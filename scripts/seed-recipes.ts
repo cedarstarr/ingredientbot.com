@@ -738,7 +738,9 @@ const recipes = [
   }
 ]
 
-function buildRawText(r: typeof recipes[0]): string {
+export type RecipeInput = typeof recipes[0]
+
+export function buildRawText(r: RecipeInput): string {
   return [
     `# ${r.title}`,
     `\n${r.description}`,
@@ -750,28 +752,30 @@ function buildRawText(r: typeof recipes[0]): string {
   ].join('\n')
 }
 
+export function buildRecipeRecord(r: RecipeInput, userId: string) {
+  return {
+    userId,
+    title: r.title,
+    description: r.description,
+    servings: r.servings,
+    prepTimeMin: r.prepTimeMin,
+    cookTimeMin: r.cookTimeMin,
+    cuisine: r.cuisine,
+    difficulty: r.difficulty,
+    sourceIngredients: r.ingredients.map(i => i.name),
+    recipeData: r,
+    rawText: buildRawText(r),
+    nutrition: r.nutrition,
+  }
+}
+
 async function main() {
   const admin = await prisma.user.findUnique({ where: { email: 'cedarbarrett@gmail.com' } })
   if (!admin) throw new Error('Admin user not found — run seed-admin-user.ts first')
 
   let created = 0
   for (const r of recipes) {
-    await prisma.recipe.create({
-      data: {
-        userId: admin.id,
-        title: r.title,
-        description: r.description,
-        servings: r.servings,
-        prepTimeMin: r.prepTimeMin,
-        cookTimeMin: r.cookTimeMin,
-        cuisine: r.cuisine,
-        difficulty: r.difficulty,
-        sourceIngredients: r.ingredients.map(i => i.name),
-        recipeData: r,
-        rawText: buildRawText(r),
-        nutrition: r.nutrition,
-      },
-    })
+    await prisma.recipe.create({ data: buildRecipeRecord(r, admin.id) })
     console.log(`✓ ${r.title}`)
     created++
   }

@@ -3,23 +3,32 @@ import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
-async function main() {
-  const email = 'cedarbarrett@gmail.com'
-  const password = 'CedarAdmin2026!'
+export const ADMIN_EMAIL = 'cedarbarrett@gmail.com'
+export const ADMIN_NAME = 'Cedar Barrett'
+export const ADMIN_PASSWORD = 'CedarAdmin2026!'
+
+export async function buildAdminUserPayload(password: string) {
   const hash = await bcrypt.hash(password, 12)
+  return {
+    email: ADMIN_EMAIL,
+    name: ADMIN_NAME,
+    password: hash,
+    isAdmin: true as const,
+    emailVerified: new Date(),
+  }
+}
 
-  const user = await prisma.user.upsert({
-    where: { email },
-    update: { isAdmin: true },
-    create: {
-      email,
-      name: 'Cedar Barrett',
-      password: hash,
-      isAdmin: true,
-      emailVerified: new Date(),
-    }
-  })
+export function buildAdminUpsertArgs(createPayload: Awaited<ReturnType<typeof buildAdminUserPayload>>) {
+  return {
+    where: { email: ADMIN_EMAIL },
+    update: { isAdmin: true as const },
+    create: createPayload,
+  }
+}
 
+async function main() {
+  const createPayload = await buildAdminUserPayload(ADMIN_PASSWORD)
+  const user = await prisma.user.upsert(buildAdminUpsertArgs(createPayload))
   console.log('Admin user seeded:', user.email)
 }
 
