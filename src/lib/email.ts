@@ -96,6 +96,29 @@ export async function sendPasswordChangedEmail(email: string, name?: string) {
   })
 }
 
+export async function sendEmailChangeVerificationEmail(toEmail: string, token: string) {
+  const url = `${SITE_URL}/api/auth/verify-email-change?token=${token}`
+  const escaped = toEmail
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+  const html = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" /></head>
+<body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#111;">
+  <h2 style="color:#e57c2c;">Verify your new email address</h2>
+  <p style="color:#555;">You requested to change your Robot Food email to <strong>${escaped}</strong>.</p>
+  <p>Click the button below to confirm. This link expires in 1 hour.</p>
+  <p style="margin-top:16px;">
+    <a href="${url}" style="background:#e57c2c;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600;">Confirm Email Change</a>
+  </p>
+  <p style="margin-top:24px;color:#777;font-size:13px;">If you did not request this change, you can safely ignore this email.</p>
+  <p style="margin-top:32px;color:#999;font-size:13px;"><a href="${SITE_URL}" style="color:#999;">robot-food.com</a></p>
+</body>
+</html>`
+  await sendEmail({ to: toEmail, subject: 'Confirm your new Robot Food email address', html })
+}
+
 export async function sendAccountDeletedEmail(email: string, name?: string) {
   const displayName = name || 'there'
   const html = `<!DOCTYPE html>
