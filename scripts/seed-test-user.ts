@@ -1,3 +1,7 @@
+/**
+ * @description Seeds the staging test user (test@test.com) for QA and E2E testing. Safe to run multiple times (upsert). Do NOT run against production.
+ * @tables users
+ */
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 

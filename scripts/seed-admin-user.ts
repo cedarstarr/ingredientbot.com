@@ -1,3 +1,7 @@
+/**
+ * @description Seeds the production admin user (cedarbarrett@gmail.com) with isAdmin=true. Safe to run multiple times (upsert).
+ * @tables users
+ */
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 

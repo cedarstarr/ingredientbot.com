@@ -142,3 +142,16 @@ model JobRun {
   @@index([job, startedAt(sort: Desc)])
   @@map("job_runs")
 }
+
+model AdminScriptLog {
+  id           String   @id @default(cuid())
+  scriptName   String   @map("script_name")
+  ranAt        DateTime @default(now()) @map("ran_at")
+  ranByUserId  String?  @map("ran_by_user_id")
+  rowsAffected Json?    @map("rows_affected")
+  status       String
+  errorMessage String?  @map("error_message")
+
+  @@index([scriptName, ranAt(sort: Desc)])
+  @@map("admin_script_logs")
+}

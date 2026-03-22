@@ -1,3 +1,7 @@
+/**
+ * @description Seeds sample recipe data for development and demo purposes. Safe to run multiple times (checks for existing title before inserting).
+ * @tables recipes
+ */
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
