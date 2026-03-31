@@ -15,8 +15,8 @@ const emailChangeSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = request.headers.get('x-forwarded-for') ?? 'anonymous'
-    const { success } = authLimiter.check(`email-change:${ip}`)
+    const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1'
+    const { success } = await authLimiter.check(`email-change:${ip}`)
     if (!success) return rateLimitResponse()
 
     const session = await auth()

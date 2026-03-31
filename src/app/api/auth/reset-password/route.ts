@@ -6,8 +6,8 @@ import { authLimiter } from '@/lib/rate-limit'
 import bcrypt from 'bcryptjs'
 
 export async function POST(request: NextRequest) {
-  const ip = request.headers.get('x-forwarded-for') ?? 'anonymous'
-  const { success } = authLimiter.check(ip)
+  const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1'
+  const { success } = await authLimiter.check(ip)
   if (!success) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }

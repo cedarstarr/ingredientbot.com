@@ -1,8 +1,11 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import { headers, cookies } from 'next/headers'
 import './globals.css'
 import { Providers } from '@/components/providers'
 import { Toaster } from '@/components/ui/toaster'
+import PlausibleProvider from 'next-plausible'
+import { CookieBanner } from '@/components/cookie-banner'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
@@ -22,15 +25,33 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+const EU_COUNTRIES = new Set([
+  'AT','BE','BG','CY','CZ','DE','DK','EE','ES','FI','FR','GR','HR','HU',
+  'IE','IT','LT','LU','LV','MT','NL','PL','PT','RO','SE','SI','SK',
+  'IS','LI','NO','GB',
+])
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const country = (await headers()).get('x-vercel-ip-country') ?? ''
+  const isEU = EU_COUNTRIES.has(country)
+  const consent = (await cookies()).get('cookie-consent')?.value
+  const plausibleEnabled = !isEU || consent === 'accepted'
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
-        <Providers>
-          <Toaster>
-            {children}
-          </Toaster>
-        </Providers>
+        <PlausibleProvider
+          domain={process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN ?? 'robot-food.vercel.app'}
+          trackOutboundLinks
+          enabled={plausibleEnabled}
+        >
+          <Providers>
+            <Toaster>
+              {children}
+            </Toaster>
+          </Providers>
+        </PlausibleProvider>
+        <CookieBanner showBanner={isEU && !consent} />
       </body>
     </html>
   )
