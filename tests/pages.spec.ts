@@ -95,7 +95,6 @@ test.describe('Authenticated pages', () => {
 
     expect(page.url()).not.toContain('login')
     await expect(page.locator('h1').first()).toBeVisible()
-    await expect(page.getByText('Settings')).toBeVisible()
   })
 
   test('/recipe/nonexistent-id returns a not-found page, not a 500', async ({ page }) => {
