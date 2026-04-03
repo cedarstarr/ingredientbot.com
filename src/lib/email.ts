@@ -4,7 +4,7 @@ import { renderPasswordResetEmail } from '@/emails/password-reset'
 import { renderVerifyEmail } from '@/emails/verify-email'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3010'
-const EMAIL_FROM = process.env.EMAIL_FROM || 'Robot Food <hello@robot-food.com>'
+const EMAIL_FROM = process.env.EMAIL_FROM || 'IngredientBot <hello@ingredientbot.com>'
 
 function getMailClient(): SendMailClient | null {
   const apiKey = process.env.ZEPTOMAIL_API_KEY
@@ -86,7 +86,7 @@ export async function sendPasswordChangedEmail(email: string, name?: string) {
   <p style="margin-top:24px;">
     <a href="${SITE_URL}/kitchen" style="background:#e57c2c;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600;">Go to Kitchen</a>
   </p>
-  <p style="margin-top:32px;color:#999;font-size:13px;"><a href="${SITE_URL}" style="color:#999;">robot-food.com</a></p>
+  <p style="margin-top:32px;color:#999;font-size:13px;"><a href="${SITE_URL}" style="color:#999;">ingredientbot.com</a></p>
 </body>
 </html>`
   await sendEmail({
@@ -113,7 +113,7 @@ export async function sendEmailChangeVerificationEmail(toEmail: string, token: s
     <a href="${url}" style="background:#e57c2c;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600;">Confirm Email Change</a>
   </p>
   <p style="margin-top:24px;color:#777;font-size:13px;">If you did not request this change, you can safely ignore this email.</p>
-  <p style="margin-top:32px;color:#999;font-size:13px;"><a href="${SITE_URL}" style="color:#999;">robot-food.com</a></p>
+  <p style="margin-top:32px;color:#999;font-size:13px;"><a href="${SITE_URL}" style="color:#999;">ingredientbot.com</a></p>
 </body>
 </html>`
   await sendEmail({ to: toEmail, subject: 'Confirm your new Robot Food email address', html })
@@ -128,7 +128,7 @@ export async function sendAccountDeletedEmail(email: string, name?: string) {
   <h2>Account deleted, ${escapeHtml(displayName)}</h2>
   <p style="color:#555;">Your Robot Food account has been permanently deleted.</p>
   <p>All your saved recipes have been removed. We hope to cook with you again someday!</p>
-  <p style="margin-top:32px;color:#999;font-size:13px;"><a href="${SITE_URL}" style="color:#999;">robot-food.com</a></p>
+  <p style="margin-top:32px;color:#999;font-size:13px;"><a href="${SITE_URL}" style="color:#999;">ingredientbot.com</a></p>
 </body>
 </html>`
   await sendEmail({

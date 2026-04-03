@@ -10,17 +10,17 @@ import { CookieBanner } from '@/components/cookie-banner'
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
-  title: 'Robot Food — AI Recipe Assistant',
+  title: 'IngredientBot — AI Recipe Assistant',
   description: 'AI-powered recipe suggestions based on ingredients you have.',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://robot-food.com'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://ingredientbot.com'),
   openGraph: {
-    title: 'Robot Food — AI Recipe Assistant',
+    title: 'IngredientBot — AI Recipe Assistant',
     description: 'Tell it what\'s in your fridge. Get instant recipe ideas powered by Claude AI.',
     images: [{ url: '/opengraph-image', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Robot Food — AI Recipe Assistant',
+    title: 'IngredientBot — AI Recipe Assistant',
     description: 'Tell it what\'s in your fridge. Get instant recipe ideas powered by Claude AI.',
   },
 }
@@ -41,7 +41,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         <PlausibleProvider
-          domain={process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN ?? 'robot-food.vercel.app'}
+          domain={process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN ?? 'ingredientbot.com'}
           trackOutboundLinks
           enabled={plausibleEnabled}
         >
