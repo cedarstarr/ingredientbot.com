@@ -8,17 +8,20 @@ import ScriptRunButton from './script-run-button'
 
 export const metadata = { title: 'Scripts — Admin — Robot Food' }
 
-function parseScriptMeta(filePath: string): { description: string; tables: string } {
+function parseScriptMeta(filePath: string): { description: string; tables: string; adminRunnable: boolean } {
   try {
     const content = fs.readFileSync(filePath, 'utf-8')
     const descMatch = content.match(/@description\s+(.+)/)
     const tablesMatch = content.match(/@tables\s+(.+)/)
+    const runnableMatch = content.match(/export\s+const\s+adminRunnable\s*=\s*(true|false)/)
+    const adminRunnable = runnableMatch ? runnableMatch[1] === 'true' : true
     return {
       description: descMatch?.[1]?.trim() ?? 'No description',
       tables: tablesMatch?.[1]?.trim() ?? '—',
+      adminRunnable,
     }
   } catch {
-    return { description: 'No description', tables: '—' }
+    return { description: 'No description', tables: '—', adminRunnable: true }
   }
 }
 
@@ -70,7 +73,7 @@ export default async function AdminScriptsPage() {
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between gap-4">
                   <CardTitle className="text-base font-mono">{name}.ts</CardTitle>
-                  <ScriptRunButton scriptName={name} />
+                  <ScriptRunButton scriptName={name} adminRunnable={meta.adminRunnable} />
                 </div>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
