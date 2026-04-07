@@ -15,6 +15,7 @@ const envSchema = z.object({
 
   NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
   NEXT_PUBLIC_SITE_URL: z.string().url().optional(),
+  NEXT_PUBLIC_APP_URL: z.string().url().optional(),
   VERCEL_URL: z.string().optional(),
 
   CRON_SECRET: z.string().optional(),

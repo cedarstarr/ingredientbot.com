@@ -1,4 +1,4 @@
-# robot-food
+# ingredientbot.com
 
 AI-powered recipe tool. Part of the 8-site portfolio.
 

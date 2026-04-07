@@ -29,11 +29,21 @@ const PUBLIC_PATHS = [
   '/api/cron/',
 ]
 
+const LOCKED_PUBLIC_PATHS = [
+  '/login', '/signup', '/forgot-password', '/reset-password',
+  '/verify-email', '/verify-request', '/2fa-verify', '/unsubscribe',
+  '/api/auth', '/api/health', '/api/cron',
+  '/_next', '/favicon.ico', '/robots.txt', '/sitemap.xml', '/opengraph-image',
+]
+
+const effectivePublicPaths =
+  process.env.LAUNCH_LOCKED === 'true' ? LOCKED_PUBLIC_PATHS : PUBLIC_PATHS
+
 export default auth(async function middleware(request: NextAuthRequest) {
   const pathname = request.nextUrl.pathname
 
   // Allow public paths without auth
-  const isPublic = PUBLIC_PATHS.some(p => pathname.startsWith(p))
+  const isPublic = effectivePublicPaths.some(p => pathname.startsWith(p))
   if (!isPublic && !request.auth) {
     // API routes return 401 instead of redirecting
     if (pathname.startsWith('/api/')) {
