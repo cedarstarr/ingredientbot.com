@@ -11,23 +11,24 @@
 | # | Stage | Command | Status | Runs | Last Run | Report |
 |---|-------|---------|--------|------|----------|--------|
 | 1 | Scaffold | /site-new | DONE | 1 | 2026-04-06 | — |
-| 2 | Feature Triage | /site-features | PENDING | 0 | — | — |
-| 3 | Feature Install | /site-install | PENDING | 0 | — | — |
-| 4 | Write Tests | /tests-reconcile | PENDING | 0 | — | — |
-| 5 | Verify Build | /tests-fix | PENDING | 0 | — | — |
-| 6 | Database Review | /site-db | PENDING | 0 | — | — |
-| 7 | QA / Bug Check | /site-bugs | PENDING | 0 | — | — |
-| 8 | Security Hardening | /site-security | PENDING | 0 | — | — |
-| 9 | UX/UI Pass | /site-design | PENDING | 0 | — | — |
-| 10 | Navigation Audit | /site-nav | PENDING | 0 | — | — |
-| 11 | Performance Audit | /site-perf | PENDING | 0 | — | — |
-| 12 | SEO Audit | /site-seo | PENDING | 0 | — | — |
-| 13 | Accessibility Audit | /site-a11y | PENDING | 0 | — | — |
-| 14 | Final E2E Tests | /tests-fix | PENDING | 0 | — | — |
-| 15 | Client Update | /client-update | PENDING | 0 | — | — |
-| 16 | Launch | /site-launch | PENDING | 0 | — | — |
+| 2 | Feature Research | /site-research | DONE | 1 | 2026-04-06 | — |
+| 3 | Feature Triage | /site-features | PENDING | 0 | — | — |
+| 4 | Feature Install | /site-install | PENDING | 0 | — | — |
+| 5 | Write Tests | /tests-reconcile | PENDING | 0 | — | — |
+| 6 | Verify Build | /tests-fix | PENDING | 0 | — | — |
+| 7 | Database Review | /site-db | PENDING | 0 | — | — |
+| 8 | QA / Bug Check | /site-bugs | PENDING | 0 | — | — |
+| 9 | Security Hardening | /site-security | PENDING | 0 | — | — |
+| 10 | UX/UI Pass | /site-design | PENDING | 0 | — | — |
+| 11 | Navigation Audit | /site-nav | PENDING | 0 | — | — |
+| 12 | Performance Audit | /site-perf | PENDING | 0 | — | — |
+| 13 | SEO Audit | /site-seo | PENDING | 0 | — | — |
+| 14 | Accessibility Audit | /site-a11y | PENDING | 0 | — | — |
+| 15 | Final E2E Tests | /tests-fix | PENDING | 0 | — | — |
+| 16 | Client Update | /client-update | PENDING | 0 | — | — |
+| 17 | Launch | /site-launch | PENDING | 0 | — | — |
 
-**Progress: 1/16 stages complete**
+**Progress: 2/17 stages complete**
 
 ---
 

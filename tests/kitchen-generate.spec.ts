@@ -74,13 +74,10 @@ test.describe('Kitchen — tab navigation', () => {
     }
   })
 
-  test('Upload tab is visible', async ({ page }) => {
-    const uploadTab = page.getByRole('tab', { name: /upload/i })
-    const hasTab = await uploadTab.isVisible().catch(() => false)
-    if (hasTab) {
-      await expect(uploadTab).toBeVisible()
-    }
-    // If no tabs, the kitchen is single-panel — that's fine
+  test('"Photo" tab is visible for fridge photo upload', async ({ page }) => {
+    // The kitchen panel has two tabs: "Type" (text input) and "Photo" (image upload)
+    const photoTab = page.getByRole('tab', { name: /^photo$/i })
+    await expect(photoTab).toBeVisible()
   })
 })
 
