@@ -50,9 +50,9 @@
 - 🛠 F31 Dietary profile (persistent preferences across all generations) [Core]
 - 🛠 F32 Prep time filter [Core]
 - 🛠 F33 Serving size slider with live scaling [Core]
-- 🛠 F34 Cuisine selector [Core]
-- 🛠 F35 Difficulty selector [Core]
-- 🛠 F42 Dark mode [Core]
+- ✅ F34 Cuisine selector [Core]
+- ✅ F35 Difficulty selector [Core]
+- ✅ F42 Dark mode [Core]
 - 🛠 F43 PWA / offline saved recipes [Core]
 - 🛠 F44 Pantry inventory (persistent, tracked between sessions) [Sticky]
 - 🛠 F45 Weekly meal plan email digest [Sticky]
@@ -72,7 +72,7 @@
 - 🛠 F59 Macro-targeting mode (generate recipes hitting protein/carb targets) [Vibe]
 - 🛠 F60 "Make it faster" modifier (<15 min constraint) [Vibe]
 - 🛠 F61 Strictness toggle (only listed ingredients vs assume pantry staples) [Vibe]
-- 🛠 F62 Recipe URL import (paste any recipe URL, AI reformats it) [Vibe]
+- ✅ F62 Recipe URL import (paste any recipe URL, AI reformats it) [Vibe]
 - 🛠 F63 Ingredient cost estimate (rough per-serving cost, no live data) [Vibe]
 - 🛠 F64 "Teach me" verbose recipe mode (explains the why) [Vibe]
 - 🛠 F65 Cuisine trend feed (weekly "try this cuisine" suggestion) [Vibe]
@@ -186,7 +186,7 @@ F64. **"Teach me" verbose recipe mode** [Vibe] — Optional mode where Claude ex
 
 ## Growth & Retention
 
-F33. **Serving size slider** [Core] — 1–12 servings; all ingredient quantities scale proportionally. Basic expectation of any recipe app; missing it creates daily friction. (Feasibility: Low — math on ingredient quantities, UI slider)
+F33. **Serving size slider** [Core] — [ENHANCE: prisma/schema.prisma] 1–12 servings; all ingredient quantities scale proportionally. Basic expectation of any recipe app; missing it creates daily friction. (Feasibility: Low — math on ingredient quantities, UI slider)
 
 F45. **Weekly meal plan email digest** [Sticky] — Monday morning email summarizing the week's planned meals from the meal planner. Brings users back to the app to check or adjust. The welcome drip (F15) is already built; this is a new recurring cron. (Feasibility: Low — new cron + email template, drip infrastructure already exists)
 
@@ -226,17 +226,17 @@ F23. **Sitemap + robots.txt + OpenGraph image** [Core] — Static sitemap for pu
 
 ## Nice-to-Haves
 
-F32. **Prep time filter** [Core] — "I have 20 minutes" constrains generation to quick recipes. Most common cooking constraint after dietary restrictions. (Feasibility: Low — prompt modifier + UI toggle)
+F32. **Prep time filter** [Core] — [ENHANCE: src/app/kitchen/page.tsx] "I have 20 minutes" constrains generation to quick recipes. Most common cooking constraint after dietary restrictions. (Feasibility: Low — prompt modifier + UI toggle)
 
-F34. **Cuisine selector** [Core] — "Make it Thai / Italian / Mexican" prefix. Quick modifier that dramatically improves relevance and gives users agency over generation direction. (Feasibility: Low — prompt modifier + UI dropdown)
+✅ F34. **Cuisine selector** [Core] — "Make it Thai / Italian / Mexican" prefix. Quick modifier that dramatically improves relevance and gives users agency over generation direction. (Feasibility: Low — prompt modifier + UI dropdown)
 
-F35. **Difficulty selector** [Core] — Beginner / Intermediate / Advanced. Beginners abandon complex recipes; this gates appropriate generation from the start. (Feasibility: Low — prompt modifier)
+✅ F35. **Difficulty selector** [Core] — Beginner / Intermediate / Advanced. Beginners abandon complex recipes; this gates appropriate generation from the start. (Feasibility: Low — prompt modifier)
 
 F54. **"Impress me" zero-input mode** [Vibe] — No ingredients entered; Claude picks seasonal/interesting ingredients and generates a recipe. Curiosity-driven discovery; good for users who want inspiration rather than pantry-clearance. (Feasibility: Low — empty-pantry prompt variant)
 
 F58. **Weekly meal themes** [Vibe] — "Taco Tuesday, Pasta Wednesday, Stir-Fry Thursday" — AI generates a themed week plan using your pantry. Makes meal planning feel fun rather than administrative. (Feasibility: Low — meal planner prompt variant)
 
-F62. **Recipe URL import** [Vibe] — Paste any recipe URL; Claude scrapes and reformats it into the cookbook. Helps users centralize all their recipes in one place. (Feasibility: Medium — Jina/scraper + Claude parsing)
+✅ F62. **Recipe URL import** [Vibe] — Paste any recipe URL; Claude scrapes and reformats it into the cookbook. Helps users centralize all their recipes in one place. (Feasibility: Medium — Jina/scraper + Claude parsing)
 
 F65. **Cuisine trend feed** [Vibe] — Weekly "try this cuisine" suggestion on the dashboard. Low-effort discovery nudge; keeps the app from feeling like a static utility. (Feasibility: Low — curated or Claude-generated weekly card)
 
