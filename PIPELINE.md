@@ -15,7 +15,7 @@
 | 1 | Scaffold | /site-new | DONE | 1 | 2026-04-06 | — |
 | 2 | Feature Research | /site-research | DONE | 2 | 2026-04-09 | [view](reports/2026-04-09-site-research.md) |
 | 3 | Feature Triage | /site-features | DONE | 1 | 2026-04-09 | [view](reports/2026-04-09-site-features.md) |
-| 4 | Feature Install | /site-install | PENDING | 0 | — | — |
+| 4 | Feature Install | /site-install | DONE | 1 | 2026-04-10 00:00 | [view](reports/2026-04-10-site-install.md) |
 | 5 | Write Tests | /tests-reconcile | PENDING | 0 | — | — |
 | 6 | Verify Build | /tests-fix | PENDING | 0 | — | — |
 | 7 | Database Review | /site-db | PENDING | 0 | — | — |
@@ -30,7 +30,9 @@
 | 16 | Client Update | /client-update | PENDING | 0 | — | — |
 | 17 | Launch | /site-launch | PENDING | 0 | — | — |
 
-**Progress: 3/17 stages complete (18%)**
+**Progress: 4/17 stages complete**
+
+**Last Updated**: 2026-04-10
 
 ---
 
@@ -38,8 +40,9 @@
 
 | Round | Triaged | Built | Failed | Remaining | Date |
 |-------|---------|-------|--------|-----------|------|
+| 1 | 50 | 10 | 0 | 39 | 2026-04-10 |
 
-**Feature Totals**: 23 built / 50 planned / 0 skipped / 0 postponed (73 total)
+**Feature Totals**: 10 built this round — 39 PENDING, 0 FAILED
 
 ---
 
@@ -50,3 +53,4 @@
 | 2026-04-06 | /site-new | — | SUCCESS | Retroactively detected: FEATURES.md exists with 46 built features |
 | 2026-04-09 | /site-research | ~25 min | SUCCESS | 150 raw features → 50 synthesized (F24–F73); 5 mainstream + 5 niche competitors researched; FEATURES.md rewritten with full competitive intel |
 | 2026-04-09 | /site-feature-select | — | SUCCESS | Phase 1: 50 triaged (50 build, 0 delay, 0 skip) |
+| 2026-04-10 00:00 | /site-feature-install | ~3h | SUCCESS | 10/10 built, 0 failed — Sprint 1 |
