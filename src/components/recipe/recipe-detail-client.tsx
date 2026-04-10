@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/button'
 import { ModificationToolbar } from './modification-toolbar'
 import { GroceryListSheet } from './grocery-list-sheet'
 import { SubstitutionPanel } from './substitution-panel'
+import { CookedThisButton } from './cooked-this-button'
+import { RecipeTags } from './recipe-tags'
+import { CollectionPicker } from './collection-picker'
 import { Clock, Users, ChevronLeft, Loader2, BookOpen, HelpCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -36,6 +39,12 @@ interface RecipeData {
   }
 }
 
+interface Collection {
+  id: string
+  name: string
+  color: string
+}
+
 interface Recipe {
   id: string
   title: string
@@ -48,13 +57,19 @@ interface Recipe {
   recipeData: unknown
   rawText: string
   nutrition?: unknown
+  tags?: string[]
+  cookedCount?: number
+  lastCookedAt?: Date | string | null
+  collectionId?: string | null
+  collection?: Collection | null
 }
 
 interface Props {
   recipe: Recipe
+  collections?: Collection[]
 }
 
-export function RecipeDetailClient({ recipe }: Props) {
+export function RecipeDetailClient({ recipe, collections = [] }: Props) {
   const recipeData = recipe.recipeData as RecipeData
   const nutrition = recipe.nutrition as RecipeData['nutrition'] | null
   const [modifiedText, setModifiedText] = useState('')
@@ -138,9 +153,24 @@ export function RecipeDetailClient({ recipe }: Props) {
         </div>
       </div>
 
+      {/* Tags (F38) */}
+      <RecipeTags recipeId={recipe.id} initialTags={recipe.tags ?? []} />
+
       {/* Actions row */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-3">
         <GroceryListSheet ingredients={recipeData.ingredients ?? []} />
+        {/* F41: Cooked this */}
+        <CookedThisButton
+          recipeId={recipe.id}
+          initialCookedCount={recipe.cookedCount ?? 0}
+          initialLastCookedAt={recipe.lastCookedAt}
+        />
+        {/* F39: Collection picker */}
+        <CollectionPicker
+          recipeId={recipe.id}
+          collections={collections}
+          currentCollectionId={recipe.collectionId}
+        />
       </div>
 
       {/* Modification toolbar */}

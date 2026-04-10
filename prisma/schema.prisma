@@ -70,10 +70,11 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  accounts   Account[]
-  sessions   Session[]
-  recipes    Recipe[]
-  mealPlans  MealPlan[]
+  accounts     Account[]
+  sessions     Session[]
+  recipes      Recipe[]
+  mealPlans    MealPlan[]
+  collections  RecipeCollection[]
 
   @@index([email])
   @@map("users")
@@ -122,13 +123,43 @@ model Recipe {
   fromPhoto         Boolean  @default(false) @map("from_photo")
   modifications     Json     @default("[]")
 
+  // F38: tagging
+  tags String[] @default([])
+
+  // F39: collections
+  collectionId String?           @map("collection_id")
+  collection   RecipeCollection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+
+  // F41: completion tracking
+  cookedCount    Int       @default(0) @map("cooked_count")
+  lastCookedAt   DateTime? @map("last_cooked_at")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   mealPlanSlots MealPlanSlot[]
 
   @@index([userId])
+  @@index([collectionId])
   @@map("recipes")
+}
+
+// F39: Recipe collections/folders
+model RecipeCollection {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?  @db.Text
+  color       String   @default("#22c55e") // default green
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  recipes Recipe[]
+
+  @@index([userId])
+  @@map("recipe_collections")
 }
 
 model MealPlan {
