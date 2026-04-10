@@ -10,7 +10,7 @@ import { SubstitutionPanel } from './substitution-panel'
 import { CookedThisButton } from './cooked-this-button'
 import { RecipeTags } from './recipe-tags'
 import { CollectionPicker } from './collection-picker'
-import { Clock, Users, ChevronLeft, Loader2, BookOpen, HelpCircle } from 'lucide-react'
+import { Clock, Users, ChevronLeft, Loader2, BookOpen, HelpCircle, Printer, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface Ingredient {
@@ -71,7 +71,10 @@ interface Props {
 
 export function RecipeDetailClient({ recipe, collections = [] }: Props) {
   const recipeData = recipe.recipeData as RecipeData
-  const nutrition = recipe.nutrition as RecipeData['nutrition'] | null
+  const [nutrition, setNutrition] = useState<RecipeData['nutrition'] | null>(
+    recipe.nutrition as RecipeData['nutrition'] | null
+  )
+  const [isEstimatingNutrition, setIsEstimatingNutrition] = useState(false)
   const [modifiedText, setModifiedText] = useState('')
   const [isModifying, setIsModifying] = useState(false)
 
@@ -79,6 +82,19 @@ export function RecipeDetailClient({ recipe, collections = [] }: Props) {
   const [substitutingIngredient, setSubstitutingIngredient] = useState<Ingredient | null>(null)
   // Quick-swap overrides: map from original ingredient name → swapped-in display string
   const [swappedIngredients, setSwappedIngredients] = useState<Map<string, string>>(new Map())
+
+  const handleEstimateNutrition = async () => {
+    setIsEstimatingNutrition(true)
+    try {
+      const res = await fetch(`/api/recipes/${recipe.id}/nutrition`, { method: 'POST' })
+      if (res.ok) {
+        const data = await res.json()
+        setNutrition(data.nutrition)
+      }
+    } finally {
+      setIsEstimatingNutrition(false)
+    }
+  }
 
   const handleSwap = (original: Ingredient, substitute: { name: string; quantity: string }) => {
     setSwappedIngredients(prev => {
@@ -171,6 +187,13 @@ export function RecipeDetailClient({ recipe, collections = [] }: Props) {
           collections={collections}
           currentCollectionId={recipe.collectionId}
         />
+        {/* F40: Print */}
+        <Button variant="outline" size="sm" asChild>
+          <Link href={`/recipe/${recipe.id}/print`} target="_blank" rel="noopener noreferrer">
+            <Printer className="h-3.5 w-3.5 mr-1.5" />
+            Print
+          </Link>
+        </Button>
       </div>
 
       {/* Modification toolbar */}
@@ -287,27 +310,77 @@ export function RecipeDetailClient({ recipe, collections = [] }: Props) {
         </section>
       )}
 
-      {/* Nutrition */}
-      {nutrition && (
-        <section>
-          <h2 className="text-xl font-semibold text-foreground mb-4">Nutrition (per serving)</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-            {[
-              { label: 'Calories', value: nutrition.calories, unit: 'kcal' },
-              { label: 'Protein', value: nutrition.protein, unit: 'g' },
-              { label: 'Fat', value: nutrition.fat, unit: 'g' },
-              { label: 'Carbs', value: nutrition.carbs, unit: 'g' },
-              { label: 'Fiber', value: nutrition.fiber, unit: 'g' },
-            ].map(({ label, value, unit }) => (
-              <div key={label} className="rounded-lg border border-border bg-card p-3 text-center">
-                <p className="text-2xl font-bold text-primary">{value}</p>
-                <p className="text-xs text-muted-foreground">{unit}</p>
-                <p className="text-xs font-medium text-foreground mt-0.5">{label}</p>
-              </div>
-            ))}
+      {/* F36: Nutrition */}
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold text-foreground">Nutrition</h2>
+          {!nutrition && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleEstimateNutrition}
+              disabled={isEstimatingNutrition}
+            >
+              {isEstimatingNutrition ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                  Estimating…
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                  Estimate Nutrition
+                </>
+              )}
+            </Button>
+          )}
+        </div>
+
+        {nutrition ? (
+          // Nutrition facts panel — styled after the familiar FDA label aesthetic
+          <div className="rounded-xl border-2 border-border overflow-hidden max-w-xs">
+            <div className="bg-foreground text-background px-4 py-3">
+              <p className="font-black text-2xl leading-none">Nutrition Facts</p>
+              <p className="text-xs mt-1 opacity-80">Per serving · AI estimate</p>
+            </div>
+
+            {/* Calories — prominent callout */}
+            <div className="px-4 py-3 border-b-4 border-border flex items-end justify-between">
+              <p className="text-sm font-medium text-muted-foreground">Calories</p>
+              <p className="text-5xl font-black text-foreground leading-none">{nutrition.calories}</p>
+            </div>
+
+            {/* Macros list */}
+            <dl className="divide-y divide-border/60 px-4">
+              {[
+                { label: 'Protein', value: nutrition.protein },
+                { label: 'Total Fat', value: nutrition.fat },
+                { label: 'Total Carbs', value: nutrition.carbs },
+                { label: 'Fiber', value: nutrition.fiber },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex items-center justify-between py-2.5">
+                  <dt className="text-sm font-semibold text-foreground">{label}</dt>
+                  <dd className="text-sm text-foreground">
+                    <span className="font-bold">{value}</span>
+                    <span className="text-muted-foreground text-xs ml-0.5">g</span>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+
+            <div className="px-4 py-2 bg-muted/40 border-t border-border">
+              <p className="text-xs text-muted-foreground">
+                Values are approximate. Generated by AI from ingredient list.
+              </p>
+            </div>
           </div>
-        </section>
-      )}
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            No nutrition data yet. Click &ldquo;Estimate Nutrition&rdquo; to have AI calculate
+            approximate values from the ingredient list.
+          </p>
+        )}
+      </section>
     </div>
   )
 }
