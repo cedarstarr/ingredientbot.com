@@ -14,7 +14,7 @@
 |---|-------|---------|--------|------|----------|--------|
 | 1 | Scaffold | /site-new | DONE | 1 | 2026-04-06 | — |
 | 2 | Feature Research | /site-research | DONE | 2 | 2026-04-09 | [view](reports/2026-04-09-site-research.md) |
-| 3 | Feature Triage | /site-features | PENDING | 0 | — | — |
+| 3 | Feature Triage | /site-features | DONE | 1 | 2026-04-09 | [view](reports/2026-04-09-site-features.md) |
 | 4 | Feature Install | /site-install | PENDING | 0 | — | — |
 | 5 | Write Tests | /tests-reconcile | PENDING | 0 | — | — |
 | 6 | Verify Build | /tests-fix | PENDING | 0 | — | — |
@@ -30,7 +30,7 @@
 | 16 | Client Update | /client-update | PENDING | 0 | — | — |
 | 17 | Launch | /site-launch | PENDING | 0 | — | — |
 
-**Progress: 2/17 stages complete (12%)**
+**Progress: 3/17 stages complete (18%)**
 
 ---
 
@@ -49,3 +49,4 @@
 |-----------|---------|----------|--------|-------|
 | 2026-04-06 | /site-new | — | SUCCESS | Retroactively detected: FEATURES.md exists with 46 built features |
 | 2026-04-09 | /site-research | ~25 min | SUCCESS | 150 raw features → 50 synthesized (F24–F73); 5 mainstream + 5 niche competitors researched; FEATURES.md rewritten with full competitive intel |
+| 2026-04-09 | /site-feature-select | — | SUCCESS | Phase 1: 50 triaged (50 build, 0 delay, 0 skip) |
