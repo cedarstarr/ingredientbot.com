@@ -67,6 +67,11 @@ model User {
 
   sessionsRevokedAt DateTime? @map("sessions_revoked_at")
 
+  // F30: Freemium gate
+  isPro              Boolean   @default(false) @map("is_pro")
+  recipeCount        Int       @default(0) @map("recipe_count")
+  monthlyResetDate   DateTime? @map("monthly_reset_date")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 

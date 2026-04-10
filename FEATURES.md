@@ -31,6 +31,10 @@
 - ✅ F21 Audit logging [Core]
 - ✅ F22 Health check API [Core]
 - ✅ F23 Sitemap + robots.txt + OpenGraph image [Core]
+- ✅ F24 Recipe regeneration (one-click "try again") [Hook]
+- ✅ F25 Ingredient substitution suggestions [Hook]
+- ✅ F29 Cooking mode (full-screen step-by-step, screen-on) [Hook]
+- ✅ F30 Freemium gate + Pro upgrade [Hook]
 - ✅ F36 Nutrition estimate per recipe [Core]
 - ✅ F37 Recipe history (full archive, searchable) [Core]
 - ✅ F38 Recipe tagging (auto by cuisine/protein/method + manual) [Core]
@@ -40,13 +44,9 @@
 
 ## 🛠 Planned / In Progress
 
-- 🛠 F24 Recipe regeneration (one-click "try again") [Hook]
-- 🛠 F25 Ingredient substitution suggestions [Hook]
 - 🛠 F26 Expiry-first mode [Hook]
 - 🛠 F27 Recipe sharing with public permalink [Hook]
 - 🛠 F28 Leftover optimizer mode [Hook]
-- 🛠 F29 Cooking mode (full-screen step-by-step, screen-on) [Hook]
-- 🛠 F30 Freemium gate + Pro upgrade [Hook]
 - 🛠 F31 Dietary profile (persistent preferences across all generations) [Core]
 - 🛠 F32 Prep time filter [Core]
 - 🛠 F33 Serving size slider with live scaling [Core]

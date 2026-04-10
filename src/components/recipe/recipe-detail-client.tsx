@@ -10,7 +10,7 @@ import { SubstitutionPanel } from './substitution-panel'
 import { CookedThisButton } from './cooked-this-button'
 import { RecipeTags } from './recipe-tags'
 import { CollectionPicker } from './collection-picker'
-import { Clock, Users, ChevronLeft, Loader2, BookOpen, HelpCircle, Printer, Sparkles } from 'lucide-react'
+import { Clock, Users, ChevronLeft, Loader2, BookOpen, HelpCircle, Printer, Sparkles, UtensilsCrossed } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface Ingredient {
@@ -174,6 +174,13 @@ export function RecipeDetailClient({ recipe, collections = [] }: Props) {
 
       {/* Actions row */}
       <div className="flex flex-wrap items-center gap-3">
+        {/* F29: Cooking mode */}
+        <Button variant="default" size="sm" asChild className="gap-1.5">
+          <Link href={`/kitchen/cook/${recipe.id}`}>
+            <UtensilsCrossed className="h-3.5 w-3.5" />
+            Cook Mode
+          </Link>
+        </Button>
         <GroceryListSheet ingredients={recipeData.ingredients ?? []} />
         {/* F41: Cooked this */}
         <CookedThisButton

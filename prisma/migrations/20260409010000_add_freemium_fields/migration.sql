@@ -1,0 +1,4 @@
+-- F30: Freemium gate fields
+ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "is_pro" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "recipe_count" INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "monthly_reset_date" TIMESTAMP(3);
