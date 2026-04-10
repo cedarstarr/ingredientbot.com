@@ -11,16 +11,16 @@
 
 | # | Feature | Effort | Status |
 |---|---------|--------|--------|
-| F24 | **Recipe regeneration (one-click "try again")** | MEDIUM | PENDING |
-| F25 | **Ingredient substitution suggestions** | MEDIUM | PENDING |
-| F29 | **Cooking mode (full-screen step-by-step, screen-on)** | MEDIUM | PENDING |
-| F30 | **Freemium gate + Pro upgrade** | MEDIUM | PENDING |
-| F36 | **Nutrition estimate per recipe** | SMALL | PENDING |
-| F37 | **Recipe history (full archive, searchable)** | SMALL | PENDING |
-| F38 | **Recipe tagging (auto by cuisine/protein/method + manual)** | MEDIUM | PENDING |
-| F39 | **Recipe collections/folders** | MEDIUM | PENDING |
-| F40 | **Print recipe view** | SMALL | PENDING |
-| F41 | **Recipe completion tracking ("cooked this")** | SMALL | PENDING |
+| F24 | **Recipe regeneration (one-click "try again")** | MEDIUM | DONE |
+| F25 | **Ingredient substitution suggestions** | MEDIUM | DONE |
+| F29 | **Cooking mode (full-screen step-by-step, screen-on)** | MEDIUM | DONE |
+| F30 | **Freemium gate + Pro upgrade** | MEDIUM | DONE |
+| F36 | **Nutrition estimate per recipe** | SMALL | DONE |
+| F37 | **Recipe history (full archive, searchable)** | SMALL | DONE |
+| F38 | **Recipe tagging (auto by cuisine/protein/method + manual)** | MEDIUM | DONE |
+| F39 | **Recipe collections/folders** | MEDIUM | DONE |
+| F40 | **Print recipe view** | SMALL | DONE |
+| F41 | **Recipe completion tracking ("cooked this")** | SMALL | DONE |
 | F42 | **Dark mode** | SMALL | PENDING |
 | F43 | **PWA / offline saved recipes** | LARGE | PENDING |
 

@@ -7,7 +7,7 @@ import { useSession, signOut } from 'next-auth/react'
 import { cn } from '@/lib/utils'
 import {
   ChefHat, BookOpen, LayoutDashboard, Settings, Shield,
-  LogOut, Menu, X, CalendarDays, Link2,
+  LogOut, Menu, X, CalendarDays, Link2, History, FolderOpen,
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 
@@ -15,6 +15,8 @@ const NAV_LINKS = [
   { href: '/kitchen', label: 'Kitchen', icon: ChefHat },
   { href: '/import', label: 'Import Recipe', icon: Link2 },
   { href: '/saved', label: 'Saved Recipes', icon: BookOpen },
+  { href: '/history', label: 'History', icon: History },
+  { href: '/collections', label: 'Collections', icon: FolderOpen },
   { href: '/meal-plan', label: 'Meal Plan', icon: CalendarDays },
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/settings', label: 'Settings', icon: Settings },

@@ -5,6 +5,14 @@ import Anthropic from '@anthropic-ai/sdk'
 
 export const maxDuration = 60
 
+const FREE_TIER_LIMIT = 5
+
+// Returns the first day of the current month at midnight UTC
+function startOfCurrentMonth(): Date {
+  const now = new Date()
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
+}
+
 export async function POST(req: NextRequest) {
   const session = await auth()
   if (!session) return new Response('Unauthorized', { status: 401 })
@@ -17,6 +25,28 @@ export async function POST(req: NextRequest) {
   const { suggestion, ingredients } = await req.json()
   if (!suggestion?.title) {
     return Response.json({ error: 'Invalid suggestion' }, { status: 400 })
+  }
+
+  // F30: Freemium gate — check + enforce monthly limit
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { isPro: true, recipeCount: true, monthlyResetDate: true },
+  })
+
+  if (!user) return Response.json({ error: 'User not found' }, { status: 404 })
+
+  if (!user.isPro) {
+    const monthStart = startOfCurrentMonth()
+    const needsReset = !user.monthlyResetDate || user.monthlyResetDate < monthStart
+
+    const currentCount = needsReset ? 0 : user.recipeCount
+
+    if (currentCount >= FREE_TIER_LIMIT) {
+      return Response.json(
+        { error: 'limit_reached', limit: FREE_TIER_LIMIT },
+        { status: 402 }
+      )
+    }
   }
 
   const anthropic = new Anthropic({ apiKey })
@@ -82,6 +112,17 @@ Schema:
       rawText,
       nutrition: recipeData.nutrition,
     }
+  })
+
+  // F30: Increment usage counter — reset if new month, then increment
+  const monthStart = startOfCurrentMonth()
+  const needsReset = !user.monthlyResetDate || user.monthlyResetDate < monthStart
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: {
+      recipeCount: needsReset ? 1 : { increment: 1 },
+      monthlyResetDate: needsReset ? monthStart : undefined,
+    },
   })
 
   return Response.json({ id: recipe.id })

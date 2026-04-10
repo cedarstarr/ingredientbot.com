@@ -2,14 +2,16 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { X, ChefHat, Upload, Camera, Loader2, Sparkles } from 'lucide-react'
+import { X, ChefHat, Upload, Camera, Loader2, Sparkles, RefreshCw } from 'lucide-react'
 import { RecipeSuggestionCard, type RecipeSuggestion } from './recipe-suggestion-card'
+import { UsageCounter } from './usage-counter'
 import { cn } from '@/lib/utils'
 
 export function KitchenPanel() {
@@ -23,6 +25,10 @@ export function KitchenPanel() {
   const [isAnalyzingPhoto, setIsAnalyzingPhoto] = useState(false)
   const [cookingId, setCookingId] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
+  // F30: track when a recipe is generated to refresh the usage counter
+  const [usageRefreshKey, setUsageRefreshKey] = useState(0)
+  // F30: whether user hit the monthly limit
+  const [limitReached, setLimitReached] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -154,14 +160,25 @@ export function KitchenPanel() {
 
   const handleCookThis = async (suggestion: RecipeSuggestion, index: number) => {
     setCookingId(index)
+    setLimitReached(false)
+    setError(null)
     try {
       const res = await fetch('/api/recipes/cook', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ suggestion, ingredients }),
       })
+
+      // F30: 402 = freemium limit reached
+      if (res.status === 402) {
+        setLimitReached(true)
+        setUsageRefreshKey(k => k + 1)
+        return
+      }
+
       const data = await res.json()
       if (data.id) {
+        setUsageRefreshKey(k => k + 1)
         router.push(`/recipe/${data.id}`)
       } else {
         setError('Failed to generate recipe. Please try again.')
@@ -171,6 +188,12 @@ export function KitchenPanel() {
     } finally {
       setCookingId(null)
     }
+  }
+
+  // F24: Regenerate — same ingredients, new suggestions, explicit user action
+  const handleTryAgain = () => {
+    if (ingredients.length < 2 || isGenerating) return
+    generateRecipes()
   }
 
   return (
@@ -260,6 +283,9 @@ export function KitchenPanel() {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* F30: Usage counter */}
+            <UsageCounter refreshKey={usageRefreshKey} />
           </TabsContent>
 
           <TabsContent value="photo" className="flex-1 p-4">
@@ -302,7 +328,7 @@ export function KitchenPanel() {
           </TabsContent>
         </Tabs>
 
-        <div className="p-4 border-t border-border shrink-0">
+        <div className="p-4 border-t border-border shrink-0 space-y-2">
           <Button
             onClick={generateRecipes}
             disabled={ingredients.length < 2 || isGenerating}
@@ -320,11 +346,40 @@ export function KitchenPanel() {
               </>
             )}
           </Button>
+
+          {/* F24: Try Again — only visible after suggestions load */}
+          {suggestions.length > 0 && !isGenerating && (
+            <Button
+              variant="outline"
+              onClick={handleTryAgain}
+              disabled={ingredients.length < 2 || isGenerating}
+              className="w-full gap-2 text-sm"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              Try Different Recipes
+            </Button>
+          )}
         </div>
       </div>
 
       {/* Right panel */}
       <div className="flex-1 overflow-auto p-6">
+        {/* F30: Limit reached banner */}
+        {limitReached && (
+          <div className="mb-4 rounded-lg border border-amber-400/40 bg-amber-50 dark:bg-amber-900/10 px-4 py-3">
+            <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
+              You&apos;ve reached your 5 free recipes this month.
+            </p>
+            <Link
+              href="/upgrade"
+              className="inline-flex items-center gap-1.5 text-sm text-primary font-medium hover:underline mt-1"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              Upgrade to Pro for unlimited recipes
+            </Link>
+          </div>
+        )}
+
         {error && (
           <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/8 px-4 py-3 text-sm text-destructive">
             {error}
@@ -338,7 +393,7 @@ export function KitchenPanel() {
             </div>
             <h2 className="text-xl font-semibold text-foreground mb-2">Add your ingredients</h2>
             <p className="text-muted-foreground max-w-xs">
-              Type at least 2 ingredients on the left (or snap a photo) and Robot Food will suggest personalized recipes.
+              Type at least 2 ingredients on the left (or snap a photo) and IngredientBot will suggest personalized recipes.
             </p>
           </div>
         )}
@@ -369,7 +424,24 @@ export function KitchenPanel() {
                   based on {ingredients.slice(0, 3).join(', ')}{ingredients.length > 3 ? '…' : ''}
                 </span>
               </h2>
-              {isGenerating && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+              <div className="flex items-center gap-2">
+                {isGenerating && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+                {/* F24: Try Again in header (compact variant) */}
+                {!isGenerating && (
+                  <button
+                    onClick={handleTryAgain}
+                    disabled={isGenerating}
+                    title="Generate new recipe ideas from the same ingredients"
+                    className={cn(
+                      'flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors rounded-md px-2 py-1',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    )}
+                  >
+                    <RefreshCw className="h-3 w-3" />
+                    Try again
+                  </button>
+                )}
+              </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               {suggestions.map((s, i) => (

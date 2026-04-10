@@ -125,3 +125,34 @@
     @apply font-sans;
   }
 }
+
+/* F40: Print styles — applied when the user prints any page via Ctrl+P */
+@media print {
+  /* Hide navigation and interactive chrome */
+  nav,
+  [data-print-hide],
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Remove background colors so ink isn't wasted */
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Ensure links show their URL when printed */
+  a[href]::after {
+    content: none;
+  }
+
+  /* Page breaks */
+  h2,
+  h3 {
+    page-break-after: avoid;
+  }
+  li,
+  p {
+    page-break-inside: avoid;
+  }
+}
