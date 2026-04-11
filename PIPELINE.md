@@ -14,7 +14,7 @@
 |---|-------|---------|--------|------|----------|--------|
 | 1 | Scaffold | /site-new | DONE | 1 | 2026-04-06 | — |
 | 2 | Feature Research | /site-research | DONE | 2 | 2026-04-09 | [view](reports/2026-04-09-site-research.md) |
-| 3 | Feature Audit | /site-feature-audit | PENDING | 0 | — | — |
+| 3 | Feature Audit | /site-feature-audit | DONE | 1 | 2026-04-11 | [view](reports/2026-04-11-site-audit.md) |
 | 4 | Feature Triage | /site-features | DONE | 1 | 2026-04-09 | [view](reports/2026-04-09-site-features.md) |
 | 5 | Feature Install | /site-install | DONE | 1 | 2026-04-10 00:00 | [view](reports/2026-04-10-site-install.md) |
 | 6 | Write Tests | /tests-reconcile | PENDING | 0 | — | — |
@@ -31,7 +31,7 @@
 | 17 | Client Update | /client-update | PENDING | 0 | — | — |
 | 18 | Launch | /site-launch | PENDING | 0 | — | — |
 
-**Progress: 4/18 stages complete**
+**Progress: 5/18 stages complete**
 
 **Last Updated**: 2026-04-10
 
@@ -55,3 +55,4 @@
 | 2026-04-09 | /site-research | ~25 min | SUCCESS | 150 raw features → 50 synthesized (F24–F73); 5 mainstream + 5 niche competitors researched; FEATURES.md rewritten with full competitive intel |
 | 2026-04-09 | /site-feature-select | — | SUCCESS | Phase 1: 50 triaged (50 build, 0 delay, 0 skip) |
 | 2026-04-10 00:00 | /site-feature-install | ~3h | SUCCESS | 10/10 built, 0 failed — Sprint 1 |
+| 2026-04-11 | /site-feature-audit | — | SUCCESS | 37 features scanned: 0 built, 3 partial (F31, F33, F57), 34 new |

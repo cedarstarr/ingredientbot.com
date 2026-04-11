@@ -172,7 +172,7 @@ F27. **Recipe sharing (public permalink)** [Hook] — Every saved recipe gets a 
 
 F28. **Leftover optimizer mode** [Hook] — "I have leftover roast chicken from last night plus these pantry items — what do I make?" Explicit "leftovers" framing changes the generation prompt to prioritize using yesterday's remainder before it goes off. (Feasibility: Low — UX framing + prompt variant)
 
-F31. **Dietary profile (persistent)** [Core] — Store dietary restrictions, allergies, and preferences on the user account. Applied to every generation so users never have to repeat "I'm vegan" or "no nuts." Table stakes for all competitors; absence immediately alienates dietary-restricted users. (Feasibility: Low — user profile field + prompt injection)
+F31. **Dietary profile (persistent)** [Core] — [ENHANCE: src/components/kitchen/kitchen-panel.tsx] Store dietary restrictions, allergies, and preferences on the user account. Applied to every generation so users never have to repeat "I'm vegan" or "no nuts." Table stakes for all competitors; absence immediately alienates dietary-restricted users. Session-level dietary dropdown exists in kitchen panel but is not persisted to the User model or settings page. (Feasibility: Low — user profile field + prompt injection)
 
 F44. **Pantry inventory (persistent)** [Sticky] — A managed list of what's in your kitchen that persists between sessions. The kitchen page pre-fills from your pantry; you add/remove items as you shop and cook. This shifts ingredientbot from a "one-off session" tool to a "daily cooking OS." (Feasibility: Medium — new Prisma model + inventory management UI)
 
@@ -186,7 +186,7 @@ F64. **"Teach me" verbose recipe mode** [Vibe] — Optional mode where Claude ex
 
 ## Growth & Retention
 
-F33. **Serving size slider** [Core] — [ENHANCE: prisma/schema.prisma] 1–12 servings; all ingredient quantities scale proportionally. Basic expectation of any recipe app; missing it creates daily friction. (Feasibility: Low — math on ingredient quantities, UI slider)
+F33. **Serving size slider** [Core] — [ENHANCE: src/components/recipe/recipe-detail-client.tsx] 1–12 servings; all ingredient quantities scale proportionally. Basic expectation of any recipe app; missing it creates daily friction. Slider UI component exists (src/components/ui/slider.tsx) and servings display is present in recipe-detail-client.tsx, but no live scaling logic is wired up. (Feasibility: Low — math on ingredient quantities, UI slider)
 
 F45. **Weekly meal plan email digest** [Sticky] — Monday morning email summarizing the week's planned meals from the meal planner. Brings users back to the app to check or adjust. The welcome drip (F15) is already built; this is a new recurring cron. (Feasibility: Low — new cron + email template, drip infrastructure already exists)
 
@@ -233,6 +233,8 @@ F32. **Prep time filter** [Core] — [ENHANCE: src/app/kitchen/page.tsx] "I have
 ✅ F35. **Difficulty selector** [Core] — Beginner / Intermediate / Advanced. Beginners abandon complex recipes; this gates appropriate generation from the start. (Feasibility: Low — prompt modifier)
 
 F54. **"Impress me" zero-input mode** [Vibe] — No ingredients entered; Claude picks seasonal/interesting ingredients and generates a recipe. Curiosity-driven discovery; good for users who want inspiration rather than pantry-clearance. (Feasibility: Low — empty-pantry prompt variant)
+
+F57. **Recipe card PDF export** [Vibe] — [ENHANCE: src/components/recipe/print-recipe-view.tsx] Generate a beautifully formatted PDF of a recipe card for offline printing and sharing. A browser "Print / Save PDF" button already exists in print-recipe-view.tsx; a true PDF export (e.g. via a server-side PDF library) is not yet implemented. (Feasibility: Small — server-side PDF generation or print stylesheet polish)
 
 F58. **Weekly meal themes** [Vibe] — "Taco Tuesday, Pasta Wednesday, Stir-Fry Thursday" — AI generates a themed week plan using your pantry. Makes meal planning feel fun rather than administrative. (Feasibility: Low — meal planner prompt variant)
 
