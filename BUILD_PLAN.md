@@ -21,14 +21,14 @@
 | F39 | **Recipe collections/folders** | MEDIUM | DONE |
 | F40 | **Print recipe view** | SMALL | DONE |
 | F41 | **Recipe completion tracking ("cooked this")** | SMALL | DONE |
-| F42 | **Dark mode** | SMALL | PENDING |
-| F43 | **PWA / offline saved recipes** | LARGE | PENDING |
+| F42 | **Dark mode** | SMALL | DONE |
+| F43 | **PWA / offline saved recipes** | LARGE | DONE |
 
 ### Differentiators
 
 | # | Feature | Effort | Status |
 |---|---------|--------|--------|
-| F26 | **Expiry-first mode** | MEDIUM | PENDING |
+| F26 | **Expiry-first mode** | MEDIUM | DONE |
 | F27 | **Recipe sharing with public permalink** | SMALL | PENDING |
 | F28 | **Leftover optimizer mode** | SMALL | PENDING |
 | F31 | **Dietary profile (persistent preferences across all generations)** | SMALL | DONE |

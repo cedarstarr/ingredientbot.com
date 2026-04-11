@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { X, ChefHat, Upload, Camera, Loader2, Sparkles, RefreshCw, Package } from 'lucide-react'
+import { X, ChefHat, Upload, Camera, Loader2, Sparkles, RefreshCw, Package, AlertTriangle, Timer } from 'lucide-react'
 import { RecipeSuggestionCard, type RecipeSuggestion } from './recipe-suggestion-card'
 import { UsageCounter } from './usage-counter'
 import { cn } from '@/lib/utils'
@@ -17,6 +17,21 @@ import { cn } from '@/lib/utils'
 interface PantryItem {
   id: string
   ingredient: string
+  expiresAt: string | null
+}
+
+// F26: days until expiry (positive = future, negative = expired)
+function daysUntilExpiry(expiresAt: string): number {
+  const now = new Date()
+  now.setHours(0, 0, 0, 0)
+  const exp = new Date(expiresAt)
+  exp.setHours(0, 0, 0, 0)
+  return Math.round((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+}
+
+function isExpiringSoon(item: PantryItem): boolean {
+  if (!item.expiresAt) return false
+  return daysUntilExpiry(item.expiresAt) <= 7
 }
 
 export function KitchenPanel() {
@@ -37,6 +52,8 @@ export function KitchenPanel() {
   // F44: pantry items — loaded once, toggled per-session
   const [pantryItems, setPantryItems] = useState<PantryItem[]>([])
   const [activePantryIds, setActivePantryIds] = useState<Set<string>>(new Set())
+  // F26: expiry-first mode — elevate expiring items and tell AI to prioritize them
+  const [expiryFirstMode, setExpiryFirstMode] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -81,16 +98,32 @@ export function KitchenPanel() {
   }
 
   // F44: Merge typed ingredients with active pantry items, deduplicated
+  // F26: when expiry-first mode is on, expiring items bubble to the top
   const allIngredients = useCallback(() => {
-    const pantryActive = pantryItems
-      .filter(p => activePantryIds.has(p.id))
-      .map(p => p.ingredient)
+    const activePantry = pantryItems.filter(p => activePantryIds.has(p.id))
+
+    // F26: sort — expiring items first when mode is enabled
+    const sorted = expiryFirstMode
+      ? [...activePantry].sort((a, b) => {
+          const aExpiring = isExpiringSoon(a) ? 0 : 1
+          const bExpiring = isExpiringSoon(b) ? 0 : 1
+          return aExpiring - bExpiring
+        })
+      : activePantry
+
     const merged = [...ingredients]
-    for (const p of pantryActive) {
-      if (!merged.includes(p)) merged.push(p)
+    for (const p of sorted) {
+      if (!merged.includes(p.ingredient)) merged.push(p.ingredient)
     }
     return merged
-  }, [ingredients, pantryItems, activePantryIds])
+  }, [ingredients, pantryItems, activePantryIds, expiryFirstMode])
+
+  // F26: list of expiring ingredient names for AI context
+  const expiringIngredients = useCallback(() => {
+    return pantryItems
+      .filter(p => activePantryIds.has(p.id) && isExpiringSoon(p))
+      .map(p => p.ingredient)
+  }, [pantryItems, activePantryIds])
 
   const generateRecipes = useCallback(async () => {
     const combined = allIngredients()
@@ -100,6 +133,9 @@ export function KitchenPanel() {
     setError(null)
 
     try {
+      // F26: pass expiring ingredients so the AI can prioritize them
+      const expiring = expiryFirstMode ? expiringIngredients() : []
+
       const res = await fetch('/api/recipes/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -107,6 +143,7 @@ export function KitchenPanel() {
           ingredients: combined,
           cuisine: cuisine === 'any' ? undefined : cuisine,
           dietary: dietary === 'any' ? [] : [dietary],
+          expiringIngredients: expiring.length > 0 ? expiring : undefined,
         }),
       })
 
@@ -343,9 +380,35 @@ export function KitchenPanel() {
                     Manage
                   </Link>
                 </div>
+
+                {/* F26: Expiry-first toggle — only shown when items have expiry dates */}
+                {pantryItems.some(isExpiringSoon) && (
+                  <button
+                    type="button"
+                    onClick={() => setExpiryFirstMode(v => !v)}
+                    title="Prioritize expiring ingredients in recipe generation"
+                    className={cn(
+                      'w-full flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                      expiryFirstMode
+                        ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-400/60 text-amber-700 dark:text-amber-400 font-medium'
+                        : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-amber-400/40',
+                    )}
+                  >
+                    <Timer className="h-3 w-3 shrink-0" />
+                    <span className="flex-1 text-left">Expiry-first mode</span>
+                    {expiryFirstMode && (
+                      <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[10px] text-amber-700 dark:text-amber-300">
+                        ON
+                      </span>
+                    )}
+                  </button>
+                )}
+
                 <div className="flex flex-wrap gap-1.5">
                   {pantryItems.map(item => {
                     const active = activePantryIds.has(item.id)
+                    const expiringSoon = isExpiringSoon(item)
+                    const critical = item.expiresAt && daysUntilExpiry(item.expiresAt) <= 3
                     return (
                       <button
                         key={item.id}
@@ -355,10 +418,16 @@ export function KitchenPanel() {
                         className={cn(
                           'inline-flex items-center gap-1 rounded-full text-xs px-2 py-0.5 border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                           active
-                            ? 'bg-primary/15 text-primary border-primary/30'
+                            ? cn(
+                                'bg-primary/15 text-primary border-primary/30',
+                                critical && 'bg-red-100 dark:bg-red-900/30 border-red-400/50 text-red-700 dark:text-red-400',
+                                !critical && expiringSoon && 'bg-amber-100 dark:bg-amber-900/30 border-amber-400/50 text-amber-700 dark:text-amber-400',
+                              )
                             : 'bg-muted/40 text-muted-foreground border-border line-through'
                         )}
                       >
+                        {critical && active && <span aria-hidden className="text-[10px]">🔴</span>}
+                        {!critical && expiringSoon && active && <span aria-hidden className="text-[10px]">🟡</span>}
                         {item.ingredient}
                         {active && (
                           <X

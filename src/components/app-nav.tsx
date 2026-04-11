@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
@@ -10,6 +10,16 @@ import {
   LogOut, Menu, X, CalendarDays, Link2, History, FolderOpen, Package,
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
+
+// F26: expiry urgency check (mirrors pantry-client logic)
+function hasExpiringSoon(expiresAt: string): boolean {
+  const now = new Date()
+  now.setHours(0, 0, 0, 0)
+  const exp = new Date(expiresAt)
+  exp.setHours(0, 0, 0, 0)
+  const days = Math.round((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+  return days <= 7
+}
 
 const NAV_LINKS = [
   { href: '/kitchen', label: 'Kitchen', icon: ChefHat },
@@ -24,13 +34,14 @@ const NAV_LINKS = [
 ]
 
 function NavLink({
-  href, label, icon: Icon, active, onClick,
+  href, label, icon: Icon, active, onClick, badge,
 }: {
   href: string
   label: string
   icon: React.ElementType
   active: boolean
   onClick?: () => void
+  badge?: number
 }) {
   return (
     <Link
@@ -44,7 +55,12 @@ function NavLink({
       )}
     >
       <Icon className="h-4 w-4 shrink-0" />
-      {label}
+      <span className="flex-1">{label}</span>
+      {badge != null && badge > 0 && (
+        <span className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] font-bold text-white">
+          {badge}
+        </span>
+      )}
     </Link>
   )
 }
@@ -52,6 +68,19 @@ function NavLink({
 function SidebarContent({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname()
   const { data: session } = useSession()
+  // F26: count expiring pantry items for nav badge
+  const [expiringCount, setExpiringCount] = useState(0)
+
+  useEffect(() => {
+    if (!session?.user) return
+    fetch('/api/user/pantry')
+      .then(r => r.ok ? r.json() : [])
+      .then((items: Array<{ expiresAt: string | null }>) => {
+        const count = items.filter(i => i.expiresAt && hasExpiringSoon(i.expiresAt)).length
+        setExpiringCount(count)
+      })
+      .catch(() => {})
+  }, [session?.user])
 
   const isActive = (href: string) =>
     pathname === href || (href !== '/dashboard' && pathname.startsWith(href + '/'))
@@ -85,6 +114,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
             icon={icon}
             active={isActive(href)}
             onClick={onClose}
+            badge={href === '/pantry' ? expiringCount : undefined}
           />
         ))}
 

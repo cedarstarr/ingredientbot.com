@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
   const { success } = await aiLimiter.check(ip)
   if (!success) return new Response('Too many requests', { status: 429 })
 
-  const { ingredients, cuisine, dietary } = await req.json()
+  const { ingredients, cuisine, dietary, expiringIngredients } = await req.json()
 
   if (!ingredients || ingredients.length < 2) {
     return new Response('Need at least 2 ingredients', { status: 400 })
@@ -49,6 +49,11 @@ export async function POST(req: NextRequest) {
   }
   const profileContext = profileLines.length ? `\n\nUser profile:\n${profileLines.join('\n')}` : ''
 
+  // F26: expiry-first mode — tell AI to prioritize using expiring items
+  const expiryContext = expiringIngredients?.length
+    ? `\n\nIMPORTANT: These ingredients are expiring soon and must be prioritized in the recipes: ${(expiringIngredients as string[]).join(', ')}. Each recipe should use at least one of these expiring ingredients.`
+    : ''
+
   const stream = await anthropic.messages.stream({
     model: 'claude-sonnet-4-6',
     max_tokens: 1024,
@@ -58,7 +63,7 @@ CRITICAL: Respond with ONLY newline-delimited JSON objects, one recipe per line,
 Each line must be a complete valid JSON object with these exact keys:
 {"title":"Recipe Name","description":"One sentence description","prepMin":15,"cookMin":25,"servings":4,"cuisine":"Italian","difficulty":"easy"}
 
-difficulty must be exactly: "easy", "medium", or "hard"${profileContext}`,
+difficulty must be exactly: "easy", "medium", or "hard"${profileContext}${expiryContext}`,
     messages: [{
       role: 'user',
       content: `I have these ingredients: ${ingredients.join(', ')}. ${cuisineStr} ${sessionDietaryStr} Suggest 4 recipes.`

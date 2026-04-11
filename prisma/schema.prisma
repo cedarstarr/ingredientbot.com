@@ -243,12 +243,14 @@ model DietaryProfile {
 }
 
 // F44: Pantry inventory — persistent ingredient list tracked between sessions
+// F26: expiresAt added for expiry-first mode
 model PantryItem {
-  id         String   @id @default(cuid())
-  userId     String   @map("user_id")
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id         String    @id @default(cuid())
+  userId     String    @map("user_id")
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   ingredient String
-  addedAt    DateTime @default(now()) @map("added_at")
+  addedAt    DateTime  @default(now()) @map("added_at")
+  expiresAt  DateTime? @map("expires_at") // nullable — not all items have an expiry date
 
   @@unique([userId, ingredient]) // prevent duplicate entries per user
   @@index([userId])

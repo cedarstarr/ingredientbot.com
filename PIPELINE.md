@@ -57,3 +57,4 @@
 | 2026-04-10 00:00 | /site-feature-install | ~3h | SUCCESS | 10/10 built, 0 failed — Sprint 1 |
 | 2026-04-11 | /site-feature-audit | — | SUCCESS | 37 features scanned: 0 built, 3 partial (F31, F33, F57), 34 new |
 | 2026-04-11 | manual install | ~30 min | SUCCESS | F31 Dietary Profile + F44 Pantry Inventory built; 2 new Prisma models, 3 API route groups, /pantry page, kitchen panel integration |
+| 2026-04-11 | manual install | ~45 min | SUCCESS | F42 Dark Mode confirmed + polished, F43 PWA/Offline (manual sw.js, manifest.json, SwRegister, PwaInstallPrompt, /offline page), F26 Expiry-first mode (expiresAt field on PantryItem, migration deployed, expiry badges in pantry UI, expiry-first toggle in kitchen, amber nav badge, AI system prompt injection) |

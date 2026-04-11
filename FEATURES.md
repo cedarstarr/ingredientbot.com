@@ -44,7 +44,7 @@
 
 ## 🛠 Planned / In Progress
 
-- 🛠 F26 Expiry-first mode [Hook]
+- ✅ F26 Expiry-first mode [Hook]
 - 🛠 F27 Recipe sharing with public permalink [Hook]
 - 🛠 F28 Leftover optimizer mode [Hook]
 - ✅ F31 Dietary profile (persistent preferences across all generations) [Core]
@@ -53,7 +53,7 @@
 - ✅ F34 Cuisine selector [Core]
 - ✅ F35 Difficulty selector [Core]
 - ✅ F42 Dark mode [Core]
-- 🛠 F43 PWA / offline saved recipes [Core]
+- ✅ F43 PWA / offline saved recipes [Core]
 - ✅ F44 Pantry inventory (persistent, tracked between sessions) [Sticky]
 - 🛠 F45 Weekly meal plan email digest [Sticky]
 - 🛠 F46 Expiration date tracking [Sticky]
@@ -166,13 +166,17 @@ F37. **Recipe history** [Core] — Full paginated archive of every recipe a user
 
 ## Differentiators
 
-F26. **Expiry-first mode** [Hook] — Flag ingredients expiring soon and tell Claude to prioritize using them. "Spinach expires tomorrow — generate a recipe that uses it up." Emotionally resonant; reduces household food waste guilt. Requires pantry inventory (F44) with expiry dates (F46). (Feasibility: Medium — depends on F44+F46 being built first)
+F26. ✅ **Expiry-first mode** [Hook] — Flag ingredients expiring soon and tell Claude to prioritize using them. "Spinach expires tomorrow — generate a recipe that uses it up." Emotionally resonant; reduces household food waste guilt. Built: `expiresAt DateTime?` on PantryItem, PATCH /api/user/pantry/[id] to set expiry, expiry badges (🔴 ≤3d, 🟡 ≤7d) on pantry page + kitchen panel, expiry-first toggle button in kitchen panel elevates expiring items and injects context into the AI system prompt, amber nav badge on Pantry link when items are expiring within 7 days.
 
 F27. **Recipe sharing (public permalink)** [Hook] — Every saved recipe gets a public URL. Share to Twitter/Instagram/iMessage. Virality mechanism: each shared recipe is an ad for ingredientbot. No other ingredient-first AI app has a shareable recipe URL that doesn't require signup to view. (Feasibility: Low — public route + access control on recipe model)
 
 F28. **Leftover optimizer mode** [Hook] — "I have leftover roast chicken from last night plus these pantry items — what do I make?" Explicit "leftovers" framing changes the generation prompt to prioritize using yesterday's remainder before it goes off. (Feasibility: Low — UX framing + prompt variant)
 
 F31. **Dietary profile (persistent)** [Core] — Store dietary restrictions, allergies, and preferences on the user account. Applied to every generation so users never have to repeat "I'm vegan" or "no nuts." Table stakes for all competitors; absence immediately alienates dietary-restricted users. Built: DietaryProfile model (restrictions[], cuisinePrefs[], dislikedIngredients[]), PATCH/GET /api/user/dietary, DietaryProfileSection on /settings, injected into both generate and cook AI system prompts.
+
+F42. ✅ **Dark mode** [Core] — System-aware dark/light mode via next-themes. ThemeProvider wraps the app via `src/components/providers.tsx`. ThemeToggle (Sun/Moon) sits in the nav sidebar footer and the mobile top bar. Full dark CSS variable set in globals.css (oklch dark palette). All UI components use Tailwind semantic color tokens (bg-background, text-foreground, etc.) so dark mode works without per-component overrides.
+
+F43. ✅ **PWA / offline saved recipes** [Core] — Manual service worker (public/sw.js) with three caching strategies: cache-first for /api/user/pantry and /api/recipes/* (enables offline viewing), network-first for navigation with fallback to /offline page, stale-while-revalidate for static assets. manifest.json at /public/manifest.json (name, icons, theme_color, display: standalone, start_url: /kitchen). SwRegister client component auto-registers the SW. PwaInstallPrompt component listens for `beforeinstallprompt` and shows a bottom-sheet banner. Root layout gets manifest link, theme-color meta tag, and apple-touch-icon via Next.js metadata API.
 
 F44. **Pantry inventory (persistent)** [Sticky] — A managed list of what's in your kitchen that persists between sessions. The kitchen page pre-fills from your pantry; you add/remove items as you shop and cook. This shifts ingredientbot from a "one-off session" tool to a "daily cooking OS." Built: PantryItem model (userId, ingredient, addedAt), GET/POST /api/user/pantry, DELETE /api/user/pantry/[id], /pantry management page, pantry panel in kitchen with per-session toggle (include/exclude each item), pantry items merged with typed ingredients for AI generation.
 
