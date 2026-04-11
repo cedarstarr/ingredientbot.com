@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { X, ChefHat, Upload, Camera, Loader2, Sparkles, RefreshCw, Package, AlertTriangle, Timer } from 'lucide-react'
+import { Textarea } from '@/components/ui/textarea'
+import { X, ChefHat, Upload, Camera, Loader2, Sparkles, RefreshCw, Package, Timer, Mic, MicOff, Lock, BookOpen } from 'lucide-react'
 import { RecipeSuggestionCard, type RecipeSuggestion } from './recipe-suggestion-card'
 import { UsageCounter } from './usage-counter'
 import { cn } from '@/lib/utils'
@@ -54,6 +55,18 @@ export function KitchenPanel() {
   const [activePantryIds, setActivePantryIds] = useState<Set<string>>(new Set())
   // F26: expiry-first mode — elevate expiring items and tell AI to prioritize them
   const [expiryFirstMode, setExpiryFirstMode] = useState(false)
+  // F28: leftover optimizer mode
+  const [leftoverMode, setLeftoverMode] = useState(false)
+  const [leftoverText, setLeftoverText] = useState('')
+  // F61: strictness toggle — strict=only listed, lenient=assume pantry staples
+  const [strictMode, setStrictMode] = useState(false)
+  // F64: "Teach me" verbose recipe mode
+  const [teachMode, setTeachMode] = useState(false)
+  // F55: voice input state
+  const [isListening, setIsListening] = useState(false)
+  const [voiceSupported, setVoiceSupported] = useState(true)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recognitionRef = useRef<any>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -68,6 +81,52 @@ export function KitchenPanel() {
       })
       .catch(() => {})
   }, [])
+
+  // F55: Check Web Speech API availability on mount (webkit prefix for Safari/older browsers)
+  // Cast window to any to handle non-standard SpeechRecognition — not in default TS lib
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const w = window as any
+    if (!w.SpeechRecognition && !w.webkitSpeechRecognition) {
+      setVoiceSupported(false)
+    }
+  }, [])
+
+  // F55: Toggle voice recognition — appends transcribed text to input
+  const toggleVoice = useCallback(() => {
+    // Resolve the constructor — prefer standard, fall back to webkit prefix
+    // Use any to avoid TS errors: SpeechRecognition not on Window in older lib versions
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const w = window as any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SR: any = w.SpeechRecognition ?? w.webkitSpeechRecognition
+    if (!SR) return // graceful no-op; button already hidden when !voiceSupported
+
+    if (isListening) {
+      recognitionRef.current?.stop()
+      return
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const recognition: any = new SR()
+    recognition.continuous = false
+    recognition.interimResults = false
+    recognition.lang = 'en-US'
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onresult = (e: any) => {
+      const transcript: string = e.results[0][0].transcript
+      // Append transcribed text so users can speak multiple batches
+      setInputValue(prev => prev ? `${prev}, ${transcript}` : transcript)
+    }
+
+    recognition.onend = () => setIsListening(false)
+    recognition.onerror = () => setIsListening(false)
+
+    recognitionRef.current = recognition
+    recognition.start()
+    setIsListening(true)
+  }, [isListening])
 
   const addIngredient = useCallback((value: string) => {
     const trimmed = value.trim().toLowerCase().replace(/,$/, '')
@@ -144,6 +203,12 @@ export function KitchenPanel() {
           cuisine: cuisine === 'any' ? undefined : cuisine,
           dietary: dietary === 'any' ? [] : [dietary],
           expiringIngredients: expiring.length > 0 ? expiring : undefined,
+          // F28: leftover mode
+          leftovers: leftoverMode && leftoverText.trim() ? leftoverText.trim() : undefined,
+          // F61: strictness mode
+          strictMode,
+          // F64: teach me mode
+          teachMode,
         }),
       })
 
@@ -193,7 +258,7 @@ export function KitchenPanel() {
     } finally {
       setIsGenerating(false)
     }
-  }, [allIngredients, cuisine, dietary, isGenerating])
+  }, [allIngredients, cuisine, dietary, isGenerating, leftoverMode, leftoverText, strictMode, teachMode])
 
   // Auto-generate after 600ms debounce when ≥2 ingredients (typed or pantry)
   useEffect(() => {
@@ -247,7 +312,14 @@ export function KitchenPanel() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // F44: pass merged ingredient list (typed + active pantry) to cook route
-        body: JSON.stringify({ suggestion, ingredients: allIngredients() }),
+        // F28/F61/F64: pass active mode flags so cook route injects them into the full recipe generation prompt
+        body: JSON.stringify({
+          suggestion,
+          ingredients: allIngredients(),
+          leftovers: leftoverMode && leftoverText.trim() ? leftoverText.trim() : undefined,
+          strictMode,
+          teachMode,
+        }),
       })
 
       // F30: 402 = freemium limit reached
@@ -299,16 +371,40 @@ export function KitchenPanel() {
           </TabsList>
 
           <TabsContent value="type" className="flex-1 flex flex-col p-4 gap-3 overflow-auto">
-            {/* Input */}
+            {/* Input + F55 voice mic */}
             <div>
-              <Input
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="e.g. chicken, rice, garlic..."
-                className="w-full"
-              />
-              <p className="text-xs text-muted-foreground mt-1">Press Enter or comma to add</p>
+              <div className="flex gap-2">
+                <Input
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="e.g. chicken, rice, garlic..."
+                  className="flex-1"
+                />
+                {/* F55: mic button — hidden when Web Speech API unsupported */}
+                {voiceSupported && (
+                  <button
+                    type="button"
+                    onClick={toggleVoice}
+                    title={isListening ? 'Stop recording' : 'Speak ingredients'}
+                    className={cn(
+                      'h-9 w-9 flex items-center justify-center rounded-md border border-border transition-colors shrink-0',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                      isListening
+                        ? 'bg-red-100 dark:bg-red-900/30 border-red-400/60 text-red-600 dark:text-red-400 animate-pulse'
+                        : 'bg-muted/40 text-muted-foreground hover:text-foreground hover:border-primary/40',
+                    )}
+                    aria-label={isListening ? 'Stop recording' : 'Start voice input'}
+                  >
+                    {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                  </button>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {isListening
+                  ? 'Listening… speak your ingredients'
+                  : 'Press Enter or comma to add'}
+              </p>
             </div>
 
             {/* Tags */}
@@ -441,6 +537,85 @@ export function KitchenPanel() {
                 </div>
               </div>
             )}
+
+            {/* F28 / F61 / F64: Generation mode toggles — grouped so they don't clutter the ingredient section */}
+            <div className="space-y-1.5 pt-1">
+              <span className="text-xs font-medium text-muted-foreground">Generation modes</span>
+
+              {/* F28: Leftover optimizer */}
+              <button
+                type="button"
+                onClick={() => setLeftoverMode(v => !v)}
+                title="Use leftover ingredients as star of the dish"
+                className={cn(
+                  'w-full flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  leftoverMode
+                    ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-400/60 text-orange-700 dark:text-orange-400 font-medium'
+                    : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-orange-400/40',
+                )}
+              >
+                <Package className="h-3 w-3 shrink-0" />
+                <span className="flex-1 text-left">Leftover optimizer</span>
+                {leftoverMode && (
+                  <Badge className="bg-orange-500/20 text-orange-700 dark:text-orange-300 text-[10px] px-1.5 py-0 border-0">
+                    ON
+                  </Badge>
+                )}
+              </button>
+
+              {/* F28: Leftover text input — only shown when mode active */}
+              {leftoverMode && (
+                <Textarea
+                  value={leftoverText}
+                  onChange={(e) => setLeftoverText(e.target.value)}
+                  placeholder="e.g. roast chicken, half a bag of pasta, some leftover rice..."
+                  className="text-xs resize-none h-16"
+                  aria-label="Leftover ingredients to use up"
+                />
+              )}
+
+              {/* F61: Strictness toggle */}
+              <button
+                type="button"
+                onClick={() => setStrictMode(v => !v)}
+                title="Only use the listed ingredients — no assumed pantry staples"
+                className={cn(
+                  'w-full flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  strictMode
+                    ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-400/60 text-purple-700 dark:text-purple-400 font-medium'
+                    : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-purple-400/40',
+                )}
+              >
+                <Lock className="h-3 w-3 shrink-0" />
+                <span className="flex-1 text-left">Strict ingredients only</span>
+                {strictMode && (
+                  <Badge className="bg-purple-500/20 text-purple-700 dark:text-purple-300 text-[10px] px-1.5 py-0 border-0">
+                    ON
+                  </Badge>
+                )}
+              </button>
+
+              {/* F64: Teach me mode */}
+              <button
+                type="button"
+                onClick={() => setTeachMode(v => !v)}
+                title="Include explanations for each cooking step"
+                className={cn(
+                  'w-full flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  teachMode
+                    ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-400/60 text-blue-700 dark:text-blue-400 font-medium'
+                    : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-blue-400/40',
+                )}
+              >
+                <BookOpen className="h-3 w-3 shrink-0" />
+                <span className="flex-1 text-left">Teach me mode</span>
+                {teachMode && (
+                  <Badge className="bg-blue-500/20 text-blue-700 dark:text-blue-300 text-[10px] px-1.5 py-0 border-0">
+                    ON
+                  </Badge>
+                )}
+              </button>
+            </div>
 
             {/* F30: Usage counter */}
             <UsageCounter refreshKey={usageRefreshKey} />

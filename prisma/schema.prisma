@@ -141,6 +141,10 @@ model Recipe {
   cookedCount    Int       @default(0) @map("cooked_count")
   lastCookedAt   DateTime? @map("last_cooked_at")
 
+  // F27: public sharing via permalink
+  isPublic   Boolean @default(false) @map("is_public")
+  publicSlug String? @unique @map("public_slug")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 

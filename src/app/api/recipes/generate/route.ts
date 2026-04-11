@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
   const { success } = await aiLimiter.check(ip)
   if (!success) return new Response('Too many requests', { status: 429 })
 
-  const { ingredients, cuisine, dietary, expiringIngredients } = await req.json()
+  const { ingredients, cuisine, dietary, expiringIngredients, leftovers, strictMode, teachMode } = await req.json()
 
   if (!ingredients || ingredients.length < 2) {
     return new Response('Need at least 2 ingredients', { status: 400 })
@@ -54,6 +54,21 @@ export async function POST(req: NextRequest) {
     ? `\n\nIMPORTANT: These ingredients are expiring soon and must be prioritized in the recipes: ${(expiringIngredients as string[]).join(', ')}. Each recipe should use at least one of these expiring ingredients.`
     : ''
 
+  // F28: leftover optimizer mode — frame leftovers as star ingredients
+  const leftoverContext = leftovers
+    ? `\n\nLEFTOVER MODE: The user has these leftover ingredients to use up: ${leftovers}. Create recipes that incorporate them as the star ingredients to minimize waste. The leftovers must feature prominently in every recipe.`
+    : ''
+
+  // F61: strict mode — no assumed pantry staples
+  const strictContext = strictMode
+    ? `\n\nSTRICT MODE: Use ONLY the listed ingredients. Do not assume the user has oil, salt, butter, or any other pantry staples unless explicitly listed.`
+    : ''
+
+  // F64: teach me mode — verbose explanations (surfaced in description to fit the suggestion format)
+  const teachContext = teachMode
+    ? `\n\nTEACH ME MODE: Write descriptions that hint at the cooking technique and explain WHY each recipe method works. Each description should be educational and mention a key technique insight.`
+    : ''
+
   const stream = await anthropic.messages.stream({
     model: 'claude-sonnet-4-6',
     max_tokens: 1024,
@@ -63,7 +78,7 @@ CRITICAL: Respond with ONLY newline-delimited JSON objects, one recipe per line,
 Each line must be a complete valid JSON object with these exact keys:
 {"title":"Recipe Name","description":"One sentence description","prepMin":15,"cookMin":25,"servings":4,"cuisine":"Italian","difficulty":"easy"}
 
-difficulty must be exactly: "easy", "medium", or "hard"${profileContext}${expiryContext}`,
+difficulty must be exactly: "easy", "medium", or "hard"${profileContext}${expiryContext}${leftoverContext}${strictContext}${teachContext}`,
     messages: [{
       role: 'user',
       content: `I have these ingredients: ${ingredients.join(', ')}. ${cuisineStr} ${sessionDietaryStr} Suggest 4 recipes.`

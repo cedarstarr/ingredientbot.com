@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select'
 import { ChefHat, BookOpen, Clock, ArrowRight, Search, X } from 'lucide-react'
 import { DeleteRecipeButton } from '@/components/recipe/delete-recipe-button'
+import { ShareRecipeButton } from '@/components/recipe/share-recipe-button'
 import { formatDate } from '@/lib/utils'
 
 interface SavedRecipe {
@@ -26,6 +27,8 @@ interface SavedRecipe {
   cookTimeMin?: number | null
   servings: number
   createdAt: Date
+  isPublic: boolean
+  publicSlug?: string | null
 }
 
 interface SavedRecipesClientProps {
@@ -160,7 +163,14 @@ export function SavedRecipesClient({ recipes }: SavedRecipesClientProps) {
               >
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <h3 className="font-semibold text-foreground leading-tight">{recipe.title}</h3>
-                  <DeleteRecipeButton id={recipe.id} />
+                  <div className="flex items-center gap-1 shrink-0">
+                    <ShareRecipeButton
+                      recipeId={recipe.id}
+                      initialIsPublic={recipe.isPublic}
+                      initialSlug={recipe.publicSlug}
+                    />
+                    <DeleteRecipeButton id={recipe.id} />
+                  </div>
                 </div>
                 {recipe.description && (
                   <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{recipe.description}</p>

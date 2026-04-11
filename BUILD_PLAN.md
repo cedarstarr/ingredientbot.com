@@ -29,13 +29,13 @@
 | # | Feature | Effort | Status |
 |---|---------|--------|--------|
 | F26 | **Expiry-first mode** | MEDIUM | DONE |
-| F27 | **Recipe sharing with public permalink** | SMALL | PENDING |
-| F28 | **Leftover optimizer mode** | SMALL | PENDING |
+| F27 | **Recipe sharing with public permalink** | SMALL | DONE |
+| F28 | **Leftover optimizer mode** | SMALL | DONE |
 | F31 | **Dietary profile (persistent preferences across all generations)** | SMALL | DONE |
 | F44 | **Pantry inventory (persistent, tracked between sessions)** | MEDIUM | DONE |
-| F55 | **Voice input for ingredients** | SMALL | PENDING |
-| F61 | **Strictness toggle (only listed ingredients vs assume pantry staples)** | SMALL | PENDING |
-| F64 | **"Teach me" verbose recipe mode (explains the why)** | SMALL | PENDING |
+| F55 | **Voice input for ingredients** | SMALL | DONE |
+| F61 | **Strictness toggle (only listed ingredients vs assume pantry staples)** | SMALL | DONE |
+| F64 | **"Teach me" verbose recipe mode (explains the why)** | SMALL | DONE |
 
 ### Growth & Retention
 

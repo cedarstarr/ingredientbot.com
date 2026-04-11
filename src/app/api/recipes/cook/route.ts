@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'AI service not configured' }, { status: 503 })
   }
 
-  const { suggestion, ingredients } = await req.json()
+  const { suggestion, ingredients, strictMode, teachMode, leftovers } = await req.json()
   if (!suggestion?.title) {
     return Response.json({ error: 'Invalid suggestion' }, { status: 400 })
   }
@@ -64,6 +64,21 @@ export async function POST(req: NextRequest) {
   }
   const profileContext = profileLines.length ? `\n\nUser profile:\n${profileLines.join('\n')}` : ''
 
+  // F61: strict mode — only use explicitly listed ingredients
+  const strictContext = strictMode
+    ? `\n\nSTRICT MODE: Use ONLY the listed ingredients. Do not assume the user has oil, salt, butter, garlic, onion, or any other pantry staples unless explicitly listed.`
+    : ''
+
+  // F64: teach me mode — verbose step-by-step explanations
+  const teachContext = teachMode
+    ? `\n\nTEACH ME MODE: After each step in the "steps" array, append a brief "Why:" explanation explaining the cooking science or technique. Format: "Do X. Why: This helps Y because Z." Also explain each ingredient's role briefly in the notes field.`
+    : ''
+
+  // F28: leftover mode context
+  const leftoverContext = leftovers
+    ? `\n\nLEFTOVER MODE: These leftovers must feature as the star ingredients: ${leftovers}. Incorporate them prominently to minimize waste.`
+    : ''
+
   const anthropic = new Anthropic({ apiKey })
 
   const response = await anthropic.messages.create({
@@ -83,7 +98,7 @@ Schema:
   "steps": [string],
   "notes": string,
   "nutrition": {"calories": number, "protein": number, "fat": number, "carbs": number, "fiber": number}
-}${profileContext}`,
+}${profileContext}${strictContext}${teachContext}${leftoverContext}`,
     messages: [{
       role: 'user',
       content: `Generate a full recipe for "${suggestion.title}". Description: ${suggestion.description}. Main ingredients available: ${ingredients.join(', ')}. Target servings: ${suggestion.servings || 4}.`
