@@ -1,7 +1,7 @@
 # IngredientBot — Build Plan
 
 **Source**: FEATURES.md (triaged 2026-04-09)
-**Last Updated**: 2026-04-09
+**Last Updated**: 2026-04-11
 
 ---
 
@@ -31,8 +31,8 @@
 | F26 | **Expiry-first mode** | MEDIUM | PENDING |
 | F27 | **Recipe sharing with public permalink** | SMALL | PENDING |
 | F28 | **Leftover optimizer mode** | SMALL | PENDING |
-| F31 | **Dietary profile (persistent preferences across all generations)** | SMALL | PENDING |
-| F44 | **Pantry inventory (persistent, tracked between sessions)** | MEDIUM | PENDING |
+| F31 | **Dietary profile (persistent preferences across all generations)** | SMALL | DONE |
+| F44 | **Pantry inventory (persistent, tracked between sessions)** | MEDIUM | DONE |
 | F55 | **Voice input for ingredients** | SMALL | PENDING |
 | F61 | **Strictness toggle (only listed ingredients vs assume pantry staples)** | SMALL | PENDING |
 | F64 | **"Teach me" verbose recipe mode (explains the why)** | SMALL | PENDING |

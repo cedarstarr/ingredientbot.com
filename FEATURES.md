@@ -47,14 +47,14 @@
 - 🛠 F26 Expiry-first mode [Hook]
 - 🛠 F27 Recipe sharing with public permalink [Hook]
 - 🛠 F28 Leftover optimizer mode [Hook]
-- 🛠 F31 Dietary profile (persistent preferences across all generations) [Core]
+- ✅ F31 Dietary profile (persistent preferences across all generations) [Core]
 - 🛠 F32 Prep time filter [Core]
 - 🛠 F33 Serving size slider with live scaling [Core]
 - ✅ F34 Cuisine selector [Core]
 - ✅ F35 Difficulty selector [Core]
 - ✅ F42 Dark mode [Core]
 - 🛠 F43 PWA / offline saved recipes [Core]
-- 🛠 F44 Pantry inventory (persistent, tracked between sessions) [Sticky]
+- ✅ F44 Pantry inventory (persistent, tracked between sessions) [Sticky]
 - 🛠 F45 Weekly meal plan email digest [Sticky]
 - 🛠 F46 Expiration date tracking [Sticky]
 - 🛠 F47 Recipe completion history + streak [Sticky]
@@ -172,9 +172,9 @@ F27. **Recipe sharing (public permalink)** [Hook] — Every saved recipe gets a 
 
 F28. **Leftover optimizer mode** [Hook] — "I have leftover roast chicken from last night plus these pantry items — what do I make?" Explicit "leftovers" framing changes the generation prompt to prioritize using yesterday's remainder before it goes off. (Feasibility: Low — UX framing + prompt variant)
 
-F31. **Dietary profile (persistent)** [Core] — [ENHANCE: src/components/kitchen/kitchen-panel.tsx] Store dietary restrictions, allergies, and preferences on the user account. Applied to every generation so users never have to repeat "I'm vegan" or "no nuts." Table stakes for all competitors; absence immediately alienates dietary-restricted users. Session-level dietary dropdown exists in kitchen panel but is not persisted to the User model or settings page. (Feasibility: Low — user profile field + prompt injection)
+F31. **Dietary profile (persistent)** [Core] — Store dietary restrictions, allergies, and preferences on the user account. Applied to every generation so users never have to repeat "I'm vegan" or "no nuts." Table stakes for all competitors; absence immediately alienates dietary-restricted users. Built: DietaryProfile model (restrictions[], cuisinePrefs[], dislikedIngredients[]), PATCH/GET /api/user/dietary, DietaryProfileSection on /settings, injected into both generate and cook AI system prompts.
 
-F44. **Pantry inventory (persistent)** [Sticky] — A managed list of what's in your kitchen that persists between sessions. The kitchen page pre-fills from your pantry; you add/remove items as you shop and cook. This shifts ingredientbot from a "one-off session" tool to a "daily cooking OS." (Feasibility: Medium — new Prisma model + inventory management UI)
+F44. **Pantry inventory (persistent)** [Sticky] — A managed list of what's in your kitchen that persists between sessions. The kitchen page pre-fills from your pantry; you add/remove items as you shop and cook. This shifts ingredientbot from a "one-off session" tool to a "daily cooking OS." Built: PantryItem model (userId, ingredient, addedAt), GET/POST /api/user/pantry, DELETE /api/user/pantry/[id], /pantry management page, pantry panel in kitchen with per-session toggle (include/exclude each item), pantry items merged with typed ingredients for AI generation.
 
 F55. **Voice input for ingredients** [Vibe] — Web Speech API: tap a mic button, speak your ingredients naturally. "chicken, garlic, some leftover rice, and I think I have coconut milk." Hands-free pantry scanning is especially valuable on mobile when your hands are full. Crumb built this on mobile; we bring it to the web. (Feasibility: Low — Web Speech API, no backend change)
 

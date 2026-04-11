@@ -9,10 +9,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { X, ChefHat, Upload, Camera, Loader2, Sparkles, RefreshCw } from 'lucide-react'
+import { X, ChefHat, Upload, Camera, Loader2, Sparkles, RefreshCw, Package } from 'lucide-react'
 import { RecipeSuggestionCard, type RecipeSuggestion } from './recipe-suggestion-card'
 import { UsageCounter } from './usage-counter'
 import { cn } from '@/lib/utils'
+
+interface PantryItem {
+  id: string
+  ingredient: string
+}
 
 export function KitchenPanel() {
   const router = useRouter()
@@ -29,8 +34,23 @@ export function KitchenPanel() {
   const [usageRefreshKey, setUsageRefreshKey] = useState(0)
   // F30: whether user hit the monthly limit
   const [limitReached, setLimitReached] = useState(false)
+  // F44: pantry items — loaded once, toggled per-session
+  const [pantryItems, setPantryItems] = useState<PantryItem[]>([])
+  const [activePantryIds, setActivePantryIds] = useState<Set<string>>(new Set())
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // F44: Load pantry items on mount
+  useEffect(() => {
+    fetch('/api/user/pantry')
+      .then(r => r.ok ? r.json() : [])
+      .then((items: PantryItem[]) => {
+        setPantryItems(items)
+        // Default: all pantry items active
+        setActivePantryIds(new Set(items.map((i: PantryItem) => i.id)))
+      })
+      .catch(() => {})
+  }, [])
 
   const addIngredient = useCallback((value: string) => {
     const trimmed = value.trim().toLowerCase().replace(/,$/, '')
@@ -50,8 +70,31 @@ export function KitchenPanel() {
     }
   }
 
+  // F44: Toggle a pantry item on/off for this session
+  const togglePantryItem = (id: string) => {
+    setActivePantryIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  // F44: Merge typed ingredients with active pantry items, deduplicated
+  const allIngredients = useCallback(() => {
+    const pantryActive = pantryItems
+      .filter(p => activePantryIds.has(p.id))
+      .map(p => p.ingredient)
+    const merged = [...ingredients]
+    for (const p of pantryActive) {
+      if (!merged.includes(p)) merged.push(p)
+    }
+    return merged
+  }, [ingredients, pantryItems, activePantryIds])
+
   const generateRecipes = useCallback(async () => {
-    if (ingredients.length < 2 || isGenerating) return
+    const combined = allIngredients()
+    if (combined.length < 2 || isGenerating) return
     setIsGenerating(true)
     setSuggestions([])
     setError(null)
@@ -61,7 +104,7 @@ export function KitchenPanel() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ingredients,
+          ingredients: combined,
           cuisine: cuisine === 'any' ? undefined : cuisine,
           dietary: dietary === 'any' ? [] : [dietary],
         }),
@@ -113,11 +156,11 @@ export function KitchenPanel() {
     } finally {
       setIsGenerating(false)
     }
-  }, [ingredients, cuisine, dietary, isGenerating])
+  }, [allIngredients, cuisine, dietary, isGenerating])
 
-  // Auto-generate after 600ms debounce when ≥2 ingredients
+  // Auto-generate after 600ms debounce when ≥2 ingredients (typed or pantry)
   useEffect(() => {
-    if (ingredients.length < 2) return
+    if (allIngredients().length < 2) return
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
       generateRecipes()
@@ -166,7 +209,8 @@ export function KitchenPanel() {
       const res = await fetch('/api/recipes/cook', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ suggestion, ingredients }),
+        // F44: pass merged ingredient list (typed + active pantry) to cook route
+        body: JSON.stringify({ suggestion, ingredients: allIngredients() }),
       })
 
       // F30: 402 = freemium limit reached
@@ -192,7 +236,7 @@ export function KitchenPanel() {
 
   // F24: Regenerate — same ingredients, new suggestions, explicit user action
   const handleTryAgain = () => {
-    if (ingredients.length < 2 || isGenerating) return
+    if (allIngredients().length < 2 || isGenerating) return
     generateRecipes()
   }
 
@@ -284,6 +328,51 @@ export function KitchenPanel() {
               </Select>
             </div>
 
+            {/* F44: Pantry section — show active pantry items with toggle */}
+            {pantryItems.length > 0 && (
+              <div className="space-y-1.5 pt-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <Package className="h-3 w-3" />
+                    Pantry
+                  </span>
+                  <Link
+                    href="/pantry"
+                    className="text-xs text-primary hover:underline focus-visible:outline-none"
+                  >
+                    Manage
+                  </Link>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {pantryItems.map(item => {
+                    const active = activePantryIds.has(item.id)
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => togglePantryItem(item.id)}
+                        title={active ? 'Click to exclude from this session' : 'Click to include'}
+                        className={cn(
+                          'inline-flex items-center gap-1 rounded-full text-xs px-2 py-0.5 border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                          active
+                            ? 'bg-primary/15 text-primary border-primary/30'
+                            : 'bg-muted/40 text-muted-foreground border-border line-through'
+                        )}
+                      >
+                        {item.ingredient}
+                        {active && (
+                          <X
+                            className="h-2.5 w-2.5 opacity-60"
+                            aria-label={`Exclude ${item.ingredient}`}
+                          />
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* F30: Usage counter */}
             <UsageCounter refreshKey={usageRefreshKey} />
           </TabsContent>
@@ -331,7 +420,7 @@ export function KitchenPanel() {
         <div className="p-4 border-t border-border shrink-0 space-y-2">
           <Button
             onClick={generateRecipes}
-            disabled={ingredients.length < 2 || isGenerating}
+            disabled={allIngredients().length < 2 || isGenerating}
             className="w-full"
           >
             {isGenerating ? (
@@ -352,7 +441,7 @@ export function KitchenPanel() {
             <Button
               variant="outline"
               onClick={handleTryAgain}
-              disabled={ingredients.length < 2 || isGenerating}
+              disabled={allIngredients().length < 2 || isGenerating}
               className="w-full gap-2 text-sm"
             >
               <RefreshCw className="h-3.5 w-3.5" />
@@ -430,7 +519,7 @@ export function KitchenPanel() {
                 {!isGenerating && (
                   <button
                     onClick={handleTryAgain}
-                    disabled={isGenerating}
+                    disabled={isGenerating || allIngredients().length < 2}
                     title="Generate new recipe ideas from the same ingredients"
                     className={cn(
                       'flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors rounded-md px-2 py-1',

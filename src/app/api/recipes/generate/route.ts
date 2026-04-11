@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 import Anthropic from '@anthropic-ai/sdk'
 import { aiLimiter } from '@/lib/rate-limit'
 
@@ -24,10 +25,29 @@ export async function POST(req: NextRequest) {
     return new Response('AI service not configured', { status: 503 })
   }
 
+  // F31: Load dietary profile to inject persistent preferences into every generation
+  const dietaryProfile = await prisma.dietaryProfile.findUnique({
+    where: { userId: session.user.id },
+    select: { restrictions: true, cuisinePrefs: true, dislikedIngredients: true },
+  })
+
   const anthropic = new Anthropic({ apiKey })
 
-  const dietaryStr = dietary?.length ? `Dietary restrictions: ${dietary.join(', ')}.` : ''
+  const sessionDietaryStr = dietary?.length ? `Dietary restrictions: ${dietary.join(', ')}.` : ''
   const cuisineStr = cuisine && cuisine !== 'any' ? `Preferred cuisine: ${cuisine}.` : ''
+
+  // F31: Build persistent profile context appended to system prompt
+  const profileLines: string[] = []
+  if (dietaryProfile?.restrictions?.length) {
+    profileLines.push(`User dietary restrictions (always apply): ${dietaryProfile.restrictions.join(', ')}.`)
+  }
+  if (dietaryProfile?.dislikedIngredients?.length) {
+    profileLines.push(`User dislikes these ingredients (avoid): ${dietaryProfile.dislikedIngredients.join(', ')}.`)
+  }
+  if (dietaryProfile?.cuisinePrefs?.length) {
+    profileLines.push(`User cuisine preferences (favor when no cuisine specified): ${dietaryProfile.cuisinePrefs.join(', ')}.`)
+  }
+  const profileContext = profileLines.length ? `\n\nUser profile:\n${profileLines.join('\n')}` : ''
 
   const stream = await anthropic.messages.stream({
     model: 'claude-sonnet-4-6',
@@ -38,10 +58,10 @@ CRITICAL: Respond with ONLY newline-delimited JSON objects, one recipe per line,
 Each line must be a complete valid JSON object with these exact keys:
 {"title":"Recipe Name","description":"One sentence description","prepMin":15,"cookMin":25,"servings":4,"cuisine":"Italian","difficulty":"easy"}
 
-difficulty must be exactly: "easy", "medium", or "hard"`,
+difficulty must be exactly: "easy", "medium", or "hard"${profileContext}`,
     messages: [{
       role: 'user',
-      content: `I have these ingredients: ${ingredients.join(', ')}. ${cuisineStr} ${dietaryStr} Suggest 4 recipes.`
+      content: `I have these ingredients: ${ingredients.join(', ')}. ${cuisineStr} ${sessionDietaryStr} Suggest 4 recipes.`
     }]
   })
 

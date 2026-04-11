@@ -75,11 +75,13 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  accounts     Account[]
-  sessions     Session[]
-  recipes      Recipe[]
-  mealPlans    MealPlan[]
-  collections  RecipeCollection[]
+  accounts        Account[]
+  sessions        Session[]
+  recipes         Recipe[]
+  mealPlans       MealPlan[]
+  collections     RecipeCollection[]
+  dietaryProfile  DietaryProfile?
+  pantryItems     PantryItem[]
 
   @@index([email])
   @@map("users")
@@ -222,4 +224,33 @@ model AdminScriptLog {
 
   @@index([scriptName, ranAt(sort: Desc)])
   @@map("admin_script_logs")
+}
+
+// F31: Dietary profile — persisted per user, injected into every AI generation
+model DietaryProfile {
+  id                  String   @id @default(cuid())
+  userId              String   @unique @map("user_id")
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // JSON arrays stored as String[] for Postgres native array support
+  restrictions        String[] @default([]) // e.g. ["vegan", "gluten-free", "nut-allergy"]
+  cuisinePrefs        String[] @default([]) @map("cuisine_prefs") // e.g. ["Italian", "Asian"]
+  dislikedIngredients String[] @default([]) @map("disliked_ingredients")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("dietary_profiles")
+}
+
+// F44: Pantry inventory — persistent ingredient list tracked between sessions
+model PantryItem {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ingredient String
+  addedAt    DateTime @default(now()) @map("added_at")
+
+  @@unique([userId, ingredient]) // prevent duplicate entries per user
+  @@index([userId])
+  @@map("pantry_items")
 }

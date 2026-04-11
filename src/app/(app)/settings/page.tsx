@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { SettingsClient } from '@/components/settings/settings-client'
+import { DietaryProfileSection } from '@/components/settings/dietary-profile-section'
 
 export const metadata = { title: 'Settings — Robot Food' }
 
@@ -20,6 +21,9 @@ export default async function SettingsPage() {
         <p className="text-sm"><span className="text-muted-foreground">Email:</span> {session.user.email}</p>
         <p className="text-sm mt-1"><span className="text-muted-foreground">Name:</span> {session.user.name || 'Not set'}</p>
       </div>
+
+      {/* F31: Dietary profile — persistent preferences applied to all AI generations */}
+      <DietaryProfileSection />
 
       <SettingsClient />
     </div>

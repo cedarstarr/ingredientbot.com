@@ -38,7 +38,6 @@ export async function POST(req: NextRequest) {
   if (!user.isPro) {
     const monthStart = startOfCurrentMonth()
     const needsReset = !user.monthlyResetDate || user.monthlyResetDate < monthStart
-
     const currentCount = needsReset ? 0 : user.recipeCount
 
     if (currentCount >= FREE_TIER_LIMIT) {
@@ -48,6 +47,22 @@ export async function POST(req: NextRequest) {
       )
     }
   }
+
+  // F31: Load dietary profile for AI system prompt injection
+  const dietaryProfile = await prisma.dietaryProfile.findUnique({
+    where: { userId: session.user.id },
+    select: { restrictions: true, cuisinePrefs: true, dislikedIngredients: true },
+  })
+
+  // F31: Build persistent profile context
+  const profileLines: string[] = []
+  if (dietaryProfile?.restrictions?.length) {
+    profileLines.push(`User dietary restrictions (always apply): ${dietaryProfile.restrictions.join(', ')}.`)
+  }
+  if (dietaryProfile?.dislikedIngredients?.length) {
+    profileLines.push(`User dislikes these ingredients (avoid): ${dietaryProfile.dislikedIngredients.join(', ')}.`)
+  }
+  const profileContext = profileLines.length ? `\n\nUser profile:\n${profileLines.join('\n')}` : ''
 
   const anthropic = new Anthropic({ apiKey })
 
@@ -68,7 +83,7 @@ Schema:
   "steps": [string],
   "notes": string,
   "nutrition": {"calories": number, "protein": number, "fat": number, "carbs": number, "fiber": number}
-}`,
+}${profileContext}`,
     messages: [{
       role: 'user',
       content: `Generate a full recipe for "${suggestion.title}". Description: ${suggestion.description}. Main ingredients available: ${ingredients.join(', ')}. Target servings: ${suggestion.servings || 4}.`

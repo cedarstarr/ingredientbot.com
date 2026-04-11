@@ -56,3 +56,4 @@
 | 2026-04-09 | /site-feature-select | — | SUCCESS | Phase 1: 50 triaged (50 build, 0 delay, 0 skip) |
 | 2026-04-10 00:00 | /site-feature-install | ~3h | SUCCESS | 10/10 built, 0 failed — Sprint 1 |
 | 2026-04-11 | /site-feature-audit | — | SUCCESS | 37 features scanned: 0 built, 3 partial (F31, F33, F57), 34 new |
+| 2026-04-11 | manual install | ~30 min | SUCCESS | F31 Dietary Profile + F44 Pantry Inventory built; 2 new Prisma models, 3 API route groups, /pantry page, kitchen panel integration |
