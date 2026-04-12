@@ -4,7 +4,7 @@
 **Concept**: AI pantry-to-recipe generator — enter what you have, get streaming recipe suggestions. Make smart changes to recipes.
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
-**Last Updated**: 2026-04-09
+**Last Updated**: 2026-04-11 (tests-reconcile complete)
 
 ---
 
@@ -17,7 +17,7 @@
 | 3 | Feature Audit | /site-feature-audit | DONE | 1 | 2026-04-11 | [view](reports/2026-04-11-site-audit.md) |
 | 4 | Feature Triage | /site-features | DONE | 1 | 2026-04-09 | [view](reports/2026-04-09-site-features.md) |
 | 5 | Feature Install | /site-install | DONE | 1 | 2026-04-10 00:00 | [view](reports/2026-04-10-site-install.md) |
-| 6 | Write Tests | /tests-reconcile | PENDING | 0 | — | — |
+| 6 | Write Tests | /tests-reconcile | DONE | 1 | 2026-04-11 | [view](reports/2026-04-11-tests-reconcile.md) |
 | 7 | Verify Build | /tests-fix | PENDING | 0 | — | — |
 | 8 | Database Review | /site-db | PENDING | 0 | — | — |
 | 9 | QA / Bug Check | /site-bugs | PENDING | 0 | — | — |
@@ -31,9 +31,9 @@
 | 17 | Client Update | /client-update | PENDING | 0 | — | — |
 | 18 | Launch | /site-launch | PENDING | 0 | — | — |
 
-**Progress: 5/18 stages complete**
+**Progress: 6/18 stages complete**
 
-**Last Updated**: 2026-04-10
+**Last Updated**: 2026-04-11 (tests-reconcile complete)
 
 ---
 
@@ -58,3 +58,4 @@
 | 2026-04-11 | /site-feature-audit | — | SUCCESS | 37 features scanned: 0 built, 3 partial (F31, F33, F57), 34 new |
 | 2026-04-11 | manual install | ~30 min | SUCCESS | F31 Dietary Profile + F44 Pantry Inventory built; 2 new Prisma models, 3 API route groups, /pantry page, kitchen panel integration |
 | 2026-04-11 | manual install | ~45 min | SUCCESS | F42 Dark Mode confirmed + polished, F43 PWA/Offline (manual sw.js, manifest.json, SwRegister, PwaInstallPrompt, /offline page), F26 Expiry-first mode (expiresAt field on PantryItem, migration deployed, expiry badges in pantry UI, expiry-first toggle in kitchen, amber nav badge, AI system prompt injection) |
+| 2026-04-11 | /tests-reconcile | ~8m | SUCCESS | new tests written, stale tests fixed, build clean |
