@@ -100,4 +100,28 @@ test.describe('Unauthenticated redirects', () => {
     await page.waitForLoadState('domcontentloaded')
     expect(page.url()).toContain('/login')
   })
+
+  test('/history redirects to /login', async ({ page }) => {
+    await page.goto('/history')
+    await page.waitForLoadState('domcontentloaded')
+    expect(page.url()).toContain('/login')
+  })
+
+  test('/pantry redirects to /login', async ({ page }) => {
+    await page.goto('/pantry')
+    await page.waitForLoadState('domcontentloaded')
+    expect(page.url()).toContain('/login')
+  })
+
+  test('/collections redirects to /login', async ({ page }) => {
+    await page.goto('/collections')
+    await page.waitForLoadState('domcontentloaded')
+    expect(page.url()).toContain('/login')
+  })
+
+  test('/upgrade redirects to /login', async ({ page }) => {
+    await page.goto('/upgrade')
+    await page.waitForLoadState('domcontentloaded')
+    expect(page.url()).toContain('/login')
+  })
 })
