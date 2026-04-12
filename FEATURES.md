@@ -48,23 +48,23 @@
 - ✅ F27 Recipe sharing with public permalink [Hook]
 - ✅ F28 Leftover optimizer mode [Hook]
 - ✅ F31 Dietary profile (persistent preferences across all generations) [Core]
-- 🛠 F32 Prep time filter [Core]
-- 🛠 F33 Serving size slider with live scaling [Core]
+- ✅ F32 Prep time filter [Core]
+- ✅ F33 Serving size slider with live scaling [Core]
 - ✅ F34 Cuisine selector [Core]
 - ✅ F35 Difficulty selector [Core]
 - ✅ F42 Dark mode [Core]
 - ✅ F43 PWA / offline saved recipes [Core]
 - ✅ F44 Pantry inventory (persistent, tracked between sessions) [Sticky]
-- 🛠 F45 Weekly meal plan email digest [Sticky]
+- ✅ F45 Weekly meal plan email digest [Sticky]
 - 🛠 F46 Expiration date tracking [Sticky]
-- 🛠 F47 Recipe completion history + streak [Sticky]
+- ✅ F47 Recipe completion history + streak [Sticky]
 - 🛠 F48 Nutritional summary over time (weekly/monthly) [Sticky]
 - 🛠 F49 Family profile (multi-eater with different restrictions) [Sticky]
 - 🛠 F50 Smart grocery list (missing items vs pantry state only) [Sticky]
-- 🛠 F51 Recipe rating (personal 1–5 stars) [Sticky]
+- ✅ F51 Recipe rating (personal 1–5 stars) [Sticky]
 - 🛠 F52 Referral program (extra credits) [Sticky]
-- 🛠 F53 Budget mode (prefer cheaper ingredient combos) [Sticky]
-- 🛠 F54 "Impress me" zero-input generation mode [Vibe]
+- ✅ F53 Budget mode (prefer cheaper ingredient combos) [Sticky]
+- ✅ F54 "Impress me" zero-input generation mode [Vibe]
 - ✅ F55 Voice input for ingredients [Vibe]
 - 🛠 F56 Leftover photo mode (snap leftovers, AI detects contents) [Vibe]
 - 🛠 F57 Recipe card PDF export [Vibe]
@@ -79,9 +79,9 @@
 - 🛠 F66 Dietary challenge mode (7-day structured programs) [Vibe]
 - 🛠 F67 Smart pantry suggestions (proactive "you often cook X, add Y?") [Vibe]
 - 🛠 F68 Recipe complexity graph (visualize cookbook by ease/time/cuisine) [Vibe]
-- 🛠 F69 Cooking history heatmap (GitHub-style contribution graph) [Vibe]
-- 🛠 F70 AI chef personality toggle (home cook / French chef / street food vendor tone) [Vibe]
-- 🛠 F71 "Date night" mode (3-course menu from your pantry) [Vibe]
+- ✅ F69 Cooking history heatmap (GitHub-style contribution graph) [Vibe]
+- ✅ F70 AI chef personality toggle (home cook / French chef / street food vendor tone) [Vibe]
+- ✅ F71 "Date night" mode (3-course menu from your pantry) [Vibe]
 - 🛠 F72 Ingredient-to-cuisine mapper (miso + sesame oil → 8 Japanese dishes) [Vibe]
 - 🛠 F73 Recipe video script generation (AI-native future feature) [Vibe]
 
@@ -190,21 +190,21 @@ F64. ✅ **"Teach me" verbose recipe mode** [Vibe] — Optional mode where Claud
 
 ## Growth & Retention
 
-F33. **Serving size slider** [Core] — [ENHANCE: src/components/recipe/recipe-detail-client.tsx] 1–12 servings; all ingredient quantities scale proportionally. Basic expectation of any recipe app; missing it creates daily friction. Slider UI component exists (src/components/ui/slider.tsx) and servings display is present in recipe-detail-client.tsx, but no live scaling logic is wired up. (Feasibility: Low — math on ingredient quantities, UI slider)
+✅ F33. **Serving size slider** [Core] — [ENHANCE: src/components/recipe/recipe-detail-client.tsx] 1–12 servings; all ingredient quantities scale proportionally. Basic expectation of any recipe app; missing it creates daily friction. Slider UI component exists (src/components/ui/slider.tsx) and servings display is present in recipe-detail-client.tsx, but no live scaling logic is wired up. (Feasibility: Low — math on ingredient quantities, UI slider)
 
-F45. **Weekly meal plan email digest** [Sticky] — Monday morning email summarizing the week's planned meals from the meal planner. Brings users back to the app to check or adjust. The welcome drip (F15) is already built; this is a new recurring cron. (Feasibility: Low — new cron + email template, drip infrastructure already exists)
+✅ F45. **Weekly meal plan email digest** [Sticky] — Monday morning email summarizing the week's planned meals from the meal planner. Brings users back to the app to check or adjust. The welcome drip (F15) is already built; this is a new recurring cron. (Feasibility: Low — new cron + email template, drip infrastructure already exists)
 
-F47. **Recipe completion history + streak** [Sticky] — "You've cooked 12 new recipes this month" with a streak count for consecutive days cooked. Gamified habit tracking; the GitHub contribution graph for cooking. Drives daily app opens. (Feasibility: Medium — completion tracking model + streak calculation)
+✅ F47. **Recipe completion history + streak** [Sticky] — "You've cooked 12 new recipes this month" with a streak count for consecutive days cooked. Gamified habit tracking; the GitHub contribution graph for cooking. Drives daily app opens. (Feasibility: Medium — completion tracking model + streak calculation)
 
 F48. **Nutritional summary over time** [Sticky] — Weekly and monthly roll-up of nutrition data from completed recipes in the meal planner. "This week you averaged 2,100 kcal/day." Value compounds over time — users who see their patterns stay longer. (Feasibility: Medium — requires F36 + F41 first)
 
 F49. **Family profile (multi-eater)** [Sticky] — Multiple dietary profiles in one account. "Generate one dinner that works for a vegan adult and a picky 7-year-old." The household cooking use case is underserved by every competitor except Mealime (and Mealime doesn't do AI generation). (Feasibility: Medium — user profile schema extension)
 
-F51. **Recipe rating (personal 1–5 stars)** [Sticky] — Rate saved recipes; "Your favorites" auto-surfaces top-rated recipes. Simple feedback loop that makes the cookbook more useful over time. (Feasibility: Low — rating field on Recipe model + UI)
+✅ F51. **Recipe rating (personal 1–5 stars)** [Sticky] — Rate saved recipes; "Your favorites" auto-surfaces top-rated recipes. Simple feedback loop that makes the cookbook more useful over time. (Feasibility: Low — rating field on Recipe model + UI)
 
 F52. **Referral program** [Sticky] — Share a link; both user and referee get bonus recipe credits. Standard referral loop. DishGen lets users earn credits via social shares; we do it via direct referral. Portfolio referral system pattern already established. (Feasibility: Medium — referral model already in portfolio pattern)
 
-F53. **Budget mode** [Sticky] — Prefer ingredient combinations that are cheaper at typical grocery prices. "I want to keep this meal under $8." Cost-of-living anxiety is real; this positioning resonates with budget-conscious users who cook at home to save money. (Feasibility: Low — Claude prompt modifier, no live pricing data needed for rough guidance)
+✅ F53. **Budget mode** [Sticky] — Prefer ingredient combinations that are cheaper at typical grocery prices. "I want to keep this meal under $8." Cost-of-living anxiety is real; this positioning resonates with budget-conscious users who cook at home to save money. (Feasibility: Low — Claude prompt modifier, no live pricing data needed for rough guidance)
 
 ---
 
@@ -230,13 +230,13 @@ F23. **Sitemap + robots.txt + OpenGraph image** [Core] — Static sitemap for pu
 
 ## Nice-to-Haves
 
-F32. **Prep time filter** [Core] — [ENHANCE: src/app/kitchen/page.tsx] "I have 20 minutes" constrains generation to quick recipes. Most common cooking constraint after dietary restrictions. (Feasibility: Low — prompt modifier + UI toggle)
+✅ F32. **Prep time filter** [Core] — [ENHANCE: src/app/kitchen/page.tsx] "I have 20 minutes" constrains generation to quick recipes. Most common cooking constraint after dietary restrictions. (Feasibility: Low — prompt modifier + UI toggle)
 
 ✅ F34. **Cuisine selector** [Core] — "Make it Thai / Italian / Mexican" prefix. Quick modifier that dramatically improves relevance and gives users agency over generation direction. (Feasibility: Low — prompt modifier + UI dropdown)
 
 ✅ F35. **Difficulty selector** [Core] — Beginner / Intermediate / Advanced. Beginners abandon complex recipes; this gates appropriate generation from the start. (Feasibility: Low — prompt modifier)
 
-F54. **"Impress me" zero-input mode** [Vibe] — No ingredients entered; Claude picks seasonal/interesting ingredients and generates a recipe. Curiosity-driven discovery; good for users who want inspiration rather than pantry-clearance. (Feasibility: Low — empty-pantry prompt variant)
+✅ F54. **"Impress me" zero-input mode** [Vibe] — No ingredients entered; Claude picks seasonal/interesting ingredients and generates a recipe. Curiosity-driven discovery; good for users who want inspiration rather than pantry-clearance. (Feasibility: Low — empty-pantry prompt variant)
 
 F57. **Recipe card PDF export** [Vibe] — [ENHANCE: src/components/recipe/print-recipe-view.tsx] Generate a beautifully formatted PDF of a recipe card for offline printing and sharing. A browser "Print / Save PDF" button already exists in print-recipe-view.tsx; a true PDF export (e.g. via a server-side PDF library) is not yet implemented. (Feasibility: Small — server-side PDF generation or print stylesheet polish)
 
@@ -246,11 +246,11 @@ F58. **Weekly meal themes** [Vibe] — "Taco Tuesday, Pasta Wednesday, Stir-Fry 
 
 F65. **Cuisine trend feed** [Vibe] — Weekly "try this cuisine" suggestion on the dashboard. Low-effort discovery nudge; keeps the app from feeling like a static utility. (Feasibility: Low — curated or Claude-generated weekly card)
 
-F69. **Cooking history heatmap** [Vibe] — GitHub contribution-graph style visualization of "days cooked" on the dashboard. Gamified habit tracking visual; high engagement for habitual cookers. (Feasibility: Low — date-based query on completion events + SVG grid render)
+✅ F69. **Cooking history heatmap** [Vibe] — GitHub contribution-graph style visualization of "days cooked" on the dashboard. Gamified habit tracking visual; high engagement for habitual cookers. (Feasibility: Low — date-based query on completion events + SVG grid render)
 
-F70. **AI chef personality toggle** [Vibe] — Friendly home cook / strict French chef / street food vendor. System prompt variant changes tone and vocabulary of all generated recipes. Cheap to build, high delight. (Feasibility: Low — system prompt variant selection)
+✅ F70. **AI chef personality toggle** [Vibe] — Friendly home cook / strict French chef / street food vendor. System prompt variant changes tone and vocabulary of all generated recipes. Cheap to build, high delight. (Feasibility: Low — system prompt variant selection)
 
-F71. **"Date night" 3-course mode** [Vibe] — From your pantry, generate a full 3-course menu: starter, main, dessert. A high-emotion cooking moment; great for viral sharing (F27). (Feasibility: Low — structured multi-recipe generation prompt)
+✅ F71. **"Date night" 3-course mode** [Vibe] — From your pantry, generate a full 3-course menu: starter, main, dessert. A high-emotion cooking moment; great for viral sharing (F27). (Feasibility: Low — structured multi-recipe generation prompt)
 
 ---
 
