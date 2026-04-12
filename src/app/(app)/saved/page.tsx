@@ -24,6 +24,7 @@ export default async function SavedPage() {
       createdAt: true,
       isPublic: true,
       publicSlug: true,
+      rating: true,  // F51
     }
   })
 

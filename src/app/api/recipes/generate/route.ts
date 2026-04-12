@@ -14,9 +14,14 @@ export async function POST(req: NextRequest) {
   const { success } = await aiLimiter.check(ip)
   if (!success) return new Response('Too many requests', { status: 429 })
 
-  const { ingredients, cuisine, dietary, expiringIngredients, leftovers, strictMode, teachMode } = await req.json()
+  const {
+    ingredients, cuisine, dietary, expiringIngredients, leftovers,
+    strictMode, teachMode,
+    impressMe, prepTimeLimit, budgetMode, chefPersonality, dateNightMode, personalityPrompt,
+  } = await req.json()
 
-  if (!ingredients || ingredients.length < 2) {
+  // F54: "Impress Me" bypasses the ingredient count guard
+  if (!impressMe && (!ingredients || ingredients.length < 2)) {
     return new Response('Need at least 2 ingredients', { status: 400 })
   }
 
@@ -69,6 +74,35 @@ export async function POST(req: NextRequest) {
     ? `\n\nTEACH ME MODE: Write descriptions that hint at the cooking technique and explain WHY each recipe method works. Each description should be educational and mention a key technique insight.`
     : ''
 
+  // F32: prep time constraint — injected when a limit is selected
+  const prepTimeContext = prepTimeLimit
+    ? `\n\nConstraint: this recipe must be completable in under ${prepTimeLimit} minutes total prep + cook time.`
+    : ''
+
+  // F53: budget mode — cheap ingredients only
+  const budgetContext = budgetMode
+    ? `\n\nBUDGET MODE: Prioritize recipes using the cheapest possible ingredient combinations. Avoid expensive proteins (lobster, prime beef, exotic produce). Prefer beans, lentils, eggs, chicken thighs, frozen veg, and pantry staples that cost under $2/serving.`
+    : ''
+
+  // F70: chef personality prefix
+  const personalityContext = personalityPrompt
+    ? `\n\n${personalityPrompt}`
+    : chefPersonality === 'french'
+      ? `\n\nYou are a classically trained French chef. Use precise culinary terminology, classical techniques, and emphasize proper method.`
+      : chefPersonality === 'street'
+        ? `\n\nYou are a street food vendor. Emphasize bold flavors, quick cooking, cultural authenticity, and affordable ingredients.`
+        : ''
+
+  // F71: date night 3-course mode
+  const dateNightContext = dateNightMode
+    ? `\n\nDATE NIGHT MODE: Generate a 3-course Date Night menu instead of 4 separate recipes. Provide exactly 3 items: a starter (label it "STARTER:"), a main course (label it "MAIN:"), and a dessert (label it "DESSERT:"). All three should use the listed ingredients. Still output as JSON objects, one per line.`
+    : ''
+
+  // F54: "Impress Me" mode — AI chooses the ingredients
+  const impressMeContext = impressMe
+    ? `\n\nIMPRESS ME MODE: The user has no specific ingredients. Choose 6–8 seasonal, interesting ingredients yourself and generate creative, impressive recipes. Include the chosen ingredients in your description.`
+    : ''
+
   const stream = await anthropic.messages.stream({
     model: 'claude-sonnet-4-6',
     max_tokens: 1024,
@@ -78,10 +112,12 @@ CRITICAL: Respond with ONLY newline-delimited JSON objects, one recipe per line,
 Each line must be a complete valid JSON object with these exact keys:
 {"title":"Recipe Name","description":"One sentence description","prepMin":15,"cookMin":25,"servings":4,"cuisine":"Italian","difficulty":"easy"}
 
-difficulty must be exactly: "easy", "medium", or "hard"${profileContext}${expiryContext}${leftoverContext}${strictContext}${teachContext}`,
+difficulty must be exactly: "easy", "medium", or "hard"${personalityContext}${profileContext}${expiryContext}${leftoverContext}${strictContext}${teachContext}${prepTimeContext}${budgetContext}${dateNightContext}${impressMeContext}`,
     messages: [{
       role: 'user',
-      content: `I have these ingredients: ${ingredients.join(', ')}. ${cuisineStr} ${sessionDietaryStr} Suggest 4 recipes.`
+      content: impressMe
+        ? 'Impress me with 4 creative recipes. Choose the ingredients yourself.'
+        : `I have these ingredients: ${ingredients.join(', ')}. ${cuisineStr} ${sessionDietaryStr} Suggest 4 recipes.`
     }]
   })
 

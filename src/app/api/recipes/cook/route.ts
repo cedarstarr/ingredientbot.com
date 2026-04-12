@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'AI service not configured' }, { status: 503 })
   }
 
-  const { suggestion, ingredients, strictMode, teachMode, leftovers } = await req.json()
+  const { suggestion, ingredients, strictMode, teachMode, leftovers, budgetMode, chefPersonality, dateNightMode } = await req.json()
   if (!suggestion?.title) {
     return Response.json({ error: 'Invalid suggestion' }, { status: 400 })
   }
@@ -79,6 +79,23 @@ export async function POST(req: NextRequest) {
     ? `\n\nLEFTOVER MODE: These leftovers must feature as the star ingredients: ${leftovers}. Incorporate them prominently to minimize waste.`
     : ''
 
+  // F53: budget mode
+  const budgetContext = budgetMode
+    ? `\n\nBUDGET MODE: Prioritize cheap ingredients. Avoid expensive proteins. Prefer beans, lentils, eggs, chicken thighs, frozen veg, pantry staples under $2/serving.`
+    : ''
+
+  // F70: chef personality
+  const personalityContext = chefPersonality === 'french'
+    ? `\n\nYou are a classically trained French chef. Use precise culinary terminology, classical techniques, and emphasize proper method.`
+    : chefPersonality === 'street'
+      ? `\n\nYou are a street food vendor. Emphasize bold flavors, quick cooking, cultural authenticity, and affordable ingredients.`
+      : ''
+
+  // F71: date night 3-course mode
+  const dateNightContext = dateNightMode
+    ? `\n\nDATE NIGHT MODE: This is a Date Night recipe. Make it romantic, impressive, and special. Use elegant plating suggestions in the notes.`
+    : ''
+
   const anthropic = new Anthropic({ apiKey })
 
   const response = await anthropic.messages.create({
@@ -98,7 +115,7 @@ Schema:
   "steps": [string],
   "notes": string,
   "nutrition": {"calories": number, "protein": number, "fat": number, "carbs": number, "fiber": number}
-}${profileContext}${strictContext}${teachContext}${leftoverContext}`,
+}${personalityContext}${profileContext}${strictContext}${teachContext}${leftoverContext}${budgetContext}${dateNightContext}`,
     messages: [{
       role: 'user',
       content: `Generate a full recipe for "${suggestion.title}". Description: ${suggestion.description}. Main ingredients available: ${ingredients.join(', ')}. Target servings: ${suggestion.servings || 4}.`

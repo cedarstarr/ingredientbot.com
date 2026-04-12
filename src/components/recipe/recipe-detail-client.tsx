@@ -4,12 +4,14 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Slider } from '@/components/ui/slider'
 import { ModificationToolbar } from './modification-toolbar'
 import { GroceryListSheet } from './grocery-list-sheet'
 import { SubstitutionPanel } from './substitution-panel'
 import { CookedThisButton } from './cooked-this-button'
 import { RecipeTags } from './recipe-tags'
 import { CollectionPicker } from './collection-picker'
+import { RecipeRating } from './recipe-rating'
 import { Clock, Users, ChevronLeft, Loader2, BookOpen, HelpCircle, Printer, Sparkles, UtensilsCrossed } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -62,11 +64,44 @@ interface Recipe {
   lastCookedAt?: Date | string | null
   collectionId?: string | null
   collection?: Collection | null
+  rating?: number | null
 }
 
 interface Props {
   recipe: Recipe
   collections?: Collection[]
+}
+
+// F33: parse a numeric quantity from an amount string like "1/2", "1.5", "2"
+function parseQuantity(amount: string): number | null {
+  const trimmed = amount.trim()
+  // Handle fractions like "1/2", "3/4"
+  const fracMatch = trimmed.match(/^(\d+)\/(\d+)$/)
+  if (fracMatch) return parseInt(fracMatch[1]) / parseInt(fracMatch[2])
+  // Handle mixed numbers like "1 1/2"
+  const mixedMatch = trimmed.match(/^(\d+)\s+(\d+)\/(\d+)$/)
+  if (mixedMatch) return parseInt(mixedMatch[1]) + parseInt(mixedMatch[2]) / parseInt(mixedMatch[3])
+  const num = parseFloat(trimmed)
+  return isNaN(num) ? null : num
+}
+
+// F33: format a scaled quantity back to a readable string
+function formatQuantity(value: number): string {
+  if (value === Math.floor(value)) return String(value)
+  // Round to nearest 1/8 for natural fractions
+  const fractions: [number, string][] = [
+    [0.125, '1/8'], [0.25, '1/4'], [0.333, '1/3'], [0.5, '1/2'],
+    [0.667, '2/3'], [0.75, '3/4'], [0.875, '7/8'],
+  ]
+  const whole = Math.floor(value)
+  const frac = value - whole
+  if (frac < 0.06) return whole > 0 ? String(whole) : '0'
+  // Find nearest fraction
+  let best = fractions[0]
+  for (const f of fractions) {
+    if (Math.abs(f[0] - frac) < Math.abs(best[0] - frac)) best = f
+  }
+  return whole > 0 ? `${whole} ${best[1]}` : best[1]
 }
 
 export function RecipeDetailClient({ recipe, collections = [] }: Props) {
@@ -77,6 +112,10 @@ export function RecipeDetailClient({ recipe, collections = [] }: Props) {
   const [isEstimatingNutrition, setIsEstimatingNutrition] = useState(false)
   const [modifiedText, setModifiedText] = useState('')
   const [isModifying, setIsModifying] = useState(false)
+
+  // F33: Serving size slider — originalServings is fixed at parse time, never changes
+  const originalServings = recipe.servings ?? 4
+  const [servings, setServings] = useState(originalServings)
 
   // Substitution panel state
   const [substitutingIngredient, setSubstitutingIngredient] = useState<Ingredient | null>(null)
@@ -164,13 +203,42 @@ export function RecipeDetailClient({ recipe, collections = [] }: Props) {
           )}
           <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
             <Users className="h-3.5 w-3.5" />
-            {recipe.servings} servings
+            {servings} serving{servings !== 1 ? 's' : ''}
+            {servings !== originalServings && (
+              <span className="text-primary font-medium">(scaled)</span>
+            )}
           </span>
+        </div>
+
+        {/* F33: Serving size slider */}
+        <div className="mt-4 flex items-center gap-4 max-w-xs">
+          <span className="text-xs text-muted-foreground shrink-0">Servings:</span>
+          <Slider
+            min={1}
+            max={12}
+            step={1}
+            value={[servings]}
+            onValueChange={([v]) => setServings(v)}
+            className="flex-1"
+            aria-label="Adjust servings"
+          />
+          <span className="text-sm font-semibold text-foreground w-6 text-center shrink-0">{servings}</span>
+          {servings !== originalServings && (
+            <button
+              onClick={() => setServings(originalServings)}
+              className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+            >
+              Reset
+            </button>
+          )}
         </div>
       </div>
 
       {/* Tags (F38) */}
       <RecipeTags recipeId={recipe.id} initialTags={recipe.tags ?? []} />
+
+      {/* F51: Personal star rating */}
+      <RecipeRating recipeId={recipe.id} initialRating={recipe.rating ?? null} />
 
       {/* Actions row */}
       <div className="flex flex-wrap items-center gap-3">
@@ -231,6 +299,14 @@ export function RecipeDetailClient({ recipe, collections = [] }: Props) {
         <ul className="space-y-2">
           {recipeData.ingredients?.map((ing, i) => {
             const swapped = swappedIngredients.get(ing.name)
+            // F33: scale amount by servings ratio
+            const scaledAmount = (() => {
+              const ratio = servings / originalServings
+              if (ratio === 1) return `${ing.amount} ${ing.unit}`.trim()
+              const qty = parseQuantity(ing.amount)
+              if (qty === null) return `${ing.amount} ${ing.unit}`.trim()
+              return `${formatQuantity(qty * ratio)} ${ing.unit}`.trim()
+            })()
             return (
               <li
                 key={i}
@@ -243,7 +319,7 @@ export function RecipeDetailClient({ recipe, collections = [] }: Props) {
                   'font-medium text-sm w-20 shrink-0 text-right',
                   swapped ? 'text-muted-foreground line-through' : 'text-primary',
                 )}>
-                  {ing.amount} {ing.unit}
+                  {scaledAmount}
                 </span>
                 <span className={cn(
                   'text-foreground text-sm flex-1',

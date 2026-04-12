@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -10,10 +10,46 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
-import { X, ChefHat, Upload, Camera, Loader2, Sparkles, RefreshCw, Package, Timer, Mic, MicOff, Lock, BookOpen } from 'lucide-react'
+import {
+  X, ChefHat, Upload, Camera, Loader2, Sparkles, RefreshCw, Package, Timer,
+  Mic, MicOff, Lock, BookOpen, DollarSign, UtensilsCrossed, Flame, Heart,
+} from 'lucide-react'
 import { RecipeSuggestionCard, type RecipeSuggestion } from './recipe-suggestion-card'
 import { UsageCounter } from './usage-counter'
 import { cn } from '@/lib/utils'
+
+// F70: Chef personality options
+type ChefPersonality = 'home' | 'french' | 'street'
+const CHEF_PERSONALITIES: { id: ChefPersonality; label: string; Icon: React.ElementType; prompt: string }[] = [
+  {
+    id: 'home',
+    label: 'Home Cook',
+    Icon: UtensilsCrossed,
+    prompt: 'You are a friendly home cook. Use accessible language, common ingredients, and practical tips.',
+  },
+  {
+    id: 'french',
+    label: 'French Chef',
+    Icon: ChefHat,
+    prompt: 'You are a classically trained French chef. Use precise culinary terminology, classical techniques, and emphasize proper method.',
+  },
+  {
+    id: 'street',
+    label: 'Street Food',
+    Icon: Flame,
+    prompt: 'You are a street food vendor. Emphasize bold flavors, quick cooking, cultural authenticity, and affordable ingredients.',
+  },
+]
+
+// F32: Prep time filter options (null = no limit)
+type PrepTime = 15 | 30 | 45 | 60 | null
+const PREP_TIMES: { value: PrepTime; label: string }[] = [
+  { value: 15, label: '15 min' },
+  { value: 30, label: '30 min' },
+  { value: 45, label: '45 min' },
+  { value: 60, label: '1 hour' },
+  { value: null, label: 'No limit' },
+]
 
 interface PantryItem {
   id: string
@@ -62,6 +98,16 @@ export function KitchenPanel() {
   const [strictMode, setStrictMode] = useState(false)
   // F64: "Teach me" verbose recipe mode
   const [teachMode, setTeachMode] = useState(false)
+  // F32: prep time filter
+  const [prepTimeLimit, setPrepTimeLimit] = useState<PrepTime>(null)
+  // F53: budget mode — persist to DB
+  const [budgetMode, setBudgetMode] = useState(false)
+  // F54: "Impress Me" mode — bypasses ingredient validation
+  const [impressMeLoading, setImpressMeLoading] = useState(false)
+  // F70: chef personality — persist to DB
+  const [chefPersonality, setChefPersonality] = useState<ChefPersonality>('home')
+  // F71: Date Night 3-course mode
+  const [dateNightMode, setDateNightMode] = useState(false)
   // F55: voice input state
   const [isListening, setIsListening] = useState(false)
   const [voiceSupported, setVoiceSupported] = useState(true)
@@ -78,6 +124,20 @@ export function KitchenPanel() {
         setPantryItems(items)
         // Default: all pantry items active
         setActivePantryIds(new Set(items.map((i: PantryItem) => i.id)))
+      })
+      .catch(() => {})
+  }, [])
+
+  // F53 + F70: Load persisted kitchen preferences on mount
+  useEffect(() => {
+    fetch('/api/user/kitchen-prefs')
+      .then(r => r.ok ? r.json() : null)
+      .then((prefs: { budgetMode: boolean; chefPersonality: string } | null) => {
+        if (!prefs) return
+        setBudgetMode(prefs.budgetMode ?? false)
+        if (['home', 'french', 'street'].includes(prefs.chefPersonality)) {
+          setChefPersonality(prefs.chefPersonality as ChefPersonality)
+        }
       })
       .catch(() => {})
   }, [])
@@ -209,6 +269,14 @@ export function KitchenPanel() {
           strictMode,
           // F64: teach me mode
           teachMode,
+          // F32: prep time constraint
+          prepTimeLimit,
+          // F53: budget mode
+          budgetMode,
+          // F70: chef personality
+          chefPersonality,
+          // F71: date night mode
+          dateNightMode,
         }),
       })
 
@@ -258,7 +326,68 @@ export function KitchenPanel() {
     } finally {
       setIsGenerating(false)
     }
-  }, [allIngredients, cuisine, dietary, isGenerating, leftoverMode, leftoverText, strictMode, teachMode])
+  }, [allIngredients, cuisine, dietary, isGenerating, leftoverMode, leftoverText, strictMode, teachMode, prepTimeLimit, budgetMode, chefPersonality, dateNightMode])
+
+  // F54: "Impress Me" — bypass ingredient validation, AI chooses ingredients
+  const handleImpressMe = useCallback(async () => {
+    if (isGenerating || impressMeLoading) return
+    setImpressMeLoading(true)
+    setSuggestions([])
+    setError(null)
+
+    const personality = CHEF_PERSONALITIES.find(p => p.id === chefPersonality)
+
+    try {
+      const res = await fetch('/api/recipes/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ingredients: ['[impress-me]'], // sentinel to bypass 2-ingredient guard
+          impressMe: true,
+          chefPersonality,
+          budgetMode,
+          prepTimeLimit,
+          personalityPrompt: personality?.prompt,
+        }),
+      })
+
+      if (!res.ok) {
+        setError('Failed to generate recipes. Please try again.')
+        return
+      }
+
+      const reader = res.body!.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() ?? ''
+        for (const line of lines) {
+          const trimmed = line.trim()
+          if (!trimmed) continue
+          try {
+            const parsed = JSON.parse(trimmed)
+            if (parsed.title) setSuggestions(prev => [...prev, parsed as RecipeSuggestion])
+          } catch { /* incomplete line */ }
+        }
+      }
+      if (buffer.trim()) {
+        try {
+          const parsed = JSON.parse(buffer.trim())
+          if (parsed.title) setSuggestions(prev => [...prev, parsed as RecipeSuggestion])
+        } catch { /* ignore */ }
+      }
+    } catch (e) {
+      setError('An error occurred. Please try again.')
+      console.error(e)
+    } finally {
+      setImpressMeLoading(false)
+    }
+  }, [isGenerating, impressMeLoading, chefPersonality, budgetMode, prepTimeLimit])
 
   // Auto-generate after 600ms debounce when ≥2 ingredients (typed or pantry)
   useEffect(() => {
@@ -319,6 +448,9 @@ export function KitchenPanel() {
           leftovers: leftoverMode && leftoverText.trim() ? leftoverText.trim() : undefined,
           strictMode,
           teachMode,
+          budgetMode,
+          chefPersonality,
+          dateNightMode,
         }),
       })
 
@@ -347,6 +479,27 @@ export function KitchenPanel() {
   const handleTryAgain = () => {
     if (allIngredients().length < 2 || isGenerating) return
     generateRecipes()
+  }
+
+  // F53: Toggle budget mode and persist
+  const toggleBudgetMode = () => {
+    const next = !budgetMode
+    setBudgetMode(next)
+    fetch('/api/user/kitchen-prefs', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ budgetMode: next }),
+    }).catch(() => {})
+  }
+
+  // F70: Change chef personality and persist
+  const changeChefPersonality = (p: ChefPersonality) => {
+    setChefPersonality(p)
+    fetch('/api/user/kitchen-prefs', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chefPersonality: p }),
+    }).catch(() => {})
   }
 
   return (
@@ -538,7 +691,64 @@ export function KitchenPanel() {
               </div>
             )}
 
-            {/* F28 / F61 / F64: Generation mode toggles — grouped so they don't clutter the ingredient section */}
+            {/* F32: Prep time filter */}
+            <div className="space-y-1.5 pt-1">
+              <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                <Timer className="h-3 w-3" />
+                Time limit
+              </span>
+              <div className="flex flex-wrap gap-1">
+                {PREP_TIMES.map(({ value, label }) => (
+                  <button
+                    key={String(value)}
+                    type="button"
+                    onClick={() => setPrepTimeLimit(value)}
+                    className={cn(
+                      'rounded-full px-2.5 py-0.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                      prepTimeLimit === value
+                        ? 'bg-primary text-primary-foreground border-primary font-medium'
+                        : 'bg-muted/30 text-muted-foreground border-border hover:border-primary/40 hover:text-foreground',
+                    )}
+                    aria-pressed={prepTimeLimit === value}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              {prepTimeLimit !== null && (
+                <p className="text-[10px] text-amber-600 dark:text-amber-400">
+                  AI will target recipes completable in under {prepTimeLimit} min
+                </p>
+              )}
+            </div>
+
+            {/* F70: Chef personality */}
+            <div className="space-y-1.5 pt-1">
+              <span className="text-xs font-medium text-muted-foreground">Chef style</span>
+              <div className="flex gap-1.5">
+                {CHEF_PERSONALITIES.map(({ id, label, Icon }) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => changeChefPersonality(id)}
+                    title={label}
+                    aria-label={label}
+                    aria-pressed={chefPersonality === id}
+                    className={cn(
+                      'flex-1 flex flex-col items-center gap-1 rounded-md py-2 px-1 border text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                      chefPersonality === id
+                        ? 'bg-primary/15 border-primary text-primary font-medium'
+                        : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-primary/40',
+                    )}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    <span className="leading-none text-center">{label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* F28 / F53 / F61 / F64 / F71: Generation mode toggles */}
             <div className="space-y-1.5 pt-1">
               <span className="text-xs font-medium text-muted-foreground">Generation modes</span>
 
@@ -615,6 +825,48 @@ export function KitchenPanel() {
                   </Badge>
                 )}
               </button>
+
+              {/* F53: Budget mode */}
+              <button
+                type="button"
+                onClick={toggleBudgetMode}
+                title="Prioritize cheap, pantry-staple ingredients"
+                className={cn(
+                  'w-full flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  budgetMode
+                    ? 'bg-green-50 dark:bg-green-900/20 border-green-400/60 text-green-700 dark:text-green-400 font-medium'
+                    : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-green-400/40',
+                )}
+              >
+                <DollarSign className="h-3 w-3 shrink-0" />
+                <span className="flex-1 text-left">Budget mode</span>
+                {budgetMode && (
+                  <Badge className="bg-green-500/20 text-green-700 dark:text-green-300 text-[10px] px-1.5 py-0 border-0">
+                    ON
+                  </Badge>
+                )}
+              </button>
+
+              {/* F71: Date Night mode */}
+              <button
+                type="button"
+                onClick={() => setDateNightMode(v => !v)}
+                title="Generate a full 3-course date night menu"
+                className={cn(
+                  'w-full flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  dateNightMode
+                    ? 'bg-pink-50 dark:bg-pink-900/20 border-pink-400/60 text-pink-700 dark:text-pink-400 font-medium'
+                    : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-pink-400/40',
+                )}
+              >
+                <Heart className="h-3 w-3 shrink-0" />
+                <span className="flex-1 text-left">Date Night (3-course)</span>
+                {dateNightMode && (
+                  <Badge className="bg-pink-500/20 text-pink-700 dark:text-pink-300 text-[10px] px-1.5 py-0 border-0">
+                    ON
+                  </Badge>
+                )}
+              </button>
             </div>
 
             {/* F30: Usage counter */}
@@ -662,9 +914,30 @@ export function KitchenPanel() {
         </Tabs>
 
         <div className="p-4 border-t border-border shrink-0 space-y-2">
+          {/* Active mode badges on the generate button */}
+          {(prepTimeLimit !== null || budgetMode || dateNightMode) && (
+            <div className="flex flex-wrap gap-1">
+              {prepTimeLimit !== null && (
+                <Badge variant="outline" className="text-[10px] py-0 border-amber-400/50 text-amber-700 dark:text-amber-400">
+                  {prepTimeLimit}min limit
+                </Badge>
+              )}
+              {budgetMode && (
+                <Badge variant="outline" className="text-[10px] py-0 border-green-400/50 text-green-700 dark:text-green-400">
+                  Budget Mode
+                </Badge>
+              )}
+              {dateNightMode && (
+                <Badge variant="outline" className="text-[10px] py-0 border-pink-400/50 text-pink-700 dark:text-pink-400">
+                  Date Night
+                </Badge>
+              )}
+            </div>
+          )}
+
           <Button
             onClick={generateRecipes}
-            disabled={allIngredients().length < 2 || isGenerating}
+            disabled={allIngredients().length < 2 || isGenerating || impressMeLoading}
             className="w-full"
           >
             {isGenerating ? (
@@ -680,8 +953,23 @@ export function KitchenPanel() {
             )}
           </Button>
 
+          {/* F54: Impress Me — always visible; prominent when no ingredients, subtle otherwise */}
+          <Button
+            variant="outline"
+            onClick={handleImpressMe}
+            disabled={isGenerating || impressMeLoading}
+            className="w-full gap-2 text-sm border-primary/40 text-primary hover:bg-primary/5"
+          >
+            {impressMeLoading ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="h-3.5 w-3.5" />
+            )}
+            Impress Me
+          </Button>
+
           {/* F24: Try Again — only visible after suggestions load */}
-          {suggestions.length > 0 && !isGenerating && (
+          {suggestions.length > 0 && !isGenerating && !impressMeLoading && (
             <Button
               variant="outline"
               onClick={handleTryAgain}
@@ -719,19 +1007,19 @@ export function KitchenPanel() {
           </div>
         )}
 
-        {!isGenerating && suggestions.length === 0 && (
+        {!isGenerating && !impressMeLoading && suggestions.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center py-20">
             <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
               <ChefHat className="h-8 w-8 text-primary" />
             </div>
             <h2 className="text-xl font-semibold text-foreground mb-2">Add your ingredients</h2>
             <p className="text-muted-foreground max-w-xs">
-              Type at least 2 ingredients on the left (or snap a photo) and IngredientBot will suggest personalized recipes.
+              Type at least 2 ingredients on the left, or click &ldquo;Impress Me&rdquo; to let the AI choose.
             </p>
           </div>
         )}
 
-        {isGenerating && suggestions.length === 0 && (
+        {(isGenerating || impressMeLoading) && suggestions.length === 0 && (
           <div className="grid gap-4 sm:grid-cols-2">
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="rounded-xl border border-border bg-card p-5 space-y-3">

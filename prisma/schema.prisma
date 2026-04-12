@@ -72,16 +72,23 @@ model User {
   recipeCount        Int       @default(0) @map("recipe_count")
   monthlyResetDate   DateTime? @map("monthly_reset_date")
 
+  // F53: Budget mode preference
+  budgetMode         Boolean   @default(false) @map("budget_mode")
+
+  // F70: Chef personality preference
+  chefPersonality    String    @default("home") @map("chef_personality")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  accounts        Account[]
-  sessions        Session[]
-  recipes         Recipe[]
-  mealPlans       MealPlan[]
-  collections     RecipeCollection[]
-  dietaryProfile  DietaryProfile?
-  pantryItems     PantryItem[]
+  accounts          Account[]
+  sessions          Session[]
+  recipes           Recipe[]
+  mealPlans         MealPlan[]
+  collections       RecipeCollection[]
+  dietaryProfile    DietaryProfile?
+  pantryItems       PantryItem[]
+  recipeCompletions RecipeCompletion[]
 
   @@index([email])
   @@map("users")
@@ -141,6 +148,12 @@ model Recipe {
   cookedCount    Int       @default(0) @map("cooked_count")
   lastCookedAt   DateTime? @map("last_cooked_at")
 
+  // F51: personal star rating (1–5), nullable = unrated
+  rating         Int?      @map("rating")
+
+  // F47: recipe completions (separate model for streak tracking)
+  completions    RecipeCompletion[]
+
   // F27: public sharing via permalink
   isPublic   Boolean @default(false) @map("is_public")
   publicSlug String? @unique @map("public_slug")
@@ -153,6 +166,20 @@ model Recipe {
   @@index([userId])
   @@index([collectionId])
   @@map("recipes")
+}
+
+// F47: per-day cooking log for streak and heatmap (separate from cookedCount on Recipe)
+model RecipeCompletion {
+  id       String   @id @default(cuid())
+  userId   String   @map("user_id")
+  recipeId String   @map("recipe_id")
+  cookedAt DateTime @default(now()) @map("cooked_at")
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe   Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([userId, cookedAt(sort: Desc)])
+  @@index([recipeId])
+  @@map("recipe_completions")
 }
 
 // F39: Recipe collections/folders
