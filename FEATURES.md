@@ -44,44 +44,44 @@
 
 ## 🛠 Planned / In Progress
 
-- 🛠 F26 Expiry-first mode [Hook]
-- 🛠 F27 Recipe sharing with public permalink [Hook]
-- 🛠 F28 Leftover optimizer mode [Hook]
-- 🛠 F31 Dietary profile (persistent preferences across all generations) [Core]
-- 🛠 F32 Prep time filter [Core]
-- 🛠 F33 Serving size slider with live scaling [Core]
+- ✅ F26 Expiry-first mode [Hook]
+- ✅ F27 Recipe sharing with public permalink [Hook]
+- ✅ F28 Leftover optimizer mode [Hook]
+- ✅ F31 Dietary profile (persistent preferences across all generations) [Core]
+- ✅ F32 Prep time filter [Core]
+- ✅ F33 Serving size slider with live scaling [Core]
 - ✅ F34 Cuisine selector [Core]
 - ✅ F35 Difficulty selector [Core]
 - ✅ F42 Dark mode [Core]
-- 🛠 F43 PWA / offline saved recipes [Core]
-- 🛠 F44 Pantry inventory (persistent, tracked between sessions) [Sticky]
-- 🛠 F45 Weekly meal plan email digest [Sticky]
+- ✅ F43 PWA / offline saved recipes [Core]
+- ✅ F44 Pantry inventory (persistent, tracked between sessions) [Sticky]
+- ✅ F45 Weekly meal plan email digest [Sticky]
 - 🛠 F46 Expiration date tracking [Sticky]
-- 🛠 F47 Recipe completion history + streak [Sticky]
+- ✅ F47 Recipe completion history + streak [Sticky]
 - 🛠 F48 Nutritional summary over time (weekly/monthly) [Sticky]
 - 🛠 F49 Family profile (multi-eater with different restrictions) [Sticky]
 - 🛠 F50 Smart grocery list (missing items vs pantry state only) [Sticky]
-- 🛠 F51 Recipe rating (personal 1–5 stars) [Sticky]
+- ✅ F51 Recipe rating (personal 1–5 stars) [Sticky]
 - 🛠 F52 Referral program (extra credits) [Sticky]
-- 🛠 F53 Budget mode (prefer cheaper ingredient combos) [Sticky]
-- 🛠 F54 "Impress me" zero-input generation mode [Vibe]
-- 🛠 F55 Voice input for ingredients [Vibe]
+- ✅ F53 Budget mode (prefer cheaper ingredient combos) [Sticky]
+- ✅ F54 "Impress me" zero-input generation mode [Vibe]
+- ✅ F55 Voice input for ingredients [Vibe]
 - 🛠 F56 Leftover photo mode (snap leftovers, AI detects contents) [Vibe]
 - 🛠 F57 Recipe card PDF export [Vibe]
 - 🛠 F58 Weekly meal themes ("Taco Tuesday + Pasta Wednesday") [Vibe]
 - 🛠 F59 Macro-targeting mode (generate recipes hitting protein/carb targets) [Vibe]
 - 🛠 F60 "Make it faster" modifier (<15 min constraint) [Vibe]
-- 🛠 F61 Strictness toggle (only listed ingredients vs assume pantry staples) [Vibe]
+- ✅ F61 Strictness toggle (only listed ingredients vs assume pantry staples) [Vibe]
 - ✅ F62 Recipe URL import (paste any recipe URL, AI reformats it) [Vibe]
 - 🛠 F63 Ingredient cost estimate (rough per-serving cost, no live data) [Vibe]
-- 🛠 F64 "Teach me" verbose recipe mode (explains the why) [Vibe]
+- ✅ F64 "Teach me" verbose recipe mode (explains the why) [Vibe]
 - 🛠 F65 Cuisine trend feed (weekly "try this cuisine" suggestion) [Vibe]
 - 🛠 F66 Dietary challenge mode (7-day structured programs) [Vibe]
 - 🛠 F67 Smart pantry suggestions (proactive "you often cook X, add Y?") [Vibe]
 - 🛠 F68 Recipe complexity graph (visualize cookbook by ease/time/cuisine) [Vibe]
-- 🛠 F69 Cooking history heatmap (GitHub-style contribution graph) [Vibe]
-- 🛠 F70 AI chef personality toggle (home cook / French chef / street food vendor tone) [Vibe]
-- 🛠 F71 "Date night" mode (3-course menu from your pantry) [Vibe]
+- ✅ F69 Cooking history heatmap (GitHub-style contribution graph) [Vibe]
+- ✅ F70 AI chef personality toggle (home cook / French chef / street food vendor tone) [Vibe]
+- ✅ F71 "Date night" mode (3-course menu from your pantry) [Vibe]
 - 🛠 F72 Ingredient-to-cuisine mapper (miso + sesame oil → 8 Japanese dishes) [Vibe]
 - 🛠 F73 Recipe video script generation (AI-native future feature) [Vibe]
 
@@ -166,41 +166,45 @@ F37. **Recipe history** [Core] — Full paginated archive of every recipe a user
 
 ## Differentiators
 
-F26. **Expiry-first mode** [Hook] — Flag ingredients expiring soon and tell Claude to prioritize using them. "Spinach expires tomorrow — generate a recipe that uses it up." Emotionally resonant; reduces household food waste guilt. Requires pantry inventory (F44) with expiry dates (F46). (Feasibility: Medium — depends on F44+F46 being built first)
+F26. ✅ **Expiry-first mode** [Hook] — Flag ingredients expiring soon and tell Claude to prioritize using them. "Spinach expires tomorrow — generate a recipe that uses it up." Emotionally resonant; reduces household food waste guilt. Built: `expiresAt DateTime?` on PantryItem, PATCH /api/user/pantry/[id] to set expiry, expiry badges (🔴 ≤3d, 🟡 ≤7d) on pantry page + kitchen panel, expiry-first toggle button in kitchen panel elevates expiring items and injects context into the AI system prompt, amber nav badge on Pantry link when items are expiring within 7 days.
 
-F27. **Recipe sharing (public permalink)** [Hook] — Every saved recipe gets a public URL. Share to Twitter/Instagram/iMessage. Virality mechanism: each shared recipe is an ad for ingredientbot. No other ingredient-first AI app has a shareable recipe URL that doesn't require signup to view. (Feasibility: Low — public route + access control on recipe model)
+F27. ✅ **Recipe sharing (public permalink)** [Hook] — Every saved recipe gets a public URL. Share to Twitter/Instagram/iMessage. Virality mechanism: each shared recipe is an ad for ingredientbot. No other ingredient-first AI app has a shareable recipe URL that doesn't require signup to view. Built: `isPublic` + `publicSlug` on Recipe model, POST/DELETE `/api/recipes/[id]/share`, public `/r/[slug]` page (no auth, OG metadata), `ShareRecipeButton` component on saved recipe cards.
 
-F28. **Leftover optimizer mode** [Hook] — "I have leftover roast chicken from last night plus these pantry items — what do I make?" Explicit "leftovers" framing changes the generation prompt to prioritize using yesterday's remainder before it goes off. (Feasibility: Low — UX framing + prompt variant)
+F28. ✅ **Leftover optimizer mode** [Hook] — "I have leftover roast chicken from last night plus these pantry items — what do I make?" Explicit "leftovers" framing changes the generation prompt to prioritize using yesterday's remainder before it goes off. Built: toggle button in kitchen (orange/amber indicator when active), "What's left over?" textarea appears when enabled, `leftovers` param injected into both generate and cook AI system prompts with LEFTOVER MODE instruction.
 
-F31. **Dietary profile (persistent)** [Core] — [ENHANCE: src/components/kitchen/kitchen-panel.tsx] Store dietary restrictions, allergies, and preferences on the user account. Applied to every generation so users never have to repeat "I'm vegan" or "no nuts." Table stakes for all competitors; absence immediately alienates dietary-restricted users. Session-level dietary dropdown exists in kitchen panel but is not persisted to the User model or settings page. (Feasibility: Low — user profile field + prompt injection)
+F31. **Dietary profile (persistent)** [Core] — Store dietary restrictions, allergies, and preferences on the user account. Applied to every generation so users never have to repeat "I'm vegan" or "no nuts." Table stakes for all competitors; absence immediately alienates dietary-restricted users. Built: DietaryProfile model (restrictions[], cuisinePrefs[], dislikedIngredients[]), PATCH/GET /api/user/dietary, DietaryProfileSection on /settings, injected into both generate and cook AI system prompts.
 
-F44. **Pantry inventory (persistent)** [Sticky] — A managed list of what's in your kitchen that persists between sessions. The kitchen page pre-fills from your pantry; you add/remove items as you shop and cook. This shifts ingredientbot from a "one-off session" tool to a "daily cooking OS." (Feasibility: Medium — new Prisma model + inventory management UI)
+F42. ✅ **Dark mode** [Core] — System-aware dark/light mode via next-themes. ThemeProvider wraps the app via `src/components/providers.tsx`. ThemeToggle (Sun/Moon) sits in the nav sidebar footer and the mobile top bar. Full dark CSS variable set in globals.css (oklch dark palette). All UI components use Tailwind semantic color tokens (bg-background, text-foreground, etc.) so dark mode works without per-component overrides.
 
-F55. **Voice input for ingredients** [Vibe] — Web Speech API: tap a mic button, speak your ingredients naturally. "chicken, garlic, some leftover rice, and I think I have coconut milk." Hands-free pantry scanning is especially valuable on mobile when your hands are full. Crumb built this on mobile; we bring it to the web. (Feasibility: Low — Web Speech API, no backend change)
+F43. ✅ **PWA / offline saved recipes** [Core] — Manual service worker (public/sw.js) with three caching strategies: cache-first for /api/user/pantry and /api/recipes/* (enables offline viewing), network-first for navigation with fallback to /offline page, stale-while-revalidate for static assets. manifest.json at /public/manifest.json (name, icons, theme_color, display: standalone, start_url: /kitchen). SwRegister client component auto-registers the SW. PwaInstallPrompt component listens for `beforeinstallprompt` and shows a bottom-sheet banner. Root layout gets manifest link, theme-color meta tag, and apple-touch-icon via Next.js metadata API.
 
-F61. **Strictness toggle** [Vibe] — Two modes: Strict (only use exactly what I listed) vs. Flexible (assume user has common staples: oil, salt, pepper, garlic, onion). Solves a real frustration — users who list "chicken and vegetables" and get a recipe requiring 12 more ingredients. (Feasibility: Low — prompt variant toggle in UI)
+F44. **Pantry inventory (persistent)** [Sticky] — A managed list of what's in your kitchen that persists between sessions. The kitchen page pre-fills from your pantry; you add/remove items as you shop and cook. This shifts ingredientbot from a "one-off session" tool to a "daily cooking OS." Built: PantryItem model (userId, ingredient, addedAt), GET/POST /api/user/pantry, DELETE /api/user/pantry/[id], /pantry management page, pantry panel in kitchen with per-session toggle (include/exclude each item), pantry items merged with typed ingredients for AI generation.
 
-F64. **"Teach me" verbose recipe mode** [Vibe] — Optional mode where Claude explains the why behind each step. "Why do you sear the chicken before braising? Because..." Differentiates ingredientbot as an educational kitchen companion, not just a recipe vending machine. (Feasibility: Low — prompt modifier)
+F55. ✅ **Voice input for ingredients** [Vibe] — Web Speech API: tap a mic button, speak your ingredients naturally. "chicken, garlic, some leftover rice, and I think I have coconut milk." Hands-free pantry scanning is especially valuable on mobile when your hands are full. Crumb built this on mobile; we bring it to the web. Built: mic button next to ingredient input, `SpeechRecognition`/`webkitSpeechRecognition` with transcript appended to input, pulsing red recording indicator, graceful hidden fallback when browser unsupported.
+
+F61. ✅ **Strictness toggle** [Vibe] — Two modes: Strict (only use exactly what I listed) vs. Flexible (assume user has common staples: oil, salt, pepper, garlic, onion). Solves a real frustration — users who list "chicken and vegetables" and get a recipe requiring 12 more ingredients. Built: "Strict ingredients only" toggle in kitchen Generation modes section (purple indicator), STRICT MODE injected into both generate and cook prompts.
+
+F64. ✅ **"Teach me" verbose recipe mode** [Vibe] — Optional mode where Claude explains the why behind each step. "Why do you sear the chicken before braising? Because..." Differentiates ingredientbot as an educational kitchen companion, not just a recipe vending machine. Built: "Teach me mode" toggle in kitchen Generation modes section (blue indicator), TEACH ME MODE injected into both generate and cook prompts; cook prompt requests "Why:" annotations after each step.
 
 ---
 
 ## Growth & Retention
 
-F33. **Serving size slider** [Core] — [ENHANCE: src/components/recipe/recipe-detail-client.tsx] 1–12 servings; all ingredient quantities scale proportionally. Basic expectation of any recipe app; missing it creates daily friction. Slider UI component exists (src/components/ui/slider.tsx) and servings display is present in recipe-detail-client.tsx, but no live scaling logic is wired up. (Feasibility: Low — math on ingredient quantities, UI slider)
+✅ F33. **Serving size slider** [Core] — [ENHANCE: src/components/recipe/recipe-detail-client.tsx] 1–12 servings; all ingredient quantities scale proportionally. Basic expectation of any recipe app; missing it creates daily friction. Slider UI component exists (src/components/ui/slider.tsx) and servings display is present in recipe-detail-client.tsx, but no live scaling logic is wired up. (Feasibility: Low — math on ingredient quantities, UI slider)
 
-F45. **Weekly meal plan email digest** [Sticky] — Monday morning email summarizing the week's planned meals from the meal planner. Brings users back to the app to check or adjust. The welcome drip (F15) is already built; this is a new recurring cron. (Feasibility: Low — new cron + email template, drip infrastructure already exists)
+✅ F45. **Weekly meal plan email digest** [Sticky] — Monday morning email summarizing the week's planned meals from the meal planner. Brings users back to the app to check or adjust. The welcome drip (F15) is already built; this is a new recurring cron. (Feasibility: Low — new cron + email template, drip infrastructure already exists)
 
-F47. **Recipe completion history + streak** [Sticky] — "You've cooked 12 new recipes this month" with a streak count for consecutive days cooked. Gamified habit tracking; the GitHub contribution graph for cooking. Drives daily app opens. (Feasibility: Medium — completion tracking model + streak calculation)
+✅ F47. **Recipe completion history + streak** [Sticky] — "You've cooked 12 new recipes this month" with a streak count for consecutive days cooked. Gamified habit tracking; the GitHub contribution graph for cooking. Drives daily app opens. (Feasibility: Medium — completion tracking model + streak calculation)
 
 F48. **Nutritional summary over time** [Sticky] — Weekly and monthly roll-up of nutrition data from completed recipes in the meal planner. "This week you averaged 2,100 kcal/day." Value compounds over time — users who see their patterns stay longer. (Feasibility: Medium — requires F36 + F41 first)
 
 F49. **Family profile (multi-eater)** [Sticky] — Multiple dietary profiles in one account. "Generate one dinner that works for a vegan adult and a picky 7-year-old." The household cooking use case is underserved by every competitor except Mealime (and Mealime doesn't do AI generation). (Feasibility: Medium — user profile schema extension)
 
-F51. **Recipe rating (personal 1–5 stars)** [Sticky] — Rate saved recipes; "Your favorites" auto-surfaces top-rated recipes. Simple feedback loop that makes the cookbook more useful over time. (Feasibility: Low — rating field on Recipe model + UI)
+✅ F51. **Recipe rating (personal 1–5 stars)** [Sticky] — Rate saved recipes; "Your favorites" auto-surfaces top-rated recipes. Simple feedback loop that makes the cookbook more useful over time. (Feasibility: Low — rating field on Recipe model + UI)
 
 F52. **Referral program** [Sticky] — Share a link; both user and referee get bonus recipe credits. Standard referral loop. DishGen lets users earn credits via social shares; we do it via direct referral. Portfolio referral system pattern already established. (Feasibility: Medium — referral model already in portfolio pattern)
 
-F53. **Budget mode** [Sticky] — Prefer ingredient combinations that are cheaper at typical grocery prices. "I want to keep this meal under $8." Cost-of-living anxiety is real; this positioning resonates with budget-conscious users who cook at home to save money. (Feasibility: Low — Claude prompt modifier, no live pricing data needed for rough guidance)
+✅ F53. **Budget mode** [Sticky] — Prefer ingredient combinations that are cheaper at typical grocery prices. "I want to keep this meal under $8." Cost-of-living anxiety is real; this positioning resonates with budget-conscious users who cook at home to save money. (Feasibility: Low — Claude prompt modifier, no live pricing data needed for rough guidance)
 
 ---
 
@@ -226,13 +230,13 @@ F23. **Sitemap + robots.txt + OpenGraph image** [Core] — Static sitemap for pu
 
 ## Nice-to-Haves
 
-F32. **Prep time filter** [Core] — [ENHANCE: src/app/kitchen/page.tsx] "I have 20 minutes" constrains generation to quick recipes. Most common cooking constraint after dietary restrictions. (Feasibility: Low — prompt modifier + UI toggle)
+✅ F32. **Prep time filter** [Core] — [ENHANCE: src/app/kitchen/page.tsx] "I have 20 minutes" constrains generation to quick recipes. Most common cooking constraint after dietary restrictions. (Feasibility: Low — prompt modifier + UI toggle)
 
 ✅ F34. **Cuisine selector** [Core] — "Make it Thai / Italian / Mexican" prefix. Quick modifier that dramatically improves relevance and gives users agency over generation direction. (Feasibility: Low — prompt modifier + UI dropdown)
 
 ✅ F35. **Difficulty selector** [Core] — Beginner / Intermediate / Advanced. Beginners abandon complex recipes; this gates appropriate generation from the start. (Feasibility: Low — prompt modifier)
 
-F54. **"Impress me" zero-input mode** [Vibe] — No ingredients entered; Claude picks seasonal/interesting ingredients and generates a recipe. Curiosity-driven discovery; good for users who want inspiration rather than pantry-clearance. (Feasibility: Low — empty-pantry prompt variant)
+✅ F54. **"Impress me" zero-input mode** [Vibe] — No ingredients entered; Claude picks seasonal/interesting ingredients and generates a recipe. Curiosity-driven discovery; good for users who want inspiration rather than pantry-clearance. (Feasibility: Low — empty-pantry prompt variant)
 
 F57. **Recipe card PDF export** [Vibe] — [ENHANCE: src/components/recipe/print-recipe-view.tsx] Generate a beautifully formatted PDF of a recipe card for offline printing and sharing. A browser "Print / Save PDF" button already exists in print-recipe-view.tsx; a true PDF export (e.g. via a server-side PDF library) is not yet implemented. (Feasibility: Small — server-side PDF generation or print stylesheet polish)
 
@@ -242,11 +246,11 @@ F58. **Weekly meal themes** [Vibe] — "Taco Tuesday, Pasta Wednesday, Stir-Fry 
 
 F65. **Cuisine trend feed** [Vibe] — Weekly "try this cuisine" suggestion on the dashboard. Low-effort discovery nudge; keeps the app from feeling like a static utility. (Feasibility: Low — curated or Claude-generated weekly card)
 
-F69. **Cooking history heatmap** [Vibe] — GitHub contribution-graph style visualization of "days cooked" on the dashboard. Gamified habit tracking visual; high engagement for habitual cookers. (Feasibility: Low — date-based query on completion events + SVG grid render)
+✅ F69. **Cooking history heatmap** [Vibe] — GitHub contribution-graph style visualization of "days cooked" on the dashboard. Gamified habit tracking visual; high engagement for habitual cookers. (Feasibility: Low — date-based query on completion events + SVG grid render)
 
-F70. **AI chef personality toggle** [Vibe] — Friendly home cook / strict French chef / street food vendor. System prompt variant changes tone and vocabulary of all generated recipes. Cheap to build, high delight. (Feasibility: Low — system prompt variant selection)
+✅ F70. **AI chef personality toggle** [Vibe] — Friendly home cook / strict French chef / street food vendor. System prompt variant changes tone and vocabulary of all generated recipes. Cheap to build, high delight. (Feasibility: Low — system prompt variant selection)
 
-F71. **"Date night" 3-course mode** [Vibe] — From your pantry, generate a full 3-course menu: starter, main, dessert. A high-emotion cooking moment; great for viral sharing (F27). (Feasibility: Low — structured multi-recipe generation prompt)
+✅ F71. **"Date night" 3-course mode** [Vibe] — From your pantry, generate a full 3-course menu: starter, main, dessert. A high-emotion cooking moment; great for viral sharing (F27). (Feasibility: Low — structured multi-recipe generation prompt)
 
 ---
 

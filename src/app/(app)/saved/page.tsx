@@ -22,6 +22,9 @@ export default async function SavedPage() {
       cookTimeMin: true,
       servings: true,
       createdAt: true,
+      isPublic: true,
+      publicSlug: true,
+      rating: true,  // F51
     }
   })
 

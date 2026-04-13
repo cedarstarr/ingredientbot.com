@@ -96,4 +96,36 @@ test.describe('Authenticated pages', () => {
       /404|not found/i.test(body ?? '')
     expect(isNotFound).toBe(true)
   })
+
+  test('/pantry loads without 500 error and shows Pantry heading', async ({ page }) => {
+    await loginAsTestUser(page)
+    await page.goto('/pantry')
+    await page.waitForLoadState('domcontentloaded')
+    expect(page.url()).not.toContain('login')
+    await expect(page.locator('h1').first()).toBeVisible()
+  })
+
+  test('/history loads without 500 error and shows a heading', async ({ page }) => {
+    await loginAsTestUser(page)
+    await page.goto('/history')
+    await page.waitForLoadState('domcontentloaded')
+    expect(page.url()).not.toContain('login')
+    await expect(page.locator('h1').first()).toBeVisible()
+  })
+
+  test('/collections loads without 500 error and shows a heading', async ({ page }) => {
+    await loginAsTestUser(page)
+    await page.goto('/collections')
+    await page.waitForLoadState('domcontentloaded')
+    expect(page.url()).not.toContain('login')
+    await expect(page.locator('h1').first()).toBeVisible()
+  })
+
+  test('/upgrade loads without 500 error', async ({ page }) => {
+    await loginAsTestUser(page)
+    await page.goto('/upgrade')
+    await page.waitForLoadState('domcontentloaded')
+    expect(page.url()).not.toContain('login')
+    await expect(page.locator('body')).toBeVisible()
+  })
 })

@@ -72,14 +72,23 @@ model User {
   recipeCount        Int       @default(0) @map("recipe_count")
   monthlyResetDate   DateTime? @map("monthly_reset_date")
 
+  // F53: Budget mode preference
+  budgetMode         Boolean   @default(false) @map("budget_mode")
+
+  // F70: Chef personality preference
+  chefPersonality    String    @default("home") @map("chef_personality")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  accounts     Account[]
-  sessions     Session[]
-  recipes      Recipe[]
-  mealPlans    MealPlan[]
-  collections  RecipeCollection[]
+  accounts          Account[]
+  sessions          Session[]
+  recipes           Recipe[]
+  mealPlans         MealPlan[]
+  collections       RecipeCollection[]
+  dietaryProfile    DietaryProfile?
+  pantryItems       PantryItem[]
+  recipeCompletions RecipeCompletion[]
 
   @@index([email])
   @@map("users")
@@ -139,6 +148,16 @@ model Recipe {
   cookedCount    Int       @default(0) @map("cooked_count")
   lastCookedAt   DateTime? @map("last_cooked_at")
 
+  // F51: personal star rating (1–5), nullable = unrated
+  rating         Int?      @map("rating")
+
+  // F47: recipe completions (separate model for streak tracking)
+  completions    RecipeCompletion[]
+
+  // F27: public sharing via permalink
+  isPublic   Boolean @default(false) @map("is_public")
+  publicSlug String? @unique @map("public_slug")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -147,6 +166,20 @@ model Recipe {
   @@index([userId])
   @@index([collectionId])
   @@map("recipes")
+}
+
+// F47: per-day cooking log for streak and heatmap (separate from cookedCount on Recipe)
+model RecipeCompletion {
+  id       String   @id @default(cuid())
+  userId   String   @map("user_id")
+  recipeId String   @map("recipe_id")
+  cookedAt DateTime @default(now()) @map("cooked_at")
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe   Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([userId, cookedAt(sort: Desc)])
+  @@index([recipeId])
+  @@map("recipe_completions")
 }
 
 // F39: Recipe collections/folders
@@ -222,4 +255,35 @@ model AdminScriptLog {
 
   @@index([scriptName, ranAt(sort: Desc)])
   @@map("admin_script_logs")
+}
+
+// F31: Dietary profile — persisted per user, injected into every AI generation
+model DietaryProfile {
+  id                  String   @id @default(cuid())
+  userId              String   @unique @map("user_id")
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // JSON arrays stored as String[] for Postgres native array support
+  restrictions        String[] @default([]) // e.g. ["vegan", "gluten-free", "nut-allergy"]
+  cuisinePrefs        String[] @default([]) @map("cuisine_prefs") // e.g. ["Italian", "Asian"]
+  dislikedIngredients String[] @default([]) @map("disliked_ingredients")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("dietary_profiles")
+}
+
+// F44: Pantry inventory — persistent ingredient list tracked between sessions
+// F26: expiresAt added for expiry-first mode
+model PantryItem {
+  id         String    @id @default(cuid())
+  userId     String    @map("user_id")
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ingredient String
+  addedAt    DateTime  @default(now()) @map("added_at")
+  expiresAt  DateTime? @map("expires_at") // nullable — not all items have an expiry date
+
+  @@unique([userId, ingredient]) // prevent duplicate entries per user
+  @@index([userId])
+  @@map("pantry_items")
 }

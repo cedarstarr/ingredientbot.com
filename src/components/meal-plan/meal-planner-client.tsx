@@ -269,12 +269,13 @@ export function MealPlannerClient({
                     ) : (
                       <button
                         onClick={() => openPicker(day, meal)}
-                        disabled={!!isLoading || savedRecipes.length === 0}
+                        disabled={!!isLoading}
                         className={cn(
                           'flex h-full w-full items-center justify-center rounded-md',
                           'text-muted-foreground hover:text-primary hover:bg-primary/5',
                           'transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
                           'disabled:opacity-40 disabled:cursor-not-allowed',
+                          savedRecipes.length === 0 && 'opacity-40',
                         )}
                         aria-label="Add recipe"
                       >

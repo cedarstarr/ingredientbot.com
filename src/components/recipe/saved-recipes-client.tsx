@@ -12,9 +12,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { ChefHat, BookOpen, Clock, ArrowRight, Search, X } from 'lucide-react'
+import { ChefHat, BookOpen, Clock, ArrowRight, Search, X, Star } from 'lucide-react'
 import { DeleteRecipeButton } from '@/components/recipe/delete-recipe-button'
+import { ShareRecipeButton } from '@/components/recipe/share-recipe-button'
 import { formatDate } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 
 interface SavedRecipe {
   id: string
@@ -26,6 +28,9 @@ interface SavedRecipe {
   cookTimeMin?: number | null
   servings: number
   createdAt: Date
+  isPublic: boolean
+  publicSlug?: string | null
+  rating?: number | null  // F51
 }
 
 interface SavedRecipesClientProps {
@@ -39,6 +44,8 @@ export function SavedRecipesClient({ recipes }: SavedRecipesClientProps) {
   const [search, setSearch] = useState('')
   const [cuisine, setCuisine] = useState('Any')
   const [difficulty, setDifficulty] = useState('Any')
+  // F51: Favorites filter — only show recipes rated 4 or 5 stars
+  const [favoritesOnly, setFavoritesOnly] = useState(false)
 
   const filtered = useMemo(() => {
     return recipes.filter(r => {
@@ -50,16 +57,18 @@ export function SavedRecipesClient({ recipes }: SavedRecipesClientProps) {
       const matchesDifficulty =
         difficulty === 'Any' ||
         (r.difficulty?.toLowerCase() === difficulty.toLowerCase())
-      return matchesSearch && matchesCuisine && matchesDifficulty
+      const matchesFavorites = !favoritesOnly || (r.rating !== null && r.rating !== undefined && r.rating >= 4)
+      return matchesSearch && matchesCuisine && matchesDifficulty && matchesFavorites
     })
-  }, [recipes, search, cuisine, difficulty])
+  }, [recipes, search, cuisine, difficulty, favoritesOnly])
 
-  const hasFilters = search !== '' || cuisine !== 'Any' || difficulty !== 'Any'
+  const hasFilters = search !== '' || cuisine !== 'Any' || difficulty !== 'Any' || favoritesOnly
 
   const clearFilters = () => {
     setSearch('')
     setCuisine('Any')
     setDifficulty('Any')
+    setFavoritesOnly(false)
   }
 
   return (
@@ -68,8 +77,8 @@ export function SavedRecipesClient({ recipes }: SavedRecipesClientProps) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <BookOpen className="h-6 w-6 text-primary" />
-            Saved Recipes
+            <BookOpen className="h-6 w-6 text-primary" aria-hidden="true" />
+            <span>Saved Recipes</span>
           </h1>
           <p className="text-muted-foreground mt-1">
             {recipes.length} recipe{recipes.length !== 1 ? 's' : ''} saved
@@ -115,6 +124,17 @@ export function SavedRecipesClient({ recipes }: SavedRecipesClientProps) {
               ))}
             </SelectContent>
           </Select>
+          {/* F51: Favorites filter — show only 4–5 star recipes */}
+          <Button
+            variant={favoritesOnly ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setFavoritesOnly(v => !v)}
+            className="gap-1.5"
+            aria-pressed={favoritesOnly}
+          >
+            <Star className={cn('h-3.5 w-3.5', favoritesOnly && 'fill-current')} />
+            Favorites
+          </Button>
           {hasFilters && (
             <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-1.5 text-muted-foreground">
               <X className="h-3.5 w-3.5" />
@@ -159,8 +179,31 @@ export function SavedRecipesClient({ recipes }: SavedRecipesClientProps) {
                 className="rounded-xl border border-border bg-card p-5 hover:border-primary/30 hover:shadow-sm transition-all duration-200"
               >
                 <div className="flex items-start justify-between gap-2 mb-2">
-                  <h3 className="font-semibold text-foreground leading-tight">{recipe.title}</h3>
-                  <DeleteRecipeButton id={recipe.id} />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-foreground leading-tight">{recipe.title}</h3>
+                    {/* F51: star rating display */}
+                    {recipe.rating !== null && recipe.rating !== undefined && (
+                      <div className="flex items-center gap-0.5 mt-1" aria-label={`Rated ${recipe.rating} out of 5 stars`}>
+                        {[1, 2, 3, 4, 5].map(s => (
+                          <Star
+                            key={s}
+                            className={cn(
+                              'h-3.5 w-3.5',
+                              s <= recipe.rating! ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/30',
+                            )}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <ShareRecipeButton
+                      recipeId={recipe.id}
+                      initialIsPublic={recipe.isPublic}
+                      initialSlug={recipe.publicSlug}
+                    />
+                    <DeleteRecipeButton id={recipe.id} />
+                  </div>
                 </div>
                 {recipe.description && (
                   <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{recipe.description}</p>

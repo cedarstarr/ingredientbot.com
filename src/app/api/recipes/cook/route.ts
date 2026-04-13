@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'AI service not configured' }, { status: 503 })
   }
 
-  const { suggestion, ingredients } = await req.json()
+  const { suggestion, ingredients, strictMode, teachMode, leftovers, budgetMode, chefPersonality, dateNightMode } = await req.json()
   if (!suggestion?.title) {
     return Response.json({ error: 'Invalid suggestion' }, { status: 400 })
   }
@@ -38,7 +38,6 @@ export async function POST(req: NextRequest) {
   if (!user.isPro) {
     const monthStart = startOfCurrentMonth()
     const needsReset = !user.monthlyResetDate || user.monthlyResetDate < monthStart
-
     const currentCount = needsReset ? 0 : user.recipeCount
 
     if (currentCount >= FREE_TIER_LIMIT) {
@@ -48,6 +47,54 @@ export async function POST(req: NextRequest) {
       )
     }
   }
+
+  // F31: Load dietary profile for AI system prompt injection
+  const dietaryProfile = await prisma.dietaryProfile.findUnique({
+    where: { userId: session.user.id },
+    select: { restrictions: true, cuisinePrefs: true, dislikedIngredients: true },
+  })
+
+  // F31: Build persistent profile context
+  const profileLines: string[] = []
+  if (dietaryProfile?.restrictions?.length) {
+    profileLines.push(`User dietary restrictions (always apply): ${dietaryProfile.restrictions.join(', ')}.`)
+  }
+  if (dietaryProfile?.dislikedIngredients?.length) {
+    profileLines.push(`User dislikes these ingredients (avoid): ${dietaryProfile.dislikedIngredients.join(', ')}.`)
+  }
+  const profileContext = profileLines.length ? `\n\nUser profile:\n${profileLines.join('\n')}` : ''
+
+  // F61: strict mode — only use explicitly listed ingredients
+  const strictContext = strictMode
+    ? `\n\nSTRICT MODE: Use ONLY the listed ingredients. Do not assume the user has oil, salt, butter, garlic, onion, or any other pantry staples unless explicitly listed.`
+    : ''
+
+  // F64: teach me mode — verbose step-by-step explanations
+  const teachContext = teachMode
+    ? `\n\nTEACH ME MODE: After each step in the "steps" array, append a brief "Why:" explanation explaining the cooking science or technique. Format: "Do X. Why: This helps Y because Z." Also explain each ingredient's role briefly in the notes field.`
+    : ''
+
+  // F28: leftover mode context
+  const leftoverContext = leftovers
+    ? `\n\nLEFTOVER MODE: These leftovers must feature as the star ingredients: ${leftovers}. Incorporate them prominently to minimize waste.`
+    : ''
+
+  // F53: budget mode
+  const budgetContext = budgetMode
+    ? `\n\nBUDGET MODE: Prioritize cheap ingredients. Avoid expensive proteins. Prefer beans, lentils, eggs, chicken thighs, frozen veg, pantry staples under $2/serving.`
+    : ''
+
+  // F70: chef personality
+  const personalityContext = chefPersonality === 'french'
+    ? `\n\nYou are a classically trained French chef. Use precise culinary terminology, classical techniques, and emphasize proper method.`
+    : chefPersonality === 'street'
+      ? `\n\nYou are a street food vendor. Emphasize bold flavors, quick cooking, cultural authenticity, and affordable ingredients.`
+      : ''
+
+  // F71: date night 3-course mode
+  const dateNightContext = dateNightMode
+    ? `\n\nDATE NIGHT MODE: This is a Date Night recipe. Make it romantic, impressive, and special. Use elegant plating suggestions in the notes.`
+    : ''
 
   const anthropic = new Anthropic({ apiKey })
 
@@ -68,7 +115,7 @@ Schema:
   "steps": [string],
   "notes": string,
   "nutrition": {"calories": number, "protein": number, "fat": number, "carbs": number, "fiber": number}
-}`,
+}${personalityContext}${profileContext}${strictContext}${teachContext}${leftoverContext}${budgetContext}${dateNightContext}`,
     messages: [{
       role: 'user',
       content: `Generate a full recipe for "${suggestion.title}". Description: ${suggestion.description}. Main ingredients available: ${ingredients.join(', ')}. Target servings: ${suggestion.servings || 4}.`

@@ -21,7 +21,8 @@ function escapeHtml(str: string): string {
     .replace(/'/g, '&#39;')
 }
 
-async function sendEmail(opts: { to: string; subject: string; html: string }) {
+// exported for internal cron routes that need to send custom HTML emails
+export async function sendEmail(opts: { to: string; subject: string; html: string }) {
   const client = getMailClient()
   if (!client) {
     console.log('[email] ZeptoMail not configured, logging email:')

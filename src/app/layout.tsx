@@ -6,6 +6,8 @@ import { Providers } from '@/components/providers'
 import { Toaster } from '@/components/ui/toaster'
 import PlausibleProvider from 'next-plausible'
 import { CookieBanner } from '@/components/cookie-banner'
+import { SwRegister } from '@/components/sw-register'
+import { PwaInstallPrompt } from '@/components/pwa-install-prompt'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
@@ -23,6 +25,13 @@ export const metadata: Metadata = {
     title: 'IngredientBot — AI Recipe Assistant',
     description: 'Tell it what\'s in your fridge. Get instant recipe ideas powered by Claude AI.',
   },
+  // F43: PWA manifest
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Robot Food',
+  },
 }
 
 const EU_COUNTRIES = new Set([
@@ -39,6 +48,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* F43: PWA theme color */}
+        <meta name="theme-color" content="#c2613c" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+      </head>
       <body className={`${inter.variable} font-sans antialiased`}>
         <PlausibleProvider
           domain={process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN ?? 'ingredientbot.com'}
@@ -52,6 +66,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </Providers>
         </PlausibleProvider>
         <CookieBanner showBanner={isEU && !consent} />
+        {/* F43: PWA service worker registration + install prompt */}
+        <SwRegister />
+        <PwaInstallPrompt />
       </body>
     </html>
   )
