@@ -32,8 +32,10 @@ test.describe('Dashboard page', () => {
   })
 
   test('"Go to Kitchen" link navigates to /kitchen', async ({ page }) => {
-    await page.getByRole('link', { name: /go to kitchen/i }).click()
-    await page.waitForLoadState('domcontentloaded')
+    await Promise.all([
+      page.waitForURL(/\/kitchen/),
+      page.getByRole('link', { name: /go to kitchen/i }).click(),
+    ])
     expect(page.url()).toContain('/kitchen')
   })
 })

@@ -41,10 +41,13 @@ test.describe('Recipe History page', () => {
     expect(body).toMatch(/cooked/i)
   })
 
-  test('unauthenticated user is redirected to /login', async ({ page: unauthPage }) => {
-    await unauthPage.goto('/history')
+  test('unauthenticated user is redirected to /login', async ({ browser }) => {
+    const ctx = await browser.newContext()
+    const unauthPage = await ctx.newPage()
+    await unauthPage.goto('http://localhost:3010/history')
     await unauthPage.waitForLoadState('domcontentloaded')
     expect(unauthPage.url()).toContain('/login')
+    await ctx.close()
   })
 
   test('search filters recipes by term', async ({ page }) => {

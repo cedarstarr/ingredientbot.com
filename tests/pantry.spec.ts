@@ -40,10 +40,13 @@ test.describe('Pantry page', () => {
     expect(body).toMatch(/test-pantry-avocado/i)
   })
 
-  test('unauthenticated user is redirected to /login', async ({ page: unauthPage }) => {
-    await unauthPage.goto('/pantry')
+  test('unauthenticated user is redirected to /login', async ({ browser }) => {
+    const ctx = await browser.newContext()
+    const unauthPage = await ctx.newPage()
+    await unauthPage.goto('http://localhost:3010/pantry')
     await unauthPage.waitForLoadState('domcontentloaded')
     expect(unauthPage.url()).toContain('/login')
+    await ctx.close()
   })
 })
 

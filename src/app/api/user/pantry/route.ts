@@ -36,5 +36,5 @@ export async function POST(req: NextRequest) {
     select: { id: true, ingredient: true, addedAt: true, expiresAt: true },
   })
 
-  return Response.json(item, { status: 201 })
+  return Response.json(item)
 }

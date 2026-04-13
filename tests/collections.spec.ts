@@ -34,10 +34,13 @@ test.describe('Collections page', () => {
     expect(hasEmpty || hasCollection >= 0).toBe(true) // page loaded cleanly
   })
 
-  test('unauthenticated user is redirected to /login', async ({ page: unauthPage }) => {
-    await unauthPage.goto('/collections')
+  test('unauthenticated user is redirected to /login', async ({ browser }) => {
+    const ctx = await browser.newContext()
+    const unauthPage = await ctx.newPage()
+    await unauthPage.goto('http://localhost:3010/collections')
     await unauthPage.waitForLoadState('domcontentloaded')
     expect(unauthPage.url()).toContain('/login')
+    await ctx.close()
   })
 })
 

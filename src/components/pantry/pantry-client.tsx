@@ -166,18 +166,9 @@ export function PantryClient() {
   // F26: count items expiring within 7 days for the info banner
   const expiringCount = items.filter(i => i.expiresAt && expiryUrgency(i.expiresAt) !== null).length
 
-  if (loading) {
-    return (
-      <div className="flex items-center gap-2 text-muted-foreground text-sm py-8">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        Loading pantry...
-      </div>
-    )
-  }
-
   return (
     <div className="space-y-5">
-      {/* Add ingredient input */}
+      {/* Add ingredient input — always rendered so it's immediately interactive */}
       <div className="rounded-lg border border-border bg-card p-4 space-y-3">
         <h2 className="text-sm font-medium text-foreground">Add to Pantry</h2>
         <div className="flex gap-2">
@@ -234,7 +225,12 @@ export function PantryClient() {
       )}
 
       {/* Pantry items list */}
-      {items.length === 0 ? (
+      {loading ? (
+        <div className="flex items-center gap-2 text-muted-foreground text-sm py-8">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Loading pantry...
+        </div>
+      ) : items.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border bg-muted/20 p-10 text-center space-y-2">
           <Package className="h-8 w-8 text-muted-foreground mx-auto" />
           <p className="text-sm font-medium text-foreground">Your pantry is empty</p>

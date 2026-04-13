@@ -77,8 +77,8 @@ export function SavedRecipesClient({ recipes }: SavedRecipesClientProps) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <BookOpen className="h-6 w-6 text-primary" />
-            Saved Recipes
+            <BookOpen className="h-6 w-6 text-primary" aria-hidden="true" />
+            <span>Saved Recipes</span>
           </h1>
           <p className="text-muted-foreground mt-1">
             {recipes.length} recipe{recipes.length !== 1 ? 's' : ''} saved

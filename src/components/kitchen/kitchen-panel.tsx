@@ -582,36 +582,42 @@ export function KitchenPanel() {
 
             {/* Filters */}
             <div className="space-y-2 pt-1">
-              <Select value={cuisine} onValueChange={setCuisine}>
-                <SelectTrigger className="w-full text-sm">
-                  <SelectValue placeholder="Any cuisine" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="any">Any cuisine</SelectItem>
-                  <SelectItem value="Italian">Italian</SelectItem>
-                  <SelectItem value="Asian">Asian</SelectItem>
-                  <SelectItem value="Mexican">Mexican</SelectItem>
-                  <SelectItem value="Mediterranean">Mediterranean</SelectItem>
-                  <SelectItem value="American">American</SelectItem>
-                  <SelectItem value="Indian">Indian</SelectItem>
-                  <SelectItem value="French">French</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Cuisine</label>
+                <Select value={cuisine} onValueChange={setCuisine}>
+                  <SelectTrigger className="w-full text-sm">
+                    <SelectValue placeholder="Any cuisine" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any cuisine</SelectItem>
+                    <SelectItem value="Italian">Italian</SelectItem>
+                    <SelectItem value="Asian">Asian</SelectItem>
+                    <SelectItem value="Mexican">Mexican</SelectItem>
+                    <SelectItem value="Mediterranean">Mediterranean</SelectItem>
+                    <SelectItem value="American">American</SelectItem>
+                    <SelectItem value="Indian">Indian</SelectItem>
+                    <SelectItem value="French">French</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-              <Select value={dietary} onValueChange={setDietary}>
-                <SelectTrigger className="w-full text-sm">
-                  <SelectValue placeholder="No dietary restrictions" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="any">No restrictions</SelectItem>
-                  <SelectItem value="vegetarian">Vegetarian</SelectItem>
-                  <SelectItem value="vegan">Vegan</SelectItem>
-                  <SelectItem value="gluten-free">Gluten-free</SelectItem>
-                  <SelectItem value="dairy-free">Dairy-free</SelectItem>
-                  <SelectItem value="low-carb">Low-carb</SelectItem>
-                  <SelectItem value="keto">Keto</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Dietary restrictions</label>
+                <Select value={dietary} onValueChange={setDietary}>
+                  <SelectTrigger className="w-full text-sm">
+                    <SelectValue placeholder="No dietary restrictions" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">No restrictions</SelectItem>
+                    <SelectItem value="vegetarian">Vegetarian</SelectItem>
+                    <SelectItem value="vegan">Vegan</SelectItem>
+                    <SelectItem value="gluten-free">Gluten-free</SelectItem>
+                    <SelectItem value="dairy-free">Dairy-free</SelectItem>
+                    <SelectItem value="low-carb">Low-carb</SelectItem>
+                    <SelectItem value="keto">Keto</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {/* F44: Pantry section — show active pantry items with toggle */}

@@ -92,8 +92,8 @@ export function CollectionsClient({ collections: initial }: CollectionsClientPro
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <FolderOpen className="h-6 w-6 text-primary" />
-            Collections
+            <FolderOpen className="h-6 w-6 text-primary" aria-hidden="true" />
+            <span>Collections</span>
           </h1>
           <p className="text-muted-foreground mt-1">
             Organise your recipes into folders

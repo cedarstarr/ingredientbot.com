@@ -110,37 +110,33 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* F47: Cooking stats row */}
-      {(completionsThisMonth > 0 || currentStreak > 0) && (
-        <div className="grid gap-4 sm:grid-cols-3">
-          <div className="rounded-xl border border-border bg-card p-5">
-            <p className="text-xs text-muted-foreground mb-1">Recipes cooked this month</p>
-            <p className="text-3xl font-bold text-foreground">{completionsThisMonth}</p>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-5">
-            <div className="flex items-center gap-2 mb-1">
-              <Flame className="h-4 w-4 text-orange-500" />
-              <p className="text-xs text-muted-foreground">Current cooking streak</p>
-            </div>
-            <p className="text-3xl font-bold text-foreground">
-              {currentStreak}
-              <span className="text-base font-normal text-muted-foreground ml-1">day{currentStreak !== 1 ? 's' : ''}</span>
-            </p>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-5">
-            <p className="text-xs text-muted-foreground mb-1">Longest streak ever</p>
-            <p className="text-3xl font-bold text-foreground">
-              {longestStreak}
-              <span className="text-base font-normal text-muted-foreground ml-1">day{longestStreak !== 1 ? 's' : ''}</span>
-            </p>
-          </div>
+      {/* F47: Cooking stats row — always shown (values are 0 until user starts cooking) */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="rounded-xl border border-border bg-card p-5">
+          <p className="text-xs text-muted-foreground mb-1">Recipes cooked this month</p>
+          <p className="text-3xl font-bold text-foreground">{completionsThisMonth}</p>
         </div>
-      )}
+        <div className="rounded-xl border border-border bg-card p-5">
+          <div className="flex items-center gap-2 mb-1">
+            <Flame className="h-4 w-4 text-orange-500" />
+            <p className="text-xs text-muted-foreground">Current cooking streak</p>
+          </div>
+          <p className="text-3xl font-bold text-foreground">
+            {currentStreak}
+            <span className="text-base font-normal text-muted-foreground ml-1">day{currentStreak !== 1 ? 's' : ''} streak</span>
+          </p>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-5">
+          <p className="text-xs text-muted-foreground mb-1">Longest streak ever</p>
+          <p className="text-3xl font-bold text-foreground">
+            {longestStreak}
+            <span className="text-base font-normal text-muted-foreground ml-1">day{longestStreak !== 1 ? 's' : ''}</span>
+          </p>
+        </div>
+      </div>
 
-      {/* F47: 12-week cooking heatmap */}
-      {allCompletions.length > 0 && (
-        <CookingHeatmap heatmapCounts={heatmapCounts} startDate={heatmapStart.toISOString()} />
-      )}
+      {/* F47: 12-week cooking heatmap — always shown, cells are empty until user starts cooking */}
+      <CookingHeatmap heatmapCounts={heatmapCounts} startDate={heatmapStart.toISOString()} />
 
       {/* Quick actions */}
       <div className="grid gap-4 sm:grid-cols-2">

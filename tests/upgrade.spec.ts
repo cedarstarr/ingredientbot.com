@@ -35,10 +35,13 @@ test.describe('Upgrade page (F30)', () => {
     expect(body).toMatch(/pro|upgrade/i)
   })
 
-  test('unauthenticated user is redirected to /login', async ({ page: unauthPage }) => {
-    await unauthPage.goto('/upgrade')
+  test('unauthenticated user is redirected to /login', async ({ browser }) => {
+    const ctx = await browser.newContext()
+    const unauthPage = await ctx.newPage()
+    await unauthPage.goto('http://localhost:3010/upgrade')
     await unauthPage.waitForLoadState('domcontentloaded')
     expect(unauthPage.url()).toContain('/login')
+    await ctx.close()
   })
 })
 
