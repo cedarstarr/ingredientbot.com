@@ -19,7 +19,7 @@
 | 5 | Feature Install | /site-install | DONE | 1 | 2026-04-10 00:00 | [view](reports/2026-04-10-site-install.md) |
 | 6 | Write Tests | /qa-tests-reconcile | DONE | 1 | 2026-04-11 | [view](reports/2026-04-11-tests-reconcile.md) |
 | 7 | Verify Build | /qa-tests-fix | PENDING | 0 | — | — |
-| 8 | Database Review | /qa-db | PENDING | 0 | — | — |
+| 8 | Database Review | /qa-db | DONE | 1 | 2026-04-14 | [view](reports/2026-04-14-site-db.md) |
 | 9 | QA / Bug Check | /qa-bugs | PENDING | 0 | — | — |
 | 10 | Security Hardening | /qa-security | PENDING | 0 | — | — |
 | 11 | UX/UI Pass | /qa-design | PENDING | 0 | — | — |
@@ -31,9 +31,9 @@
 | 17 | Client Update | /ops-client-report | PENDING | 0 | — | — |
 | 18 | Launch | /ops-launch | PENDING | 0 | — | — |
 
-**Progress: 6/18 stages complete**
+**Progress: 7/18 stages complete**
 
-**Last Updated**: 2026-04-11 (tests-reconcile complete)
+**Last Updated**: 2026-04-14 (qa-db complete)
 
 ---
 
@@ -59,3 +59,4 @@
 | 2026-04-11 | manual install | ~30 min | SUCCESS | F31 Dietary Profile + F44 Pantry Inventory built; 2 new Prisma models, 3 API route groups, /pantry page, kitchen panel integration |
 | 2026-04-11 | manual install | ~45 min | SUCCESS | F42 Dark Mode confirmed + polished, F43 PWA/Offline (manual sw.js, manifest.json, SwRegister, PwaInstallPrompt, /offline page), F26 Expiry-first mode (expiresAt field on PantryItem, migration deployed, expiry badges in pantry UI, expiry-first toggle in kitchen, amber nav badge, AI system prompt injection) |
 | 2026-04-11 | /qa-tests-reconcile | ~8m | SUCCESS | new tests written, stale tests fixed, build clean |
+| 2026-04-14 | /qa-db | — | SUCCESS | 9 issues found, 7 fixed (3 HIGH, 4 MEDIUM fixed; 2 LOW flagged only) |
