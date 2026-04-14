@@ -3,8 +3,16 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import Anthropic from '@anthropic-ai/sdk'
 import { aiLimiter } from '@/lib/rate-limit'
+import { Difficulty } from '@prisma/client'
 
 export const maxDuration = 60
+
+const FREE_TIER_LIMIT = 5
+
+function startOfCurrentMonth(): Date {
+  const now = new Date()
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
+}
 
 function isValidUrl(str: string): boolean {
   try {
@@ -28,6 +36,22 @@ export async function POST(req: NextRequest) {
 
   // Save mode: persist a previously extracted recipe
   if (save && body.recipeData) {
+    // F30: Apply the same freemium gate as recipe generation — imports count toward the monthly limit
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { isPro: true, recipeCount: true, monthlyResetDate: true },
+    })
+    if (!user) return Response.json({ error: 'User not found' }, { status: 404 })
+
+    if (!user.isPro) {
+      const monthStart = startOfCurrentMonth()
+      const needsReset = !user.monthlyResetDate || user.monthlyResetDate < monthStart
+      const currentCount = needsReset ? 0 : user.recipeCount
+      if (currentCount >= FREE_TIER_LIMIT) {
+        return Response.json({ error: 'limit_reached', limit: FREE_TIER_LIMIT }, { status: 402 })
+      }
+    }
+
     const rd = body.recipeData as {
       title: string
       description?: string
@@ -53,22 +77,34 @@ export async function POST(req: NextRequest) {
       rd.notes ? `\n## Notes\n${rd.notes}` : '',
     ].join('\n')
 
-    const recipe = await prisma.recipe.create({
-      data: {
-        userId: session.user.id,
-        title: rd.title,
-        description: rd.description ?? null,
-        servings: rd.servings ?? 4,
-        prepTimeMin: rd.prepTimeMin ?? null,
-        cookTimeMin: rd.cookTimeMin ?? null,
-        cuisine: rd.cuisine ?? null,
-        difficulty: rd.difficulty ?? null,
-        sourceIngredients: (rd.ingredients ?? []).map((i) => i.name),
-        recipeData: JSON.parse(JSON.stringify(rd)),
-        rawText,
-        nutrition: rd.nutrition ?? undefined,
-      },
-    })
+    const monthStart = startOfCurrentMonth()
+    const needsReset = !user.monthlyResetDate || user.monthlyResetDate < monthStart
+
+    const [recipe] = await prisma.$transaction([
+      prisma.recipe.create({
+        data: {
+          userId: session.user.id,
+          title: rd.title,
+          description: rd.description ?? null,
+          servings: rd.servings ?? 4,
+          prepTimeMin: rd.prepTimeMin ?? null,
+          cookTimeMin: rd.cookTimeMin ?? null,
+          cuisine: rd.cuisine ?? null,
+          difficulty: (rd.difficulty ?? null) as Difficulty | null,
+          sourceIngredients: (rd.ingredients ?? []).map((i) => i.name),
+          recipeData: JSON.parse(JSON.stringify(rd)),
+          rawText,
+          nutrition: rd.nutrition ?? undefined,
+        },
+      }),
+      prisma.user.update({
+        where: { id: session.user.id },
+        data: {
+          recipeCount: needsReset ? 1 : { increment: 1 },
+          monthlyResetDate: needsReset ? monthStart : undefined,
+        },
+      }),
+    ])
 
     return Response.json({ id: recipe.id })
   }

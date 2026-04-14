@@ -8,7 +8,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const { id } = await params
   const recipe = await prisma.recipe.findFirst({
-    where: { id, userId: session.user.id }
+    where: { id, userId: session.user.id },
+    select: {
+      id: true, title: true, description: true, cuisine: true, difficulty: true,
+      servings: true, prepTimeMin: true, cookTimeMin: true, tags: true,
+      rating: true, isPublic: true, publicSlug: true, cookedCount: true,
+      lastCookedAt: true, collectionId: true, createdAt: true, updatedAt: true,
+    },
   })
 
   if (!recipe) return NextResponse.json({ error: 'Not found' }, { status: 404 })
@@ -21,14 +27,18 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   const { id } = await params
   const recipe = await prisma.recipe.findFirst({
-    where: { id, userId: session.user.id }
+    where: { id, userId: session.user.id },
+    select: { id: true },
   })
   if (!recipe) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   const body = await req.json()
+  // Allowlist editable fields — prevents arbitrary column writes via PATCH body injection
+  const { rating } = body
   const updated = await prisma.recipe.update({
     where: { id },
-    data: body
+    data: { ...(rating !== undefined && { rating }) },
+    select: { id: true, rating: true },
   })
   return NextResponse.json(updated)
 }

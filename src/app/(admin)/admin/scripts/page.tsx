@@ -43,6 +43,7 @@ export default async function AdminScriptsPage() {
   const recentLogs = await prisma.adminScriptLog.findMany({
     orderBy: { ranAt: 'desc' },
     distinct: ['scriptName'],
+    select: { scriptName: true, ranAt: true, status: true, rowsAffected: true, errorMessage: true },
   })
   for (const log of recentLogs) {
     logs[log.scriptName] = log

@@ -2,7 +2,7 @@
  * @description Seeds sample recipe data for development and demo purposes. Safe to run multiple times (checks for existing title before inserting).
  * @tables recipes
  */
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Difficulty } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -765,7 +765,7 @@ export function buildRecipeRecord(r: RecipeInput, userId: string) {
     prepTimeMin: r.prepTimeMin,
     cookTimeMin: r.cookTimeMin,
     cuisine: r.cuisine,
-    difficulty: r.difficulty,
+    difficulty: r.difficulty as Difficulty,
     sourceIngredients: r.ingredients.map(i => i.name),
     recipeData: r,
     rawText: buildRawText(r),

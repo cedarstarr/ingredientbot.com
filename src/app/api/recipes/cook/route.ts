@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import Anthropic from '@anthropic-ai/sdk'
+import { Difficulty } from '@prisma/client'
 
 export const maxDuration = 60
 
@@ -144,33 +145,37 @@ Schema:
     recipeData.notes ? `\n## Notes\n${recipeData.notes}` : ''
   ].join('\n')
 
-  const recipe = await prisma.recipe.create({
-    data: {
-      userId: session.user.id,
-      title: recipeData.title,
-      description: recipeData.description,
-      servings: recipeData.servings,
-      prepTimeMin: recipeData.prepTimeMin,
-      cookTimeMin: recipeData.cookTimeMin,
-      cuisine: recipeData.cuisine,
-      difficulty: recipeData.difficulty,
-      sourceIngredients: ingredients,
-      recipeData: recipeData,
-      rawText,
-      nutrition: recipeData.nutrition,
-    }
-  })
-
-  // F30: Increment usage counter — reset if new month, then increment
+  // F30: Wrap recipe creation and usage counter update in a transaction — if either fails,
+  // neither is committed, preventing a recipe from being saved without counting toward the limit
+  // (or a counter incrementing for a recipe that failed to save).
   const monthStart = startOfCurrentMonth()
   const needsReset = !user.monthlyResetDate || user.monthlyResetDate < monthStart
-  await prisma.user.update({
-    where: { id: session.user.id },
-    data: {
-      recipeCount: needsReset ? 1 : { increment: 1 },
-      monthlyResetDate: needsReset ? monthStart : undefined,
-    },
-  })
+
+  const [recipe] = await prisma.$transaction([
+    prisma.recipe.create({
+      data: {
+        userId: session.user.id,
+        title: recipeData.title,
+        description: recipeData.description,
+        servings: recipeData.servings,
+        prepTimeMin: recipeData.prepTimeMin,
+        cookTimeMin: recipeData.cookTimeMin,
+        cuisine: recipeData.cuisine,
+        difficulty: recipeData.difficulty as Difficulty | null,
+        sourceIngredients: ingredients,
+        recipeData: recipeData,
+        rawText,
+        nutrition: recipeData.nutrition,
+      },
+    }),
+    prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        recipeCount: needsReset ? 1 : { increment: 1 },
+        monthlyResetDate: needsReset ? monthStart : undefined,
+      },
+    }),
+  ])
 
   return Response.json({ id: recipe.id })
 }

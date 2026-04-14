@@ -9,9 +9,11 @@ export default async function SavedPage() {
   const session = await auth()
   if (!session?.user) redirect('/login')
 
+  // 500-recipe cap: users with huge libraries are power users who will use /history for search/filter
   const recipes = await prisma.recipe.findMany({
     where: { userId: session.user.id },
     orderBy: { createdAt: 'desc' },
+    take: 500,
     select: {
       id: true,
       title: true,

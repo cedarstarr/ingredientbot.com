@@ -7,6 +7,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Difficulty {
+  easy
+  medium
+  hard
+
+  @@map("difficulty")
+}
+
+enum MealType {
+  breakfast
+  lunch
+  dinner
+
+  @@map("meal_type")
+}
+
+enum ChefPersonality {
+  home
+  french
+  street
+
+  @@map("chef_personality")
+}
+
 model Account {
   id                String  @id @default(cuid())
   userId            String  @map("user_id")
@@ -68,15 +92,15 @@ model User {
   sessionsRevokedAt DateTime? @map("sessions_revoked_at")
 
   // F30: Freemium gate
-  isPro              Boolean   @default(false) @map("is_pro")
-  recipeCount        Int       @default(0) @map("recipe_count")
-  monthlyResetDate   DateTime? @map("monthly_reset_date")
+  isPro            Boolean   @default(false) @map("is_pro")
+  recipeCount      Int       @default(0) @map("recipe_count")
+  monthlyResetDate DateTime? @map("monthly_reset_date")
 
   // F53: Budget mode preference
-  budgetMode         Boolean   @default(false) @map("budget_mode")
+  budgetMode Boolean @default(false) @map("budget_mode")
 
   // F70: Chef personality preference
-  chefPersonality    String    @default("home") @map("chef_personality")
+  chefPersonality ChefPersonality @default(home) @map("chef_personality")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -119,20 +143,20 @@ model AuditLog {
 }
 
 model Recipe {
-  id          String  @id @default(cuid())
-  userId      String  @map("user_id")
-  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String      @id @default(cuid())
+  userId      String      @map("user_id")
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   title       String
-  description String? @db.Text
-  servings    Int     @default(4)
-  prepTimeMin Int?    @map("prep_time_min")
-  cookTimeMin Int?    @map("cook_time_min")
+  description String?     @db.Text
+  servings    Int         @default(4)
+  prepTimeMin Int?        @map("prep_time_min")
+  cookTimeMin Int?        @map("cook_time_min")
   cuisine     String?
-  difficulty  String?
+  difficulty  Difficulty?
 
   sourceIngredients String[] @map("source_ingredients")
   recipeData        Json     @map("recipe_data")
-  rawText           String   @db.Text @map("raw_text")
+  rawText           String   @map("raw_text") @db.Text
   nutrition         Json?
   fromPhoto         Boolean  @default(false) @map("from_photo")
   modifications     Json     @default("[]")
@@ -145,14 +169,14 @@ model Recipe {
   collection   RecipeCollection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
 
   // F41: completion tracking
-  cookedCount    Int       @default(0) @map("cooked_count")
-  lastCookedAt   DateTime? @map("last_cooked_at")
+  cookedCount  Int       @default(0) @map("cooked_count")
+  lastCookedAt DateTime? @map("last_cooked_at")
 
   // F51: personal star rating (1–5), nullable = unrated
-  rating         Int?      @map("rating")
+  rating Int? @map("rating")
 
   // F47: recipe completions (separate model for streak tracking)
-  completions    RecipeCompletion[]
+  completions RecipeCompletion[]
 
   // F27: public sharing via permalink
   isPublic   Boolean @default(false) @map("is_public")
@@ -184,12 +208,12 @@ model RecipeCompletion {
 
 // F39: Recipe collections/folders
 model RecipeCollection {
-  id          String   @id @default(cuid())
-  userId      String   @map("user_id")
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String  @id @default(cuid())
+  userId      String  @map("user_id")
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   name        String
-  description String?  @db.Text
-  color       String   @default("#22c55e") // default green
+  description String? @db.Text
+  color       String  @default("#22c55e") // default green
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -218,7 +242,7 @@ model MealPlanSlot {
   id         String   @id @default(cuid())
   mealPlanId String   @map("meal_plan_id")
   dayOfWeek  Int      @map("day_of_week")
-  mealType   String   @map("meal_type")
+  mealType   MealType @map("meal_type")
   recipeId   String   @map("recipe_id")
   mealPlan   MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
   recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)

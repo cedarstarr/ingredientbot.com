@@ -39,19 +39,21 @@ export async function POST(request: NextRequest) {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3010'
   const verifyUrl = `${baseUrl}/api/auth/verify-email?token=${verifyToken}&email=${encodeURIComponent(email)}`
 
-  const user = await prisma.user.create({
-    data: {
-      email,
-      password: hashedPassword,
-      name: name || null,
-      emailVerified: null,
-    },
-  })
-
-  // Create verification token
-  await prisma.verificationToken.create({
-    data: { identifier: email, token: verifyToken, expires: verifyExpires },
-  })
+  // Wrap both writes in a transaction — if token creation fails, the user row is rolled back,
+  // preventing orphaned accounts that can never verify their email.
+  const [user] = await prisma.$transaction([
+    prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        name: name || null,
+        emailVerified: null,
+      },
+    }),
+    prisma.verificationToken.create({
+      data: { identifier: email, token: verifyToken, expires: verifyExpires },
+    }),
+  ])
 
   // Send welcome/verify email
   try {

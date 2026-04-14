@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { MealType } from '@prisma/client'
 
 // GET /api/meal-plan?weekStart=YYYY-MM-DD
 export async function GET(req: NextRequest) {
@@ -48,6 +49,12 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
+  // Validate mealType against the enum — reject unknown values early
+  const validMealTypes: string[] = Object.values(MealType)
+  if (!validMealTypes.includes(mealType)) {
+    return NextResponse.json({ error: 'Invalid mealType' }, { status: 400 })
+  }
+
   const date = new Date(weekStart)
   if (isNaN(date.getTime())) {
     return NextResponse.json({ error: 'Invalid weekStart date' }, { status: 400 })
@@ -66,10 +73,10 @@ export async function PUT(req: NextRequest) {
     update: {},
   })
 
-  // Upsert the slot
+  // Upsert the slot — mealType is already validated above
   const slot = await prisma.mealPlanSlot.upsert({
-    where: { mealPlanId_dayOfWeek_mealType: { mealPlanId: plan.id, dayOfWeek, mealType } },
-    create: { mealPlanId: plan.id, dayOfWeek, mealType, recipeId },
+    where: { mealPlanId_dayOfWeek_mealType: { mealPlanId: plan.id, dayOfWeek, mealType: mealType as MealType } },
+    create: { mealPlanId: plan.id, dayOfWeek, mealType: mealType as MealType, recipeId },
     update: { recipeId },
     include: {
       recipe: { select: { id: true, title: true, cuisine: true, difficulty: true } },
