@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import Anthropic from '@anthropic-ai/sdk'
+import { generateText } from 'ai'
+import { claudeSonnet } from '@/lib/ai'
 import { Difficulty } from '@prisma/client'
 
 export const maxDuration = 60
@@ -18,8 +19,7 @@ export async function POST(req: NextRequest) {
   const session = await auth()
   if (!session) return new Response('Unauthorized', { status: 401 })
 
-  const apiKey = process.env.ANTHROPIC_API_KEY
-  if (!apiKey) {
+  if (!process.env.ANTHROPIC_API_KEY) {
     return Response.json({ error: 'AI service not configured' }, { status: 503 })
   }
 
@@ -97,11 +97,9 @@ export async function POST(req: NextRequest) {
     ? `\n\nDATE NIGHT MODE: This is a Date Night recipe. Make it romantic, impressive, and special. Use elegant plating suggestions in the notes.`
     : ''
 
-  const anthropic = new Anthropic({ apiKey })
-
-  const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 2048,
+  const { text } = await generateText({
+    model: claudeSonnet,
+    maxOutputTokens: 2048,
     system: `You are an expert chef. Generate a complete detailed recipe as JSON. Return ONLY valid JSON with no markdown, no code blocks.
 Schema:
 {
@@ -119,16 +117,13 @@ Schema:
 }${personalityContext}${profileContext}${strictContext}${teachContext}${leftoverContext}${budgetContext}${dateNightContext}`,
     messages: [{
       role: 'user',
-      content: `Generate a full recipe for "${suggestion.title}". Description: ${suggestion.description}. Main ingredients available: ${ingredients.join(', ')}. Target servings: ${suggestion.servings || 4}.`
-    }]
+      content: `Generate a full recipe for "${suggestion.title}". Description: ${suggestion.description}. Main ingredients available: ${ingredients.join(', ')}. Target servings: ${suggestion.servings || 4}.`,
+    }],
   })
-
-  const content = response.content[0]
-  if (content.type !== 'text') return Response.json({ error: 'Failed to generate recipe' }, { status: 500 })
 
   let recipeData
   try {
-    const match = content.text.match(/\{[\s\S]*\}/)
+    const match = text.match(/\{[\s\S]*\}/)
     recipeData = match ? JSON.parse(match[0]) : null
     if (!recipeData) throw new Error('No JSON found')
   } catch {

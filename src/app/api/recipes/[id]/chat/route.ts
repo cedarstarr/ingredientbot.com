@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import Anthropic from '@anthropic-ai/sdk'
+import { streamText } from 'ai'
+import { claudeHaiku } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 
 export const maxDuration = 60
@@ -26,10 +27,9 @@ export async function POST(
   const { message, history } = await req.json()
   if (!message?.trim()) return new Response('Message is required', { status: 400 })
 
-  const apiKey = process.env.ANTHROPIC_API_KEY
-  if (!apiKey) return new Response('AI service not configured', { status: 503 })
-
-  const anthropic = new Anthropic({ apiKey })
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return new Response('AI service not configured', { status: 503 })
+  }
 
   const recipeData = recipe.recipeData as {
     title?: string
@@ -59,23 +59,23 @@ Be concise but helpful. Reference specific steps from the recipe when relevant. 
   }
   messages.push({ role: 'user', content: message.trim() })
 
-  const stream = await anthropic.messages.stream({
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: 500,
+  const result = streamText({
+    model: claudeHaiku,
+    maxOutputTokens: 500,
     system: systemPrompt,
     messages,
   })
 
+  // Emit SSE events as `data: {"text": "..."}` to match the original contract
+  // chosen over toDataStreamResponse because the existing protocol uses a custom {text} shape + [DONE] sentinel
   const encoder = new TextEncoder()
   const readable = new ReadableStream({
     async start(controller) {
       try {
-        for await (const event of stream) {
-          if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
-            controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify({ text: event.delta.text })}\n\n`)
-            )
-          }
+        for await (const chunk of result.textStream) {
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify({ text: chunk })}\n\n`)
+          )
         }
         controller.enqueue(encoder.encode('data: [DONE]\n\n'))
         controller.close()
