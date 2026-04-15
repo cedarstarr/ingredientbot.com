@@ -103,7 +103,7 @@ test.describe('Kitchen — recipe generation smoke test (mocked AI)', () => {
 
       await route.fulfill({
         status: 200,
-        contentType: 'application/x-ndjson',
+        contentType: 'text/plain; charset=utf-8',
         body: fakeNdjson,
       })
     })

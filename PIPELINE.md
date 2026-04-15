@@ -17,7 +17,7 @@
 | 3 | Feature Audit | /plan-feature-audit | DONE | 1 | 2026-04-11 | [view](reports/2026-04-11-site-audit.md) |
 | 4 | Feature Triage | /site-features | DONE | 1 | 2026-04-09 | [view](reports/2026-04-09-site-features.md) |
 | 5 | Feature Install | /site-install | DONE | 1 | 2026-04-10 00:00 | [view](reports/2026-04-10-site-install.md) |
-| 6 | Write Tests | /qa-tests-reconcile | DONE | 1 | 2026-04-11 | [view](reports/2026-04-11-tests-reconcile.md) |
+| 6 | Write Tests | /qa-tests-reconcile | DONE | 2 | 2026-04-14 | [view](reports/2026-04-14-tests-reconcile.md) |
 | 7 | Verify Build | /qa-tests-fix | PENDING | 0 | — | — |
 | 8 | Database Review | /qa-db | DONE | 1 | 2026-04-14 | [view](reports/2026-04-14-site-db.md) |
 | 9 | QA / Bug Check | /qa-bugs | PENDING | 0 | — | — |
@@ -33,7 +33,7 @@
 
 **Progress: 7/18 stages complete**
 
-**Last Updated**: 2026-04-14 (qa-db complete)
+**Last Updated**: 2026-04-14 (qa-tests-reconcile run 2 complete)
 
 ---
 
@@ -60,3 +60,4 @@
 | 2026-04-11 | manual install | ~45 min | SUCCESS | F42 Dark Mode confirmed + polished, F43 PWA/Offline (manual sw.js, manifest.json, SwRegister, PwaInstallPrompt, /offline page), F26 Expiry-first mode (expiresAt field on PantryItem, migration deployed, expiry badges in pantry UI, expiry-first toggle in kitchen, amber nav badge, AI system prompt injection) |
 | 2026-04-11 | /qa-tests-reconcile | ~8m | SUCCESS | new tests written, stale tests fixed, build clean |
 | 2026-04-14 | /qa-db | — | SUCCESS | 9 issues found, 7 fixed (3 HIGH, 4 MEDIUM fixed; 2 LOW flagged only) |
+| 2026-04-14 | /qa-tests-reconcile | ~5m | SUCCESS | 2 new test files (F24/F35, F42/F43/F45); kitchen-prefs API tests added; stale content-type mock fixed |

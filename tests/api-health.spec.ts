@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { loginAsTestUser } from './helpers'
 
 test.describe('API health endpoint', () => {
   test('GET /api/health returns 200 with status ok', async ({ request }) => {
@@ -46,5 +47,50 @@ test.describe('Protected API routes — unauthenticated', () => {
       data: { ingredients: ['chicken', 'rice'] },
     })
     expect(res.status()).not.toBe(200)
+  })
+
+  test('GET /api/user/kitchen-prefs returns 401 when unauthenticated', async ({ request }) => {
+    const res = await request.get('/api/user/kitchen-prefs')
+    expect(res.status()).not.toBe(200)
+  })
+})
+
+test.describe('Kitchen preferences API — authenticated (F53, F70)', () => {
+  test.setTimeout(60000)
+
+  test('GET /api/user/kitchen-prefs returns budgetMode and chefPersonality', async ({ page }) => {
+    await loginAsTestUser(page)
+    const res = await page.request.get('/api/user/kitchen-prefs')
+    expect(res.status()).toBe(200)
+    const body = await res.json()
+    expect(typeof body.budgetMode).toBe('boolean')
+    expect(typeof body.chefPersonality).toBe('string')
+  })
+
+  test('PATCH /api/user/kitchen-prefs updates chefPersonality', async ({ page }) => {
+    await loginAsTestUser(page)
+
+    const res = await page.request.patch('/api/user/kitchen-prefs', {
+      data: { chefPersonality: 'french' },
+    })
+    expect(res.status()).toBe(200)
+
+    // Verify the change was persisted
+    const readback = await page.request.get('/api/user/kitchen-prefs')
+    const data = await readback.json()
+    expect(data.chefPersonality).toBe('french')
+
+    // Reset to default
+    await page.request.patch('/api/user/kitchen-prefs', {
+      data: { chefPersonality: 'home' },
+    })
+  })
+
+  test('PATCH /api/user/kitchen-prefs rejects an invalid chefPersonality', async ({ page }) => {
+    await loginAsTestUser(page)
+    const res = await page.request.patch('/api/user/kitchen-prefs', {
+      data: { chefPersonality: 'robot-overlord' },
+    })
+    expect(res.status()).toBe(400)
   })
 })
