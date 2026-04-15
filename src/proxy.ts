@@ -27,6 +27,8 @@ const PUBLIC_PATHS = [
   '/api/health',
   '/_next', '/favicon.ico', '/robots.txt', '/sitemap.xml',
   '/api/cron/',
+  // PWA assets — must be publicly accessible for install/offline flow
+  '/manifest.json', '/sw.js', '/offline',
 ]
 
 const LOCKED_PUBLIC_PATHS = [

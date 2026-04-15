@@ -27,6 +27,20 @@ export async function POST(
   const { message, history } = await req.json()
   if (!message?.trim()) return new Response('Message is required', { status: 400 })
 
+  if (process.env.PLAYWRIGHT_TEST === 'true') {
+    const encoder = new TextEncoder()
+    const mockStream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: 'Mock AI response for testing.' })}\n\n`))
+        controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+        controller.close()
+      },
+    })
+    return new Response(mockStream, {
+      headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' },
+    })
+  }
+
   if (!process.env.ANTHROPIC_API_KEY) {
     return new Response('AI service not configured', { status: 503 })
   }

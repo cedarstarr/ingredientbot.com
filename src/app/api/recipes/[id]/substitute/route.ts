@@ -29,6 +29,31 @@ export async function POST(
     return NextResponse.json({ error: 'missingIngredient is required' }, { status: 400 })
   }
 
+  if (process.env.PLAYWRIGHT_TEST === 'true') {
+    return NextResponse.json({
+      role: 'Fat and flavor base that crisps up and renders its fat into the dish.',
+      substitutions: [
+        {
+          name: 'Pancetta',
+          quantity: '150g',
+          flavorImpact: 'Less fatty than the original but delivers a similar cured-pork flavor.',
+          textureImpact: 'Crisps up similarly when rendered.',
+          confidence: 'works_great',
+          techniqueNote: null,
+        },
+        {
+          name: 'Thick-cut bacon',
+          quantity: '150g',
+          flavorImpact: 'Adds a smokier flavor that changes the character of the dish slightly.',
+          textureImpact: 'Crisps well; drain excess fat before combining.',
+          confidence: 'works_ok',
+          techniqueNote: 'Drain some of the rendered fat before adding pasta.',
+        },
+      ],
+      tip: 'Whichever you use, render the fat slowly over medium heat for the best texture.',
+    })
+  }
+
   if (!process.env.ANTHROPIC_API_KEY) {
     return new Response('AI service not configured', { status: 503 })
   }

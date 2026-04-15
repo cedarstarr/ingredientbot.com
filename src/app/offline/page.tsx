@@ -1,8 +1,8 @@
+'use client'
+
 import { ChefHat, WifiOff } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-
-export const metadata = { title: 'Offline — Robot Food' }
 
 export default function OfflinePage() {
   return (

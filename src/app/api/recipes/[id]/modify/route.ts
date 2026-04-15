@@ -26,6 +26,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   })
   if (!recipe) return new Response('Not found', { status: 404 })
 
+  if (process.env.PLAYWRIGHT_TEST === 'true') {
+    const mockMarkdown = `# Modified Recipe\n\nThis is a mock modified recipe for testing.\n\n## Ingredients\n- 400g spaghetti\n- 4 eggs\n- 100g Pecorino Romano\n\n## Instructions\n1. Boil pasta\n2. Combine ingredients off heat\n`
+    return new Response(mockMarkdown, {
+      headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' },
+    })
+  }
+
   if (!process.env.ANTHROPIC_API_KEY) {
     return new Response('AI service not configured', { status: 503 })
   }

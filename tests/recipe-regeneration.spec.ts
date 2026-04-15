@@ -96,12 +96,22 @@ test.describe('Kitchen — difficulty selector (F35)', () => {
   })
 
   test('difficulty options include Beginner / Easy, Intermediate / Medium, and Advanced / Hard', async ({ page }) => {
+    // Open the Difficulty select to reveal options
+    // The SelectTrigger for Difficulty follows the label text "Difficulty"
+    const difficultyLabel = page.getByText('Difficulty', { exact: true })
+    await expect(difficultyLabel).toBeVisible()
+
+    // Find the combobox adjacent to the Difficulty label and open it
+    const difficultyTrigger = difficultyLabel.locator('..').locator('[role="combobox"]')
+    await difficultyTrigger.click()
+    await page.waitForTimeout(200)
+
+    // Now the options should be visible in the body
     const body = await page.locator('body').textContent()
-    // At least one pair of difficulty labels must be present
     const hasEasyOrBeginner = /beginner|easy/i.test(body ?? '')
     const hasIntermediateOrMedium = /intermediate|medium/i.test(body ?? '')
     const hasAdvancedOrHard = /advanced|hard/i.test(body ?? '')
-    // Either labels appear in the body or the select is collapsed — check for at least one
+    // At least one difficulty option tier must be present when dropdown is open
     expect(hasEasyOrBeginner || hasIntermediateOrMedium || hasAdvancedOrHard).toBe(true)
   })
 })

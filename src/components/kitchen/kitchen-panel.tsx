@@ -79,6 +79,8 @@ export function KitchenPanel() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [cuisine, setCuisine] = useState('any')
   const [dietary, setDietary] = useState('any')
+  // F35: difficulty filter — beginner/intermediate/advanced
+  const [difficulty, setDifficulty] = useState('any')
   const [isAnalyzingPhoto, setIsAnalyzingPhoto] = useState(false)
   const [cookingId, setCookingId] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -262,6 +264,8 @@ export function KitchenPanel() {
           ingredients: combined,
           cuisine: cuisine === 'any' ? undefined : cuisine,
           dietary: dietary === 'any' ? [] : [dietary],
+          // F35: difficulty filter
+          difficulty: difficulty === 'any' ? undefined : difficulty,
           expiringIngredients: expiring.length > 0 ? expiring : undefined,
           // F28: leftover mode
           leftovers: leftoverMode && leftoverText.trim() ? leftoverText.trim() : undefined,
@@ -615,6 +619,22 @@ export function KitchenPanel() {
                     <SelectItem value="dairy-free">Dairy-free</SelectItem>
                     <SelectItem value="low-carb">Low-carb</SelectItem>
                     <SelectItem value="keto">Keto</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* F35: Difficulty selector */}
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Difficulty</label>
+                <Select value={difficulty} onValueChange={setDifficulty}>
+                  <SelectTrigger className="w-full text-sm">
+                    <SelectValue placeholder="Any difficulty" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any difficulty</SelectItem>
+                    <SelectItem value="beginner">Beginner / Easy</SelectItem>
+                    <SelectItem value="intermediate">Intermediate / Medium</SelectItem>
+                    <SelectItem value="advanced">Advanced / Hard</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

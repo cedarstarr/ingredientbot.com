@@ -11,7 +11,8 @@ test.describe('Saved Recipes page', () => {
   })
 
   test('shows "Saved Recipes" heading', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: /saved recipes/i })).toBeVisible()
+    // level: 1 disambiguates from "No saved recipes yet" h2 which also matches /saved recipes/i
+    await expect(page.getByRole('heading', { name: /saved recipes/i, level: 1 })).toBeVisible()
   })
 
   test('shows recipe count in subtitle', async ({ page }) => {

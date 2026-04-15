@@ -48,6 +48,9 @@ test.describe('Meal Planner page', () => {
   })
 
   test('plus buttons to add recipes are visible in each cell when recipes exist', async ({ page }) => {
+    // Wait for full page render — the meal planner server component may still be streaming
+    await page.waitForLoadState('networkidle')
+
     // If the user has no saved recipes, the add buttons are disabled but still rendered
     const addButtons = page.getByRole('button', { name: /add recipe/i })
     // 7 days × 3 meals = 21 cells; all should have an add button when empty

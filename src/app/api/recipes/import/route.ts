@@ -35,6 +35,36 @@ export async function POST(req: NextRequest) {
   const body = await req.json()
   const { url, save } = body as { url?: string; save?: boolean; recipeData?: Record<string, unknown> }
 
+  if (process.env.PLAYWRIGHT_TEST === 'true') {
+    // Save mode: skip DB write and return a mock id
+    if (save && body.recipeData) {
+      return Response.json({ id: 'test-mock-id' })
+    }
+    // Extract mode: return a mock recipe structure
+    return Response.json({
+      recipe: {
+        title: 'Classic Spaghetti Carbonara',
+        description: 'A rich Italian pasta dish.',
+        servings: 4,
+        prepTimeMin: 15,
+        cookTimeMin: 20,
+        cuisine: 'Italian',
+        difficulty: 'easy',
+        ingredients: [
+          { name: 'Spaghetti', amount: '400', unit: 'g' },
+          { name: 'Eggs', amount: '4', unit: '' },
+          { name: 'Pecorino Romano', amount: '100', unit: 'g' },
+          { name: 'Guanciale', amount: '150', unit: 'g' },
+        ],
+        steps: ['Boil pasta', 'Fry guanciale until crispy', 'Mix eggs and cheese', 'Combine off heat'],
+        notes: 'Remove from heat before adding egg mixture to avoid scrambling.',
+        nutrition: { calories: 620, protein: 32, fat: 24, carbs: 68, fiber: 3 },
+        dietaryTags: [],
+        sourceUrl: url ?? '',
+      },
+    })
+  }
+
   // Save mode: persist a previously extracted recipe
   if (save && body.recipeData) {
     // F30: Apply the same freemium gate as recipe generation — imports count toward the monthly limit

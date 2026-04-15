@@ -19,7 +19,8 @@ test.describe('Collections page', () => {
   })
 
   test('shows "Collections" heading', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: /collections/i })).toBeVisible()
+    // level: 1 disambiguates from "No collections yet" h2 which also matches /collections/i
+    await expect(page.getByRole('heading', { name: /collections/i, level: 1 })).toBeVisible()
   })
 
   test('shows a "New Collection" button or link', async ({ page }) => {

@@ -7,6 +7,10 @@ export async function POST(req: NextRequest) {
   const session = await auth()
   if (!session) return new Response('Unauthorized', { status: 401 })
 
+  if (process.env.PLAYWRIGHT_TEST === 'true') {
+    return Response.json({ comment: 'This ingredient adds a sharp, salty depth that is essential to the dish. A close substitute will work but the flavor will be milder.' })
+  }
+
   if (!process.env.ANTHROPIC_API_KEY) {
     return Response.json({ error: 'AI service not configured' }, { status: 503 })
   }

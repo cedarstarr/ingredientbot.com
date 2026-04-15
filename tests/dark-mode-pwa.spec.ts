@@ -17,36 +17,62 @@ test.describe('Dark mode toggle (F42)', () => {
   test('ThemeToggle button is visible in the nav when authenticated', async ({ page }) => {
     await loginAsTestUser(page)
     await page.goto('/dashboard')
-    await page.waitForLoadState('domcontentloaded')
+    // Wait for React hydration so ThemeToggle's useEffect(setMounted) fires before checking
+    await page.waitForLoadState('networkidle')
 
     // The ThemeToggle has data-testid="theme-toggle" and aria-label="Toggle theme"
-    const toggleBtn = page.getByTestId('theme-toggle')
-    await expect(toggleBtn).toBeVisible()
+    // Desktop sidebar is hidden on mobile; the visible toggle is in the mobile top bar
+    const allToggles = page.getByTestId('theme-toggle')
+    const count = await allToggles.count()
+    // At least one toggle must be visible (desktop or mobile nav)
+    let found = false
+    for (let i = 0; i < count; i++) {
+      const visible = await allToggles.nth(i).isVisible()
+      if (visible) { found = true; break }
+    }
+    expect(found).toBe(true)
   })
 
   test('clicking the theme toggle changes the visible icon', async ({ page }) => {
     await loginAsTestUser(page)
     await page.goto('/dashboard')
-    await page.waitForLoadState('domcontentloaded')
+    // Wait for React hydration so ThemeToggle's useEffect(setMounted) fires before checking
+    await page.waitForLoadState('networkidle')
 
-    const toggleBtn = page.getByTestId('theme-toggle')
-    await expect(toggleBtn).toBeVisible()
+    // Find the visible toggle (desktop sidebar is hidden on mobile)
+    const allToggles = page.getByTestId('theme-toggle')
+    const count = await allToggles.count()
+    let visibleToggle = allToggles.first()
+    for (let i = 0; i < count; i++) {
+      if (await allToggles.nth(i).isVisible()) {
+        visibleToggle = allToggles.nth(i)
+        break
+      }
+    }
 
     // Click to toggle — the svg icon inside should change (Moon ↔ Sun)
-    await toggleBtn.click()
+    await visibleToggle.click()
     await page.waitForTimeout(300)
 
     // After toggling, the button should still be visible and functional
-    await expect(toggleBtn).toBeVisible()
+    await expect(visibleToggle).toBeVisible()
   })
 
   test('ThemeToggle has aria-label="Toggle theme" for accessibility', async ({ page }) => {
     await loginAsTestUser(page)
-    await page.goto('/kitchen')
-    await page.waitForLoadState('domcontentloaded')
+    await page.goto('/dashboard')
+    // Wait for React hydration so the ThemeToggle's useEffect(setMounted) has fired
+    await page.waitForLoadState('networkidle')
 
-    const toggleBtn = page.getByLabel('Toggle theme')
-    await expect(toggleBtn).toBeVisible()
+    // At least one toggle with the correct aria-label must be present (desktop or mobile nav)
+    const allToggles = page.getByLabel('Toggle theme')
+    const count = await allToggles.count()
+    let found = false
+    for (let i = 0; i < count; i++) {
+      const visible = await allToggles.nth(i).isVisible()
+      if (visible) { found = true; break }
+    }
+    expect(found).toBe(true)
   })
 })
 

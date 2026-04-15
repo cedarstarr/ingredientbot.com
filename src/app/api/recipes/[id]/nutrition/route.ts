@@ -8,6 +8,10 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
   const session = await auth()
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  if (process.env.PLAYWRIGHT_TEST === 'true') {
+    return NextResponse.json({ nutrition: { calories: 620, protein: 32, fat: 24, carbs: 68, fiber: 3 } })
+  }
+
   if (!process.env.ANTHROPIC_API_KEY) {
     return NextResponse.json({ error: 'AI service not configured' }, { status: 503 })
   }

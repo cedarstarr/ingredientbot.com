@@ -19,6 +19,11 @@ export async function POST(req: NextRequest) {
   const session = await auth()
   if (!session) return new Response('Unauthorized', { status: 401 })
 
+  if (process.env.PLAYWRIGHT_TEST === 'true') {
+    // Skip DB write and AI call — return a stable mock recipe id
+    return Response.json({ id: 'test-mock-id' })
+  }
+
   if (!process.env.ANTHROPIC_API_KEY) {
     return Response.json({ error: 'AI service not configured' }, { status: 503 })
   }

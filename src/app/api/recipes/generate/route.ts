@@ -26,6 +26,18 @@ export async function POST(req: NextRequest) {
     return new Response('Need at least 2 ingredients', { status: 400 })
   }
 
+  if (process.env.PLAYWRIGHT_TEST === 'true') {
+    const mockLines = [
+      JSON.stringify({ title: 'Classic Spaghetti Carbonara', description: 'A rich Italian pasta dish with eggs and cheese.', prepMin: 15, cookMin: 20, servings: 4, cuisine: 'Italian', difficulty: 'easy' }),
+      JSON.stringify({ title: 'Vegetable Stir Fry', description: 'Quick and healthy stir fry with seasonal vegetables.', prepMin: 10, cookMin: 15, servings: 2, cuisine: 'Asian', difficulty: 'easy' }),
+      JSON.stringify({ title: 'Mushroom Risotto', description: 'Creamy Italian rice dish with earthy mushrooms.', prepMin: 10, cookMin: 30, servings: 4, cuisine: 'Italian', difficulty: 'medium' }),
+      JSON.stringify({ title: 'Garlic Butter Pasta', description: 'Simple pasta with fragrant garlic butter sauce.', prepMin: 5, cookMin: 15, servings: 2, cuisine: 'Italian', difficulty: 'easy' }),
+    ].join('\n')
+    return new Response(mockLines, {
+      headers: { 'Content-Type': 'text/plain; charset=utf-8', 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-cache' },
+    })
+  }
+
   if (!process.env.ANTHROPIC_API_KEY) {
     return new Response('AI service not configured', { status: 503 })
   }

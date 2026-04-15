@@ -30,11 +30,14 @@ test.describe('Pantry page', () => {
   })
 
   test('adding an ingredient shows it in the list', async ({ page }) => {
-    const input = page.locator('input[type="text"]').first()
+    // Wait for network to settle so React has finished hydrating the PantryClient
+    await page.waitForLoadState('networkidle')
+    const input = page.locator('input[placeholder*="olive oil"]')
+    await input.waitFor({ state: 'visible' })
     await input.fill('test-pantry-avocado')
     await page.keyboard.press('Enter')
 
-    // Wait for the item to appear
+    // Wait for the item to appear in the list
     await page.waitForTimeout(1500)
     const body = await page.locator('body').textContent()
     expect(body).toMatch(/test-pantry-avocado/i)
