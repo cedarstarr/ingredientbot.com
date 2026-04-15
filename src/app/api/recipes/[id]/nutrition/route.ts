@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import Anthropic from '@anthropic-ai/sdk'
+import { generateText } from 'ai'
+import { claudeSonnet } from '@/lib/ai'
 
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const apiKey = process.env.ANTHROPIC_API_KEY
-  if (!apiKey) return NextResponse.json({ error: 'AI service not configured' }, { status: 503 })
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return NextResponse.json({ error: 'AI service not configured' }, { status: 503 })
+  }
 
   const { id } = await params
   const recipe = await prisma.recipe.findFirst({
@@ -29,37 +31,29 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ error: 'No ingredients found in recipe' }, { status: 400 })
   }
 
-  const anthropic = new Anthropic({ apiKey })
   const ingredientList = ingredients
     .map(i => `${i.amount} ${i.unit} ${i.name}`.trim())
     .join(', ')
 
-  const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 256,
+  const { text } = await generateText({
+    model: claudeSonnet,
+    maxOutputTokens: 256,
     system: `You are a registered dietitian. Estimate the nutritional content of a recipe per serving.
 Return ONLY valid JSON with no markdown, no code blocks, no extra text:
 {"calories": number, "protein": number, "fat": number, "carbs": number, "fiber": number}
 Values are per serving. Calories in kcal, macros in grams. Round to nearest whole number.`,
-    messages: [
-      {
-        role: 'user',
-        content: `Recipe: "${recipe.title}" (${recipe.servings} servings)
+    messages: [{
+      role: 'user',
+      content: `Recipe: "${recipe.title}" (${recipe.servings} servings)
 Ingredients: ${ingredientList}
 
 Estimate nutrition per serving.`,
-      },
-    ],
+    }],
   })
-
-  const content = response.content[0]
-  if (content.type !== 'text') {
-    return NextResponse.json({ error: 'AI did not return text' }, { status: 500 })
-  }
 
   let nutrition: { calories: number; protein: number; fat: number; carbs: number; fiber: number }
   try {
-    const match = content.text.match(/\{[\s\S]*\}/)
+    const match = text.match(/\{[\s\S]*\}/)
     if (!match) throw new Error('No JSON found')
     nutrition = JSON.parse(match[0])
     // Validate required keys exist

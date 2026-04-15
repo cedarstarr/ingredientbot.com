@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import Anthropic from '@anthropic-ai/sdk'
+import { streamText } from 'ai'
+import { claudeSonnet } from '@/lib/ai'
 
 export const maxDuration = 60
 
@@ -25,8 +26,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   })
   if (!recipe) return new Response('Not found', { status: 404 })
 
-  const apiKey = process.env.ANTHROPIC_API_KEY
-  if (!apiKey) return new Response('AI service not configured', { status: 503 })
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return new Response('AI service not configured', { status: 503 })
+  }
 
   const body = await req.json()
   const { action, targetServings, targetMethod } = body
@@ -34,34 +36,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const actionPrompt = actionPrompts[action]
   if (!actionPrompt) return new Response('Invalid action', { status: 400 })
 
-  const anthropic = new Anthropic({ apiKey })
-
-  const stream = await anthropic.messages.stream({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 2048,
+  const result = streamText({
+    model: claudeSonnet,
+    maxOutputTokens: 2048,
     system: 'You are an expert chef who helps people modify recipes. Present modifications clearly in markdown.',
     messages: [{
       role: 'user',
-      content: `Here is the current recipe:\n${recipe.rawText}\n\n${actionPrompt(recipe, { targetServings, targetMethod })}`
-    }]
+      content: `Here is the current recipe:\n${recipe.rawText}\n\n${actionPrompt(recipe, { targetServings, targetMethod })}`,
+    }],
   })
 
-  const encoder = new TextEncoder()
-  const readable = new ReadableStream({
-    async start(controller) {
-      try {
-        for await (const chunk of stream) {
-          if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
-            controller.enqueue(encoder.encode(chunk.delta.text))
-          }
-        }
-      } finally {
-        controller.close()
-      }
-    }
-  })
-
-  return new Response(readable, {
-    headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' }
+  // Frontend reads raw text with getReader() — use toTextStreamResponse (not toDataStreamResponse)
+  return result.toTextStreamResponse({
+    headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' },
   })
 }

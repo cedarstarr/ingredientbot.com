@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import Anthropic from '@anthropic-ai/sdk'
+import { generateText } from 'ai'
+import { claudeSonnet } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { Difficulty } from '@prisma/client'
 
@@ -114,8 +115,7 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'Please provide a valid URL' }, { status: 400 })
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY
-  if (!apiKey) {
+  if (!process.env.ANTHROPIC_API_KEY) {
     return Response.json({ error: 'AI service not configured' }, { status: 503 })
   }
 
@@ -153,11 +153,9 @@ export async function POST(req: NextRequest) {
   const maxChars = 80_000
   const truncatedHtml = html.length > maxChars ? html.slice(0, maxChars) : html
 
-  const anthropic = new Anthropic({ apiKey })
-
-  const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 2048,
+  const { text } = await generateText({
+    model: claudeSonnet,
+    maxOutputTokens: 2048,
     system: `You are a recipe extraction expert. Given the HTML content of a recipe webpage, extract the recipe into structured JSON. Return ONLY valid JSON with no markdown, no code blocks, no extra text.
 
 If the page does not contain a recognizable recipe, return: {"error": "No recipe found on this page"}
@@ -187,17 +185,12 @@ Rules:
 - If servings are not stated, estimate based on ingredient quantities.`,
     messages: [{
       role: 'user',
-      content: `Extract the recipe from this webpage. Source URL: ${url}\n\n${truncatedHtml}`
-    }]
+      content: `Extract the recipe from this webpage. Source URL: ${url}\n\n${truncatedHtml}`,
+    }],
   })
 
-  const content = response.content[0]
-  if (content.type !== 'text') {
-    return Response.json({ error: 'Failed to extract recipe' }, { status: 500 })
-  }
-
   try {
-    const match = content.text.match(/\{[\s\S]*\}/)
+    const match = text.match(/\{[\s\S]*\}/)
     const parsed = match ? JSON.parse(match[0]) : null
     if (!parsed) throw new Error('No JSON found')
 

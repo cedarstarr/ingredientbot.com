@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import Anthropic from '@anthropic-ai/sdk'
+import { generateText } from 'ai'
+import { claudeSonnet } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 
 export const maxDuration = 30
@@ -28,10 +29,9 @@ export async function POST(
     return NextResponse.json({ error: 'missingIngredient is required' }, { status: 400 })
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY
-  if (!apiKey) return new Response('AI service not configured', { status: 503 })
-
-  const anthropic = new Anthropic({ apiKey })
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return new Response('AI service not configured', { status: 503 })
+  }
 
   interface RecipeDataShape {
     title?: string
@@ -44,9 +44,9 @@ export async function POST(
     ? recipeData.ingredients.map(i => `${i.amount} ${i.unit} ${i.name}`.trim()).join(', ')
     : recipe.sourceIngredients.join(', ')
 
-  const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 800,
+  const { text } = await generateText({
+    model: claudeSonnet,
+    maxOutputTokens: 800,
     system: `You are a professional chef and food scientist. Analyze the role an ingredient plays in a recipe and suggest practical substitutions. Respond with valid JSON only, no markdown fences:
 {
   "role": "one sentence describing what role this ingredient plays (e.g., binder, acid, fat, leavener, flavor base)",
@@ -72,7 +72,6 @@ Analyze what role "${missingIngredient}" plays in this specific recipe and sugge
     }],
   })
 
-  const text = response.content[0].type === 'text' ? response.content[0].text : ''
   const jsonMatch = text.match(/\{[\s\S]*\}/)
   if (!jsonMatch) {
     return NextResponse.json({ error: 'Failed to parse substitutions' }, { status: 500 })

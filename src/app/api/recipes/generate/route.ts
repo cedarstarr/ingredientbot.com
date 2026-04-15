@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import Anthropic from '@anthropic-ai/sdk'
+import { streamText } from 'ai'
+import { claudeSonnet } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 
 export const maxDuration = 60
@@ -25,8 +26,7 @@ export async function POST(req: NextRequest) {
     return new Response('Need at least 2 ingredients', { status: 400 })
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY
-  if (!apiKey) {
+  if (!process.env.ANTHROPIC_API_KEY) {
     return new Response('AI service not configured', { status: 503 })
   }
 
@@ -35,8 +35,6 @@ export async function POST(req: NextRequest) {
     where: { userId: session.user.id },
     select: { restrictions: true, cuisinePrefs: true, dislikedIngredients: true },
   })
-
-  const anthropic = new Anthropic({ apiKey })
 
   const sessionDietaryStr = dietary?.length ? `Dietary restrictions: ${dietary.join(', ')}.` : ''
   const cuisineStr = cuisine && cuisine !== 'any' ? `Preferred cuisine: ${cuisine}.` : ''
@@ -103,9 +101,9 @@ export async function POST(req: NextRequest) {
     ? `\n\nIMPRESS ME MODE: The user has no specific ingredients. Choose 6–8 seasonal, interesting ingredients yourself and generate creative, impressive recipes. Include the chosen ingredients in your description.`
     : ''
 
-  const stream = await anthropic.messages.stream({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 1024,
+  const result = streamText({
+    model: claudeSonnet,
+    maxOutputTokens: 1024,
     system: `You are an expert chef. When given a list of ingredients, suggest exactly 4 recipes that use most of them.
 
 CRITICAL: Respond with ONLY newline-delimited JSON objects, one recipe per line, NO other text before or after.
@@ -117,30 +115,16 @@ difficulty must be exactly: "easy", "medium", or "hard"${personalityContext}${pr
       role: 'user',
       content: impressMe
         ? 'Impress me with 4 creative recipes. Choose the ingredients yourself.'
-        : `I have these ingredients: ${ingredients.join(', ')}. ${cuisineStr} ${sessionDietaryStr} Suggest 4 recipes.`
-    }]
+        : `I have these ingredients: ${ingredients.join(', ')}. ${cuisineStr} ${sessionDietaryStr} Suggest 4 recipes.`,
+    }],
   })
 
-  const encoder = new TextEncoder()
-  const readable = new ReadableStream({
-    async start(controller) {
-      try {
-        for await (const chunk of stream) {
-          if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
-            controller.enqueue(encoder.encode(chunk.delta.text))
-          }
-        }
-      } finally {
-        controller.close()
-      }
-    }
-  })
-
-  return new Response(readable, {
+  // Frontend reads raw text chunks (newline-delimited JSON), not SSE data: events
+  return result.toTextStreamResponse({
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
       'X-Content-Type-Options': 'nosniff',
       'Cache-Control': 'no-cache',
-    }
+    },
   })
 }
