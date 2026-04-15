@@ -324,9 +324,8 @@ export function KitchenPanel() {
           }
         } catch { /* ignore */ }
       }
-    } catch (e) {
+    } catch {
       setError('An error occurred. Please try again.')
-      console.error(e)
     } finally {
       setIsGenerating(false)
     }
@@ -385,9 +384,8 @@ export function KitchenPanel() {
           if (parsed.title) setSuggestions(prev => [...prev, parsed as RecipeSuggestion])
         } catch { /* ignore */ }
       }
-    } catch (e) {
+    } catch {
       setError('An error occurred. Please try again.')
-      console.error(e)
     } finally {
       setImpressMeLoading(false)
     }

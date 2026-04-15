@@ -12,24 +12,27 @@ export async function PATCH(
   const { id } = await params
   const body = await req.json()
 
-  const item = await prisma.pantryItem.findUnique({
-    where: { id },
-    select: { userId: true },
-  })
+  try {
+    const item = await prisma.pantryItem.findUnique({
+      where: { id },
+      select: { userId: true },
+    })
 
-  if (!item) return Response.json({ error: 'Not found' }, { status: 404 })
-  if (item.userId !== session.user.id) return new Response('Forbidden', { status: 403 })
+    if (!item) return Response.json({ error: 'Not found' }, { status: 404 })
+    if (item.userId !== session.user.id) return new Response('Forbidden', { status: 403 })
 
-  // F26: update expiry date — pass null to clear it
-  const expiresAt = body.expiresAt === null ? null : body.expiresAt ? new Date(body.expiresAt) : undefined
+    // F26: update expiry date — pass null to clear it
+    const expiresAt = body.expiresAt === null ? null : body.expiresAt ? new Date(body.expiresAt) : undefined
 
-  const updated = await prisma.pantryItem.update({
-    where: { id },
-    data: { expiresAt },
-    select: { id: true, ingredient: true, addedAt: true, expiresAt: true },
-  })
-
-  return Response.json(updated)
+    const updated = await prisma.pantryItem.update({
+      where: { id },
+      data: { expiresAt },
+      select: { id: true, ingredient: true, addedAt: true, expiresAt: true },
+    })
+    return Response.json(updated)
+  } catch {
+    return Response.json({ error: 'Failed to update pantry item' }, { status: 500 })
+  }
 }
 
 export async function DELETE(
@@ -41,16 +44,19 @@ export async function DELETE(
 
   const { id } = await params
 
-  // Verify ownership before deleting — never allow cross-user deletes
-  const item = await prisma.pantryItem.findUnique({
-    where: { id },
-    select: { userId: true },
-  })
+  try {
+    // Verify ownership before deleting — never allow cross-user deletes
+    const item = await prisma.pantryItem.findUnique({
+      where: { id },
+      select: { userId: true },
+    })
 
-  if (!item) return Response.json({ error: 'Not found' }, { status: 404 })
-  if (item.userId !== session.user.id) return new Response('Forbidden', { status: 403 })
+    if (!item) return Response.json({ error: 'Not found' }, { status: 404 })
+    if (item.userId !== session.user.id) return new Response('Forbidden', { status: 403 })
 
-  await prisma.pantryItem.delete({ where: { id } })
-
-  return new Response(null, { status: 204 })
+    await prisma.pantryItem.delete({ where: { id } })
+    return new Response(null, { status: 204 })
+  } catch {
+    return Response.json({ error: 'Failed to delete pantry item' }, { status: 500 })
+  }
 }

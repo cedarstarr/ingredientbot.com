@@ -6,15 +6,18 @@ export async function GET() {
   const session = await auth()
   if (!session?.user) return new Response('Unauthorized', { status: 401 })
 
-  const profile = await prisma.dietaryProfile.findUnique({
-    where: { userId: session.user.id },
-    select: { restrictions: true, cuisinePrefs: true, dislikedIngredients: true },
-  })
-
-  // Return empty arrays if no profile exists yet
-  return Response.json(
-    profile ?? { restrictions: [], cuisinePrefs: [], dislikedIngredients: [] }
-  )
+  try {
+    const profile = await prisma.dietaryProfile.findUnique({
+      where: { userId: session.user.id },
+      select: { restrictions: true, cuisinePrefs: true, dislikedIngredients: true },
+    })
+    // Return empty arrays if no profile exists yet
+    return Response.json(
+      profile ?? { restrictions: [], cuisinePrefs: [], dislikedIngredients: [] }
+    )
+  } catch {
+    return Response.json({ error: 'Failed to fetch dietary profile' }, { status: 500 })
+  }
 }
 
 export async function PATCH(req: NextRequest) {
@@ -26,13 +29,16 @@ export async function PATCH(req: NextRequest) {
   const cuisinePrefs: string[] = Array.isArray(body.cuisinePrefs) ? body.cuisinePrefs : []
   const dislikedIngredients: string[] = Array.isArray(body.dislikedIngredients) ? body.dislikedIngredients : []
 
-  // upsert — create on first save, update thereafter
-  const profile = await prisma.dietaryProfile.upsert({
-    where: { userId: session.user.id },
-    create: { userId: session.user.id, restrictions, cuisinePrefs, dislikedIngredients },
-    update: { restrictions, cuisinePrefs, dislikedIngredients },
-    select: { restrictions: true, cuisinePrefs: true, dislikedIngredients: true },
-  })
-
-  return Response.json(profile)
+  try {
+    // upsert — create on first save, update thereafter
+    const profile = await prisma.dietaryProfile.upsert({
+      where: { userId: session.user.id },
+      create: { userId: session.user.id, restrictions, cuisinePrefs, dislikedIngredients },
+      update: { restrictions, cuisinePrefs, dislikedIngredients },
+      select: { restrictions: true, cuisinePrefs: true, dislikedIngredients: true },
+    })
+    return Response.json(profile)
+  } catch {
+    return Response.json({ error: 'Failed to save dietary profile' }, { status: 500 })
+  }
 }

@@ -8,12 +8,15 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { notifyMarketing: true, notifyProduct: true },
-  })
-
-  return NextResponse.json(user)
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { notifyMarketing: true, notifyProduct: true },
+    })
+    return NextResponse.json(user)
+  } catch {
+    return NextResponse.json({ error: 'Failed to fetch notification preferences' }, { status: 500 })
+  }
 }
 
 export async function PATCH(request: NextRequest) {
@@ -24,13 +27,16 @@ export async function PATCH(request: NextRequest) {
 
   const { notifyMarketing, notifyProduct } = await request.json()
 
-  await prisma.user.update({
-    where: { id: session.user.id },
-    data: {
-      ...(typeof notifyMarketing === 'boolean' && { notifyMarketing }),
-      ...(typeof notifyProduct === 'boolean' && { notifyProduct }),
-    },
-  })
-
-  return NextResponse.json({ message: 'Preferences updated' })
+  try {
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        ...(typeof notifyMarketing === 'boolean' && { notifyMarketing }),
+        ...(typeof notifyProduct === 'boolean' && { notifyProduct }),
+      },
+    })
+    return NextResponse.json({ message: 'Preferences updated' })
+  } catch {
+    return NextResponse.json({ error: 'Failed to update preferences' }, { status: 500 })
+  }
 }

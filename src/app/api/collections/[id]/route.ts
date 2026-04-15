@@ -8,24 +8,27 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await params
-  const existing = await prisma.recipeCollection.findFirst({
-    where: { id, userId: session.user.id },
-  })
-  if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  try {
+    const existing = await prisma.recipeCollection.findFirst({
+      where: { id, userId: session.user.id },
+    })
+    if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  const { name, description, color } = await req.json()
+    const { name, description, color } = await req.json()
 
-  const updated = await prisma.recipeCollection.update({
-    where: { id },
-    data: {
-      ...(name?.trim() && { name: name.trim() }),
-      ...(description !== undefined && { description: description?.trim() || null }),
-      ...(color && { color }),
-    },
-    include: { _count: { select: { recipes: true } } },
-  })
-
-  return NextResponse.json(updated)
+    const updated = await prisma.recipeCollection.update({
+      where: { id },
+      data: {
+        ...(name?.trim() && { name: name.trim() }),
+        ...(description !== undefined && { description: description?.trim() || null }),
+        ...(color && { color }),
+      },
+      include: { _count: { select: { recipes: true } } },
+    })
+    return NextResponse.json(updated)
+  } catch {
+    return NextResponse.json({ error: 'Failed to update collection' }, { status: 500 })
+  }
 }
 
 // F39: DELETE /api/collections/[id] — delete a collection (recipes become uncollected)
@@ -34,11 +37,15 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await params
-  const existing = await prisma.recipeCollection.findFirst({
-    where: { id, userId: session.user.id },
-  })
-  if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  try {
+    const existing = await prisma.recipeCollection.findFirst({
+      where: { id, userId: session.user.id },
+    })
+    if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  await prisma.recipeCollection.delete({ where: { id } })
-  return NextResponse.json({ message: 'Deleted' })
+    await prisma.recipeCollection.delete({ where: { id } })
+    return NextResponse.json({ message: 'Deleted' })
+  } catch {
+    return NextResponse.json({ error: 'Failed to delete collection' }, { status: 500 })
+  }
 }

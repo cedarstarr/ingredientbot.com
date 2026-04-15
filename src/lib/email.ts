@@ -25,9 +25,12 @@ function escapeHtml(str: string): string {
 export async function sendEmail(opts: { to: string; subject: string; html: string }) {
   const client = getMailClient()
   if (!client) {
-    console.log('[email] ZeptoMail not configured, logging email:')
-    console.log(`  To: ${opts.to}`)
-    console.log(`  Subject: ${opts.subject}`)
+    // Dev-only fallback — suppress in production to avoid leaking email addresses to logs
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[email] ZeptoMail not configured, logging email:')
+      console.log(`  To: ${opts.to}`)
+      console.log(`  Subject: ${opts.subject}`)
+    }
     return
   }
   const fromMatch = EMAIL_FROM.match(/^(.*?)\s*<(.+?)>$/)

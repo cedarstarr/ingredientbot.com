@@ -20,11 +20,14 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   // Deduplicate + trim + lowercase
   const cleaned = [...new Set((tags as string[]).map(t => t.trim().toLowerCase()).filter(Boolean))]
 
-  const updated = await prisma.recipe.update({
-    where: { id },
-    data: { tags: cleaned },
-    select: { id: true, tags: true },
-  })
-
-  return NextResponse.json(updated)
+  try {
+    const updated = await prisma.recipe.update({
+      where: { id },
+      data: { tags: cleaned },
+      select: { id: true, tags: true },
+    })
+    return NextResponse.json(updated)
+  } catch {
+    return NextResponse.json({ error: 'Failed to update tags' }, { status: 500 })
+  }
 }

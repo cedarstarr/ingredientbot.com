@@ -9,14 +9,18 @@ export async function POST() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  await prisma.user.update({
-    where: { id: session.user.id },
-    data: { sessionsRevokedAt: new Date() },
-  })
+  try {
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: { sessionsRevokedAt: new Date() },
+    })
 
-  await prisma.session.deleteMany({ where: { userId: session.user.id } })
+    await prisma.session.deleteMany({ where: { userId: session.user.id } })
 
-  void logAuditEvent(session.user.id, 'signout_all', null)
+    void logAuditEvent(session.user.id, 'signout_all', null)
 
-  return NextResponse.json({ message: 'All sessions revoked' })
+    return NextResponse.json({ message: 'All sessions revoked' })
+  } catch {
+    return NextResponse.json({ error: 'Failed to revoke sessions' }, { status: 500 })
+  }
 }

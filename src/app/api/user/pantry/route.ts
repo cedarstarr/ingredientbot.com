@@ -6,13 +6,16 @@ export async function GET() {
   const session = await auth()
   if (!session?.user) return new Response('Unauthorized', { status: 401 })
 
-  const items = await prisma.pantryItem.findMany({
-    where: { userId: session.user.id },
-    orderBy: { addedAt: 'desc' },
-    select: { id: true, ingredient: true, addedAt: true, expiresAt: true },
-  })
-
-  return Response.json(items)
+  try {
+    const items = await prisma.pantryItem.findMany({
+      where: { userId: session.user.id },
+      orderBy: { addedAt: 'desc' },
+      select: { id: true, ingredient: true, addedAt: true, expiresAt: true },
+    })
+    return Response.json(items)
+  } catch {
+    return Response.json({ error: 'Failed to fetch pantry items' }, { status: 500 })
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -28,13 +31,16 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'ingredient is required' }, { status: 400 })
   }
 
-  // upsert to handle duplicates gracefully — schema has a unique index on (userId, ingredient)
-  const item = await prisma.pantryItem.upsert({
-    where: { userId_ingredient: { userId: session.user.id, ingredient } },
-    create: { userId: session.user.id, ingredient, expiresAt },
-    update: {}, // already exists — no-op
-    select: { id: true, ingredient: true, addedAt: true, expiresAt: true },
-  })
-
-  return Response.json(item)
+  try {
+    // upsert to handle duplicates gracefully — schema has a unique index on (userId, ingredient)
+    const item = await prisma.pantryItem.upsert({
+      where: { userId_ingredient: { userId: session.user.id, ingredient } },
+      create: { userId: session.user.id, ingredient, expiresAt },
+      update: {}, // already exists — no-op
+      select: { id: true, ingredient: true, addedAt: true, expiresAt: true },
+    })
+    return Response.json(item)
+  } catch {
+    return Response.json({ error: 'Failed to add pantry item' }, { status: 500 })
+  }
 }

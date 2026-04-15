@@ -12,18 +12,21 @@ export async function DELETE(
 
   const { id } = await params
 
-  // Verify ownership via the meal plan
-  const slot = await prisma.mealPlanSlot.findUnique({
-    where: { id },
-    include: { mealPlan: { select: { userId: true } } },
-  })
+  try {
+    // Verify ownership via the meal plan
+    const slot = await prisma.mealPlanSlot.findUnique({
+      where: { id },
+      include: { mealPlan: { select: { userId: true } } },
+    })
 
-  if (!slot) return NextResponse.json({ error: 'Slot not found' }, { status: 404 })
-  if (slot.mealPlan.userId !== session.user.id) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    if (!slot) return NextResponse.json({ error: 'Slot not found' }, { status: 404 })
+    if (slot.mealPlan.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    await prisma.mealPlanSlot.delete({ where: { id } })
+    return NextResponse.json({ ok: true })
+  } catch {
+    return NextResponse.json({ error: 'Failed to delete slot' }, { status: 500 })
   }
-
-  await prisma.mealPlanSlot.delete({ where: { id } })
-
-  return NextResponse.json({ ok: true })
 }

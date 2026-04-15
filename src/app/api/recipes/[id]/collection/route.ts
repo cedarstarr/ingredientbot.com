@@ -16,20 +16,23 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const { collectionId } = await req.json()
 
-  // If collectionId provided, verify it belongs to this user
-  if (collectionId) {
-    const col = await prisma.recipeCollection.findFirst({
-      where: { id: collectionId, userId: session.user.id },
-      select: { id: true },
+  try {
+    // If collectionId provided, verify it belongs to this user
+    if (collectionId) {
+      const col = await prisma.recipeCollection.findFirst({
+        where: { id: collectionId, userId: session.user.id },
+        select: { id: true },
+      })
+      if (!col) return NextResponse.json({ error: 'Collection not found' }, { status: 404 })
+    }
+
+    const updated = await prisma.recipe.update({
+      where: { id },
+      data: { collectionId: collectionId ?? null },
+      select: { id: true, collectionId: true },
     })
-    if (!col) return NextResponse.json({ error: 'Collection not found' }, { status: 404 })
+    return NextResponse.json(updated)
+  } catch {
+    return NextResponse.json({ error: 'Failed to update recipe collection' }, { status: 500 })
   }
-
-  const updated = await prisma.recipe.update({
-    where: { id },
-    data: { collectionId: collectionId ?? null },
-    select: { id: true, collectionId: true },
-  })
-
-  return NextResponse.json(updated)
 }
