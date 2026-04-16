@@ -18,7 +18,7 @@
 | 4 | Feature Triage | /site-features | DONE | 1 | 2026-04-09 | [view](reports/2026-04-09-site-features.md) |
 | 5 | Feature Install | /site-install | DONE | 1 | 2026-04-10 00:00 | [view](reports/2026-04-10-site-install.md) |
 | 6 | Write Tests | /qa-tests-reconcile | DONE | 2 | 2026-04-14 | [view](reports/2026-04-14-tests-reconcile.md) |
-| 7 | Verify Build | /qa-tests-fix | PENDING | 0 | — | — |
+| 7 | Verify Build | /qa-tests-fix | DONE | 1 | 2026-04-16 | [view](reports/2026-04-16-tests-fix.md) |
 | 8 | Database Review | /qa-db | DONE | 1 | 2026-04-14 | [view](reports/2026-04-14-site-db.md) |
 | 9 | QA / Bug Check | /qa-bugs | PENDING | 0 | — | — |
 | 10 | Security Hardening | /qa-security | PENDING | 0 | — | — |
