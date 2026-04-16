@@ -15,7 +15,7 @@ test.describe('Settings page', () => {
   })
 
   test('shows the logged-in email address', async ({ page }) => {
-    await expect(page.getByText('test@test.com')).toBeVisible()
+    await expect(page.getByText('Email: test@test.com')).toBeVisible()
   })
 
   test('shows Account section with email and name', async ({ page }) => {
