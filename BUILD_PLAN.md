@@ -1,7 +1,7 @@
 # IngredientBot — Build Plan
 
 **Source**: FEATURES.md (triaged 2026-04-09)
-**Last Updated**: 2026-04-11
+**Last Updated**: 2026-04-16
 
 ---
 
@@ -43,12 +43,8 @@
 |---|---------|--------|--------|
 | F33 | **Serving size slider with live scaling** | SMALL | DONE |
 | F45 | **Weekly meal plan email digest** | SMALL | DONE |
-| F46 | **Expiration date tracking** | MEDIUM | PENDING |
 | F47 | **Recipe completion history + streak** | MEDIUM | DONE |
-| F48 | **Nutritional summary over time (weekly/monthly)** | MEDIUM | PENDING |
-| F49 | **Family profile (multi-eater with different restrictions)** | MEDIUM | PENDING |
 | F51 | **Recipe rating (personal 1–5 stars)** | SMALL | DONE |
-| F52 | **Referral program (extra credits)** | MEDIUM | PENDING |
 | F53 | **Budget mode (prefer cheaper ingredient combos)** | SMALL | DONE |
 
 ### Nice-to-Haves
@@ -57,30 +53,37 @@
 |---|---------|--------|--------|
 | F32 | **Prep time filter** | SMALL | DONE |
 | F34 | **Cuisine selector** | SMALL | PENDING |
-| F35 | **Difficulty selector** | SMALL | PENDING |
 | F54 | **"Impress me" zero-input generation mode** | SMALL | DONE |
-| F56 | **Leftover photo mode (snap leftovers, AI detects contents)** | LARGE | PENDING |
-| F57 | **Recipe card PDF export** | SMALL | PENDING |
-| F58 | **Weekly meal themes ("Taco Tuesday + Pasta Wednesday")** | SMALL | PENDING |
-| F59 | **Macro-targeting mode (generate recipes hitting protein/carb targets)** | SMALL | PENDING |
-| F60 | **"Make it faster" modifier (<15 min constraint)** | SMALL | PENDING |
-| F62 | **Recipe URL import (paste any recipe URL, AI reformats it)** | MEDIUM | PENDING |
-| F63 | **Ingredient cost estimate (rough per-serving cost, no live data)** | SMALL | PENDING |
-| F65 | **Cuisine trend feed (weekly "try this cuisine" suggestion)** | SMALL | PENDING |
-| F66 | **Dietary challenge mode (7-day structured programs)** | MEDIUM | PENDING |
-| F67 | **Smart pantry suggestions (proactive "you often cook X, add Y?")** | LARGE | PENDING |
-| F68 | **Recipe complexity graph (visualize cookbook by ease/time/cuisine)** | LARGE | PENDING |
-| F69 | **Cooking history heatmap (GitHub-style contribution graph)** | LARGE | PENDING |
 | F70 | **AI chef personality toggle (home cook / French chef / street food vendor tone)** | SMALL | DONE |
 | F71 | **"Date night" mode (3-course menu from your pantry)** | SMALL | DONE |
-| F72 | **Ingredient-to-cuisine mapper (miso + sesame oil → 8 Japanese dishes)** | SMALL | PENDING |
-| F73 | **Recipe video script generation (AI-native future feature)** | LARGE | PENDING |
 
 ---
 
 ## Delayed — Future Phases
 
-_No features delayed — all planned features included in Phase 1._
+> Non-MVP — use /plan-feature-audit to restore when ready.
+
+| # | Feature | Effort | Section |
+|---|---------|--------|---------|
+| F35 | **Difficulty selector** | SMALL | Nice-to-Haves |
+| F46 | **Expiration date tracking** | MEDIUM | Growth & Retention |
+| F48 | **Nutritional summary over time (weekly/monthly)** | MEDIUM | Growth & Retention |
+| F49 | **Family profile (multi-eater with different restrictions)** | MEDIUM | Growth & Retention |
+| F52 | **Referral program (extra credits)** | MEDIUM | Growth & Retention |
+| F56 | **Leftover photo mode (snap leftovers, AI detects contents)** | LARGE | Nice-to-Haves |
+| F57 | **Recipe card PDF export** | SMALL | Nice-to-Haves |
+| F58 | **Weekly meal themes ("Taco Tuesday + Pasta Wednesday")** | SMALL | Nice-to-Haves |
+| F59 | **Macro-targeting mode (generate recipes hitting protein/carb targets)** | SMALL | Nice-to-Haves |
+| F60 | **"Make it faster" modifier (<15 min constraint)** | SMALL | Nice-to-Haves |
+| F62 | **Recipe URL import (paste any recipe URL, AI reformats it)** | MEDIUM | Nice-to-Haves |
+| F63 | **Ingredient cost estimate (rough per-serving cost, no live data)** | SMALL | Nice-to-Haves |
+| F65 | **Cuisine trend feed (weekly "try this cuisine" suggestion)** | SMALL | Nice-to-Haves |
+| F66 | **Dietary challenge mode (7-day structured programs)** | MEDIUM | Nice-to-Haves |
+| F67 | **Smart pantry suggestions (proactive "you often cook X, add Y?")** | LARGE | Nice-to-Haves |
+| F68 | **Recipe complexity graph (visualize cookbook by ease/time/cuisine)** | LARGE | Nice-to-Haves |
+| F69 | **Cooking history heatmap (GitHub-style contribution graph)** | LARGE | Nice-to-Haves |
+| F72 | **Ingredient-to-cuisine mapper (miso + sesame oil → 8 Japanese dishes)** | SMALL | Nice-to-Haves |
+| F73 | **Recipe video script generation (AI-native future feature)** | LARGE | Nice-to-Haves |
 
 ---
 
