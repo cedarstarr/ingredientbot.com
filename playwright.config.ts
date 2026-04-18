@@ -22,7 +22,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'PATH=$HOME/.nvm/versions/node/v20.20.0/bin:$PATH npm run dev -- --port 3010',
+    command: 'PATH=$HOME/.nvm/versions/node/v20.20.0/bin:$PATH npm run start -- --port 3010',
     port: 3010,
     reuseExistingServer: !process.env.CI,
     timeout: 30000,
