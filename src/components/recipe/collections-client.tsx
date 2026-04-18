@@ -134,7 +134,7 @@ export function CollectionsClient({ collections: initial }: CollectionsClientPro
                     className="h-9 w-9 rounded-lg flex items-center justify-center shrink-0"
                     style={{ backgroundColor: col.color + '20' }}
                   >
-                    <FolderOpen className="h-4.5 w-4.5" style={{ color: col.color }} />
+                    <FolderOpen className="h-5 w-5" style={{ color: col.color }} />
                   </div>
                   <div className="min-w-0">
                     <Link

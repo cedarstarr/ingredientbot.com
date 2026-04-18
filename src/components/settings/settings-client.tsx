@@ -5,6 +5,7 @@ import { signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
 import { useRouter } from 'next/navigation'
@@ -155,20 +156,30 @@ export function SettingsClient() {
       <div className="rounded-lg border border-border bg-card p-5">
         <h2 className="text-base font-semibold text-foreground mb-4">Email Notifications</h2>
         <div className="space-y-3">
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" checked={notifyMarketing} onChange={e => setNotifyMarketing(e.target.checked)} className="h-4 w-4 rounded" />
+          <div className="flex items-start gap-3">
+            <Checkbox
+              id="notifyMarketing"
+              checked={notifyMarketing}
+              onCheckedChange={(checked) => setNotifyMarketing(checked === true)}
+              className="mt-0.5"
+            />
             <div>
-              <p className="text-sm font-medium text-foreground">Marketing emails</p>
+              <Label htmlFor="notifyMarketing" className="text-sm font-medium text-foreground cursor-pointer">Marketing emails</Label>
               <p className="text-xs text-muted-foreground">Tips, updates, and new features</p>
             </div>
-          </label>
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" checked={notifyProduct} onChange={e => setNotifyProduct(e.target.checked)} className="h-4 w-4 rounded" />
+          </div>
+          <div className="flex items-start gap-3">
+            <Checkbox
+              id="notifyProduct"
+              checked={notifyProduct}
+              onCheckedChange={(checked) => setNotifyProduct(checked === true)}
+              className="mt-0.5"
+            />
             <div>
-              <p className="text-sm font-medium text-foreground">Product emails</p>
+              <Label htmlFor="notifyProduct" className="text-sm font-medium text-foreground cursor-pointer">Product emails</Label>
               <p className="text-xs text-muted-foreground">Recipe suggestions and cooking tips</p>
             </div>
-          </label>
+          </div>
         </div>
         <Button size="sm" className="mt-4" onClick={handleNotifSave} disabled={notifLoading}>
           {notifLoading ? 'Saving...' : 'Save Preferences'}

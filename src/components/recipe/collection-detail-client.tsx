@@ -63,11 +63,17 @@ export function CollectionDetailClient({ collection }: Props) {
 
       {/* Recipes */}
       {collection.recipes.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <FolderOpen className="h-12 w-12 text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">
-            No recipes in this collection yet. Open any recipe and use the collection picker to add it here.
+        <div className="flex flex-col items-center justify-center py-16 text-center rounded-xl border border-dashed border-border bg-muted/20">
+          <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+            <FolderOpen className="h-7 w-7 text-primary" />
+          </div>
+          <h2 className="text-lg font-semibold text-foreground mb-2">No recipes yet</h2>
+          <p className="text-sm text-muted-foreground max-w-sm mb-6">
+            Open any recipe and use the collection picker to add it to this collection.
           </p>
+          <Button asChild variant="outline" size="sm">
+            <Link href="/saved">Browse Saved Recipes</Link>
+          </Button>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">

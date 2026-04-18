@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { X, Plus, Loader2, ChefHat, Package, Calendar, AlertTriangle } from 'lucide-react'
+import { X, Plus, Loader2, ChefHat, Package, Calendar, AlertTriangle, Circle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface PantryItem {
@@ -49,7 +49,7 @@ function ExpiryBadge({ expiresAt }: { expiresAt: string | null }) {
   if (urgency === 'critical') {
     return (
       <span className="inline-flex items-center gap-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs px-1.5 py-0.5 font-medium">
-        <span aria-hidden>🔴</span>
+        <Circle className="h-2.5 w-2.5 fill-current" aria-hidden="true" />
         {days === 0 ? 'Today' : `${days}d`}
       </span>
     )
@@ -58,7 +58,7 @@ function ExpiryBadge({ expiresAt }: { expiresAt: string | null }) {
   if (urgency === 'soon') {
     return (
       <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs px-1.5 py-0.5 font-medium">
-        <span aria-hidden>🟡</span>
+        <Circle className="h-2.5 w-2.5 fill-current" aria-hidden="true" />
         {days}d
       </span>
     )

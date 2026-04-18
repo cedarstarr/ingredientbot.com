@@ -27,7 +27,7 @@ export default function OfflinePage() {
         </Button>
         <button
           onClick={() => window.location.reload()}
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
         >
           Try again
         </button>
