@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
+const PORT = 3010
+
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
@@ -8,7 +10,7 @@ export default defineConfig({
   workers: 1,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:3010',
+    baseURL: `http://localhost:${PORT}`,
     trace: 'on-first-retry',
   },
   projects: [
@@ -22,10 +24,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'PATH=$HOME/.nvm/versions/node/v20.20.0/bin:$PATH npm run start -- --port 3010',
-    port: 3010,
+    command: 'PATH=$HOME/.nvm/versions/node/v20.20.0/bin:$PATH npm run start',
+    port: PORT,
     reuseExistingServer: !process.env.CI,
     timeout: 30000,
-    env: { PLAYWRIGHT_TEST: 'true' },
+    env: { PORT: String(PORT), PLAYWRIGHT_TEST: 'true' },
   },
 })
