@@ -329,7 +329,7 @@ export function KitchenPanel() {
     } finally {
       setIsGenerating(false)
     }
-  }, [allIngredients, cuisine, dietary, isGenerating, leftoverMode, leftoverText, strictMode, teachMode, prepTimeLimit, budgetMode, chefPersonality, dateNightMode])
+  }, [allIngredients, expiringIngredients, expiryFirstMode, cuisine, dietary, isGenerating, leftoverMode, leftoverText, strictMode, teachMode, prepTimeLimit, budgetMode, chefPersonality, dateNightMode])
 
   // F54: "Impress Me" — bypass ingredient validation, AI chooses ingredients
   const handleImpressMe = useCallback(async () => {

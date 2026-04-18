@@ -25,7 +25,7 @@ function WelcomeEmail({ name, siteUrl, verifyUrl }: Props) {
         )}
         <Hr style={{ marginTop: '32px' }} />
         <Text style={{ color: '#999', fontSize: '13px' }}>
-          <Link href={siteUrl} style={{ color: '#999' }}>robot-food.com</Link>
+          <Link href={siteUrl} style={{ color: '#999' }}>ingredientbot.com</Link>
         </Text>
       </Body>
     </Html>

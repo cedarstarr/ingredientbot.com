@@ -101,10 +101,10 @@ export default function TermsPage() {
             <p className="text-muted-foreground">
               Questions about these terms? Email us at{' '}
               <a
-                href="mailto:hello@robot-food.com"
+                href="mailto:hello@ingredientbot.com"
                 className="text-primary underline underline-offset-4 hover:opacity-80"
               >
-                hello@robot-food.com
+                hello@ingredientbot.com
               </a>.
             </p>
           </section>
