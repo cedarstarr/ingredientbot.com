@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { streamText } from 'ai'
 import { claudeSonnet } from '@/lib/ai'
+import { aiLimiter } from '@/lib/rate-limit'
 
 export const maxDuration = 60
 
@@ -19,6 +20,10 @@ const actionPrompts: Record<string, (recipe: any, options: any) => string> = {
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (!session) return new Response('Unauthorized', { status: 401 })
+
+  const ip = req.headers.get('x-forwarded-for') ?? '127.0.0.1'
+  const { success } = await aiLimiter.check(ip)
+  if (!success) return new Response('Too many requests', { status: 429 })
 
   const { id } = await params
   const recipe = await prisma.recipe.findFirst({

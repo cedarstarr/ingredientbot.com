@@ -18,7 +18,32 @@ function startOfCurrentMonth(): Date {
 function isValidUrl(str: string): boolean {
   try {
     const url = new URL(str)
-    return url.protocol === 'http:' || url.protocol === 'https:'
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return false
+    // SSRF guard — block private/loopback/link-local/cloud-metadata hostnames
+    // Chose hostname blocklist over DNS resolution: we cannot reliably resolve
+    // DNS here without a bigger dep, and this covers the 99% attack surface
+    // (cloud metadata IP, literal localhost, RFC1918 addresses).
+    const host = url.hostname.toLowerCase()
+    if (
+      host === 'localhost' ||
+      host === '0.0.0.0' ||
+      host.endsWith('.localhost') ||
+      host.endsWith('.local') ||
+      host === '169.254.169.254' || // AWS/GCP/Azure instance metadata
+      host === 'metadata.google.internal' ||
+      host.startsWith('127.') ||
+      host.startsWith('10.') ||
+      host.startsWith('192.168.') ||
+      /^172\.(1[6-9]|2\d|3[01])\./.test(host) ||
+      host.startsWith('169.254.') ||
+      host.startsWith('::1') ||
+      host.startsWith('fc') || // fc00::/7 unique-local IPv6
+      host.startsWith('fd') ||
+      host.startsWith('fe80:') // link-local IPv6
+    ) {
+      return false
+    }
+    return true
   } catch {
     return false
   }

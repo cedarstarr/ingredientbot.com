@@ -2,12 +2,17 @@ import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { generateText } from 'ai'
 import { claudeSonnet } from '@/lib/ai'
+import { aiLimiter } from '@/lib/rate-limit'
 
 export const maxDuration = 60
 
 export async function POST(req: NextRequest) {
   const session = await auth()
   if (!session) return new Response('Unauthorized', { status: 401 })
+
+  const ip = req.headers.get('x-forwarded-for') ?? '127.0.0.1'
+  const { success } = await aiLimiter.check(ip)
+  if (!success) return new Response('Too many requests', { status: 429 })
 
   if (process.env.PLAYWRIGHT_TEST === 'true') {
     return Response.json({ ingredients: ['eggs', 'cheddar cheese', 'broccoli', 'leftover rice', 'butter', 'garlic'] })

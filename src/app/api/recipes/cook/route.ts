@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateText } from 'ai'
 import { claudeSonnet } from '@/lib/ai'
+import { aiLimiter } from '@/lib/rate-limit'
 import { Difficulty } from '@prisma/client'
 
 export const maxDuration = 60
@@ -18,6 +19,10 @@ function startOfCurrentMonth(): Date {
 export async function POST(req: NextRequest) {
   const session = await auth()
   if (!session) return new Response('Unauthorized', { status: 401 })
+
+  const ip = req.headers.get('x-forwarded-for') ?? '127.0.0.1'
+  const { success } = await aiLimiter.check(ip)
+  if (!success) return new Response('Too many requests', { status: 429 })
 
   if (process.env.PLAYWRIGHT_TEST === 'true') {
     // Skip DB write and AI call — return a stable mock recipe id

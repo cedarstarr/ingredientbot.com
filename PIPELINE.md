@@ -21,7 +21,7 @@
 | 7 | Verify Build | /qa-tests-fix | DONE | 1 | 2026-04-16 | [view](reports/2026-04-16-tests-fix.md) |
 | 8 | Database Review | /qa-db | DONE | 1 | 2026-04-14 | [view](reports/2026-04-14-site-db.md) |
 | 9 | QA / Bug Check | /qa-bugs | PENDING | 0 | — | — |
-| 10 | Security Hardening | /qa-security | PENDING | 0 | — | — |
+| 10 | Security Hardening | /qa-security | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-security.md) |
 | 11 | UX/UI Pass | /qa-design | PENDING | 0 | — | — |
 | 12 | Navigation Audit | /qa-nav | PENDING | 0 | — | — |
 | 13 | Performance Audit | /qa-perf | PENDING | 0 | — | — |
@@ -31,9 +31,9 @@
 | 17 | Client Update | /ops-client-report | PENDING | 0 | — | — |
 | 18 | Launch | /ops-launch | PENDING | 0 | — | — |
 
-**Progress: 7/18 stages complete**
+**Progress: 8/18 stages complete**
 
-**Last Updated**: 2026-04-17 (qa-tests-reconcile run 3 complete)
+**Last Updated**: 2026-04-18 (qa-security complete — 8 issues fixed)
 
 ---
 
@@ -62,3 +62,4 @@
 | 2026-04-14 | /qa-db | — | SUCCESS | 9 issues found, 7 fixed (3 HIGH, 4 MEDIUM fixed; 2 LOW flagged only) |
 | 2026-04-14 | /qa-tests-reconcile | ~5m | SUCCESS | 2 new test files (F24/F35, F42/F43/F45); kitchen-prefs API tests added; stale content-type mock fixed |
 | 2026-04-17 | /qa-tests-reconcile | ~5m | SUCCESS | 1 new test file (kitchen-voice-input.spec.ts); F55 voice input + F34 cuisine selector expansion (14 cuisines) covered; 0 stale, 0 code fixes; build clean |
+| 2026-04-18 | /qa-security | ~15m | SUCCESS | 8 issues found (1 HIGH, 5 MEDIUM, 2 LOW), all fixed; systemic fix added aiLimiter to 5 AI routes; SSRF hardened in /api/recipes/import; security headers in next.config.ts; HTML-escape in digest email |

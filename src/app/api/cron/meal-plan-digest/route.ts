@@ -45,6 +45,12 @@ export async function GET(req: NextRequest) {
   const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
   const MEAL_ORDER = ['breakfast', 'lunch', 'dinner']
 
+  // HTML-escape strings before interpolating into email template — user.name and
+  // recipe.title are user-controlled, so raw interpolation risks self-XSS in
+  // webmail clients that render HTML liberally.
+  const escapeHtml = (s: string) =>
+    s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+
   let sent = 0
   let failed = 0
   const errors: string[] = []
@@ -70,12 +76,12 @@ export async function GET(req: NextRequest) {
           )
           const mealsHtml = sortedSlots.map(s => {
             const time = (s.recipe.prepTimeMin ?? 0) + (s.recipe.cookTimeMin ?? 0)
-            return `<tr><td style="padding:4px 12px 4px 0;color:#555;font-size:13px;text-transform:capitalize;">${s.mealType}</td><td style="padding:4px 0;font-size:14px;font-weight:600;color:#111;">${s.recipe.title}${time > 0 ? ` <span style="font-weight:normal;color:#888;">(${time}m)</span>` : ''}</td></tr>`
+            return `<tr><td style="padding:4px 12px 4px 0;color:#555;font-size:13px;text-transform:capitalize;">${escapeHtml(s.mealType)}</td><td style="padding:4px 0;font-size:14px;font-weight:600;color:#111;">${escapeHtml(s.recipe.title)}${time > 0 ? ` <span style="font-weight:normal;color:#888;">(${time}m)</span>` : ''}</td></tr>`
           }).join('')
           return `<div style="margin-bottom:16px;"><p style="font-weight:700;font-size:15px;margin:0 0 6px;color:#222;">${DAY_NAMES[day]}</p><table style="border-collapse:collapse;">${mealsHtml}</table></div>`
         }).join('')
 
-      const displayName = plan.user.name || 'there'
+      const displayName = escapeHtml(plan.user.name || 'there')
       const weekLabel = plan.weekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' })
       const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ingredientbot.com'
 

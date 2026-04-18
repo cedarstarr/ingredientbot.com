@@ -3,10 +3,15 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateText } from 'ai'
 import { claudeSonnet } from '@/lib/ai'
+import { aiLimiter } from '@/lib/rate-limit'
 
-export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const ip = req.headers.get('x-forwarded-for') ?? '127.0.0.1'
+  const { success } = await aiLimiter.check(ip)
+  if (!success) return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
 
   if (process.env.PLAYWRIGHT_TEST === 'true') {
     return NextResponse.json({ nutrition: { calories: 620, protein: 32, fat: 24, carbs: 68, fiber: 3 } })
