@@ -584,6 +584,7 @@ export function KitchenPanel() {
 
             {/* Filters */}
             <div className="space-y-2 pt-1">
+              {/* F34: Cuisine selector — 14 cuisines + Any default */}
               <div className="space-y-1">
                 <label className="text-xs font-medium text-muted-foreground">Cuisine</label>
                 <Select value={cuisine} onValueChange={setCuisine}>
@@ -592,13 +593,20 @@ export function KitchenPanel() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="any">Any cuisine</SelectItem>
+                    <SelectItem value="Thai">Thai</SelectItem>
                     <SelectItem value="Italian">Italian</SelectItem>
-                    <SelectItem value="Asian">Asian</SelectItem>
                     <SelectItem value="Mexican">Mexican</SelectItem>
-                    <SelectItem value="Mediterranean">Mediterranean</SelectItem>
-                    <SelectItem value="American">American</SelectItem>
+                    <SelectItem value="Japanese">Japanese</SelectItem>
                     <SelectItem value="Indian">Indian</SelectItem>
+                    <SelectItem value="Mediterranean">Mediterranean</SelectItem>
                     <SelectItem value="French">French</SelectItem>
+                    <SelectItem value="American">American</SelectItem>
+                    <SelectItem value="Chinese">Chinese</SelectItem>
+                    <SelectItem value="Korean">Korean</SelectItem>
+                    <SelectItem value="Middle Eastern">Middle Eastern</SelectItem>
+                    <SelectItem value="Greek">Greek</SelectItem>
+                    <SelectItem value="Vietnamese">Vietnamese</SelectItem>
+                    <SelectItem value="Spanish">Spanish</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
