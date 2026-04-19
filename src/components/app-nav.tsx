@@ -7,7 +7,7 @@ import { useSession, signOut } from 'next-auth/react'
 import { cn } from '@/lib/utils'
 import {
   ChefHat, BookOpen, LayoutDashboard, Settings, Shield,
-  LogOut, Menu, X, CalendarDays, Link2, History, FolderOpen, Package,
+  LogOut, Menu, X, CalendarDays, Link2, History, FolderOpen, Package, Sparkles,
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 
@@ -21,15 +21,21 @@ function hasExpiringSoon(expiresAt: string): boolean {
   return days <= 7
 }
 
+// Primary nav — frequency-ordered: Kitchen first, daily-use tools up top
 const NAV_LINKS = [
   { href: '/kitchen', label: 'Kitchen', icon: ChefHat },
   { href: '/pantry', label: 'Pantry', icon: Package },
-  { href: '/import', label: 'Import Recipe', icon: Link2 },
   { href: '/saved', label: 'Saved Recipes', icon: BookOpen },
-  { href: '/history', label: 'History', icon: History },
   { href: '/collections', label: 'Collections', icon: FolderOpen },
+  { href: '/history', label: 'History', icon: History },
+  { href: '/import', label: 'Import Recipe', icon: Link2 },
   { href: '/meal-plan', label: 'Meal Plan', icon: CalendarDays },
+]
+
+// Footer nav — low-frequency account/utility links
+const FOOTER_NAV_LINKS = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/upgrade', label: 'Upgrade', icon: Sparkles },
   { href: '/settings', label: 'Settings', icon: Settings },
 ]
 
@@ -104,7 +110,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
         )}
       </div>
 
-      {/* Nav links */}
+      {/* Primary nav — kitchen + recipe tools */}
       <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-0.5">
         {NAV_LINKS.map(({ href, label, icon }) => (
           <NavLink
@@ -129,9 +135,23 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
         )}
       </nav>
 
-      {/* Footer */}
-      <div className="shrink-0 border-t border-border px-2 py-3">
-        <div className="flex items-center justify-between px-3 py-1.5">
+      {/* Footer nav — account + upgrade + settings */}
+      <div className="shrink-0 border-t border-border px-2 pt-2 pb-1">
+        <div className="space-y-0.5 mb-1">
+          {FOOTER_NAV_LINKS.map(({ href, label, icon }) => (
+            <NavLink
+              key={href}
+              href={href}
+              label={label}
+              icon={icon}
+              active={isActive(href)}
+              onClick={onClose}
+            />
+          ))}
+        </div>
+
+        {/* User info + sign out */}
+        <div className="flex items-center justify-between px-3 py-1.5 mt-1">
           <div className="min-w-0">
             <p className="truncate text-xs font-medium text-foreground max-w-[120px]">
               {session?.user?.name || 'Account'}
