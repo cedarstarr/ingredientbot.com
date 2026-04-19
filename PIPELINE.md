@@ -25,15 +25,15 @@
 | 11 | UX/UI Pass | /qa-design | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
 | 12 | Navigation Audit | /qa-nav | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-nav.md) |
 | 13 | Performance Audit | /qa-perf | PENDING | 0 | — | — |
-| 14 | SEO Audit | /qa-seo | PENDING | 0 | — | — |
+| 14 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
 | 15 | Accessibility Audit | /qa-a11y | PENDING | 0 | — | — |
 | 16 | Final E2E Tests | /qa-tests-fix | PENDING | 0 | — | — |
 | 17 | Client Update | /ops-client-report | PENDING | 0 | — | — |
 | 18 | Launch | /ops-launch | PENDING | 0 | — | — |
 
-**Progress: 10/18 stages complete**
+**Progress: 11/18 stages complete**
 
-**Last Updated**: 2026-04-18 (qa-nav complete — Option C applied, /upgrade added to nav)
+**Last Updated**: 2026-04-19 (qa-seo complete — 14 issues found, 13 fixed, 1 accepted; build clean)
 
 ---
 
@@ -65,3 +65,4 @@
 | 2026-04-18 | /qa-security | ~15m | SUCCESS | 8 issues found (1 HIGH, 5 MEDIUM, 2 LOW), all fixed; systemic fix added aiLimiter to 5 AI routes; SSRF hardened in /api/recipes/import; security headers in next.config.ts; HTML-escape in digest email |
 | 2026-04-18 | /qa-design | ~10m | SUCCESS | 7 issues fixed: admin active-link indicator, shadcn Checkbox upgrade, emoji→Lucide icons, invalid Tailwind class, empty state improvement, settings card semantic markup, focus-visible ring |
 | 2026-04-18 | /qa-nav | ~5m | SUCCESS | 1 orphan (/upgrade), 0 dead links; Option C applied (Kitchen-first, footer zone for Dashboard/Upgrade/Settings); build clean |
+| 2026-04-19 | /qa-seo | ~15m | SUCCESS | 14 issues found (1 CRITICAL, 3 HIGH, 4 MEDIUM, 6 LOW); 13 fixed: Recipe+WebApp JSON-LD, canonicals, OG image, twitter card, sitemap (auth-gated /kitchen removed, public recipe entries added), robots env var fix, privacy/terms OG, (app)/loading.tsx; 1 accepted (offline page client directive needed); build clean |
