@@ -23,7 +23,7 @@
 | 9 | QA / Bug Check | /qa-bugs | PENDING | 0 | — | — |
 | 10 | Security Hardening | /qa-security | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-security.md) |
 | 11 | UX/UI Pass | /qa-design | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
-| 12 | Navigation Audit | /qa-nav | PENDING | 0 | — | — |
+| 12 | Navigation Audit | /qa-nav | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-nav.md) |
 | 13 | Performance Audit | /qa-perf | PENDING | 0 | — | — |
 | 14 | SEO Audit | /qa-seo | PENDING | 0 | — | — |
 | 15 | Accessibility Audit | /qa-a11y | PENDING | 0 | — | — |
@@ -31,9 +31,9 @@
 | 17 | Client Update | /ops-client-report | PENDING | 0 | — | — |
 | 18 | Launch | /ops-launch | PENDING | 0 | — | — |
 
-**Progress: 9/18 stages complete**
+**Progress: 10/18 stages complete**
 
-**Last Updated**: 2026-04-18 (qa-design complete — 7 issues fixed)
+**Last Updated**: 2026-04-18 (qa-nav complete — Option C applied, /upgrade added to nav)
 
 ---
 
@@ -64,3 +64,4 @@
 | 2026-04-17 | /qa-tests-reconcile | ~5m | SUCCESS | 1 new test file (kitchen-voice-input.spec.ts); F55 voice input + F34 cuisine selector expansion (14 cuisines) covered; 0 stale, 0 code fixes; build clean |
 | 2026-04-18 | /qa-security | ~15m | SUCCESS | 8 issues found (1 HIGH, 5 MEDIUM, 2 LOW), all fixed; systemic fix added aiLimiter to 5 AI routes; SSRF hardened in /api/recipes/import; security headers in next.config.ts; HTML-escape in digest email |
 | 2026-04-18 | /qa-design | ~10m | SUCCESS | 7 issues fixed: admin active-link indicator, shadcn Checkbox upgrade, emoji→Lucide icons, invalid Tailwind class, empty state improvement, settings card semantic markup, focus-visible ring |
+| 2026-04-18 | /qa-nav | ~5m | SUCCESS | 1 orphan (/upgrade), 0 dead links; Option C applied (Kitchen-first, footer zone for Dashboard/Upgrade/Settings); build clean |
