@@ -1,10 +1,45 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ChefHat, Camera, Sparkles, Sliders, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ingredientbot.com'
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: baseUrl,
+  },
+}
+
+const webAppJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'IngredientBot',
+  alternateName: 'Robot Food',
+  url: baseUrl,
+  description: 'AI-powered recipe suggestions based on ingredients you have. Type what\'s in your fridge, snap a photo, and get instant recipe ideas powered by Claude AI.',
+  applicationCategory: 'FoodApplication',
+  operatingSystem: 'Web',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+    description: 'Free to start — no credit card needed',
+  },
+  author: {
+    '@type': 'Organization',
+    name: 'IngredientBot',
+    url: baseUrl,
+  },
+}
+
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppJsonLd) }}
+      />
       {/* Nav */}
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">

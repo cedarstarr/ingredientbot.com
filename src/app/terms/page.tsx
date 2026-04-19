@@ -2,9 +2,19 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ChefHat } from 'lucide-react'
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ingredientbot.com'
+
 export const metadata: Metadata = {
   title: 'Terms of Service — Robot Food',
   description: 'Terms and conditions for using Robot Food, the AI-powered recipe assistant.',
+  alternates: {
+    canonical: `${baseUrl}/terms`,
+  },
+  openGraph: {
+    title: 'Terms of Service — Robot Food',
+    description: 'Terms and conditions for using Robot Food, the AI-powered recipe assistant.',
+    siteName: 'IngredientBot',
+  },
 }
 
 export default function TermsPage() {

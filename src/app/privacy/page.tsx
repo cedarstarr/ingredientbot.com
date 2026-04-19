@@ -2,9 +2,19 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ChefHat } from 'lucide-react'
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ingredientbot.com'
+
 export const metadata: Metadata = {
   title: 'Privacy Policy — Robot Food',
   description: 'How Robot Food collects, uses, and protects your data when you use our AI recipe assistant.',
+  alternates: {
+    canonical: `${baseUrl}/privacy`,
+  },
+  openGraph: {
+    title: 'Privacy Policy — Robot Food',
+    description: 'How Robot Food collects, uses, and protects your data when you use our AI recipe assistant.',
+    siteName: 'IngredientBot',
+  },
 }
 
 export default function PrivacyPage() {
