@@ -51,41 +51,36 @@ export async function GET(req: NextRequest) {
   const escapeHtml = (s: string) =>
     s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
 
-  let sent = 0
-  let failed = 0
-  const errors: string[] = []
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ingredientbot.com'
 
-  for (const plan of mealPlans) {
-    if (plan.slots.length === 0) continue
+  // Build and send email for a single plan — extracted so Promise.allSettled can dispatch in parallel
+  const sendPlanEmail = (plan: typeof mealPlans[number]) => {
+    if (plan.slots.length === 0) return Promise.resolve(null)
 
-    try {
-      // Group slots by day
-      const byDay = new Map<number, typeof plan.slots>()
-      for (const slot of plan.slots) {
-        const arr = byDay.get(slot.dayOfWeek) ?? []
-        arr.push(slot)
-        byDay.set(slot.dayOfWeek, arr)
-      }
+    const byDay = new Map<number, typeof plan.slots>()
+    for (const slot of plan.slots) {
+      const arr = byDay.get(slot.dayOfWeek) ?? []
+      arr.push(slot)
+      byDay.set(slot.dayOfWeek, arr)
+    }
 
-      // Build plain-text meal list HTML
-      const daysHtml = [...byDay.entries()]
-        .sort(([a], [b]) => a - b)
-        .map(([day, slots]) => {
-          const sortedSlots = [...slots].sort(
-            (a, b) => MEAL_ORDER.indexOf(a.mealType) - MEAL_ORDER.indexOf(b.mealType)
-          )
-          const mealsHtml = sortedSlots.map(s => {
-            const time = (s.recipe.prepTimeMin ?? 0) + (s.recipe.cookTimeMin ?? 0)
-            return `<tr><td style="padding:4px 12px 4px 0;color:#555;font-size:13px;text-transform:capitalize;">${escapeHtml(s.mealType)}</td><td style="padding:4px 0;font-size:14px;font-weight:600;color:#111;">${escapeHtml(s.recipe.title)}${time > 0 ? ` <span style="font-weight:normal;color:#888;">(${time}m)</span>` : ''}</td></tr>`
-          }).join('')
-          return `<div style="margin-bottom:16px;"><p style="font-weight:700;font-size:15px;margin:0 0 6px;color:#222;">${DAY_NAMES[day]}</p><table style="border-collapse:collapse;">${mealsHtml}</table></div>`
+    const daysHtml = [...byDay.entries()]
+      .sort(([a], [b]) => a - b)
+      .map(([day, slots]) => {
+        const sortedSlots = [...slots].sort(
+          (a, b) => MEAL_ORDER.indexOf(a.mealType) - MEAL_ORDER.indexOf(b.mealType)
+        )
+        const mealsHtml = sortedSlots.map(s => {
+          const time = (s.recipe.prepTimeMin ?? 0) + (s.recipe.cookTimeMin ?? 0)
+          return `<tr><td style="padding:4px 12px 4px 0;color:#555;font-size:13px;text-transform:capitalize;">${escapeHtml(s.mealType)}</td><td style="padding:4px 0;font-size:14px;font-weight:600;color:#111;">${escapeHtml(s.recipe.title)}${time > 0 ? ` <span style="font-weight:normal;color:#888;">(${time}m)</span>` : ''}</td></tr>`
         }).join('')
+        return `<div style="margin-bottom:16px;"><p style="font-weight:700;font-size:15px;margin:0 0 6px;color:#222;">${DAY_NAMES[day]}</p><table style="border-collapse:collapse;">${mealsHtml}</table></div>`
+      }).join('')
 
-      const displayName = escapeHtml(plan.user.name || 'there')
-      const weekLabel = plan.weekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' })
-      const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ingredientbot.com'
+    const displayName = escapeHtml(plan.user.name || 'there')
+    const weekLabel = plan.weekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' })
 
-      const html = `<!DOCTYPE html>
+    const html = `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" /></head>
 <body style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#111;">
@@ -104,14 +99,27 @@ export async function GET(req: NextRequest) {
 </body>
 </html>`
 
-      await sendEmail({ to: plan.user.email, subject: `Your meal plan for the week of ${weekLabel}`, html })
+    return sendEmail({ to: plan.user.email, subject: `Your meal plan for the week of ${weekLabel}`, html })
+  }
+
+  const results = await Promise.allSettled(mealPlans.map(plan => sendPlanEmail(plan)))
+
+  let sent = 0
+  let failed = 0
+  const errors: string[] = []
+
+  results.forEach((result, i) => {
+    const plan = mealPlans[i]
+    if (plan.slots.length === 0) return // skipped — no slots, not a failure
+    if (result.status === 'fulfilled') {
       sent++
-    } catch (err) {
+    } else {
       failed++
+      const err = result.reason
       errors.push(`${plan.user.email}: ${err instanceof Error ? err.message : String(err)}`)
       console.error('[meal-plan-digest] Failed for', plan.user.email, err)
     }
-  }
+  })
 
   await prisma.jobRun.create({
     data: {

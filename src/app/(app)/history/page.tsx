@@ -56,10 +56,12 @@ export default async function HistoryPage({
     prisma.recipe.count({ where }),
   ])
 
-  // Gather all distinct tags for filter chips
+  // Gather all distinct tags for filter chips — take: 500 prevents unbounded scan
+  // (tags is a Postgres String[] so Prisma can't use distinct on it directly)
   const allTagRows = await prisma.recipe.findMany({
     where: { userId: session.user.id },
     select: { tags: true },
+    take: 500,
   })
   const allTags = [...new Set(allTagRows.flatMap(r => r.tags))].sort()
 

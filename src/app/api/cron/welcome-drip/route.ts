@@ -23,20 +23,24 @@ export async function GET(req: NextRequest) {
     select: { id: true, email: true, name: true }
   })
 
+  const results = await Promise.allSettled(
+    newUsers.map(user => sendWelcomeEmail(user.email, user.name))
+  )
+
   let sent = 0
   let failed = 0
   const errors: string[] = []
 
-  for (const user of newUsers) {
-    try {
-      await sendWelcomeEmail(user.email, user.name)
+  results.forEach((result, i) => {
+    if (result.status === 'fulfilled') {
       sent++
-    } catch (err) {
+    } else {
       failed++
-      errors.push(`${user.email}: ${err instanceof Error ? err.message : String(err)}`)
-      console.error('[welcome-drip] Failed to send to', user.email, err)
+      const err = result.reason
+      errors.push(`${newUsers[i].email}: ${err instanceof Error ? err.message : String(err)}`)
+      console.error('[welcome-drip] Failed to send to', newUsers[i].email, err)
     }
-  }
+  })
 
   // Log job run
   await prisma.jobRun.create({

@@ -1,22 +1,27 @@
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
+import { cache } from 'react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Clock, Users, ChefHat, ArrowRight, Utensils } from 'lucide-react'
 
+export const revalidate = 3600
+
 interface Props {
   params: Promise<{ slug: string }>
 }
 
+// cache() deduplicates the DB call between generateMetadata and the page render within the same request
+const getPublicRecipe = cache((slug: string) =>
+  prisma.recipe.findUnique({ where: { publicSlug: slug, isPublic: true } })
+)
+
 // Generate OG metadata for social sharing previews
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const recipe = await prisma.recipe.findUnique({
-    where: { publicSlug: slug, isPublic: true },
-    select: { title: true, description: true, cuisine: true },
-  })
+  const recipe = await getPublicRecipe(slug)
 
   if (!recipe) return { title: 'Recipe Not Found' }
 
@@ -39,9 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PublicRecipePage({ params }: Props) {
   const { slug } = await params
 
-  const recipe = await prisma.recipe.findUnique({
-    where: { publicSlug: slug, isPublic: true },
-  })
+  const recipe = await getPublicRecipe(slug)
 
   if (!recipe) notFound()
 

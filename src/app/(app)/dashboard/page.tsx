@@ -64,7 +64,7 @@ export default async function DashboardPage() {
   const heatmapStart = new Date(Date.now() - 83 * 86_400_000)
   heatmapStart.setUTCHours(0, 0, 0, 0)
 
-  const [recentRecipes, totalCount, completionsThisMonth, allCompletions] = await Promise.all([
+  const [recentRecipes, totalCount, completionsThisMonth, allCompletions, allTimeCompletions] = await Promise.all([
     prisma.recipe.findMany({
       where: { userId: session.user.id },
       orderBy: { createdAt: 'desc' },
@@ -80,14 +80,13 @@ export default async function DashboardPage() {
       select: { cookedAt: true },
       orderBy: { cookedAt: 'asc' },
     }),
+    // Build unique day set for streak calculation (all time) — runs in parallel with heatmap query
+    prisma.recipeCompletion.findMany({
+      where: { userId: session.user.id },
+      select: { cookedAt: true },
+      orderBy: { cookedAt: 'asc' },
+    }),
   ])
-
-  // Build unique day set for streak calculation (all time)
-  const allTimeCompletions = await prisma.recipeCompletion.findMany({
-    where: { userId: session.user.id },
-    select: { cookedAt: true },
-    orderBy: { cookedAt: 'asc' },
-  })
   const uniqueDays = [...new Set(allTimeCompletions.map(c => c.cookedAt.toISOString().split('T')[0]))]
   const { current: currentStreak, longest: longestStreak } = computeStreak(uniqueDays)
 

@@ -7,6 +7,7 @@ export const metadata = { title: 'Users — Admin — Robot Food' }
 export default async function AdminUsersPage() {
   const users = await prisma.user.findMany({
     orderBy: { createdAt: 'desc' },
+    take: 200,
     select: { id: true, email: true, name: true, isAdmin: true, createdAt: true, emailVerified: true }
   })
 
