@@ -4,7 +4,7 @@
 **Concept**: AI pantry-to-recipe generator — enter what you have, get streaming recipe suggestions. Make smart changes to recipes.
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
-**Last Updated**: 2026-04-11 (tests-reconcile complete)
+**Last Updated**: 2026-04-19 (qa-a11y complete)
 
 ---
 
@@ -20,20 +20,20 @@
 | 6 | Write Tests | /qa-tests-reconcile | DONE | 3 | 2026-04-17 | [view](reports/2026-04-17-tests-reconcile.md) |
 | 7 | Verify Build | /qa-tests-fix | DONE | 1 | 2026-04-16 | [view](reports/2026-04-16-tests-fix.md) |
 | 8 | Database Review | /qa-db | DONE | 1 | 2026-04-14 | [view](reports/2026-04-14-site-db.md) |
-| 9 | QA / Bug Check | /qa-bugs | PENDING | 0 | — | — |
+| 9 | QA / Bug Check | /qa-bugs | DONE | 2 | 2026-04-18 | [view](reports/2026-04-18-site-bugs.md) |
 | 10 | Security Hardening | /qa-security | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-security.md) |
 | 11 | UX/UI Pass | /qa-design | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
 | 12 | Navigation Audit | /qa-nav | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-nav.md) |
-| 13 | Performance Audit | /qa-perf | PENDING | 0 | — | — |
+| 13 | Performance Audit | /qa-perf | DONE | 1 | 2026-04-18 | — |
 | 14 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
-| 15 | Accessibility Audit | /qa-a11y | PENDING | 0 | — | — |
+| 15 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
 | 16 | Final E2E Tests | /qa-tests-fix | PENDING | 0 | — | — |
 | 17 | Client Update | /ops-client-report | PENDING | 0 | — | — |
 | 18 | Launch | /ops-launch | PENDING | 0 | — | — |
 
-**Progress: 11/18 stages complete**
+**Progress: 15/18 stages complete**
 
-**Last Updated**: 2026-04-19 (qa-seo complete — 14 issues found, 13 fixed, 1 accepted; build clean)
+**Last Updated**: 2026-04-19 (qa-a11y complete — 11 issues found, 11 fixed, WCAG AA; build clean)
 
 ---
 
@@ -65,4 +65,8 @@
 | 2026-04-18 | /qa-security | ~15m | SUCCESS | 8 issues found (1 HIGH, 5 MEDIUM, 2 LOW), all fixed; systemic fix added aiLimiter to 5 AI routes; SSRF hardened in /api/recipes/import; security headers in next.config.ts; HTML-escape in digest email |
 | 2026-04-18 | /qa-design | ~10m | SUCCESS | 7 issues fixed: admin active-link indicator, shadcn Checkbox upgrade, emoji→Lucide icons, invalid Tailwind class, empty state improvement, settings card semantic markup, focus-visible ring |
 | 2026-04-18 | /qa-nav | ~5m | SUCCESS | 1 orphan (/upgrade), 0 dead links; Option C applied (Kitchen-first, footer zone for Dashboard/Upgrade/Settings); build clean |
+| 2026-04-15 | /qa-bugs | — | SUCCESS | QA bug fixes run 1 — see reports/2026-04-15-site-bugs.md |
+| 2026-04-18 | /qa-bugs | — | SUCCESS | QA bug fixes run 2 — see reports/2026-04-18-site-bugs.md |
+| 2026-04-18 | /qa-perf | — | SUCCESS | Performance audit fixes |
 | 2026-04-19 | /qa-seo | ~15m | SUCCESS | 14 issues found (1 CRITICAL, 3 HIGH, 4 MEDIUM, 6 LOW); 13 fixed: Recipe+WebApp JSON-LD, canonicals, OG image, twitter card, sitemap (auth-gated /kitchen removed, public recipe entries added), robots env var fix, privacy/terms OG, (app)/loading.tsx; 1 accepted (offline page client directive needed); build clean |
+| 2026-04-19 | /qa-a11y | ~10m | SUCCESS | 11 issues found, 11 fixed: skip-to-content link, main landmarks, nav aria-label, delete/remove button labels, role="alert" on 4 error forms, PWA prompt role fix, share dialog role, focus rings, prefers-reduced-motion CSS; build clean |
