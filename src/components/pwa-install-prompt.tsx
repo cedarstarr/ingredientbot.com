@@ -51,8 +51,9 @@ export function PwaInstallPrompt() {
 
   return (
     <div
-      role="banner"
-      aria-label="Install app prompt"
+      role="dialog"
+      aria-label="Install Robot Food app"
+      aria-modal="false"
       className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-sm rounded-xl border border-border bg-card shadow-lg sm:left-auto sm:right-6 sm:bottom-6"
     >
       <div className="flex items-start gap-3 p-4">

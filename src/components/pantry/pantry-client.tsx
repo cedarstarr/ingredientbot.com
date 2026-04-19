@@ -255,6 +255,7 @@ export function PantryClient() {
                     {editingExpiryId === item.id ? (
                       <input
                         type="date"
+                        aria-label={`Expiry date for ${item.ingredient}`}
                         defaultValue={item.expiresAt ? new Date(item.expiresAt).toISOString().split('T')[0] : ''}
                         autoFocus
                         min={new Date().toISOString().split('T')[0]}

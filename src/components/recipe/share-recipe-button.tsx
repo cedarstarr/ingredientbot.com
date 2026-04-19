@@ -86,13 +86,13 @@ export function ShareRecipeButton({ recipeId, initialSlug, initialIsPublic }: Pr
           {/* Backdrop */}
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           {/* Popover */}
-          <div className="absolute right-0 top-8 z-50 w-72 rounded-xl border border-border bg-card shadow-lg p-4 space-y-3">
+          <div role="dialog" aria-label="Share recipe" className="absolute right-0 top-8 z-50 w-72 rounded-xl border border-border bg-card shadow-lg p-4 space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-sm font-semibold text-foreground">Share Recipe</p>
               <button
                 onClick={() => setOpen(false)}
-                className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none"
-                aria-label="Close"
+                className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+                aria-label="Close share dialog"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -118,7 +118,7 @@ export function ShareRecipeButton({ recipeId, initialSlug, initialIsPublic }: Pr
                 <button
                   onClick={disableSharing}
                   disabled={loading}
-                  className="text-xs text-muted-foreground hover:text-destructive transition-colors focus-visible:outline-none"
+                  className="text-xs text-muted-foreground hover:text-destructive transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
                 >
                   Revoke public link
                 </button>

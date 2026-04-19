@@ -573,7 +573,8 @@ export function KitchenPanel() {
                     {ing}
                     <button
                       onClick={() => removeIngredient(ing)}
-                      className="text-primary/60 hover:text-primary transition-colors"
+                      aria-label={`Remove ${ing}`}
+                      className="text-primary/60 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -656,7 +657,7 @@ export function KitchenPanel() {
                   </span>
                   <Link
                     href="/pantry"
-                    className="text-xs text-primary hover:underline focus-visible:outline-none"
+                    className="text-xs text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
                   >
                     Manage
                   </Link>
@@ -935,7 +936,11 @@ export function KitchenPanel() {
                 {ingredients.map(ing => (
                   <span key={ing} className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-xs px-2.5 py-1">
                     {ing}
-                    <button onClick={() => removeIngredient(ing)}>
+                    <button
+                      onClick={() => removeIngredient(ing)}
+                      aria-label={`Remove ${ing}`}
+                      className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+                    >
                       <X className="h-3 w-3" />
                     </button>
                   </span>
@@ -1034,7 +1039,7 @@ export function KitchenPanel() {
         )}
 
         {error && (
-          <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/8 px-4 py-3 text-sm text-destructive">
+          <div role="alert" className="mb-4 rounded-lg border border-destructive/30 bg-destructive/8 px-4 py-3 text-sm text-destructive">
             {error}
           </div>
         )}

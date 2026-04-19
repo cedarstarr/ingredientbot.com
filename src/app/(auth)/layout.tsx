@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12">
+    <div id="main-content" className="relative flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12">
       {/* Logo at top */}
       <div className="mb-8 flex items-center gap-2">
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">

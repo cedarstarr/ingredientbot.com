@@ -4,7 +4,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <AppNav />
-      <main className="flex-1 min-w-0 overflow-auto md:pt-0 pt-14">
+      <main id="main-content" className="flex-1 min-w-0 overflow-auto md:pt-0 pt-14">
         {children}
       </main>
     </div>

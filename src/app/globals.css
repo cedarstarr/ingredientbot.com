@@ -126,6 +126,18 @@
   }
 }
 
+/* Reduced-motion: disable all CSS animations and transitions for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* F40: Print styles — applied when the user prints any page via Ctrl+P */
 @media print {
   /* Hide navigation and interactive chrome */

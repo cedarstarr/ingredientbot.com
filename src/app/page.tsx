@@ -58,6 +58,7 @@ export default function LandingPage() {
         </div>
       </header>
 
+      <main id="main-content">
       {/* Hero */}
       <section className="mx-auto max-w-6xl px-4 pt-24 pb-20 text-center">
         <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm text-primary mb-8">
@@ -162,6 +163,8 @@ export default function LandingPage() {
           </Button>
         </div>
       </section>
+
+      </main>
 
       {/* Footer */}
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">

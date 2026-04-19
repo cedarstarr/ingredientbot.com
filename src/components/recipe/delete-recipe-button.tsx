@@ -30,7 +30,7 @@ export function DeleteRecipeButton({ id }: { id: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive shrink-0">
+        <Button variant="ghost" size="icon" aria-label="Delete recipe" className="h-7 w-7 text-muted-foreground hover:text-destructive shrink-0">
           <Trash2 className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>
