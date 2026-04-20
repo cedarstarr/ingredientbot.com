@@ -9,7 +9,7 @@ const prisma = new PrismaClient()
 
 export const ADMIN_EMAIL = 'cedarbarrett@gmail.com'
 export const ADMIN_NAME = 'Cedar Barrett'
-export const ADMIN_PASSWORD = 'CedarAdmin2026!'
+export const ADMIN_PASSWORD = 'iCedarAdmin2026!t'
 
 export async function buildAdminUserPayload(password: string) {
   const hash = await bcrypt.hash(password, 12)
@@ -25,7 +25,7 @@ export async function buildAdminUserPayload(password: string) {
 export function buildAdminUpsertArgs(createPayload: Awaited<ReturnType<typeof buildAdminUserPayload>>) {
   return {
     where: { email: ADMIN_EMAIL },
-    update: { isAdmin: true as const },
+    update: { name: ADMIN_NAME, password: createPayload.password, emailVerified: createPayload.emailVerified, isAdmin: true as const },
     create: createPayload,
   }
 }
