@@ -33,7 +33,11 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'AI service not configured' }, { status: 503 })
   }
 
-  const { suggestion, ingredients, strictMode, teachMode, leftovers, budgetMode, chefPersonality, dateNightMode } = await req.json()
+  const {
+    suggestion, ingredients, strictMode, teachMode, leftovers, budgetMode, chefPersonality, dateNightMode,
+    // F74–F78: modifiers mirrored from the generate route
+    cookingMethod, exhaustedMode, proteinMax, restaurantStyle, spiceLevel,
+  } = await req.json()
   if (!suggestion?.title) {
     return Response.json({ error: 'Invalid suggestion' }, { status: 400 })
   }
@@ -60,9 +64,17 @@ export async function POST(req: NextRequest) {
   }
 
   // F31: Load dietary profile for AI system prompt injection
+  // F79: also load medical flags (low-sodium, low-FODMAP, diabetes-friendly)
   const dietaryProfile = await prisma.dietaryProfile.findUnique({
     where: { userId: session.user.id },
-    select: { restrictions: true, cuisinePrefs: true, dislikedIngredients: true },
+    select: {
+      restrictions: true,
+      cuisinePrefs: true,
+      dislikedIngredients: true,
+      lowSodium: true,
+      lowFodmap: true,
+      diabetesFriendly: true,
+    },
   })
 
   // F31: Build persistent profile context
@@ -72,6 +84,16 @@ export async function POST(req: NextRequest) {
   }
   if (dietaryProfile?.dislikedIngredients?.length) {
     profileLines.push(`User dislikes these ingredients (avoid): ${dietaryProfile.dislikedIngredients.join(', ')}.`)
+  }
+  // F79: medical dietary flags
+  if (dietaryProfile?.lowSodium) {
+    profileLines.push(`Low-sodium: keep sodium per serving under ~500mg, avoid high-sodium ingredients like soy sauce, cured meats, canned broths.`)
+  }
+  if (dietaryProfile?.lowFodmap) {
+    profileLines.push(`Low-FODMAP: avoid onion, garlic, wheat, lactose, and high-FODMAP foods. Substitute appropriately.`)
+  }
+  if (dietaryProfile?.diabetesFriendly) {
+    profileLines.push(`Diabetes-friendly: keep carbs moderate per serving, prefer low-glycemic ingredients, flag any recipe component that spikes blood sugar.`)
   }
   const profileContext = profileLines.length ? `\n\nUser profile:\n${profileLines.join('\n')}` : ''
 
@@ -107,6 +129,56 @@ export async function POST(req: NextRequest) {
     ? `\n\nDATE NIGHT MODE: This is a Date Night recipe. Make it romantic, impressive, and special. Use elegant plating suggestions in the notes.`
     : ''
 
+  // F74: cooking method constraint
+  let cookingMethodContext = ''
+  if (typeof cookingMethod === 'string' && cookingMethod && cookingMethod !== 'any') {
+    switch (cookingMethod) {
+      case 'Sheet Pan':
+        cookingMethodContext = `\n\nSHEET PAN: All ingredients should cook on a single sheet pan in the oven. No separate pots or pans.`
+        break
+      case 'One-Pot':
+        cookingMethodContext = `\n\nONE-POT: All cooking must happen in a single pot/pan for minimal cleanup.`
+        break
+      case 'Air Fryer':
+        cookingMethodContext = `\n\nAIR FRYER: Recipe must be cookable entirely in a standard air fryer. No stovetop or oven.`
+        break
+      case 'Slow Cooker':
+        cookingMethodContext = `\n\nSLOW COOKER: Recipe must work in a slow cooker / Crock-Pot. Dump-and-wait style.`
+        break
+      case 'Instant Pot':
+        cookingMethodContext = `\n\nINSTANT POT: Recipe must use a pressure cooker / Instant Pot. Include pressure-release timing.`
+        break
+      case 'Microwave Only':
+        cookingMethodContext = `\n\nMICROWAVE ONLY: All cooking steps must be doable in a standard microwave. No stovetop, no oven.`
+        break
+      case 'No Stove':
+        cookingMethodContext = `\n\nNO STOVE: Do not use the stovetop or oven — assume they're unavailable. Oven-free, stovetop-free.`
+        break
+    }
+  }
+
+  // F75: exhausted mode
+  const exhaustedContext = exhaustedMode
+    ? `\n\nEXHAUSTED MODE: Minimize active cooking effort. Prefer dump-and-wait, one-step, or passive-cook recipes. Assume the user has about 5 minutes of active effort. Label the recipe as low-effort.`
+    : ''
+
+  // F76: protein-max mode
+  const proteinMaxContext = proteinMax
+    ? `\n\nPROTEIN-MAX MODE: Each serving must contain at least 40g of protein. Prioritize protein-dense ingredients (chicken, beef, eggs, Greek yogurt, cottage cheese, tofu, tempeh, legumes). Display protein grams prominently in the recipe.`
+    : ''
+
+  // F77: restaurant recreation
+  const restaurantContext = typeof restaurantStyle === 'string' && restaurantStyle.trim()
+    ? `\n\nRESTAURANT RECREATION: Recreate the flavor profile and style of "${restaurantStyle.trim().slice(0, 120)}". Use their known signature techniques and flavors, but make it achievable with pantry ingredients.`
+    : ''
+
+  // F78: spice level — always inject even at 0=Mild
+  const spiceN = typeof spiceLevel === 'number' && Number.isInteger(spiceLevel)
+    ? Math.max(0, Math.min(3, spiceLevel))
+    : 0
+  const spiceLabel = ['Mild', 'Medium', 'Hot', 'Fire'][spiceN]
+  const spiceContext = `\n\nSPICE LEVEL: ${spiceLabel}. Calibrate heat accordingly — use appropriate chiles, peppers, and spices. Do not exceed this level.`
+
   const { text } = await generateText({
     model: claudeSonnet,
     maxOutputTokens: 2048,
@@ -124,7 +196,7 @@ Schema:
   "steps": [string],
   "notes": string,
   "nutrition": {"calories": number, "protein": number, "fat": number, "carbs": number, "fiber": number}
-}${personalityContext}${profileContext}${strictContext}${teachContext}${leftoverContext}${budgetContext}${dateNightContext}`,
+}${personalityContext}${profileContext}${strictContext}${teachContext}${leftoverContext}${budgetContext}${dateNightContext}${cookingMethodContext}${exhaustedContext}${proteinMaxContext}${restaurantContext}${spiceContext}`,
     messages: [{
       role: 'user',
       content: `Generate a full recipe for "${suggestion.title}". Description: ${suggestion.description}. Main ingredients available: ${ingredients.join(', ')}. Target servings: ${suggestion.servings || 4}.`,
