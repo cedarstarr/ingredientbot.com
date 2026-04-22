@@ -10,9 +10,11 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
+import { Slider } from '@/components/ui/slider'
 import {
   X, ChefHat, Upload, Camera, Loader2, Sparkles, RefreshCw, Package, Timer,
   Mic, MicOff, Lock, BookOpen, DollarSign, UtensilsCrossed, Flame, Heart,
+  Bed, Dumbbell, Utensils,
 } from 'lucide-react'
 import { RecipeSuggestionCard, type RecipeSuggestion } from './recipe-suggestion-card'
 import { UsageCounter } from './usage-counter'
@@ -50,6 +52,22 @@ const PREP_TIMES: { value: PrepTime; label: string }[] = [
   { value: 60, label: '1 hour' },
   { value: null, label: 'No limit' },
 ]
+
+// F74: Cooking method options — "any" keeps default AI freedom
+const COOKING_METHODS = [
+  'any',
+  'Sheet Pan',
+  'One-Pot',
+  'Air Fryer',
+  'Slow Cooker',
+  'Instant Pot',
+  'Microwave Only',
+  'No Stove',
+] as const
+type CookingMethod = (typeof COOKING_METHODS)[number]
+
+// F78: Spice level labels — index = value (0..3)
+const SPICE_LABELS = ['Mild', 'Medium', 'Hot', 'Fire'] as const
 
 interface PantryItem {
   id: string
@@ -110,6 +128,16 @@ export function KitchenPanel() {
   const [chefPersonality, setChefPersonality] = useState<ChefPersonality>('home')
   // F71: Date Night 3-course mode
   const [dateNightMode, setDateNightMode] = useState(false)
+  // F74: Cooking method — persist to DB (equipment constraint)
+  const [cookingMethod, setCookingMethod] = useState<CookingMethod>('any')
+  // F75: "I'm exhausted" — session only (transient mood)
+  const [exhaustedMode, setExhaustedMode] = useState(false)
+  // F76: Protein-Max — session only
+  const [proteinMax, setProteinMax] = useState(false)
+  // F77: Restaurant recreation free-text — session only (different craving each time)
+  const [restaurantStyle, setRestaurantStyle] = useState('')
+  // F78: Spice level 0..3 — persist to DB
+  const [spiceLevel, setSpiceLevel] = useState(0)
   // F55: voice input state
   const [isListening, setIsListening] = useState(false)
   const [voiceSupported, setVoiceSupported] = useState(true)
@@ -130,15 +158,28 @@ export function KitchenPanel() {
       .catch(() => {})
   }, [])
 
-  // F53 + F70: Load persisted kitchen preferences on mount
+  // F53 + F70 + F74 + F78: Load persisted kitchen preferences on mount
   useEffect(() => {
     fetch('/api/user/kitchen-prefs')
       .then(r => r.ok ? r.json() : null)
-      .then((prefs: { budgetMode: boolean; chefPersonality: string } | null) => {
+      .then((prefs: {
+        budgetMode: boolean
+        chefPersonality: string
+        cookingMethod?: string
+        spiceLevel?: number
+      } | null) => {
         if (!prefs) return
         setBudgetMode(prefs.budgetMode ?? false)
         if (['home', 'french', 'street'].includes(prefs.chefPersonality)) {
           setChefPersonality(prefs.chefPersonality as ChefPersonality)
+        }
+        // F74: only accept known cooking methods
+        if (typeof prefs.cookingMethod === 'string' && (COOKING_METHODS as readonly string[]).includes(prefs.cookingMethod)) {
+          setCookingMethod(prefs.cookingMethod as CookingMethod)
+        }
+        // F78: clamp spice to 0..3
+        if (typeof prefs.spiceLevel === 'number') {
+          setSpiceLevel(Math.max(0, Math.min(3, prefs.spiceLevel)))
         }
       })
       .catch(() => {})
@@ -281,6 +322,16 @@ export function KitchenPanel() {
           chefPersonality,
           // F71: date night mode
           dateNightMode,
+          // F74: cooking method
+          cookingMethod,
+          // F75: exhausted mode
+          exhaustedMode,
+          // F76: protein-max
+          proteinMax,
+          // F77: restaurant recreation (trim on client too — server re-trims)
+          restaurantStyle: restaurantStyle.trim() || undefined,
+          // F78: spice level (always sent; AI calibrates even at Mild)
+          spiceLevel,
         }),
       })
 
@@ -329,7 +380,7 @@ export function KitchenPanel() {
     } finally {
       setIsGenerating(false)
     }
-  }, [allIngredients, expiringIngredients, expiryFirstMode, cuisine, dietary, isGenerating, leftoverMode, leftoverText, strictMode, teachMode, prepTimeLimit, budgetMode, chefPersonality, dateNightMode])
+  }, [allIngredients, expiringIngredients, expiryFirstMode, cuisine, dietary, isGenerating, leftoverMode, leftoverText, strictMode, teachMode, prepTimeLimit, budgetMode, chefPersonality, dateNightMode, cookingMethod, exhaustedMode, proteinMax, restaurantStyle, spiceLevel, difficulty])
 
   // F54: "Impress Me" — bypass ingredient validation, AI chooses ingredients
   const handleImpressMe = useCallback(async () => {
@@ -351,6 +402,12 @@ export function KitchenPanel() {
           budgetMode,
           prepTimeLimit,
           personalityPrompt: personality?.prompt,
+          // F74–F78: honor kitchen-panel modifiers even for Impress Me
+          cookingMethod,
+          exhaustedMode,
+          proteinMax,
+          restaurantStyle: restaurantStyle.trim() || undefined,
+          spiceLevel,
         }),
       })
 
@@ -389,7 +446,7 @@ export function KitchenPanel() {
     } finally {
       setImpressMeLoading(false)
     }
-  }, [isGenerating, impressMeLoading, chefPersonality, budgetMode, prepTimeLimit])
+  }, [isGenerating, impressMeLoading, chefPersonality, budgetMode, prepTimeLimit, cookingMethod, exhaustedMode, proteinMax, restaurantStyle, spiceLevel])
 
   // Auto-generate after 600ms debounce when ≥2 ingredients (typed or pantry)
   useEffect(() => {
@@ -453,6 +510,12 @@ export function KitchenPanel() {
           budgetMode,
           chefPersonality,
           dateNightMode,
+          // F74–F78: mirror every modifier into the full recipe generation
+          cookingMethod,
+          exhaustedMode,
+          proteinMax,
+          restaurantStyle: restaurantStyle.trim() || undefined,
+          spiceLevel,
         }),
       })
 
@@ -501,6 +564,27 @@ export function KitchenPanel() {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chefPersonality: p }),
+    }).catch(() => {})
+  }
+
+  // F74: Change cooking method and persist
+  const changeCookingMethod = (m: CookingMethod) => {
+    setCookingMethod(m)
+    fetch('/api/user/kitchen-prefs', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cookingMethod: m }),
+    }).catch(() => {})
+  }
+
+  // F78: Change spice level and persist
+  const changeSpiceLevel = (lvl: number) => {
+    const clamped = Math.max(0, Math.min(3, Math.round(lvl)))
+    setSpiceLevel(clamped)
+    fetch('/api/user/kitchen-prefs', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ spiceLevel: clamped }),
     }).catch(() => {})
   }
 
@@ -612,6 +696,19 @@ export function KitchenPanel() {
                 </Select>
               </div>
 
+              {/* F77: Restaurant recreation — free-text, session only */}
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Recreate restaurant style</label>
+                <Input
+                  value={restaurantStyle}
+                  onChange={(e) => setRestaurantStyle(e.target.value)}
+                  placeholder="Recreate like Chipotle, Olive Garden…"
+                  className="text-sm"
+                  maxLength={120}
+                  aria-label="Recreate the flavor profile of a restaurant"
+                />
+              </div>
+
               <div className="space-y-1">
                 <label className="text-xs font-medium text-muted-foreground">Dietary restrictions</label>
                 <Select value={dietary} onValueChange={setDietary}>
@@ -644,6 +741,59 @@ export function KitchenPanel() {
                     <SelectItem value="advanced">Advanced / Hard</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              {/* F74: Cooking method selector — persisted equipment constraint */}
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                  <Utensils className="h-3 w-3" />
+                  Cooking method
+                </label>
+                <Select value={cookingMethod} onValueChange={(v) => changeCookingMethod(v as CookingMethod)}>
+                  <SelectTrigger className="w-full text-sm">
+                    <SelectValue placeholder="Any method" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {COOKING_METHODS.map(m => (
+                      <SelectItem key={m} value={m}>
+                        {m === 'any' ? 'Any method' : m}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* F78: Spice level slider — always sent to AI so even Mild is explicit */}
+            <div className="space-y-1.5 pt-1">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                  <Flame className="h-3 w-3" />
+                  Spice level
+                </span>
+                <span className="text-[10px] font-medium text-primary">{SPICE_LABELS[spiceLevel]}</span>
+              </div>
+              <Slider
+                value={[spiceLevel]}
+                min={0}
+                max={3}
+                step={1}
+                onValueChange={(v) => changeSpiceLevel(v[0] ?? 0)}
+                aria-label="Spice level"
+                className="focus-visible:outline-none"
+              />
+              <div className="flex justify-between text-[10px] text-muted-foreground px-0.5">
+                {SPICE_LABELS.map((label, i) => (
+                  <span
+                    key={label}
+                    className={cn(
+                      'transition-colors',
+                      spiceLevel === i && 'text-foreground font-medium',
+                    )}
+                  >
+                    {label}
+                  </span>
+                ))}
               </div>
             </div>
 
@@ -875,6 +1025,50 @@ export function KitchenPanel() {
                 <span className="flex-1 text-left">Budget mode</span>
                 {budgetMode && (
                   <Badge className="bg-green-500/20 text-green-700 dark:text-green-300 text-[10px] px-1.5 py-0 border-0">
+                    ON
+                  </Badge>
+                )}
+              </button>
+
+              {/* F75: "I'm exhausted" — session-only, minimal active effort */}
+              <button
+                type="button"
+                onClick={() => setExhaustedMode(v => !v)}
+                title="Prefer dump-and-wait, 5-minute-effort recipes"
+                className={cn(
+                  'w-full flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  exhaustedMode
+                    ? 'bg-slate-100 dark:bg-slate-800/40 border-slate-400/60 text-slate-700 dark:text-slate-200 font-medium'
+                    : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-slate-400/40',
+                )}
+                aria-pressed={exhaustedMode}
+              >
+                <Bed className="h-3 w-3 shrink-0" />
+                <span className="flex-1 text-left">I&apos;m exhausted</span>
+                {exhaustedMode && (
+                  <Badge className="bg-slate-500/20 text-slate-700 dark:text-slate-200 text-[10px] px-1.5 py-0 border-0">
+                    ON
+                  </Badge>
+                )}
+              </button>
+
+              {/* F76: Protein-Max — session-only, 40g+ protein per serving */}
+              <button
+                type="button"
+                onClick={() => setProteinMax(v => !v)}
+                title="Force 40g+ protein per serving"
+                className={cn(
+                  'w-full flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  proteinMax
+                    ? 'bg-red-50 dark:bg-red-900/20 border-red-400/60 text-red-700 dark:text-red-400 font-medium'
+                    : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-red-400/40',
+                )}
+                aria-pressed={proteinMax}
+              >
+                <Dumbbell className="h-3 w-3 shrink-0" />
+                <span className="flex-1 text-left">Protein-Max (40g+)</span>
+                {proteinMax && (
+                  <Badge className="bg-red-500/20 text-red-700 dark:text-red-300 text-[10px] px-1.5 py-0 border-0">
                     ON
                   </Badge>
                 )}
