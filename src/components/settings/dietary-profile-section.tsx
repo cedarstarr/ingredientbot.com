@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
 import { X, Plus, Loader2, CheckCircle } from 'lucide-react'
 
 const RESTRICTION_OPTIONS = [
@@ -41,6 +42,10 @@ export function DietaryProfileSection() {
   const [cuisinePrefs, setCuisinePrefs] = useState<string[]>([])
   const [dislikedIngredients, setDislikedIngredients] = useState<string[]>([])
   const [dislikedInput, setDislikedInput] = useState('')
+  // F79: medical dietary flags — AI-generated guidance, not medical advice
+  const [lowSodium, setLowSodium] = useState(false)
+  const [lowFodmap, setLowFodmap] = useState(false)
+  const [diabetesFriendly, setDiabetesFriendly] = useState(false)
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -54,6 +59,9 @@ export function DietaryProfileSection() {
           setRestrictions(d.restrictions ?? [])
           setCuisinePrefs(d.cuisinePrefs ?? [])
           setDislikedIngredients(d.dislikedIngredients ?? [])
+          setLowSodium(Boolean(d.lowSodium))
+          setLowFodmap(Boolean(d.lowFodmap))
+          setDiabetesFriendly(Boolean(d.diabetesFriendly))
         }
       })
       .finally(() => setLoading(false))
@@ -96,7 +104,14 @@ export function DietaryProfileSection() {
       await fetch('/api/user/dietary', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ restrictions, cuisinePrefs, dislikedIngredients }),
+        body: JSON.stringify({
+          restrictions,
+          cuisinePrefs,
+          dislikedIngredients,
+          lowSodium,
+          lowFodmap,
+          diabetesFriendly,
+        }),
       })
       setSaved(true)
       // clear confirmation after 3s
@@ -207,6 +222,47 @@ export function DietaryProfileSection() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* F79: Medical dietary flags */}
+      <div className="space-y-2">
+        <h3 className="text-sm font-medium text-foreground">Medical</h3>
+        <div className="flex flex-col gap-2">
+          <label className="flex items-center gap-2 cursor-pointer group">
+            <Checkbox
+              checked={lowSodium}
+              onCheckedChange={(v) => { setLowSodium(Boolean(v)); setSaved(false) }}
+              aria-label="Low-sodium"
+            />
+            <span className="text-sm text-foreground group-hover:text-primary transition-colors">
+              Low-sodium
+            </span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer group">
+            <Checkbox
+              checked={lowFodmap}
+              onCheckedChange={(v) => { setLowFodmap(Boolean(v)); setSaved(false) }}
+              aria-label="Low-FODMAP"
+            />
+            <span className="text-sm text-foreground group-hover:text-primary transition-colors">
+              Low-FODMAP
+            </span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer group">
+            <Checkbox
+              checked={diabetesFriendly}
+              onCheckedChange={(v) => { setDiabetesFriendly(Boolean(v)); setSaved(false) }}
+              aria-label="Diabetes-friendly"
+            />
+            <span className="text-sm text-foreground group-hover:text-primary transition-colors">
+              Diabetes-friendly
+            </span>
+          </label>
+        </div>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          These are general AI-generated guidelines based on common dietary recommendations — not medical advice.
+          Consult your doctor for serious conditions.
+        </p>
       </div>
 
       <div className="flex items-center gap-3 pt-1">

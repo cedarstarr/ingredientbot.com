@@ -19,6 +19,9 @@ export async function POST(req: NextRequest) {
     ingredients, cuisine, dietary, expiringIngredients, leftovers,
     strictMode, teachMode,
     impressMe, prepTimeLimit, budgetMode, chefPersonality, dateNightMode, personalityPrompt,
+    // F74: cooking method (string). F75: exhausted toggle. F76: protein-max toggle.
+    // F77: restaurant recreation free-text. F78: spice level 0..3.
+    cookingMethod, exhaustedMode, proteinMax, restaurantStyle, spiceLevel,
   } = await req.json()
 
   // F54: "Impress Me" bypasses the ingredient count guard
@@ -43,9 +46,17 @@ export async function POST(req: NextRequest) {
   }
 
   // F31: Load dietary profile to inject persistent preferences into every generation
+  // F79: also load medical flags (low-sodium, low-FODMAP, diabetes-friendly)
   const dietaryProfile = await prisma.dietaryProfile.findUnique({
     where: { userId: session.user.id },
-    select: { restrictions: true, cuisinePrefs: true, dislikedIngredients: true },
+    select: {
+      restrictions: true,
+      cuisinePrefs: true,
+      dislikedIngredients: true,
+      lowSodium: true,
+      lowFodmap: true,
+      diabetesFriendly: true,
+    },
   })
 
   const sessionDietaryStr = dietary?.length ? `Dietary restrictions: ${dietary.join(', ')}.` : ''
@@ -61,6 +72,16 @@ export async function POST(req: NextRequest) {
   }
   if (dietaryProfile?.cuisinePrefs?.length) {
     profileLines.push(`User cuisine preferences (favor when no cuisine specified): ${dietaryProfile.cuisinePrefs.join(', ')}.`)
+  }
+  // F79: medical dietary flags — phrased as guidance (disclaimer shown in UI, not medical advice)
+  if (dietaryProfile?.lowSodium) {
+    profileLines.push(`Low-sodium: keep sodium per serving under ~500mg, avoid high-sodium ingredients like soy sauce, cured meats, canned broths.`)
+  }
+  if (dietaryProfile?.lowFodmap) {
+    profileLines.push(`Low-FODMAP: avoid onion, garlic, wheat, lactose, and high-FODMAP foods. Substitute appropriately.`)
+  }
+  if (dietaryProfile?.diabetesFriendly) {
+    profileLines.push(`Diabetes-friendly: keep carbs moderate per serving, prefer low-glycemic ingredients, flag any recipe component that spikes blood sugar.`)
   }
   const profileContext = profileLines.length ? `\n\nUser profile:\n${profileLines.join('\n')}` : ''
 
@@ -113,6 +134,27 @@ export async function POST(req: NextRequest) {
     ? `\n\nIMPRESS ME MODE: The user has no specific ingredients. Choose 6–8 seasonal, interesting ingredients yourself and generate creative, impressive recipes. Include the chosen ingredients in your description.`
     : ''
 
+  // F74: cooking method constraint — equipment-specific instructions
+  const cookingMethodContext = buildCookingMethodContext(cookingMethod)
+
+  // F75: exhausted mode — prefer dump-and-wait recipes
+  const exhaustedContext = exhaustedMode
+    ? `\n\nEXHAUSTED MODE: Minimize active cooking effort. Prefer dump-and-wait, one-step, or passive-cook recipes. Assume the user has about 5 minutes of active effort. Label the recipe as low-effort.`
+    : ''
+
+  // F76: protein-max — enforce 40g+ protein per serving
+  const proteinMaxContext = proteinMax
+    ? `\n\nPROTEIN-MAX MODE: Each serving must contain at least 40g of protein. Prioritize protein-dense ingredients (chicken, beef, eggs, Greek yogurt, cottage cheese, tofu, tempeh, legumes). Display protein grams prominently in the recipe.`
+    : ''
+
+  // F77: restaurant recreation — trim the user input to avoid prompt-injection-style bloat
+  const restaurantContext = typeof restaurantStyle === 'string' && restaurantStyle.trim()
+    ? `\n\nRESTAURANT RECREATION: Recreate the flavor profile and style of "${restaurantStyle.trim().slice(0, 120)}". Use their known signature techniques and flavors, but make it achievable with pantry ingredients.`
+    : ''
+
+  // F78: spice level — always inject (even at 0=Mild) so AI knows to restrain itself
+  const spiceContext = buildSpiceContext(spiceLevel)
+
   const result = streamText({
     model: claudeSonnet,
     maxOutputTokens: 1024,
@@ -122,7 +164,7 @@ CRITICAL: Respond with ONLY newline-delimited JSON objects, one recipe per line,
 Each line must be a complete valid JSON object with these exact keys:
 {"title":"Recipe Name","description":"One sentence description","prepMin":15,"cookMin":25,"servings":4,"cuisine":"Italian","difficulty":"easy"}
 
-difficulty must be exactly: "easy", "medium", or "hard"${personalityContext}${profileContext}${expiryContext}${leftoverContext}${strictContext}${teachContext}${prepTimeContext}${budgetContext}${dateNightContext}${impressMeContext}`,
+difficulty must be exactly: "easy", "medium", or "hard"${personalityContext}${profileContext}${expiryContext}${leftoverContext}${strictContext}${teachContext}${prepTimeContext}${budgetContext}${dateNightContext}${impressMeContext}${cookingMethodContext}${exhaustedContext}${proteinMaxContext}${restaurantContext}${spiceContext}`,
     messages: [{
       role: 'user',
       content: impressMe
@@ -139,4 +181,36 @@ difficulty must be exactly: "easy", "medium", or "hard"${personalityContext}${pr
       'Cache-Control': 'no-cache',
     },
   })
+}
+
+// F74: shared between generate and cook routes — map dropdown value to system-prompt injection
+// Not exported — Next.js route files only permit HTTP verb exports. The cook route keeps its own copy.
+function buildCookingMethodContext(method: unknown): string {
+  if (typeof method !== 'string' || !method || method === 'any') return ''
+  switch (method) {
+    case 'Sheet Pan':
+      return `\n\nSHEET PAN: All ingredients should cook on a single sheet pan in the oven. No separate pots or pans.`
+    case 'One-Pot':
+      return `\n\nONE-POT: All cooking must happen in a single pot/pan for minimal cleanup.`
+    case 'Air Fryer':
+      return `\n\nAIR FRYER: Recipe must be cookable entirely in a standard air fryer. No stovetop or oven.`
+    case 'Slow Cooker':
+      return `\n\nSLOW COOKER: Recipe must work in a slow cooker / Crock-Pot. Dump-and-wait style.`
+    case 'Instant Pot':
+      return `\n\nINSTANT POT: Recipe must use a pressure cooker / Instant Pot. Include pressure-release timing.`
+    case 'Microwave Only':
+      return `\n\nMICROWAVE ONLY: All cooking steps must be doable in a standard microwave. No stovetop, no oven.`
+    case 'No Stove':
+      return `\n\nNO STOVE: Do not use the stovetop or oven — assume they're unavailable. Oven-free, stovetop-free.`
+    default:
+      return ''
+  }
+}
+
+// F78: spice level 0..3 — always inject so AI doesn't default to "medium"
+function buildSpiceContext(level: unknown): string {
+  const n = typeof level === 'number' && Number.isInteger(level) ? level : 0
+  const clamped = Math.max(0, Math.min(3, n))
+  const label = ['Mild', 'Medium', 'Hot', 'Fire'][clamped]
+  return `\n\nSPICE LEVEL: ${label}. Calibrate heat accordingly — use appropriate chiles, peppers, and spices. Do not exceed this level.`
 }
