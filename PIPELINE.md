@@ -4,7 +4,7 @@
 **Concept**: AI pantry-to-recipe generator — enter what you have, get streaming recipe suggestions. Make smart changes to recipes.
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
-**Last Updated**: 2026-04-19 (qa-a11y complete)
+**Last Updated**: 2026-04-23 (qa-tests-reconcile run 4 — 24 new tests for F38, F62, F74–F79; 0 stale, 0 code fixes; build clean)
 
 ---
 
@@ -17,7 +17,7 @@
 | 3 | Feature Audit | /plan-feature-audit | DONE | 1 | 2026-04-11 | [view](reports/2026-04-11-site-audit.md) |
 | 4 | Feature Triage | /site-features | DONE | 1 | 2026-04-09 | [view](reports/2026-04-09-site-features.md) |
 | 5 | Feature Install | /site-install | DONE | 1 | 2026-04-10 00:00 | [view](reports/2026-04-10-site-install.md) |
-| 6 | Write Tests | /qa-tests-reconcile | DONE | 3 | 2026-04-17 | [view](reports/2026-04-17-tests-reconcile.md) |
+| 6 | Write Tests | /qa-tests-reconcile | DONE | 4 | 2026-04-23 | [view](reports/2026-04-23-tests-reconcile.md) |
 | 7 | Verify Build | /qa-tests-fix | DONE | 1 | 2026-04-16 | [view](reports/2026-04-16-tests-fix.md) |
 | 8 | Database Review | /qa-db | DONE | 1 | 2026-04-14 | [view](reports/2026-04-14-site-db.md) |
 | 9 | QA / Bug Check | /qa-bugs | DONE | 2 | 2026-04-18 | [view](reports/2026-04-18-site-bugs.md) |
@@ -33,7 +33,7 @@
 
 **Progress: 15/18 stages complete**
 
-**Last Updated**: 2026-04-19 (qa-a11y complete — 11 issues found, 11 fixed, WCAG AA; build clean)
+**Last Updated**: 2026-04-23 (qa-tests-reconcile run 4 — 24 new tests for F38, F62, F74–F79; build clean)
 
 ---
 
@@ -70,3 +70,4 @@
 | 2026-04-18 | /qa-perf | — | SUCCESS | Performance audit fixes |
 | 2026-04-19 | /qa-seo | ~15m | SUCCESS | 14 issues found (1 CRITICAL, 3 HIGH, 4 MEDIUM, 6 LOW); 13 fixed: Recipe+WebApp JSON-LD, canonicals, OG image, twitter card, sitemap (auth-gated /kitchen removed, public recipe entries added), robots env var fix, privacy/terms OG, (app)/loading.tsx; 1 accepted (offline page client directive needed); build clean |
 | 2026-04-19 | /qa-a11y | ~10m | SUCCESS | 11 issues found, 11 fixed: skip-to-content link, main landmarks, nav aria-label, delete/remove button labels, role="alert" on 4 error forms, PWA prompt role fix, share dialog role, focus rings, prefers-reduced-motion CSS; build clean |
+| 2026-04-23 | /qa-tests-reconcile | ~4m | SUCCESS | 24 new tests across 3 files (kitchen-modifiers-f74-f79, recipe-import-f62, recipe-tags-f38); 0 stale fixed, 0 code fixes; npm run build clean |
