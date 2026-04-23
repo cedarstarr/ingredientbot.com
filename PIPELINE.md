@@ -27,13 +27,13 @@
 | 13 | Performance Audit | /qa-perf | DONE | 1 | 2026-04-18 | — |
 | 14 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
 | 15 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
-| 16 | Final E2E Tests | /qa-tests-fix | PENDING | 0 | — | — |
+| 16 | Final E2E Tests | /qa-tests-fix | DONE | 1 | 2026-04-23 02:50 | [view](reports/2026-04-23-tests-fix.md) |
 | 17 | Client Update | /ops-client-report | PENDING | 0 | — | — |
 | 18 | Launch | /ops-launch | PENDING | 0 | — | — |
 
-**Progress: 15/18 stages complete**
+**Progress: 16/18 stages complete**
 
-**Last Updated**: 2026-04-23 (qa-tests-reconcile run 4 — 24 new tests for F38, F62, F74–F79; build clean)
+**Last Updated**: 2026-04-23 (qa-tests-fix stage 16 — 197/197 passing; fixed NEXTAUTH_URL env, seeded test user, + 13 isolated test fixes)
 
 ---
 
@@ -71,3 +71,4 @@
 | 2026-04-19 | /qa-seo | ~15m | SUCCESS | 14 issues found (1 CRITICAL, 3 HIGH, 4 MEDIUM, 6 LOW); 13 fixed: Recipe+WebApp JSON-LD, canonicals, OG image, twitter card, sitemap (auth-gated /kitchen removed, public recipe entries added), robots env var fix, privacy/terms OG, (app)/loading.tsx; 1 accepted (offline page client directive needed); build clean |
 | 2026-04-19 | /qa-a11y | ~10m | SUCCESS | 11 issues found, 11 fixed: skip-to-content link, main landmarks, nav aria-label, delete/remove button labels, role="alert" on 4 error forms, PWA prompt role fix, share dialog role, focus rings, prefers-reduced-motion CSS; build clean |
 | 2026-04-23 | /qa-tests-reconcile | ~4m | SUCCESS | 24 new tests across 3 files (kitchen-modifiers-f74-f79, recipe-import-f62, recipe-tags-f38); 0 stale fixed, 0 code fixes; npm run build clean |
+| 2026-04-23 02:50 | /qa-tests-fix | ~55m | SUCCESS | 197/197 passing; initial 54/143 → systemic fixes (NEXTAUTH_URL → localhost, seed test user) recovered auth cascade → agent fixed 13 residuals (LOCKED_PUBLIC_PATHS, settings layout, streaming waits); commit 825a389 |
