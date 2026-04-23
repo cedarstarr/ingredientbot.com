@@ -31,24 +31,18 @@ const PUBLIC_PATHS = [
   '/manifest.json', '/sw.js', '/offline',
 ]
 
-const LOCKED_PUBLIC_PATHS = [
-  '/login', '/signup', '/forgot-password', '/reset-password',
-  '/verify-email', '/verify-request', '/2fa-verify', '/unsubscribe',
-  '/api/auth', '/api/health', '/api/cron',
-  '/_next', '/favicon.ico', '/robots.txt', '/sitemap.xml', '/opengraph-image',
-  // PWA assets must remain public even when the site is launch-locked —
-  // the browser requests them before login to enable install/offline flows.
-  '/manifest.json', '/sw.js', '/offline',
-]
-
-const effectivePublicPaths =
-  process.env.LAUNCH_LOCKED === 'true' ? LOCKED_PUBLIC_PATHS : PUBLIC_PATHS
-
 export default auth(async function middleware(request: NextAuthRequest) {
   const pathname = request.nextUrl.pathname
 
+  const host = request.headers.get('host') ?? ''
+  if (host.startsWith('staging.')) {
+    const response = NextResponse.next()
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+    return response
+  }
+
   // Allow public paths without auth
-  const isPublic = effectivePublicPaths.some(p => pathname.startsWith(p))
+  const isPublic = PUBLIC_PATHS.some(p => pathname.startsWith(p))
   if (!isPublic && !request.auth) {
     // API routes return 401 instead of redirecting
     if (pathname.startsWith('/api/')) {
