@@ -84,6 +84,12 @@
 - ✅ F71 "Date night" mode (3-course menu from your pantry) [Vibe]
 - 🛠 F72 Ingredient-to-cuisine mapper (miso + sesame oil → 8 Japanese dishes) [Vibe]
 - 🛠 F73 Recipe video script generation (AI-native future feature) [Vibe]
+- ✅ F74 Cooking method selector (sheet pan / one-pot / air fryer / etc.) [Hook]
+- ✅ F75 "I'm exhausted" mode (dump-and-wait, 5 min active effort) [Hook]
+- ✅ F76 Protein-Max mode (40g+ protein per serving) [Hook]
+- ✅ F77 Restaurant recreation (recreate Chipotle / Olive Garden style) [Hook]
+- ✅ F78 Spice level slider (Mild / Medium / Hot / Fire) [Vibe]
+- ✅ F79 Medical dietary flags (low-sodium / low-FODMAP / diabetes-friendly) [Core]
 
 ---
 
@@ -186,6 +192,16 @@ F61. ✅ **Strictness toggle** [Vibe] — Two modes: Strict (only use exactly wh
 
 F64. ✅ **"Teach me" verbose recipe mode** [Vibe] — Optional mode where Claude explains the why behind each step. "Why do you sear the chicken before braising? Because..." Differentiates ingredientbot as an educational kitchen companion, not just a recipe vending machine. Built: "Teach me mode" toggle in kitchen Generation modes section (blue indicator), TEACH ME MODE injected into both generate and cook prompts; cook prompt requests "Why:" annotations after each step.
 
+F74. ✅ **Cooking method selector** [Hook] — Equipment-constrained generation. Dropdown beside cuisine with options: Any / Sheet Pan / One-Pot / Air Fryer / Slow Cooker / Instant Pot / Microwave Only / No Stove. Solves "I only have an air fryer in this Airbnb" and "my stove is broken" scenarios that competitors ignore. Persists to kitchen prefs so repeat visitors don't re-select. Context injected into both generate and cook prompts. Built: `cookingMethod` string on User (default "any"), `<Select>` next to Difficulty, PATCH /api/user/kitchen-prefs accepts `cookingMethod`, 7 method-specific system-prompt blocks in generate and cook routes.
+
+F75. ✅ **"I'm exhausted" mode** [Hook] — Toggle that tells Claude the user has ~5 minutes of active cooking effort. Prefers dump-and-wait, one-step, or passive-cook recipes. Solves the most emotionally-loaded cooking moment: "I'm too tired to cook but need dinner." Session-only; no persistence because exhaustion is transient. Injected into generate and cook prompts. Built: Bed icon toggle in Generation modes section, `exhaustedMode` boolean passed in both payloads, EXHAUSTED MODE system prompt block.
+
+F76. ✅ **Protein-Max mode** [Hook] — Toggle that forces each serving to contain ≥40g protein. Targets fitness/gym users who macro-track. Prioritizes chicken, beef, eggs, Greek yogurt, cottage cheese, tofu, tempeh, legumes. Protein grams displayed prominently. Session-only. Built: Dumbbell icon toggle in Generation modes section (red indicator), `proteinMax` boolean in both payloads, PROTEIN-MAX MODE system prompt block.
+
+F77. ✅ **Restaurant recreation** [Hook] — Free-text field: "Recreate like Chipotle, Olive Garden…". Claude reproduces a restaurant's signature flavor profile using pantry ingredients. High emotional resonance — users frequently crave specific restaurant dishes and can't afford/access them. Session-only (different restaurant each time). Injected into generate and cook prompts. Built: `<Input>` below Cuisine selector with 120-char limit, server re-trims input and slices to 120 chars, RESTAURANT RECREATION system prompt block.
+
+F79. ✅ **Medical dietary flags** [Core] — Three bool fields on the dietary profile: low-sodium, low-FODMAP, diabetes-friendly. Rendered as a "Medical" subsection in the dietary profile page with a clear disclaimer: "general AI-generated guidelines — not medical advice. Consult your doctor for serious conditions." Injected into generate and cook prompts as always-on constraints when enabled. Expands the dietary-restricted audience beyond basic allergens to users managing chronic conditions. Built: `lowSodium`/`lowFodmap`/`diabetesFriendly` booleans on DietaryProfile (migration `20260422000000_add_medical_dietary_fields`), three shadcn `<Checkbox>` inputs in DietaryProfileSection, disclaimer copy, GET/PATCH /api/user/dietary accepts/returns the three fields, system-prompt profile block appends each enabled guideline.
+
 ---
 
 ## Growth & Retention
@@ -251,6 +267,8 @@ F65. **Cuisine trend feed** [Vibe] — Weekly "try this cuisine" suggestion on t
 ✅ F70. **AI chef personality toggle** [Vibe] — Friendly home cook / strict French chef / street food vendor. System prompt variant changes tone and vocabulary of all generated recipes. Cheap to build, high delight. (Feasibility: Low — system prompt variant selection)
 
 ✅ F71. **"Date night" 3-course mode** [Vibe] — From your pantry, generate a full 3-course menu: starter, main, dessert. A high-emotion cooking moment; great for viral sharing (F27). (Feasibility: Low — structured multi-recipe generation prompt)
+
+F78. ✅ **Spice level slider** [Vibe] — 4-stop slider (Mild / Medium / Hot / Fire) with a flame icon. Calibrates heat across any cuisine — "Thai but mild for the kids" or "Mexican but fire". Persists to kitchen prefs so chili-sensitive users don't get repeatedly surprised. Always injected into generation prompt even at Mild (so the AI knows to restrain itself). Fills the gap between binary "spicy/not spicy" tags on most apps. Built: `spiceLevel` integer 0..3 on User (default 0), shadcn `<Slider>` in kitchen panel with Flame icon + 4 stop labels, PATCH /api/user/kitchen-prefs accepts `spiceLevel`, SPICE LEVEL system prompt block always emitted.
 
 ---
 

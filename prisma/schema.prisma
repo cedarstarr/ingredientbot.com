@@ -103,6 +103,12 @@ model User {
   // F70: Chef personality preference
   chefPersonality ChefPersonality @default(home) @map("chef_personality")
 
+  // F74: Cooking method preference (stored as free-form string to avoid enum migrations when adding options)
+  cookingMethod String @default("any") @map("cooking_method")
+
+  // F78: Spice tolerance — 0=Mild, 1=Medium, 2=Hot, 3=Fire
+  spiceLevel Int @default(0) @map("spice_level")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -291,6 +297,11 @@ model DietaryProfile {
   restrictions        String[] @default([]) // e.g. ["vegan", "gluten-free", "nut-allergy"]
   cuisinePrefs        String[] @default([]) @map("cuisine_prefs") // e.g. ["Italian", "Asian"]
   dislikedIngredients String[] @default([]) @map("disliked_ingredients")
+
+  // F79: Medical dietary flags — general AI-generated guidance, NOT medical advice.
+  lowSodium        Boolean @default(false) @map("low_sodium")
+  lowFodmap        Boolean @default(false) @map("low_fodmap")
+  diabetesFriendly Boolean @default(false) @map("diabetes_friendly")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
