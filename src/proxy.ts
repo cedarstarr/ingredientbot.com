@@ -36,6 +36,9 @@ const LOCKED_PUBLIC_PATHS = [
   '/verify-email', '/verify-request', '/2fa-verify', '/unsubscribe',
   '/api/auth', '/api/health', '/api/cron',
   '/_next', '/favicon.ico', '/robots.txt', '/sitemap.xml', '/opengraph-image',
+  // PWA assets must remain public even when the site is launch-locked —
+  // the browser requests them before login to enable install/offline flows.
+  '/manifest.json', '/sw.js', '/offline',
 ]
 
 const effectivePublicPaths =

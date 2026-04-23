@@ -25,6 +25,8 @@ test.describe('Recipe History page', () => {
   })
 
   test('shows recipe count or empty state message', async ({ page }) => {
+    // Wait for post-hydration content so count/empty state is in DOM
+    await expect(page.getByRole('heading', { name: /recipe history/i })).toBeVisible()
     const body = await page.locator('body').textContent()
     const hasCount = /\d+\s+recipe/i.test(body ?? '')
     const hasEmpty = /no recipes|start cooking|generate your first/i.test(body ?? '')

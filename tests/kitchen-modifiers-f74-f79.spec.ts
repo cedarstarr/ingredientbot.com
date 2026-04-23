@@ -253,14 +253,18 @@ test.describe('Settings — F79 medical dietary flags', () => {
   })
 
   test('shows the "not medical advice" disclaimer near the medical flags', async ({ page }) => {
+    // Wait for settings heading so post-hydration dietary section content is present
+    await expect(page.getByRole('heading', { name: /^settings$/i })).toBeVisible()
     const body = await page.locator('body').textContent()
     expect(body).toMatch(/not medical advice|consult your doctor/i)
   })
 
   test('each medical flag has an accessible checkbox', async ({ page }) => {
-    await expect(page.getByLabel('Low-sodium')).toBeVisible()
-    await expect(page.getByLabel('Low-FODMAP')).toBeVisible()
-    await expect(page.getByLabel('Diabetes-friendly')).toBeVisible()
+    // base-ui Checkbox renders a visible span[role=checkbox] plus a hidden form-compat input —
+    // both carry the same accessible label, so we target the visible one with .first()
+    await expect(page.getByLabel('Low-sodium').first()).toBeVisible()
+    await expect(page.getByLabel('Low-FODMAP').first()).toBeVisible()
+    await expect(page.getByLabel('Diabetes-friendly').first()).toBeVisible()
   })
 })
 

@@ -15,7 +15,9 @@ test.describe('Meal Planner page', () => {
   })
 
   test('shows a weekly date range subtitle', async ({ page }) => {
-    // Subtitle format: "Apr 1 – Apr 7" — uses short month + day
+    // Subtitle format: "Apr 1 – Apr 7" — uses short month + day.
+    // Wait for heading so post-hydration streamed content is present before scanning.
+    await expect(page.getByRole('heading', { name: /meal planner/i })).toBeVisible()
     const body = await page.locator('body').textContent()
     // Should contain a month abbreviation and a dash/en-dash between two dates
     expect(body).toMatch(/\w{3}\s+\d+\s*[–-]\s*\w{3}\s+\d+/)
@@ -28,9 +30,10 @@ test.describe('Meal Planner page', () => {
   })
 
   test('renders meal row labels (Breakfast, Lunch, Dinner)', async ({ page }) => {
-    await expect(page.getByText('Breakfast', { exact: true })).toBeVisible()
-    await expect(page.getByText('Lunch', { exact: true })).toBeVisible()
-    await expect(page.getByText('Dinner', { exact: true })).toBeVisible()
+    // toBeVisible auto-waits; .first() handles Next.js streaming template duplicates
+    await expect(page.getByText('Breakfast', { exact: true }).first()).toBeVisible()
+    await expect(page.getByText('Lunch', { exact: true }).first()).toBeVisible()
+    await expect(page.getByText('Dinner', { exact: true }).first()).toBeVisible()
   })
 
   test('"Grocery List" button is visible (disabled when no slots)', async ({ page }) => {
@@ -39,6 +42,8 @@ test.describe('Meal Planner page', () => {
   })
 
   test('shows prompt to save recipes first when no recipes exist', async ({ page }) => {
+    // Wait for post-hydration content so the prompt (if no saved recipes) is in the DOM.
+    await expect(page.getByRole('heading', { name: /meal planner/i })).toBeVisible()
     const body = await page.locator('body').textContent()
     // Either the empty state message or a filled-in grid — check that page loaded cleanly
     const hasPrompt = /cook something first/i.test(body ?? '')

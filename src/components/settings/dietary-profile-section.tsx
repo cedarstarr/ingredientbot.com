@@ -123,9 +123,15 @@ export function DietaryProfileSection() {
 
   if (loading) {
     return (
-      <div className="rounded-lg border border-border bg-card p-4 flex items-center gap-2 text-muted-foreground text-sm">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        Loading dietary profile...
+      <div className="rounded-lg border border-border bg-card p-5 space-y-3">
+        <div className="flex items-center gap-2 text-muted-foreground text-sm">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Loading dietary profile...
+        </div>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          Medical dietary flags (low-sodium, low-FODMAP, diabetes-friendly) are general
+          AI-generated guidelines — not medical advice. Consult your doctor for serious conditions.
+        </p>
       </div>
     )
   }

@@ -15,7 +15,8 @@ test.describe('Settings page', () => {
   })
 
   test('shows the logged-in email address', async ({ page }) => {
-    await expect(page.getByText('Email: test@test.com')).toBeVisible()
+    // .first() handles Next.js streaming template duplicates
+    await expect(page.getByText('Email: test@test.com').first()).toBeVisible()
   })
 
   test('shows Account section with email and name', async ({ page }) => {
@@ -26,17 +27,19 @@ test.describe('Settings page', () => {
   })
 
   test('shows Profile section with Display Name input', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: /profile/i })).toBeVisible()
-    await expect(page.locator('input#name')).toBeVisible()
-    await expect(page.getByRole('button', { name: /save name/i })).toBeVisible()
+    // Profile heading is unique (Dietary Profile uses a different heading text);
+    // .first() guards against Next.js streaming placeholders leaving duplicate nodes in DOM
+    await expect(page.getByRole('heading', { name: /^profile$/i }).first()).toBeVisible()
+    await expect(page.locator('input#name').first()).toBeVisible()
+    await expect(page.getByRole('button', { name: /save name/i }).first()).toBeVisible()
   })
 
   test('shows Change Password section with password fields', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: /change password/i })).toBeVisible()
-    await expect(page.locator('input#currentPassword')).toBeVisible()
-    await expect(page.locator('input#newPassword')).toBeVisible()
-    await expect(page.locator('input#confirmNewPassword')).toBeVisible()
-    await expect(page.getByRole('button', { name: /update password/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /change password/i }).first()).toBeVisible()
+    await expect(page.locator('input#currentPassword').first()).toBeVisible()
+    await expect(page.locator('input#newPassword').first()).toBeVisible()
+    await expect(page.locator('input#confirmNewPassword').first()).toBeVisible()
+    await expect(page.getByRole('button', { name: /update password/i }).first()).toBeVisible()
   })
 
   test('shows Email Notifications section with checkboxes', async ({ page }) => {
