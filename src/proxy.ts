@@ -29,6 +29,7 @@ const PUBLIC_PATHS = [
   '/api/cron/',
   // PWA assets — must be publicly accessible for install/offline flow
   '/manifest.json', '/sw.js', '/offline',
+  '/coming-soon',
 ]
 
 export default auth(async function middleware(request: NextAuthRequest) {
@@ -39,6 +40,12 @@ export default auth(async function middleware(request: NextAuthRequest) {
     const response = NextResponse.next()
     response.headers.set('X-Robots-Tag', 'noindex, nofollow')
     return response
+  }
+
+  if (process.env.COMING_SOON === 'true' && !pathname.startsWith('/api/') && pathname !== '/coming-soon') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/coming-soon'
+    return NextResponse.rewrite(url)
   }
 
   // Allow public paths without auth
