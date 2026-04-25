@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { streamText } from 'ai'
 import { claudeSonnet } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
+import { logAICall } from '@/lib/ai-log'
 
 export const maxDuration = 60
 
@@ -171,6 +172,16 @@ difficulty must be exactly: "easy", "medium", or "hard"${personalityContext}${pr
         ? 'Impress me with 4 creative recipes. Choose the ingredients yourself.'
         : `I have these ingredients: ${ingredients.join(', ')}. ${cuisineStr} ${sessionDietaryStr} Suggest 4 recipes.`,
     }],
+    onFinish: ({ usage }) => {
+      logAICall({
+        feature: "recipe-generation",
+        provider: "anthropic",
+        model: "claude-sonnet-4-6",
+        inputTokens: usage.inputTokens,
+        outputTokens: usage.outputTokens,
+        userId: session.user.id,
+      })
+    },
   })
 
   // Frontend reads raw text chunks (newline-delimited JSON), not SSE data: events

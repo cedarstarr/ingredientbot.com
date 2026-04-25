@@ -5,6 +5,7 @@ import type { Prisma } from '@prisma/client'
 import { generateText } from 'ai'
 import { claudeSonnet } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
+import { logAICall } from '@/lib/ai-log'
 
 export const maxDuration = 30
 
@@ -54,7 +55,7 @@ export async function POST(
     instructions?: string[]
   }
 
-  const { text } = await generateText({
+  const { text, usage } = await generateText({
     model: claudeSonnet,
     maxOutputTokens: 800,
     system: `You are a professional chef specializing in dietary adaptations. Convert recipes to fit specific dietary restrictions while maintaining flavor and texture. Respond with JSON:
@@ -75,6 +76,15 @@ Title: ${recipeData.title || recipe.title}
 Ingredients: ${JSON.stringify(recipeData.ingredients || recipe.sourceIngredients)}
 Instructions: ${JSON.stringify(recipeData.instructions || [])}`,
     }],
+  })
+
+  logAICall({
+    feature: "diet-conversion",
+    provider: "anthropic",
+    model: "claude-sonnet-4-6",
+    inputTokens: usage.inputTokens,
+    outputTokens: usage.outputTokens,
+    userId: session.user.id,
   })
 
   const jsonMatch = text.match(/\{[\s\S]*\}/)

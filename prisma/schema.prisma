@@ -309,6 +309,22 @@ model DietaryProfile {
   @@map("dietary_profiles")
 }
 
+model AICallLog {
+  id           String   @id @default(cuid())
+  site         String
+  feature      String
+  provider     String
+  model        String
+  inputTokens  Int
+  outputTokens Int
+  durationMs   Int?
+  userId       String?
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([feature])
+}
+
 // F44: Pantry inventory — persistent ingredient list tracked between sessions
 // F26: expiresAt added for expiry-first mode
 model PantryItem {

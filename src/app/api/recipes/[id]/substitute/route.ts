@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { generateText } from 'ai'
 import { claudeSonnet } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
+import { logAICall } from '@/lib/ai-log'
 
 export const maxDuration = 30
 
@@ -69,7 +70,7 @@ export async function POST(
     ? recipeData.ingredients.map(i => `${i.amount} ${i.unit} ${i.name}`.trim()).join(', ')
     : recipe.sourceIngredients.join(', ')
 
-  const { text } = await generateText({
+  const { text, usage } = await generateText({
     model: claudeSonnet,
     maxOutputTokens: 800,
     system: `You are a professional chef and food scientist. Analyze the role an ingredient plays in a recipe and suggest practical substitutions. Respond with valid JSON only, no markdown fences:
@@ -95,6 +96,15 @@ Missing ingredient: ${missingIngredient}
 
 Analyze what role "${missingIngredient}" plays in this specific recipe and suggest 2-3 substitutions ordered from best to last resort.`,
     }],
+  })
+
+  logAICall({
+    feature: "ingredient-substitute",
+    provider: "anthropic",
+    model: "claude-sonnet-4-6",
+    inputTokens: usage.inputTokens,
+    outputTokens: usage.outputTokens,
+    userId: session.user.id,
   })
 
   const jsonMatch = text.match(/\{[\s\S]*\}/)

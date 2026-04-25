@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { streamText } from 'ai'
 import { claudeSonnet } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
+import { logAICall } from '@/lib/ai-log'
 
 export const maxDuration = 60
 
@@ -56,6 +57,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       role: 'user',
       content: `Here is the current recipe:\n${recipe.rawText}\n\n${actionPrompt(recipe, { targetServings, targetMethod })}`,
     }],
+    onFinish: ({ usage }) => {
+      logAICall({
+        feature: "recipe-modify",
+        provider: "anthropic",
+        model: "claude-sonnet-4-6",
+        inputTokens: usage.inputTokens,
+        outputTokens: usage.outputTokens,
+        userId: session.user.id,
+      })
+    },
   })
 
   // Frontend reads raw text with getReader() — use toTextStreamResponse (not toDataStreamResponse)

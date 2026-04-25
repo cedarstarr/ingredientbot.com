@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { generateText } from 'ai'
 import { claudeSonnet } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
+import { logAICall } from '@/lib/ai-log'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -44,7 +45,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     .map(i => `${i.amount} ${i.unit} ${i.name}`.trim())
     .join(', ')
 
-  const { text } = await generateText({
+  const { text, usage } = await generateText({
     model: claudeSonnet,
     maxOutputTokens: 256,
     system: `You are a registered dietitian. Estimate the nutritional content of a recipe per serving.
@@ -58,6 +59,15 @@ Ingredients: ${ingredientList}
 
 Estimate nutrition per serving.`,
     }],
+  })
+
+  logAICall({
+    feature: "nutrition-estimate",
+    provider: "anthropic",
+    model: "claude-sonnet-4-6",
+    inputTokens: usage.inputTokens,
+    outputTokens: usage.outputTokens,
+    userId: session.user.id,
   })
 
   let nutrition: { calories: number; protein: number; fat: number; carbs: number; fiber: number }
