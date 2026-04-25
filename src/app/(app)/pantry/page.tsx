@@ -2,7 +2,7 @@ import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { PantryClient } from '@/components/pantry/pantry-client'
 
-export const metadata = { title: 'Pantry — IngredientBot' }
+export const metadata = { title: 'Pantry — Robot Food' }
 
 export default async function PantryPage() {
   const session = await auth()

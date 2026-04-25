@@ -53,27 +53,27 @@ export async function sendWelcomeEmail(to: string, name: string | null, verifyUr
   })
   await sendEmail({
     to,
-    subject: 'Welcome to IngredientBot!',
+    subject: 'Welcome to Robot Food!',
     html,
   })
 }
 
 export async function sendVerificationEmail(email: string, token: string) {
   const url = `${SITE_URL}/api/auth/verify-email?token=${token}&email=${encodeURIComponent(email)}`
-  const html = await renderVerifyEmail({ url, siteName: 'IngredientBot' })
+  const html = await renderVerifyEmail({ url, siteName: 'Robot Food' })
   await sendEmail({
     to: email,
-    subject: 'Verify your IngredientBot email',
+    subject: 'Verify your Robot Food email',
     html,
   })
 }
 
 export async function sendPasswordResetEmail(email: string, token: string) {
   const url = `${SITE_URL}/reset-password?token=${token}`
-  const html = await renderPasswordResetEmail({ url, siteName: 'IngredientBot' })
+  const html = await renderPasswordResetEmail({ url, siteName: 'Robot Food' })
   await sendEmail({
     to: email,
-    subject: 'Reset your IngredientBot password',
+    subject: 'Reset your Robot Food password',
     html,
   })
 }
@@ -85,7 +85,7 @@ export async function sendPasswordChangedEmail(email: string, name?: string) {
 <head><meta charset="utf-8" /></head>
 <body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#111;">
   <h2>Your password has been changed, ${escapeHtml(displayName)}!</h2>
-  <p style="color:#555;">Your IngredientBot password was recently changed.</p>
+  <p style="color:#555;">Your Robot Food password was recently changed.</p>
   <p>If you did not make this change, please contact us immediately.</p>
   <p style="margin-top:24px;">
     <a href="${SITE_URL}/kitchen" style="background:#e57c2c;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600;">Go to Kitchen</a>
@@ -95,7 +95,7 @@ export async function sendPasswordChangedEmail(email: string, name?: string) {
 </html>`
   await sendEmail({
     to: email,
-    subject: 'Your IngredientBot password has been changed',
+    subject: 'Your Robot Food password has been changed',
     html,
   })
 }
@@ -111,7 +111,7 @@ export async function sendEmailChangeVerificationEmail(toEmail: string, token: s
 <head><meta charset="utf-8" /></head>
 <body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#111;">
   <h2 style="color:#e57c2c;">Verify your new email address</h2>
-  <p style="color:#555;">You requested to change your IngredientBot email to <strong>${escaped}</strong>.</p>
+  <p style="color:#555;">You requested to change your Robot Food email to <strong>${escaped}</strong>.</p>
   <p>Click the button below to confirm. This link expires in 1 hour.</p>
   <p style="margin-top:16px;">
     <a href="${url}" style="background:#e57c2c;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600;">Confirm Email Change</a>
@@ -120,7 +120,7 @@ export async function sendEmailChangeVerificationEmail(toEmail: string, token: s
   <p style="margin-top:32px;color:#999;font-size:13px;"><a href="${SITE_URL}" style="color:#999;">ingredientbot.com</a></p>
 </body>
 </html>`
-  await sendEmail({ to: toEmail, subject: 'Confirm your new IngredientBot email address', html })
+  await sendEmail({ to: toEmail, subject: 'Confirm your new Robot Food email address', html })
 }
 
 export async function sendAccountDeletedEmail(email: string, name?: string) {
@@ -130,14 +130,14 @@ export async function sendAccountDeletedEmail(email: string, name?: string) {
 <head><meta charset="utf-8" /></head>
 <body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#111;">
   <h2>Account deleted, ${escapeHtml(displayName)}</h2>
-  <p style="color:#555;">Your IngredientBot account has been permanently deleted.</p>
+  <p style="color:#555;">Your Robot Food account has been permanently deleted.</p>
   <p>All your saved recipes have been removed. We hope to cook with you again someday!</p>
   <p style="margin-top:32px;color:#999;font-size:13px;"><a href="${SITE_URL}" style="color:#999;">ingredientbot.com</a></p>
 </body>
 </html>`
   await sendEmail({
     to: email,
-    subject: 'Your IngredientBot account has been deleted',
+    subject: 'Your Robot Food account has been deleted',
     html,
   })
 }

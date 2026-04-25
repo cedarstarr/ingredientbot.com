@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { formatDate } from '@/lib/utils'
 
-export const metadata = { title: 'Audit Logs — Admin — IngredientBot' }
+export const metadata = { title: 'Audit Logs — Admin — Robot Food' }
 
 export default async function AdminAuditLogsPage() {
   const logs = await prisma.auditLog.findMany({

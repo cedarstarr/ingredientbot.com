@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { HistoryClient } from '@/components/recipe/history-client'
 
-export const metadata = { title: 'Recipe History — IngredientBot' }
+export const metadata = { title: 'Recipe History — Robot Food' }
 
 export default async function HistoryPage({
   searchParams,

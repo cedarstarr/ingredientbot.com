@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
-export const alt = 'IngredientBot — AI Recipe Generator'
+export const alt = 'Robot Food — AI Recipe Generator'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -80,7 +80,7 @@ export default async function Image() {
               textTransform: 'uppercase',
             }}
           >
-            IngredientBot
+            Robot Food
           </span>
         </div>
 

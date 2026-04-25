@@ -8,7 +8,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <div className="mb-8 flex items-center gap-2">
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <ChefHat className="h-7 w-7 text-primary" />
-          <span className="text-xl font-bold text-foreground">IngredientBot</span>
+          <span className="text-xl font-bold text-foreground">Robot Food</span>
         </Link>
       </div>
 

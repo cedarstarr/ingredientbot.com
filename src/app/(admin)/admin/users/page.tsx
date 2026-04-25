@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { formatDate } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 
-export const metadata = { title: 'Users — Admin — IngredientBot' }
+export const metadata = { title: 'Users — Admin — Robot Food' }
 
 export default async function AdminUsersPage() {
   const users = await prisma.user.findMany({

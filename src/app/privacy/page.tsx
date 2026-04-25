@@ -5,14 +5,14 @@ import { ChefHat } from 'lucide-react'
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ingredientbot.com'
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — IngredientBot',
-  description: 'How IngredientBot collects, uses, and protects your data when you use our AI recipe assistant.',
+  title: 'Privacy Policy — Robot Food',
+  description: 'How Robot Food collects, uses, and protects your data when you use our AI recipe assistant.',
   alternates: {
     canonical: `${baseUrl}/privacy`,
   },
   openGraph: {
-    title: 'Privacy Policy — IngredientBot',
-    description: 'How IngredientBot collects, uses, and protects your data when you use our AI recipe assistant.',
+    title: 'Privacy Policy — Robot Food',
+    description: 'How Robot Food collects, uses, and protects your data when you use our AI recipe assistant.',
     siteName: 'IngredientBot',
   },
 }
@@ -25,7 +25,7 @@ export default function PrivacyPage() {
         <div className="mx-auto flex h-16 max-w-4xl items-center px-4">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <ChefHat className="h-6 w-6 text-primary" />
-            <span className="font-bold text-lg text-foreground">IngredientBot</span>
+            <span className="font-bold text-lg text-foreground">Robot Food</span>
           </Link>
         </div>
       </header>

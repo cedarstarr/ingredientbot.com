@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { CollectionsClient } from '@/components/recipe/collections-client'
 
-export const metadata = { title: 'Collections — IngredientBot' }
+export const metadata = { title: 'Collections — Robot Food' }
 
 export default async function CollectionsPage() {
   const session = await auth()

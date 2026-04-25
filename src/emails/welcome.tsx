@@ -8,7 +8,7 @@ function WelcomeEmail({ name, siteUrl, verifyUrl }: Props) {
     <Html>
       <Head />
       <Body style={{ fontFamily: 'sans-serif', maxWidth: '600px', margin: '0 auto', padding: '24px', color: '#111' }}>
-        <Heading as="h2" style={{ color: '#e57c2c' }}>Welcome to IngredientBot, {name}!</Heading>
+        <Heading as="h2" style={{ color: '#e57c2c' }}>Welcome to Robot Food, {name}!</Heading>
         <Text>Your AI-powered kitchen assistant is ready. Start typing your ingredients and get instant recipe ideas.</Text>
         {verifyUrl && (
           <>

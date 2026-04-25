@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { MealPlannerClient } from '@/components/meal-plan/meal-planner-client'
 
-export const metadata = { title: 'Meal Planner — IngredientBot' }
+export const metadata = { title: 'Meal Planner — Robot Food' }
 
 /** Normalize a date to the Monday of its week at midnight UTC */
 function getWeekStart(from: Date): Date {

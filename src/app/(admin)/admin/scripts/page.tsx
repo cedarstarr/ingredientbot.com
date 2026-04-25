@@ -6,7 +6,7 @@ import fs from 'fs'
 import path from 'path'
 import ScriptRunButton from './script-run-button'
 
-export const metadata = { title: 'Scripts — Admin — IngredientBot' }
+export const metadata = { title: 'Scripts — Admin — Robot Food' }
 
 function parseScriptMeta(filePath: string): { description: string; tables: string; adminRunnable: boolean } {
   try {

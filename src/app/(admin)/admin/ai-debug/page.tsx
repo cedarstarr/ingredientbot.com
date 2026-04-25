@@ -1,7 +1,7 @@
 import { requireAdmin } from '@/lib/admin'
 import { AiDebugClient } from './ai-debug-client'
 
-export const metadata = { title: 'AI Debug — Admin — IngredientBot' }
+export const metadata = { title: 'AI Debug — Admin — Robot Food' }
 
 export default async function AiDebugPage() {
   await requireAdmin()

@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { SavedRecipesClient } from '@/components/recipe/saved-recipes-client'
 
-export const metadata = { title: 'Saved Recipes — IngredientBot' }
+export const metadata = { title: 'Saved Recipes — Robot Food' }
 
 export default async function SavedPage() {
   const session = await auth()
