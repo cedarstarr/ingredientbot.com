@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { generateText } from 'ai'
 import { claudeHaiku } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
+import { logAICall } from '@/lib/ai-log'
 
 export async function POST(req: NextRequest) {
   const session = await auth()
@@ -22,13 +23,22 @@ export async function POST(req: NextRequest) {
 
   const { recipeTitle, ingredient, action } = await req.json()
 
-  const { text } = await generateText({
+  const { text, usage } = await generateText({
     model: claudeHaiku,
     maxOutputTokens: 100,
     messages: [{
       role: 'user',
       content: `In the context of "${recipeTitle}", what is the effect of ${action === 'add' ? 'adding' : 'removing'} ${ingredient}? Reply in exactly 1-2 sentences focusing on flavor, texture, or nutrition. Be specific and helpful.`,
     }],
+  })
+
+  logAICall({
+    feature: "ingredient-comment",
+    provider: "anthropic",
+    model: "claude-haiku-4-5-20251001",
+    inputTokens: usage.inputTokens,
+    outputTokens: usage.outputTokens,
+    userId: session.user.id,
   })
 
   return Response.json({ comment: text })

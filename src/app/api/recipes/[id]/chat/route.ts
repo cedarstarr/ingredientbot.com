@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { streamText } from 'ai'
 import { claudeHaiku } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
+import { logAICall } from '@/lib/ai-log'
 
 export const maxDuration = 60
 
@@ -78,6 +79,16 @@ Be concise but helpful. Reference specific steps from the recipe when relevant. 
     maxOutputTokens: 500,
     system: systemPrompt,
     messages,
+    onFinish: ({ usage }) => {
+      logAICall({
+        feature: "cooking-chat",
+        provider: "anthropic",
+        model: "claude-haiku-4-5-20251001",
+        inputTokens: usage.inputTokens,
+        outputTokens: usage.outputTokens,
+        userId: session.user.id,
+      })
+    },
   })
 
   // Emit SSE events as `data: {"text": "..."}` to match the original contract

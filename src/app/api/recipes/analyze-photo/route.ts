@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { generateText } from 'ai'
 import { claudeSonnet } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
+import { logAICall } from '@/lib/ai-log'
 
 export const maxDuration = 60
 
@@ -34,7 +35,7 @@ export async function POST(req: NextRequest) {
   const base64 = Buffer.from(arrayBuffer).toString('base64')
   const mimeType = (photo.type || 'image/jpeg') as 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif'
 
-  const { text } = await generateText({
+  const { text, usage } = await generateText({
     model: claudeSonnet,
     maxOutputTokens: 512,
     messages: [{
@@ -47,6 +48,15 @@ export async function POST(req: NextRequest) {
         },
       ],
     }],
+  })
+
+  logAICall({
+    feature: "photo-analysis",
+    provider: "anthropic",
+    model: "claude-sonnet-4-6",
+    inputTokens: usage.inputTokens,
+    outputTokens: usage.outputTokens,
+    userId: session.user.id,
   })
 
   try {
