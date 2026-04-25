@@ -4,7 +4,7 @@
 **Concept**: AI pantry-to-recipe generator — enter what you have, get streaming recipe suggestions. Make smart changes to recipes.
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
-**Last Updated**: 2026-04-23 (qa-tests-reconcile run 4 — 24 new tests for F38, F62, F74–F79; 0 stale, 0 code fixes; build clean)
+**Last Updated**: 2026-04-24 (coming-soon gate deployed to production)
 
 ---
 
@@ -33,7 +33,7 @@
 
 **Progress: 16/18 stages complete**
 
-**Last Updated**: 2026-04-23 (qa-tests-fix stage 16 — 197/197 passing; fixed NEXTAUTH_URL env, seeded test user, + 13 isolated test fixes)
+**Last Updated**: 2026-04-24 (coming-soon gate deployed to production)
 
 ---
 
@@ -72,3 +72,4 @@
 | 2026-04-19 | /qa-a11y | ~10m | SUCCESS | 11 issues found, 11 fixed: skip-to-content link, main landmarks, nav aria-label, delete/remove button labels, role="alert" on 4 error forms, PWA prompt role fix, share dialog role, focus rings, prefers-reduced-motion CSS; build clean |
 | 2026-04-23 | /qa-tests-reconcile | ~4m | SUCCESS | 24 new tests across 3 files (kitchen-modifiers-f74-f79, recipe-import-f62, recipe-tags-f38); 0 stale fixed, 0 code fixes; npm run build clean |
 | 2026-04-23 02:50 | /qa-tests-fix | ~55m | SUCCESS | 197/197 passing; initial 54/143 → systemic fixes (NEXTAUTH_URL → localhost, seed test user) recovered auth cascade → agent fixed 13 residuals (LOCKED_PUBLIC_PATHS, settings layout, streaming waits); commit 825a389 |
+| 2026-04-24 | coming-soon gate | ~2m | SUCCESS | Middleware gate + /coming-soon page deployed; COMING_SOON=true set on Vercel production; staging unaffected |
