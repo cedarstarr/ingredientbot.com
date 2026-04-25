@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   images: {
@@ -7,6 +8,11 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react'],
   },
+  // Sentry requires these packages to remain external so its Node instrumentation works correctly
+  serverExternalPackages: [
+    '@sentry/nextjs', '@sentry/node', '@sentry/core',
+    'import-in-the-middle', 'require-in-the-middle',
+  ],
   // Security headers applied to every response (complements proxy.ts, which only
   // runs on matched routes). Vercel sets HSTS automatically; adding it here makes
   // self-hosted / preview deploys consistent.
@@ -27,4 +33,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  silent: true,
+  sourcemaps: { disable: true },
+});

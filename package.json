@@ -30,6 +30,7 @@
     "@radix-ui/react-toast": "^1.2.15",
     "@react-email/components": "^1.0.10",
     "@react-email/render": "^2.0.4",
+    "@sentry/nextjs": "^10.50.0",
     "@types/pg": "^8.18.0",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.37.0",
@@ -53,7 +54,9 @@
     "zeptomail": "^7.0.2",
     "zod": "^4.3.6"
   },
-  "engines": { "node": ">=20.9.0" },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
