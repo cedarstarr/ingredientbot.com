@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { formatDate } from '@/lib/utils'
 import { CookingHeatmap } from '@/components/recipe/cooking-heatmap'
 
-export const metadata = { title: 'Dashboard — Robot Food' }
+export const metadata = { title: 'Dashboard — IngredientBot' }
 
 // F47: Compute streak from sorted list of unique cook dates (UTC day strings)
 function computeStreak(cookDates: string[]): { current: number; longest: number } {

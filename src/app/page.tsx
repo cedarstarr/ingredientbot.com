@@ -15,7 +15,7 @@ const webAppJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
   name: 'IngredientBot',
-  alternateName: 'Robot Food',
+
   url: baseUrl,
   description: 'AI-powered recipe suggestions based on ingredients you have. Type what\'s in your fridge, snap a photo, and get instant recipe ideas powered by Claude AI.',
   applicationCategory: 'FoodApplication',
@@ -45,7 +45,7 @@ export default function LandingPage() {
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
           <div className="flex items-center gap-2">
             <ChefHat className="h-6 w-6 text-primary" />
-            <span className="font-bold text-lg text-foreground">Robot Food</span>
+            <span className="font-bold text-lg text-foreground">IngredientBot</span>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" asChild>
@@ -129,7 +129,7 @@ export default function LandingPage() {
         </h2>
         <div className="space-y-6">
           {[
-            { n: '1', title: 'Add your ingredients', desc: 'Type them in one by one, or snap a photo of your fridge. Robot Food recognizes them instantly.' },
+            { n: '1', title: 'Add your ingredients', desc: 'Type them in one by one, or snap a photo of your fridge. IngredientBot recognizes them instantly.' },
             { n: '2', title: 'Browse AI-generated recipe suggestions', desc: 'Get 4 personalized recipe ideas based exactly on what you have. Filter by cuisine or dietary needs.' },
             { n: '3', title: 'Cook and customize in real-time', desc: 'Open any recipe to see full instructions. Tap to lower calories, switch cooking method, or change servings.' },
           ].map(step => (
@@ -153,7 +153,7 @@ export default function LandingPage() {
             Ready to cook smarter?
           </h2>
           <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-            Join Robot Food and transform how you cook. Free to start — no credit card needed.
+            Join IngredientBot and transform how you cook. Free to start — no credit card needed.
           </p>
           <Button size="lg" asChild className="text-base px-10">
             <Link href="/signup">
@@ -170,7 +170,7 @@ export default function LandingPage() {
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
         <div className="flex items-center justify-center gap-2 mb-2">
           <ChefHat className="h-4 w-4 text-primary" />
-          <span className="font-semibold text-foreground">Robot Food</span>
+          <span className="font-semibold text-foreground">IngredientBot</span>
         </div>
         <p>AI-powered recipe assistant. Cook smarter, eat better.</p>
       </footer>

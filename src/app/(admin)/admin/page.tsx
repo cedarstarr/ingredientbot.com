@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { formatDate } from '@/lib/utils'
 
-export const metadata = { title: 'Admin — Robot Food' }
+export const metadata = { title: 'Admin — IngredientBot' }
 
 export default async function AdminPage() {
   const [userCount, recipeCount, recentLogs] = await Promise.all([

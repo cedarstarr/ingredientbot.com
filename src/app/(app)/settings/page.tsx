@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { SettingsClient } from '@/components/settings/settings-client'
 import { DietaryProfileSection } from '@/components/settings/dietary-profile-section'
 
-export const metadata = { title: 'Settings — Robot Food' }
+export const metadata = { title: 'Settings — IngredientBot' }
 
 export default async function SettingsPage() {
   const session = await auth()
