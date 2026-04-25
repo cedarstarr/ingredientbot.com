@@ -52,7 +52,7 @@ export function PwaInstallPrompt() {
   return (
     <div
       role="dialog"
-      aria-label="Install Robot Food app"
+      aria-label="Install IngredientBot app"
       aria-modal="false"
       className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-sm rounded-xl border border-border bg-card shadow-lg sm:left-auto sm:right-6 sm:bottom-6"
     >
@@ -61,7 +61,7 @@ export function PwaInstallPrompt() {
           <ChefHat className="h-5 w-5 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-foreground">Install Robot Food</p>
+          <p className="text-sm font-semibold text-foreground">Install IngredientBot</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
             Add to your home screen for quick access and offline recipes.
           </p>

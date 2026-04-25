@@ -46,7 +46,7 @@ export function LoginForm() {
           <ChefHat className="h-6 w-6 text-primary" />
         </div>
         <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">Sign in to your Robot Food account</p>
+        <p className="mt-1.5 text-sm text-muted-foreground">Sign in to your IngredientBot account</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
