@@ -97,7 +97,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
       <div className="flex h-14 shrink-0 items-center gap-2.5 border-b border-border px-4">
         <ChefHat className="h-5 w-5 shrink-0 text-primary" />
         <span className="font-semibold tracking-tight text-foreground text-sm">
-          Robot Food
+          IngredientBot
         </span>
         {onClose && (
           <button
@@ -196,7 +196,7 @@ export function AppNav() {
           <Menu className="h-5 w-5" />
         </button>
         <ChefHat className="h-5 w-5 text-primary" />
-        <span className="font-semibold text-sm text-foreground">Robot Food</span>
+        <span className="font-semibold text-sm text-foreground">IngredientBot</span>
         <div className="ml-auto">
           <ThemeToggle />
         </div>
