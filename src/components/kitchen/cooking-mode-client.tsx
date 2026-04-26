@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
 import {
   ChevronLeft,
   ChevronRight,
@@ -15,6 +14,11 @@ import {
   Users,
   Clock,
   BatteryWarning,
+  ChefHat,
+  Pause,
+  Play,
+  RotateCcw,
+  FastForward,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -86,7 +90,6 @@ export function CookingModeClient({ recipe }: Props) {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const totalTime = (recipe.prepTimeMin || 0) + (recipe.cookTimeMin || 0)
-  const progress = steps.length > 0 ? ((currentStep + 1) / steps.length) * 100 : 0
 
   // Screen wake lock — keeps display on while cooking
   useEffect(() => {
@@ -136,7 +139,6 @@ export function CookingModeClient({ recipe }: Props) {
         setTimerElapsed(prev => {
           const next = prev + 1
           if (timerSeconds !== null && next >= timerSeconds * 60) {
-            // Timer done
             setTimerRunning(false)
             clearInterval(timerRef.current!)
           }
@@ -198,62 +200,79 @@ export function CookingModeClient({ recipe }: Props) {
   const isDone = currentStep === steps.length - 1 && completedSteps.has(currentStep)
 
   return (
-    <div className="min-h-screen bg-background flex flex-col select-none">
+    <div className="min-h-screen text-white select-none flex flex-col">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
-        <Link
-          href={`/recipe/${recipe.id}`}
-          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md px-2 py-1 -ml-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <X className="h-4 w-4" />
-          Exit
-        </Link>
+      <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/25 text-primary">
+            <ChefHat className="h-[18px] w-[18px]" />
+          </div>
+          <div>
+            <div className="text-[11px] text-white/50 uppercase tracking-[0.08em] font-semibold leading-none mb-0.5">
+              Cook Mode · Step {currentStep + 1} of {steps.length}
+            </div>
+            <div className="text-[14px] font-medium text-white/85 leading-none">{recipe.title}</div>
+          </div>
+        </div>
 
-        <div className="flex items-center gap-2">
-          {recipe.cuisine && <Badge variant="secondary" className="text-xs hidden sm:inline-flex">{recipe.cuisine}</Badge>}
+        <div className="flex items-center gap-3">
+          {/* Wake lock indicator */}
+          {wakeLockSupported && (
+            <span
+              title={wakeLockActive ? 'Screen will stay on' : 'Screen may sleep'}
+              className={cn(
+                'text-xs flex items-center gap-1',
+                wakeLockActive ? 'text-primary' : 'text-white/40',
+              )}
+            >
+              {wakeLockActive ? <Flame className="h-3 w-3" /> : <BatteryWarning className="h-3 w-3" />}
+            </span>
+          )}
           {totalTime > 0 && (
-            <span className="text-xs text-muted-foreground flex items-center gap-1">
+            <span className="hidden sm:flex items-center gap-1 text-xs text-white/50">
               <Clock className="h-3 w-3" />
               {totalTime}m
             </span>
           )}
-          <span className="text-xs text-muted-foreground flex items-center gap-1">
+          <span className="hidden sm:flex items-center gap-1 text-xs text-white/50">
             <Users className="h-3 w-3" />
             {recipe.servings}
           </span>
-          {/* Wake lock indicator */}
-          {wakeLockSupported && (
-            <span
-              title={wakeLockActive ? 'Screen will stay on' : 'Screen may sleep — tap to keep on'}
-              className={cn(
-                'text-xs flex items-center gap-1 cursor-default',
-                wakeLockActive ? 'text-primary' : 'text-muted-foreground',
-              )}
-            >
-              {wakeLockActive ? <Flame className="h-3 w-3" /> : <BatteryWarning className="h-3 w-3" />}
-              <span className="hidden sm:inline">{wakeLockActive ? 'Screen on' : 'Screen may sleep'}</span>
-            </span>
-          )}
+          <Link
+            href={`/recipe/${recipe.id}`}
+            className="flex items-center gap-1.5 text-xs border border-white/20 text-white/70 hover:text-white hover:border-white/40 rounded-md px-3 py-1.5 transition-colors"
+          >
+            <X className="h-3.5 w-3.5" />
+            Exit cook mode
+          </Link>
         </div>
-
-        <button
-          onClick={() => setShowIngredients(prev => !prev)}
-          className="text-sm text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded px-1"
-        >
-          {showIngredients ? 'Hide' : 'Ingredients'}
-        </button>
       </div>
 
-      {/* Progress bar */}
-      <Progress value={progress} className="h-1 rounded-none" />
+      {/* Segmented progress bar */}
+      <div
+        className="grid gap-2 px-6 pt-5 pb-1"
+        style={{ gridTemplateColumns: `repeat(${steps.length}, 1fr)` }}
+      >
+        {steps.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentStep(i)}
+            aria-label={`Go to step ${i + 1}`}
+            className={cn(
+              'h-1.5 rounded-full transition-colors duration-200',
+              i <= currentStep ? 'bg-primary' : 'bg-white/15',
+            )}
+          />
+        ))}
+      </div>
 
-      {/* Ingredients overlay */}
+      {/* Ingredients drawer */}
       {showIngredients && (
-        <div className="border-b border-border bg-muted/40 px-4 py-4">
-          <h2 className="text-sm font-semibold text-foreground mb-3">Ingredients</h2>
+        <div className="border-b border-white/10 bg-white/4 px-6 py-4">
+          <h2 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-3">Ingredients</h2>
           <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-1.5">
             {ingredients.map((ing, i) => (
-              <li key={i} className="text-sm text-foreground flex gap-2">
+              <li key={i} className="text-sm text-white/80 flex gap-2">
                 <span className="text-primary font-medium w-16 shrink-0 text-right">{ing.amount} {ing.unit}</span>
                 <span>{ing.name}</span>
               </li>
@@ -263,49 +282,16 @@ export function CookingModeClient({ recipe }: Props) {
       )}
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 max-w-2xl mx-auto w-full">
-        {/* Step counter */}
-        <div className="flex items-center gap-2 mb-6">
-          <span className="text-sm text-muted-foreground">
-            Step {currentStep + 1} of {steps.length}
-          </span>
-          {completedSteps.has(currentStep) && (
-            <Badge variant="secondary" className="gap-1 text-xs bg-primary/10 text-primary border-primary/20">
-              <Check className="h-3 w-3" />
-              Done
-            </Badge>
-          )}
-        </div>
-
-        {/* Step mini-nav dots */}
-        <div className="flex gap-1.5 mb-8 flex-wrap justify-center max-w-xs">
-          {steps.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentStep(i)}
-              aria-label={`Go to step ${i + 1}`}
-              className={cn(
-                'h-2 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                i === currentStep
-                  ? 'w-6 bg-primary'
-                  : completedSteps.has(i)
-                  ? 'w-2 bg-primary/40'
-                  : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50',
-              )}
-            />
-          ))}
-        </div>
-
-        {/* Step text — large, optimized for glancing while hands are busy */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-10 max-w-3xl mx-auto w-full">
         {isDone ? (
-          <div className="text-center space-y-4">
-            <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-              <Check className="h-8 w-8 text-primary" />
+          <div className="text-center space-y-5">
+            <div className="h-20 w-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto">
+              <Check className="h-10 w-10 text-primary" />
             </div>
-            <h2 className="text-3xl font-bold text-foreground">Recipe complete!</h2>
-            <p className="text-muted-foreground">Enjoy your {recipe.title}.</p>
+            <h2 className="text-4xl font-bold text-white">Recipe complete!</h2>
+            <p className="text-white/60 text-lg">Enjoy your {recipe.title}.</p>
             <div className="flex gap-3 justify-center pt-2">
-              <Button asChild variant="outline">
+              <Button asChild variant="outline" className="border-white/20 text-white bg-transparent hover:bg-white/10">
                 <Link href={`/recipe/${recipe.id}`}>View Recipe</Link>
               </Button>
               <Button asChild>
@@ -315,90 +301,130 @@ export function CookingModeClient({ recipe }: Props) {
           </div>
         ) : (
           <>
-            <p className="text-2xl sm:text-3xl font-medium text-foreground text-center leading-relaxed text-balance mb-8">
+            {/* Step label */}
+            {timerSeconds && (
+              <div className="text-xs font-bold uppercase tracking-[0.1em] text-accent mb-3">
+                Step {currentStep + 1} · {timerSeconds} minutes
+              </div>
+            )}
+
+            {/* Step text — large, optimized for glancing while hands are busy */}
+            <p className="text-3xl sm:text-4xl md:text-5xl font-bold text-white text-center leading-[1.1] tracking-tight text-balance mb-8 max-w-2xl">
               {steps[currentStep]}
             </p>
 
-            {/* Timer (auto-detected from step text) */}
+            {/* Timer widget */}
             {timerSeconds !== null && (
               <div className={cn(
-                'rounded-2xl border px-6 py-4 mb-8 text-center min-w-48 transition-colors',
+                'flex items-center gap-6 rounded-2xl border px-8 py-6 mb-8',
                 timerDone
-                  ? 'border-primary bg-primary/10'
+                  ? 'border-primary/60 bg-primary/15'
                   : timerRunning
-                  ? 'border-primary/40 bg-primary/5'
-                  : 'border-border bg-card',
+                  ? 'border-primary/30 bg-white/5'
+                  : 'border-white/10 bg-white/4',
               )}>
-                <p className="text-xs text-muted-foreground mb-1 flex items-center justify-center gap-1.5">
-                  <Timer className="h-3 w-3" />
-                  {timerDone ? 'Time\'s up!' : 'Suggested timer'}
-                </p>
-                <p className={cn(
-                  'text-4xl font-mono font-bold tabular-nums',
-                  timerDone ? 'text-primary' : 'text-foreground',
-                )}>
-                  {timerDone ? '0:00' : `${timerMins}:${String(timerSecs).padStart(2, '0')}`}
-                </p>
-                <div className="flex gap-2 justify-center mt-3">
-                  {!timerDone && (
-                    <Button
-                      size="sm"
-                      variant={timerRunning ? 'outline' : 'default'}
-                      onClick={() => setTimerRunning(r => !r)}
-                      className="h-8 text-xs px-4"
-                    >
-                      {timerRunning ? 'Pause' : timerElapsed > 0 ? 'Resume' : 'Start'}
-                    </Button>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="ghost"
+                <div>
+                  <div className="text-[11px] text-white/50 uppercase tracking-wider mb-1.5">Timer</div>
+                  <div className={cn(
+                    'text-5xl font-bold tabular-nums tracking-tighter leading-none',
+                    timerDone ? 'text-primary' : 'text-white',
+                  )}>
+                    {timerDone ? '0:00' : `${timerMins}:${String(timerSecs).padStart(2, '0')}`}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
                     onClick={() => { setTimerRunning(false); setTimerElapsed(0) }}
-                    className="h-8 text-xs px-3 text-muted-foreground"
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/70 hover:text-white hover:border-white/40 transition-colors"
+                    aria-label="Reset timer"
                   >
-                    Reset
-                  </Button>
+                    <RotateCcw className="h-4 w-4" />
+                  </button>
+                  {!timerDone && (
+                    <button
+                      onClick={() => setTimerRunning(r => !r)}
+                      className="flex h-14 w-14 items-center justify-center rounded-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors"
+                      aria-label={timerRunning ? 'Pause timer' : 'Start timer'}
+                    >
+                      {timerRunning
+                        ? <Pause className="h-5 w-5" />
+                        : <Play className="h-5 w-5 ml-0.5" />
+                      }
+                    </button>
+                  )}
+                  <button
+                    onClick={goNext}
+                    disabled={currentStep === steps.length - 1}
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/70 hover:text-white hover:border-white/40 transition-colors disabled:opacity-30"
+                    aria-label="Skip step"
+                  >
+                    <FastForward className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
             )}
 
             {/* Navigation */}
-            <div className="flex items-center gap-4 w-full max-w-sm">
+            <div className="flex items-center gap-3">
               <Button
                 variant="outline"
-                size="lg"
                 onClick={goPrev}
                 disabled={currentStep === 0}
-                className="flex-1 gap-2"
+                className="border-white/20 text-white/80 bg-transparent hover:bg-white/10 hover:text-white gap-2"
                 aria-label="Previous step"
               >
-                <ChevronLeft className="h-5 w-5" />
-                Prev
+                <ChevronLeft className="h-4 w-4" />
+                Previous
               </Button>
 
               <Button
-                size="lg"
                 onClick={markComplete}
-                className="flex-1 gap-2"
+                className="gap-2"
                 aria-label={currentStep === steps.length - 1 ? 'Finish recipe' : 'Next step'}
               >
                 {currentStep === steps.length - 1 ? (
                   <>
-                    <Check className="h-5 w-5" />
+                    <Check className="h-4 w-4" />
                     Finish
                   </>
                 ) : (
                   <>
-                    Next
-                    <ChevronRight className="h-5 w-5" />
+                    Mark done · next step
+                    <ChevronRight className="h-4 w-4" />
                   </>
                 )}
               </Button>
+
+              <button
+                onClick={() => setShowIngredients(v => !v)}
+                className="flex items-center gap-1.5 text-sm border border-white/20 text-white/70 hover:text-white hover:border-white/40 rounded-md px-3 py-2 transition-colors"
+              >
+                {showIngredients ? 'Hide' : 'Ingredients'}
+              </button>
             </div>
 
-            <p className="text-xs text-muted-foreground mt-4 text-center">
+            <p className="text-xs text-white/30 mt-5 text-center">
               Arrow keys to navigate · Space/Enter to advance
             </p>
+
+            {/* Step dots */}
+            <div className="flex gap-1.5 mt-6 flex-wrap justify-center max-w-xs">
+              {steps.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentStep(i)}
+                  aria-label={`Go to step ${i + 1}`}
+                  className={cn(
+                    'h-1.5 rounded-full transition-all focus-visible:outline-none',
+                    i === currentStep
+                      ? 'w-6 bg-primary'
+                      : completedSteps.has(i)
+                      ? 'w-1.5 bg-primary/40'
+                      : 'w-1.5 bg-white/20 hover:bg-white/40',
+                  )}
+                />
+              ))}
+            </div>
           </>
         )}
       </div>

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
-import { Flame, Droplets, Users, Utensils } from 'lucide-react'
+import { Flame, Droplets, Users, Utensils, Dumbbell, Leaf, Globe, Sparkles } from 'lucide-react'
 
 interface Props {
   recipeId: string
@@ -17,18 +17,21 @@ export function ModificationToolbar({ recipeId, servings, onModified }: Props) {
   const [targetMethod, setTargetMethod] = useState('original')
 
   return (
-    <div className="rounded-xl border border-border bg-muted/30 p-4">
-      <h3 className="text-sm font-medium text-foreground mb-3">Customize Recipe</h3>
-      <div className="flex flex-wrap gap-3 items-end">
+    <div className="rounded-xl border border-border bg-muted/50 p-4">
+      <h3 className="flex items-center gap-1.5 text-sm font-semibold text-foreground mb-3">
+        <Sparkles className="h-3.5 w-3.5 text-primary" />
+        Customize this recipe
+      </h3>
+      <div className="flex flex-wrap gap-2 items-end">
         {/* Lower calories */}
         <Button
           variant="outline"
           size="sm"
           onClick={() => onModified('lower_calories', {})}
-          className="gap-2"
+          className="gap-1.5"
         >
           <Flame className="h-3.5 w-3.5 text-orange-500" />
-          Lower Calories
+          Lower calories
         </Button>
 
         {/* Reduce fat */}
@@ -36,17 +39,50 @@ export function ModificationToolbar({ recipeId, servings, onModified }: Props) {
           variant="outline"
           size="sm"
           onClick={() => onModified('reduce_fat', {})}
-          className="gap-2"
+          className="gap-1.5"
         >
           <Droplets className="h-3.5 w-3.5 text-blue-500" />
-          Reduce Fat
+          Reduce fat
+        </Button>
+
+        {/* Protein-max */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onModified('protein_max', {})}
+          className="gap-1.5"
+        >
+          <Dumbbell className="h-3.5 w-3.5 text-red-600" />
+          Protein-max
+        </Button>
+
+        {/* Make vegetarian */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onModified('make_vegetarian', {})}
+          className="gap-1.5"
+        >
+          <Leaf className="h-3.5 w-3.5 text-green-600" />
+          Make vegetarian
+        </Button>
+
+        {/* Make it Thai */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onModified('change_cuisine', { cuisine: 'Thai' })}
+          className="gap-1.5"
+        >
+          <Globe className="h-3.5 w-3.5" />
+          Make it Thai
         </Button>
 
         {/* Servings */}
         <div className="flex items-end gap-2 min-w-[160px]">
           <div className="flex-1">
             <label className="text-xs text-muted-foreground mb-1.5 block">
-              Servings: {targetServings}
+              Servings · {targetServings}
             </label>
             <Slider
               min={1}
@@ -61,7 +97,7 @@ export function ModificationToolbar({ recipeId, servings, onModified }: Props) {
             variant="outline"
             size="sm"
             onClick={() => onModified('change_servings', { targetServings })}
-            className="gap-2 shrink-0"
+            className="gap-1.5 shrink-0"
           >
             <Users className="h-3.5 w-3.5" />
             Apply
@@ -90,7 +126,7 @@ export function ModificationToolbar({ recipeId, servings, onModified }: Props) {
             size="sm"
             onClick={() => onModified('change_method', { targetMethod })}
             disabled={targetMethod === 'original'}
-            className="gap-2 shrink-0"
+            className="gap-1.5 shrink-0"
           >
             <Utensils className="h-3.5 w-3.5" />
             Apply
