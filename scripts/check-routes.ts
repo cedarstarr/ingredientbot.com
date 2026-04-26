@@ -46,7 +46,18 @@ function collectDynamicRoutes(dir: string): { urlPath: string; param: string; fs
   return results
 }
 
+function checkMiddlewareConflict() {
+  const srcDir = join(process.cwd(), 'src')
+  const hasMiddleware = (() => { try { statSync(join(srcDir, 'middleware.ts')); return true } catch { return false } })()
+  const hasProxy = (() => { try { statSync(join(srcDir, 'proxy.ts')); return true } catch { return false } })()
+  if (hasMiddleware && hasProxy) {
+    console.error('\n❌ Both src/middleware.ts and src/proxy.ts exist. Remove one — Next.js rejects both.\n')
+    process.exit(1)
+  }
+}
+
 function main() {
+  checkMiddlewareConflict()
   const routes = collectDynamicRoutes(APP_DIR)
 
   const byParent = new Map<string, typeof routes>()
