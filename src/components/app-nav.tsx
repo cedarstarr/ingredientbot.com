@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import {
   ChefHat, BookOpen, LayoutDashboard, Settings, Shield,
   LogOut, Menu, X, CalendarDays, Link2, History, FolderOpen, Package, Sparkles,
+  BarChart3,
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 
@@ -21,23 +22,33 @@ function hasExpiringSoon(expiresAt: string): boolean {
   return days <= 7
 }
 
-// Primary nav — frequency-ordered: Kitchen first, daily-use tools up top
-const NAV_LINKS = [
-  { href: '/kitchen', label: 'Kitchen', icon: ChefHat },
-  { href: '/pantry', label: 'Pantry', icon: Package },
-  { href: '/saved', label: 'Saved Recipes', icon: BookOpen },
-  { href: '/collections', label: 'Collections', icon: FolderOpen },
-  { href: '/history', label: 'History', icon: History },
-  { href: '/import', label: 'Import Recipe', icon: Link2 },
-  { href: '/meal-plan', label: 'Meal Plan', icon: CalendarDays },
+// Nav grouped per design: Cooking | Activity | Account
+const COOKING_LINKS = [
+  { href: '/kitchen',    label: 'Kitchen',       icon: ChefHat },
+  { href: '/pantry',     label: 'Pantry',        icon: Package },
+  { href: '/saved',      label: 'Saved Recipes', icon: BookOpen },
+  { href: '/meal-plan',  label: 'Meal Plan',     icon: CalendarDays },
 ]
 
-// Footer nav — low-frequency account/utility links
-const FOOTER_NAV_LINKS = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/upgrade', label: 'Upgrade', icon: Sparkles },
-  { href: '/settings', label: 'Settings', icon: Settings },
+const ACTIVITY_LINKS = [
+  { href: '/history',    label: 'History',   icon: History },
+  { href: '/dashboard',  label: 'Insights',  icon: BarChart3 },
 ]
+
+const ACCOUNT_LINKS = [
+  { href: '/collections', label: 'Collections',   icon: FolderOpen },
+  { href: '/import',      label: 'Import Recipe', icon: Link2 },
+  { href: '/upgrade',     label: 'Upgrade',       icon: Sparkles },
+  { href: '/settings',    label: 'Settings',      icon: Settings },
+]
+
+function NavSection({ label }: { label: string }) {
+  return (
+    <div className="px-3 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground select-none">
+      {label}
+    </div>
+  )
+}
 
 function NavLink({
   href, label, icon: Icon, active, onClick, badge,
@@ -63,11 +74,22 @@ function NavLink({
       <Icon className="h-4 w-4 shrink-0" />
       <span className="flex-1">{label}</span>
       {badge != null && badge > 0 && (
-        <span className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] font-bold text-white">
+        <span className="ml-auto flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-accent text-accent-foreground px-1 text-[10px] font-bold">
           {badge}
         </span>
       )}
     </Link>
+  )
+}
+
+function UserAvatar({ name }: { name?: string | null }) {
+  const initials = name
+    ? name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+    : '?'
+  return (
+    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary text-[13px] font-semibold select-none">
+      {initials}
+    </div>
   )
 }
 
@@ -94,15 +116,20 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       {/* Logo */}
-      <div className="flex h-14 shrink-0 items-center gap-2.5 border-b border-border px-4">
-        <ChefHat className="h-5 w-5 shrink-0 text-primary" />
+      <div className="flex h-14 shrink-0 items-center gap-2 border-b border-sidebar-border px-4">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <ChefHat className="h-[18px] w-[18px]" />
+        </div>
         <span className="font-semibold tracking-tight text-foreground text-sm">
-          Robot Food
+          IngredientBot
+        </span>
+        <span className="ml-auto rounded-full bg-secondary px-1.5 py-0.5 text-[11px] text-muted-foreground">
+          beta
         </span>
         {onClose && (
           <button
             onClick={onClose}
-            className="ml-auto rounded p-1 text-muted-foreground hover:text-foreground transition-colors"
+            className="ml-1 rounded p-1 text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Close navigation"
           >
             <X className="h-4 w-4" />
@@ -110,9 +137,10 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
         )}
       </div>
 
-      {/* Primary nav — kitchen + recipe tools */}
-      <nav aria-label="Main navigation" className="flex-1 overflow-y-auto px-2 py-3 space-y-0.5">
-        {NAV_LINKS.map(({ href, label, icon }) => (
+      {/* Scrollable nav */}
+      <nav aria-label="Main navigation" className="flex-1 overflow-y-auto px-2 py-1">
+        <NavSection label="Cooking" />
+        {COOKING_LINKS.map(({ href, label, icon }) => (
           <NavLink
             key={href}
             href={href}
@@ -121,6 +149,30 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
             active={isActive(href)}
             onClick={onClose}
             badge={href === '/pantry' ? expiringCount : undefined}
+          />
+        ))}
+
+        <NavSection label="Activity" />
+        {ACTIVITY_LINKS.map(({ href, label, icon }) => (
+          <NavLink
+            key={href}
+            href={href}
+            label={label}
+            icon={icon}
+            active={isActive(href)}
+            onClick={onClose}
+          />
+        ))}
+
+        <NavSection label="Account" />
+        {ACCOUNT_LINKS.map(({ href, label, icon }) => (
+          <NavLink
+            key={href}
+            href={href}
+            label={label}
+            icon={icon}
+            active={isActive(href)}
+            onClick={onClose}
           />
         ))}
 
@@ -135,32 +187,19 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
         )}
       </nav>
 
-      {/* Footer nav — account + upgrade + settings */}
-      <div className="shrink-0 border-t border-border px-2 pt-2 pb-1">
-        <div className="space-y-0.5 mb-1">
-          {FOOTER_NAV_LINKS.map(({ href, label, icon }) => (
-            <NavLink
-              key={href}
-              href={href}
-              label={label}
-              icon={icon}
-              active={isActive(href)}
-              onClick={onClose}
-            />
-          ))}
-        </div>
-
-        {/* User info + sign out */}
-        <div className="flex items-center justify-between px-3 py-1.5 mt-1">
-          <div className="min-w-0">
-            <p className="truncate text-xs font-medium text-foreground max-w-[120px]">
+      {/* User row */}
+      <div className="shrink-0 border-t border-sidebar-border px-3 py-3">
+        <div className="flex items-center gap-2.5">
+          <UserAvatar name={session?.user?.name} />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[13px] font-medium text-foreground leading-tight">
               {session?.user?.name || 'Account'}
             </p>
-            <p className="truncate text-xs text-muted-foreground max-w-[120px]">
+            <p className="truncate text-[11px] text-muted-foreground">
               {session?.user?.email}
             </p>
           </div>
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-0.5 shrink-0">
             <ThemeToggle />
             <button
               onClick={() => signOut({ callbackUrl: '/login' })}
@@ -181,8 +220,8 @@ export function AppNav() {
 
   return (
     <>
-      {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-56 shrink-0 flex-col sticky top-0 h-screen border-r border-border bg-card">
+      {/* Desktop sidebar — bg-sidebar keeps it slightly cooler/warmer than page bg */}
+      <aside className="hidden md:flex w-56 shrink-0 flex-col sticky top-0 h-screen border-r border-sidebar-border bg-sidebar">
         <SidebarContent />
       </aside>
 
@@ -195,8 +234,10 @@ export function AppNav() {
         >
           <Menu className="h-5 w-5" />
         </button>
-        <ChefHat className="h-5 w-5 text-primary" />
-        <span className="font-semibold text-sm text-foreground">Robot Food</span>
+        <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10 text-primary">
+          <ChefHat className="h-4 w-4" />
+        </div>
+        <span className="font-semibold text-sm text-foreground">IngredientBot</span>
         <div className="ml-auto">
           <ThemeToggle />
         </div>
@@ -209,7 +250,7 @@ export function AppNav() {
             className="fixed inset-0 bg-background/80 backdrop-blur-sm"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="relative z-50 w-64 bg-card border-r border-border h-full">
+          <aside className="relative z-50 w-64 bg-sidebar border-r border-sidebar-border h-full">
             <SidebarContent onClose={() => setMobileOpen(false)} />
           </aside>
         </div>

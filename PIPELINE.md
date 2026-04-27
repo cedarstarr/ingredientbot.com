@@ -21,17 +21,24 @@
 | 7 | Verify Build | /qa-tests-fix | DONE | 1 | 2026-04-16 | [view](reports/2026-04-16-tests-fix.md) |
 | 8 | Database Review | /qa-db | DONE | 1 | 2026-04-14 | [view](reports/2026-04-14-site-db.md) |
 | 9 | QA / Bug Check | /qa-bugs | DONE | 2 | 2026-04-18 | [view](reports/2026-04-18-site-bugs.md) |
-| 10 | Security Hardening | /qa-security | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-security.md) |
-| 11 | UX/UI Pass | /qa-design | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
-| 12 | Navigation Audit | /qa-nav | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-nav.md) |
-| 13 | Performance Audit | /qa-perf | DONE | 1 | 2026-04-18 | — |
-| 14 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
-| 15 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
-| 16 | Final E2E Tests | /qa-tests-fix | DONE | 1 | 2026-04-23 02:50 | [view](reports/2026-04-23-tests-fix.md) |
-| 17 | Client Update | /ops-client-report | PENDING | 0 | — | — |
-| 18 | Launch | /ops-launch | PENDING | 0 | — | — |
+| 10 | Re-verify Tests | /qa-tests-fix | DONE | 1 | 2026-04-23 | [view](reports/2026-04-23-tests-fix.md) |
+| 11 | Security Hardening | /qa-security | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-security.md) |
+| 12 | UX/UI Pass | /qa-design | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
+| 13 | Copy Audit | /qa-copy | PENDING | 0 | — | — |
+| 14 | Navigation Audit | /qa-nav | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-nav.md) |
+| 15 | Performance Audit | /qa-perf | DONE | 1 | 2026-04-18 | — |
+| 16 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
+| 17 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
+| 18 | Final E2E Tests | /qa-tests-fix | DONE | 1 | 2026-04-23 02:50 | [view](reports/2026-04-23-tests-fix.md) |
+| 19 | iPhone Tests | /qa-tests-iphone | PENDING | 0 | — | — |
+| 20 | Android Tests | /qa-tests-android | PENDING | 0 | — | — |
+| 21 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
+| 22 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
+| 23 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
+| 24 | Client Update | /ops-client-report | PENDING | 0 | — | — |
+| 25 | Launch | /ops-launch | PENDING | 0 | — | — |
 
-**Progress: 16/18 stages complete**
+**Progress: 17/25 stages complete**
 
 **Last Updated**: 2026-04-23 (qa-tests-fix stage 16 — 197/197 passing; fixed NEXTAUTH_URL env, seeded test user, + 13 isolated test fixes)
 

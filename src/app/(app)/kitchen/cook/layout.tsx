@@ -2,7 +2,7 @@
 // fixed overlay so the user gets an unobstructed step-by-step experience.
 export default function CookingLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="fixed inset-0 z-50 bg-background overflow-auto">
+    <div className="fixed inset-0 z-50 bg-[oklch(0.14_0.01_50)] overflow-auto">
       {children}
     </div>
   )
