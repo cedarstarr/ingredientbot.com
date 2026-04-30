@@ -31,6 +31,7 @@
     "@react-email/components": "^1.0.10",
     "@react-email/render": "^2.0.4",
     "@sentry/nextjs": "^10.50.0",
+    "@t3-oss/env-nextjs": "^0.13.11",
     "@types/pg": "^8.18.0",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.37.0",
