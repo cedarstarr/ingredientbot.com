@@ -34,6 +34,11 @@ const nextConfig: NextConfig = {
 };
 
 export default withSentryConfig(nextConfig, {
-  silent: true,
-  sourcemaps: { disable: true },
+  org: "foulweatherlabscom",
+  project: "ingredientbotcom",
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: !process.env.CI,
+  widenClientFileUpload: true,
+  tunnelRoute: "/monitoring",
+  sourcemaps: { deleteSourcemapsAfterUpload: true },
 });

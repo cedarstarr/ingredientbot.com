@@ -15,7 +15,6 @@ const webAppJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
   name: 'IngredientBot',
-
   url: baseUrl,
   description: 'AI-powered recipe suggestions based on ingredients you have. Type what\'s in your fridge, snap a photo, and get instant recipe ideas powered by Claude AI.',
   applicationCategory: 'FoodApplication',
