@@ -12,4 +12,14 @@ Sentry.init({
       blockAllMedia: true,
     }),
   ],
+  ignoreErrors: [
+    'ResizeObserver loop limit exceeded',
+    'ResizeObserver loop completed with undelivered notifications',
+    'Non-Error promise rejection captured',
+  ],
+  beforeSend(event) {
+    // Filter hydration errors injected by browser extensions (not app bugs)
+    if (event.exception?.values?.[0]?.value?.includes('Minified React error')) return null
+    return event
+  },
 })
