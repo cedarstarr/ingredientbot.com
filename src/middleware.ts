@@ -12,10 +12,11 @@ const securityHeaders = {
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
 }
 
-function addSecurityHeaders(response: NextResponse) {
+function addSecurityHeaders(response: NextResponse, requestId?: string) {
   for (const [key, value] of Object.entries(securityHeaders)) {
     response.headers.set(key, value)
   }
+  if (requestId) response.headers.set('x-request-id', requestId)
   return response
 }
 
@@ -33,19 +34,23 @@ const PUBLIC_PATHS = [
 ]
 
 export default auth(async function middleware(request: NextAuthRequest) {
+  const requestId = request.headers.get('x-request-id') ?? crypto.randomUUID()
   const pathname = request.nextUrl.pathname
 
   const host = request.headers.get('host') ?? ''
   if (host.startsWith('staging.')) {
     const response = NextResponse.next()
     response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+    response.headers.set('x-request-id', requestId)
     return response
   }
 
   if (process.env.COMING_SOON === 'true' && !pathname.startsWith('/api/') && pathname !== '/coming-soon') {
     const url = request.nextUrl.clone()
     url.pathname = '/coming-soon'
-    return NextResponse.rewrite(url)
+    const response = NextResponse.rewrite(url)
+    response.headers.set('x-request-id', requestId)
+    return response
   }
 
   // Allow public paths without auth
@@ -53,11 +58,15 @@ export default auth(async function middleware(request: NextAuthRequest) {
   if (!isPublic && !request.auth) {
     // API routes return 401 instead of redirecting
     if (pathname.startsWith('/api/')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      const res = NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      res.headers.set('x-request-id', requestId)
+      return res
     }
     const url = new URL('/login', request.url)
     url.searchParams.set('next', pathname)
-    return NextResponse.redirect(url)
+    const res = NextResponse.redirect(url)
+    res.headers.set('x-request-id', requestId)
+    return res
   }
 
   const session = request.auth
@@ -73,26 +82,26 @@ export default auth(async function middleware(request: NextAuthRequest) {
       path.startsWith('/api/auth/resend-verification') ||
       path.startsWith('/api/auth/')
     if (!isVerifyEmailPath) {
-      return addSecurityHeaders(NextResponse.redirect(new URL('/verify-email', request.url)))
+      return addSecurityHeaders(NextResponse.redirect(new URL('/verify-email', request.url)), requestId)
     }
   }
 
   // Admin protection
   if (pathname.startsWith('/admin')) {
     if (!user) {
-      return addSecurityHeaders(NextResponse.redirect(new URL('/login', request.url)))
+      return addSecurityHeaders(NextResponse.redirect(new URL('/login', request.url)), requestId)
     }
     if (!user.isAdmin) {
-      return addSecurityHeaders(NextResponse.redirect(new URL('/kitchen', request.url)))
+      return addSecurityHeaders(NextResponse.redirect(new URL('/kitchen', request.url)), requestId)
     }
   }
 
   // Redirect logged-in users away from login/signup pages
   if ((pathname.startsWith('/login') || pathname.startsWith('/signup')) && user && emailVerified) {
-    return addSecurityHeaders(NextResponse.redirect(new URL('/kitchen', request.url)))
+    return addSecurityHeaders(NextResponse.redirect(new URL('/kitchen', request.url)), requestId)
   }
 
-  return addSecurityHeaders(NextResponse.next())
+  return addSecurityHeaders(NextResponse.next(), requestId)
 })
 
 export const config = {

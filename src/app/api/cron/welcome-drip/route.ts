@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendWelcomeEmail } from '@/lib/email'
+import { childLogger } from '@/lib/logger'
 
 export const maxDuration = 60
 
@@ -9,6 +10,9 @@ export async function GET(req: NextRequest) {
   if (process.env.CRON_SECRET && cronSecret !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const requestId = req.headers.get('x-request-id') ?? crypto.randomUUID()
+  const log = childLogger(requestId)
 
   const start = Date.now()
 
@@ -38,7 +42,7 @@ export async function GET(req: NextRequest) {
       failed++
       const err = result.reason
       errors.push(`${newUsers[i].email}: ${err instanceof Error ? err.message : String(err)}`)
-      console.error('[welcome-drip] Failed to send to', newUsers[i].email, err)
+      log.error({ err, email: newUsers[i].email }, '[welcome-drip] Failed to send')
     }
   })
 
