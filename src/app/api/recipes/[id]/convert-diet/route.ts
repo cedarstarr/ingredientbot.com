@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import type { Prisma } from '@prisma/client'
 import { generateText } from 'ai'
-import { claudeSonnet } from '@/lib/ai'
+import { geminiFlashLite } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { logAICall } from '@/lib/ai-log'
 
@@ -56,7 +56,7 @@ export async function POST(
   }
 
   const { text, usage } = await generateText({
-    model: claudeSonnet,
+    model: geminiFlashLite,
     maxOutputTokens: 800,
     system: `You are a professional chef specializing in dietary adaptations. Convert recipes to fit specific dietary restrictions while maintaining flavor and texture. Respond with JSON:
 {
@@ -80,8 +80,8 @@ Instructions: ${JSON.stringify(recipeData.instructions || [])}`,
 
   logAICall({
     feature: "diet-conversion",
-    provider: "anthropic",
-    model: "claude-sonnet-4-6",
+    provider: "google",
+    model: "gemini-2.5-flash-lite",
     inputTokens: usage.inputTokens,
     outputTokens: usage.outputTokens,
     userId: session.user.id,

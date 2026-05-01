@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { generateText } from 'ai'
-import { claudeSonnet } from '@/lib/ai'
+import { geminiFlashLite } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { logAICall } from '@/lib/ai-log'
 
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
   const mimeType = (photo.type || 'image/jpeg') as 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif'
 
   const { text, usage } = await generateText({
-    model: claudeSonnet,
+    model: geminiFlashLite,
     maxOutputTokens: 512,
     messages: [{
       role: 'user',
@@ -52,8 +52,8 @@ export async function POST(req: NextRequest) {
 
   logAICall({
     feature: "photo-analysis",
-    provider: "anthropic",
-    model: "claude-sonnet-4-6",
+    provider: "google",
+    model: "gemini-2.5-flash-lite",
     inputTokens: usage.inputTokens,
     outputTokens: usage.outputTokens,
     userId: session.user.id,

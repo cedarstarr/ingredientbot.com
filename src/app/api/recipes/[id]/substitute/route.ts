@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateText } from 'ai'
-import { claudeSonnet } from '@/lib/ai'
+import { geminiFlashLite } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { logAICall } from '@/lib/ai-log'
 
@@ -71,7 +71,7 @@ export async function POST(
     : recipe.sourceIngredients.join(', ')
 
   const { text, usage } = await generateText({
-    model: claudeSonnet,
+    model: geminiFlashLite,
     maxOutputTokens: 800,
     system: `You are a professional chef and food scientist. Analyze the role an ingredient plays in a recipe and suggest practical substitutions. Respond with valid JSON only, no markdown fences:
 {
@@ -100,8 +100,8 @@ Analyze what role "${missingIngredient}" plays in this specific recipe and sugge
 
   logAICall({
     feature: "ingredient-substitute",
-    provider: "anthropic",
-    model: "claude-sonnet-4-6",
+    provider: "google",
+    model: "gemini-2.5-flash-lite",
     inputTokens: usage.inputTokens,
     outputTokens: usage.outputTokens,
     userId: session.user.id,
