@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { streamText } from 'ai'
-import { claudeSonnet } from '@/lib/ai'
+import { geminiFlashLite } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { logAICall } from '@/lib/ai-log'
 
@@ -157,7 +157,7 @@ export async function POST(req: NextRequest) {
   const spiceContext = buildSpiceContext(spiceLevel)
 
   const result = streamText({
-    model: claudeSonnet,
+    model: geminiFlashLite,
     maxOutputTokens: 1024,
     system: `You are an expert chef. When given a list of ingredients, suggest exactly 4 recipes that use most of them.
 
@@ -175,8 +175,8 @@ difficulty must be exactly: "easy", "medium", or "hard"${personalityContext}${pr
     onFinish: ({ usage }) => {
       logAICall({
         feature: "recipe-generation",
-        provider: "anthropic",
-        model: "claude-sonnet-4-6",
+        provider: "google",
+        model: "gemini-2.5-flash-lite",
         inputTokens: usage.inputTokens,
         outputTokens: usage.outputTokens,
         userId: session.user.id,

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateText } from 'ai'
-import { claudeSonnet } from '@/lib/ai'
+import { geminiFlashLite } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { logAICall } from '@/lib/ai-log'
 
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     .join(', ')
 
   const { text, usage } = await generateText({
-    model: claudeSonnet,
+    model: geminiFlashLite,
     maxOutputTokens: 256,
     system: `You are a registered dietitian. Estimate the nutritional content of a recipe per serving.
 Return ONLY valid JSON with no markdown, no code blocks, no extra text:
@@ -63,8 +63,8 @@ Estimate nutrition per serving.`,
 
   logAICall({
     feature: "nutrition-estimate",
-    provider: "anthropic",
-    model: "claude-sonnet-4-6",
+    provider: "google",
+    model: "gemini-2.5-flash-lite",
     inputTokens: usage.inputTokens,
     outputTokens: usage.outputTokens,
     userId: session.user.id,

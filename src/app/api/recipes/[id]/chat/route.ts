@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { streamText } from 'ai'
-import { claudeHaiku } from '@/lib/ai'
+import { geminiFlashLite } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { logAICall } from '@/lib/ai-log'
 
@@ -75,15 +75,15 @@ Be concise but helpful. Reference specific steps from the recipe when relevant. 
   messages.push({ role: 'user', content: message.trim() })
 
   const result = streamText({
-    model: claudeHaiku,
+    model: geminiFlashLite,
     maxOutputTokens: 500,
     system: systemPrompt,
     messages,
     onFinish: ({ usage }) => {
       logAICall({
         feature: "cooking-chat",
-        provider: "anthropic",
-        model: "claude-haiku-4-5-20251001",
+        provider: "google",
+        model: "gemini-2.5-flash-lite",
         inputTokens: usage.inputTokens,
         outputTokens: usage.outputTokens,
         userId: session.user.id,

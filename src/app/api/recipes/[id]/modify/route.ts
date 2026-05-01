@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { streamText } from 'ai'
-import { claudeSonnet } from '@/lib/ai'
+import { geminiFlashLite } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { logAICall } from '@/lib/ai-log'
 
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!actionPrompt) return new Response('Invalid action', { status: 400 })
 
   const result = streamText({
-    model: claudeSonnet,
+    model: geminiFlashLite,
     maxOutputTokens: 2048,
     system: 'You are an expert chef who helps people modify recipes. Present modifications clearly in markdown.',
     messages: [{
@@ -60,8 +60,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     onFinish: ({ usage }) => {
       logAICall({
         feature: "recipe-modify",
-        provider: "anthropic",
-        model: "claude-sonnet-4-6",
+        provider: "google",
+        model: "gemini-2.5-flash-lite",
         inputTokens: usage.inputTokens,
         outputTokens: usage.outputTokens,
         userId: session.user.id,
