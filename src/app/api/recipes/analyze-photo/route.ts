@@ -4,6 +4,7 @@ import { generateText } from 'ai'
 import { geminiFlashLite } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { logAICall } from '@/lib/ai-log'
+import { getCached, setCached, sha256 } from '@/lib/recipe-cache'
 
 export const maxDuration = 60
 
@@ -32,8 +33,14 @@ export async function POST(req: NextRequest) {
   }
 
   const arrayBuffer = await photo.arrayBuffer()
-  const base64 = Buffer.from(arrayBuffer).toString('base64')
+  const buf = Buffer.from(arrayBuffer)
+  const base64 = buf.toString('base64')
   const mimeType = (photo.type || 'image/jpeg') as 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif'
+
+  // Cache by raw image bytes — identical re-uploads short-circuit the LLM call.
+  const inputHash = sha256(buf)
+  const cached = await getCached<{ ingredients: string[] }>('photo', inputHash)
+  if (cached) return Response.json(cached)
 
   const { text, usage } = await generateText({
     model: geminiFlashLite,
@@ -62,7 +69,9 @@ export async function POST(req: NextRequest) {
   try {
     const match = text.match(/\[[\s\S]*\]/)
     const ingredients = match ? JSON.parse(match[0]) : []
-    return Response.json({ ingredients })
+    const result = { ingredients }
+    await setCached('photo', inputHash, result)
+    return Response.json(result)
   } catch {
     return Response.json({ ingredients: [] })
   }

@@ -325,6 +325,22 @@ model AICallLog {
   @@index([feature])
 }
 
+// Cache for expensive AI outputs keyed by content hash. Eliminates unbounded
+// free-tier LLM spend on repeated identical inputs (suggestion regenerations,
+// re-uploaded fridge photos, repeat ingredient-comment requests).
+model RecipeCache {
+  id        String   @id @default(cuid())
+  feature   String   // 'suggestions' | 'photo' | 'comment'
+  inputHash String
+  output    Json     // stored result (full JSON for non-streamed payloads)
+  hitCount  Int      @default(0)
+  createdAt DateTime @default(now())
+  lastHitAt DateTime @default(now())
+
+  @@unique([feature, inputHash])
+  @@index([feature, lastHitAt])
+}
+
 // F44: Pantry inventory — persistent ingredient list tracked between sessions
 // F26: expiresAt added for expiry-first mode
 model PantryItem {
