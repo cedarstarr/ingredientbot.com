@@ -4,6 +4,7 @@ import { generateText } from 'ai'
 import { claudeHaiku } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { logAICall } from '@/lib/ai-log'
+import { canonicalize, getCached, setCached, sha256 } from '@/lib/recipe-cache'
 
 export async function POST(req: NextRequest) {
   const session = await auth()
@@ -23,6 +24,11 @@ export async function POST(req: NextRequest) {
 
   const { recipeTitle, ingredient, action } = await req.json()
 
+  // Comments are deterministic for the same (action, ingredient, recipeTitle) tuple.
+  const inputHash = sha256(canonicalize({ action, ingredient, recipeTitle }))
+  const cached = await getCached<{ comment: string }>('comment', inputHash)
+  if (cached) return Response.json(cached)
+
   const { text, usage } = await generateText({
     model: claudeHaiku,
     maxOutputTokens: 100,
@@ -41,5 +47,7 @@ export async function POST(req: NextRequest) {
     userId: session.user.id,
   })
 
-  return Response.json({ comment: text })
+  const result = { comment: text }
+  await setCached('comment', inputHash, result)
+  return Response.json(result)
 }

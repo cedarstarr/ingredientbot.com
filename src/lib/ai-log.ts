@@ -18,5 +18,5 @@ export function logAICall(opts: {
       outputTokens: opts.outputTokens ?? 0,
       userId: opts.userId,
     },
-  }).catch(() => {});
+  }).catch((err) => console.error("AICallLog write failed:", err));
 }
