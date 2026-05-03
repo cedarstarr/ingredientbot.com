@@ -4,6 +4,7 @@
 **Concept**: AI pantry-to-recipe generator — enter what you have, get streaming recipe suggestions. Make smart changes to recipes.
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
+**Design System**: Claude design system installed (2026-05-03)
 **Last Updated**: 2026-05-03
 
 ---
