@@ -18,10 +18,10 @@
 | 4 | Feature Triage | /site-features | DONE | 1 | 2026-04-09 | [view](reports/2026-04-09-site-features.md) |
 | 5 | Feature Install | /site-install | DONE | 1 | 2026-04-10 00:00 | [view](reports/2026-04-10-site-install.md) |
 | 6 | Write Tests | /qa-tests-reconcile | DONE | 5 | 2026-05-02 | [view](reports/2026-05-02-tests-reconcile.md) |
-| 7 | Verify Build | /qa-tests-fix | DONE | 1 | 2026-04-16 | [view](reports/2026-04-16-tests-fix.md) |
+| 7 | Verify Build | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 8 | Database Review | /qa-db | DONE | 1 | 2026-04-14 | [view](reports/2026-04-14-site-db.md) |
 | 9 | QA / Bug Check | /qa-bugs | DONE | 2 | 2026-04-18 | [view](reports/2026-04-18-site-bugs.md) |
-| 10 | Re-verify Tests | /qa-tests-fix | DONE | 1 | 2026-04-23 | [view](reports/2026-04-23-tests-fix.md) |
+| 10 | Re-verify Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 11 | Security Hardening | /qa-security | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-security.md) |
 | 12 | UX/UI Pass | /qa-design | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
 | 13 | Copy Audit | /qa-copy | PENDING | 0 | — | — |
@@ -29,7 +29,7 @@
 | 15 | Performance Audit | /qa-perf | DONE | 1 | 2026-04-18 | — |
 | 16 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
 | 17 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
-| 18 | Final E2E Tests | /qa-tests-fix | DONE | 1 | 2026-04-23 02:50 | [view](reports/2026-04-23-tests-fix.md) |
+| 18 | Final E2E Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 19 | iPhone Tests | /qa-tests-iphone | PENDING | 0 | — | — |
 | 20 | Android Tests | /qa-tests-android | PENDING | 0 | — | — |
 | 21 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
@@ -81,3 +81,4 @@
 | 2026-04-23 02:50 | /qa-tests-fix | ~55m | SUCCESS | 197/197 passing; initial 54/143 → systemic fixes (NEXTAUTH_URL → localhost, seed test user) recovered auth cascade → agent fixed 13 residuals (LOCKED_PUBLIC_PATHS, settings layout, streaming waits); commit 825a389 |
 | 2026-04-24 | coming-soon gate | ~2m | SUCCESS | Middleware gate + /coming-soon page deployed; COMING_SOON=true set on Vercel production; staging unaffected |
 | 2026-05-02 | /qa-tests-reconcile | ~10m | SUCCESS | 14 new tests written, 0 stale tests fixed, 0 code fixes |
+| 2026-05-03 | /qa-tests-fix | ~7m | SUCCESS | 210 passed, 27 skipped — R3: 5 fixes (env.ts preprocess, strict-mode locator, waitForResponse race fix, expiry-first API seed, networkidle→domcontentloaded) |
