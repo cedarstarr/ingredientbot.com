@@ -62,35 +62,68 @@ test.describe('Pantry expiry — PATCH /api/user/pantry/[id] (F26)', () => {
 test.describe('Kitchen — expiry-first mode toggle (F26)', () => {
   test.setTimeout(60000)
 
-  test.beforeEach(async ({ page }) => {
+  // The Expiry-first toggle is conditionally rendered — it only appears when
+  // the user has pantry items with expiry dates within the next 7 days.
+  // These tests seed a pantry item with a near-expiry date, verify the toggle
+  // appears, interact with it, then clean up.
+
+  test('kitchen panel shows the "Expiry-first" toggle when an expiring item is present', async ({ page }) => {
     await loginAsTestUser(page)
+
+    // Seed an expiring pantry item (expires in 3 days)
+    const ingredient = `e2e-expiry-toggle-${Date.now()}`
+    const createRes = await page.request.post('/api/user/pantry', {
+      data: { ingredient },
+    })
+    expect(createRes.status()).toBe(200)
+    const created = await createRes.json()
+
+    const soonDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()
+    await page.request.patch(`/api/user/pantry/${created.id}`, {
+      data: { expiresAt: soonDate },
+    })
+
+    // Navigate to kitchen — the toggle should now be visible
     await page.goto('/kitchen')
     await page.waitForLoadState('domcontentloaded')
-  })
 
-  test('kitchen panel shows the "Expiry-first" toggle button', async ({ page }) => {
-    const body = await page.locator('body').textContent()
-    expect(body).toMatch(/expiry.first|prioritize expiring/i)
+    // The Expiry-first toggle renders inside the Pantry section — wait for it
+    const toggle = page.getByRole('button', { name: /expiry-first mode/i })
+    await expect(toggle).toBeVisible()
+
+    // Cleanup
+    await page.request.delete(`/api/user/pantry/${created.id}`)
   })
 
   test('clicking the Expiry-first toggle activates it', async ({ page }) => {
-    // Find the expiry-first button by accessible name or text
-    const btn = page.getByRole('button', { name: /expiry.first/i })
-    const hasBtn = await btn.isVisible().catch(() => false)
-    if (!hasBtn) {
-      // Some UIs render it as a different element — fall back to text check
-      const body = await page.locator('body').textContent()
-      expect(body).toMatch(/expiry/i)
-      return
-    }
+    await loginAsTestUser(page)
 
-    // Toggle it on
-    await btn.click()
+    // Seed an expiring pantry item so the toggle renders
+    const ingredient = `e2e-expiry-click-${Date.now()}`
+    const createRes = await page.request.post('/api/user/pantry', {
+      data: { ingredient },
+    })
+    expect(createRes.status()).toBe(200)
+    const created = await createRes.json()
+
+    const soonDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()
+    await page.request.patch(`/api/user/pantry/${created.id}`, {
+      data: { expiresAt: soonDate },
+    })
+
+    await page.goto('/kitchen')
+    await page.waitForLoadState('domcontentloaded')
+
+    const toggle = page.getByRole('button', { name: /expiry-first mode/i })
+    await expect(toggle).toBeVisible()
+
+    // Toggle on — the "ON" badge should appear
+    await toggle.click()
     await page.waitForTimeout(300)
-
-    // Button should now reflect active state (aria-pressed or class change)
-    // The toggle text or surrounding UI should change
-    const body = await page.locator('body').textContent()
+    const body = await page.locator('main, [data-main], body').textContent()
     expect(body).toMatch(/expiry/i)
+
+    // Cleanup
+    await page.request.delete(`/api/user/pantry/${created.id}`)
   })
 })

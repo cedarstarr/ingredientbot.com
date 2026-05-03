@@ -55,21 +55,22 @@ test.describe('Kitchen — F74 cooking method selector', () => {
     // Allow PATCH to fly
     await page.waitForTimeout(800)
 
-    // Reload — the kitchen panel should hydrate with the saved value
+    // Reload — use domcontentloaded then wait for the combobox to appear rather
+    // than networkidle: the kitchen page fires fetch requests on mount (pantry +
+    // kitchen-prefs) and may auto-trigger recipe generation, keeping the network
+    // busy long enough for networkidle to time out.
     await page.reload()
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('domcontentloaded')
 
-    const triggerText = await page.getByText('Cooking method', { exact: true })
+    // Wait for kitchen-prefs to hydrate by polling the combobox value
+    const reloadedTrigger = page.getByText('Cooking method', { exact: true })
       .locator('..')
       .locator('[role="combobox"]')
-      .textContent()
-    expect(triggerText).toMatch(/air fryer/i)
+    await expect(reloadedTrigger).toBeVisible()
+    await expect(reloadedTrigger).toContainText(/air fryer/i, { timeout: 10000 })
 
     // Reset to "any" so this test does not affect other tests
-    const resetTrigger = page.getByText('Cooking method', { exact: true })
-      .locator('..')
-      .locator('[role="combobox"]')
-    await resetTrigger.click()
+    await reloadedTrigger.click()
     await page.waitForTimeout(200)
     await page.getByRole('option', { name: /any method/i }).click()
   })
