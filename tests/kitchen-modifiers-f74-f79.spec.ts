@@ -50,24 +50,30 @@ test.describe('Kitchen — F74 cooking method selector', () => {
     const trigger = label.locator('..').locator('[role="combobox"]')
     await trigger.click()
     await page.waitForTimeout(300)
+
+    // Set up PATCH waiter before clicking so we don't race the response
+    const patchDone = page.waitForResponse(
+      resp => resp.url().includes('/api/user/kitchen-prefs') && resp.request().method() === 'PATCH',
+      { timeout: 5000 }
+    ).catch(() => {})
     await page.getByRole('option', { name: /air fryer/i }).click()
+    await patchDone  // ensure preference is saved before reloading
 
-    // Allow PATCH to fly
-    await page.waitForTimeout(800)
-
-    // Reload — use domcontentloaded then wait for the combobox to appear rather
-    // than networkidle: the kitchen page fires fetch requests on mount (pantry +
-    // kitchen-prefs) and may auto-trigger recipe generation, keeping the network
-    // busy long enough for networkidle to time out.
+    // Set up GET waiter before reloading so we don't race the response
+    const getAfterReload = page.waitForResponse(
+      resp => resp.url().includes('/api/user/kitchen-prefs') && resp.request().method() === 'GET',
+      { timeout: 8000 }
+    ).catch(() => {})
     await page.reload()
     await page.waitForLoadState('domcontentloaded')
+    await getAfterReload  // ensure preferences have been fetched after reload
 
     // Wait for kitchen-prefs to hydrate by polling the combobox value
     const reloadedTrigger = page.getByText('Cooking method', { exact: true })
       .locator('..')
       .locator('[role="combobox"]')
     await expect(reloadedTrigger).toBeVisible()
-    await expect(reloadedTrigger).toContainText(/air fryer/i, { timeout: 10000 })
+    await expect(reloadedTrigger).toContainText(/air fryer/i, { timeout: 5000 })
 
     // Reset to "any" so this test does not affect other tests
     await reloadedTrigger.click()

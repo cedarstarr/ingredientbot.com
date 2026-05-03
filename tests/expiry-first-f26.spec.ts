@@ -120,7 +120,7 @@ test.describe('Kitchen — expiry-first mode toggle (F26)', () => {
     // Toggle on — the "ON" badge should appear
     await toggle.click()
     await page.waitForTimeout(300)
-    const body = await page.locator('main, [data-main], body').textContent()
+    const body = await page.locator('main').first().textContent()
     expect(body).toMatch(/expiry/i)
 
     // Cleanup
