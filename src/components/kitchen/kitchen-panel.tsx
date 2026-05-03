@@ -1108,7 +1108,7 @@ export function KitchenPanel() {
               {isAnalyzingPhoto ? (
                 <>
                   <Loader2 className="h-8 w-8 text-primary animate-spin mb-2" />
-                  <p className="text-sm text-muted-foreground">Analyzing photo...</p>
+                  <p className="text-sm text-muted-foreground">Analyzing photo…</p>
                 </>
               ) : (
                 <>

@@ -44,7 +44,7 @@ export function DeleteRecipeButton({ id }: { id: string }) {
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
           <Button variant="destructive" onClick={handleDelete} disabled={loading}>
-            {loading ? 'Deleting...' : 'Delete Recipe'}
+            {loading ? 'Deleting…' : 'Delete Recipe'}
           </Button>
         </DialogFooter>
       </DialogContent>

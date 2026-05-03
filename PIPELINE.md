@@ -4,7 +4,7 @@
 **Concept**: AI pantry-to-recipe generator — enter what you have, get streaming recipe suggestions. Make smart changes to recipes.
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
-**Last Updated**: 2026-05-02
+**Last Updated**: 2026-05-03
 
 ---
 
@@ -24,7 +24,7 @@
 | 10 | Re-verify Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 11 | Security Hardening | /qa-security | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-security.md) |
 | 12 | UX/UI Pass | /qa-design | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
-| 13 | Copy Audit | /qa-copy | PENDING | 0 | — | — |
+| 13 | Copy Audit | /qa-copy | DONE | 1 | 2026-05-03 | [view](reports/2026-05-03-ingredientbot-copy.md) |
 | 14 | Navigation Audit | /qa-nav | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-nav.md) |
 | 15 | Performance Audit | /qa-perf | DONE | 1 | 2026-04-18 | — |
 | 16 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
@@ -38,7 +38,7 @@
 | 24 | Client Update | /ops-client-report | PENDING | 0 | — | — |
 | 25 | Launch | /ops-launch | PENDING | 0 | — | — |
 
-**Progress: 17/25 stages complete**
+**Progress: 18/25 stages complete**
 
 **Last Updated**: 2026-04-24 (coming-soon gate deployed to production)
 

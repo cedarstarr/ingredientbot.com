@@ -228,7 +228,7 @@ export function PantryClient() {
       {loading ? (
         <div className="flex items-center gap-2 text-muted-foreground text-sm py-8">
           <Loader2 className="h-4 w-4 animate-spin" />
-          Loading pantry...
+          Loading pantry…
         </div>
       ) : items.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border bg-muted/20 p-10 text-center space-y-2">

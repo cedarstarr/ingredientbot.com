@@ -153,7 +153,7 @@ export function ImportClient() {
           {isExtracting ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Extracting...
+              Extracting…
             </>
           ) : (
             <>
@@ -212,7 +212,7 @@ export function ImportClient() {
                 {isSaving ? (
                   <>
                     <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
-                    Saving...
+                    Saving…
                   </>
                 ) : (
                   <>
@@ -355,7 +355,7 @@ export function ImportClient() {
               {isSaving ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Saving...
+                  Saving…
                 </>
               ) : (
                 <>
