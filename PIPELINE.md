@@ -21,7 +21,7 @@
 | 6 | Write Tests | /qa-tests-reconcile | DONE | 5 | 2026-05-02 | [view](reports/2026-05-02-tests-reconcile.md) |
 | 7 | Verify Build | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 8 | Database Review | /qa-db | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-site-db.md) |
-| 9 | QA / Bug Check | /qa-bugs | DONE | 2 | 2026-04-18 | [view](reports/2026-04-18-site-bugs.md) |
+| 9 | QA / Bug Check | /qa-bugs | DONE | 3 | 2026-05-03 | [view](reports/2026-05-03-site-bugs.md) |
 | 10 | Re-verify Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 11 | Security Hardening | /qa-security | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-security.md) |
 | 12 | UX/UI Pass | /qa-design | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
@@ -41,7 +41,7 @@
 
 **Progress: 18/25 stages complete**
 
-**Last Updated**: 2026-04-24 (coming-soon gate deployed to production)
+**Last Updated**: 2026-05-03 (qa-bugs run 3)
 
 ---
 
@@ -84,3 +84,4 @@
 | 2026-05-02 | /qa-tests-reconcile | ~10m | SUCCESS | 14 new tests written, 0 stale tests fixed, 0 code fixes |
 | 2026-05-03 | /qa-tests-fix | ~7m | SUCCESS | 210 passed, 27 skipped — R3: 5 fixes (env.ts preprocess, strict-mode locator, waitForResponse race fix, expiry-first API seed, networkidle→domcontentloaded) |
 | 2026-05-03 | /qa-db | ~5m | SUCCESS | 6 issues found (0 CRITICAL, 2 HIGH, 2 MEDIUM, 2 LOW); 2 HIGH fixed (unbounded findMany on meal-plan picker + dashboard streak query); MEDIUM/LOW reported only |
+| 2026-05-03 | /qa-bugs | ~8m | SUCCESS | 9 issues found (0 CRITICAL, 4 HIGH, 5 MEDIUM, 0 LOW); 4 HIGH fixed (AI route try/catch); 5 MEDIUM reported only |
