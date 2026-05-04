@@ -80,11 +80,17 @@ export default async function DashboardPage() {
       select: { cookedAt: true },
       orderBy: { cookedAt: 'asc' },
     }),
-    // Build unique day set for streak calculation (all time) — runs in parallel with heatmap query
+    // Build unique day set for streak calculation — capped at 2 years of completions.
+    // Longest realistic streak is bounded well below this; an unbounded scan is the
+    // cost we want to avoid for power users with thousands of completions.
     prisma.recipeCompletion.findMany({
-      where: { userId: session.user.id },
+      where: {
+        userId: session.user.id,
+        cookedAt: { gte: new Date(Date.now() - 730 * 86_400_000) },
+      },
       select: { cookedAt: true },
       orderBy: { cookedAt: 'asc' },
+      take: 2000,
     }),
   ])
   const uniqueDays = [...new Set(allTimeCompletions.map(c => c.cookedAt.toISOString().split('T')[0]))]

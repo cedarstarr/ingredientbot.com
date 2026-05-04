@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-05-03
+**Last Updated**: 2026-05-03 (qa-db re-run)
 
 ---
 
@@ -20,7 +20,7 @@
 | 5 | Feature Install | /site-install | DONE | 1 | 2026-04-10 00:00 | [view](reports/2026-04-10-site-install.md) |
 | 6 | Write Tests | /qa-tests-reconcile | DONE | 5 | 2026-05-02 | [view](reports/2026-05-02-tests-reconcile.md) |
 | 7 | Verify Build | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
-| 8 | Database Review | /qa-db | DONE | 1 | 2026-04-14 | [view](reports/2026-04-14-site-db.md) |
+| 8 | Database Review | /qa-db | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-site-db.md) |
 | 9 | QA / Bug Check | /qa-bugs | DONE | 2 | 2026-04-18 | [view](reports/2026-04-18-site-bugs.md) |
 | 10 | Re-verify Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 11 | Security Hardening | /qa-security | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-security.md) |
@@ -83,3 +83,4 @@
 | 2026-04-24 | coming-soon gate | ~2m | SUCCESS | Middleware gate + /coming-soon page deployed; COMING_SOON=true set on Vercel production; staging unaffected |
 | 2026-05-02 | /qa-tests-reconcile | ~10m | SUCCESS | 14 new tests written, 0 stale tests fixed, 0 code fixes |
 | 2026-05-03 | /qa-tests-fix | ~7m | SUCCESS | 210 passed, 27 skipped — R3: 5 fixes (env.ts preprocess, strict-mode locator, waitForResponse race fix, expiry-first API seed, networkidle→domcontentloaded) |
+| 2026-05-03 | /qa-db | ~5m | SUCCESS | 6 issues found (0 CRITICAL, 2 HIGH, 2 MEDIUM, 2 LOW); 2 HIGH fixed (unbounded findMany on meal-plan picker + dashboard streak query); MEDIUM/LOW reported only |
