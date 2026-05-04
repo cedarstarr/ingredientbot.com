@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
-import { generateText } from 'ai'
+import { generateText, type LanguageModelUsage } from 'ai'
 import { geminiFlashLite } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { logAICall } from '@/lib/ai-log'
@@ -29,14 +29,22 @@ export async function POST(req: NextRequest) {
   const cached = await getCached<{ comment: string }>('comment', inputHash)
   if (cached) return Response.json(cached)
 
-  const { text, usage } = await generateText({
-    model: geminiFlashLite,
-    maxOutputTokens: 100,
-    messages: [{
-      role: 'user',
-      content: `In the context of "${recipeTitle}", what is the effect of ${action === 'add' ? 'adding' : 'removing'} ${ingredient}? Reply in exactly 1-2 sentences focusing on flavor, texture, or nutrition. Be specific and helpful.`,
-    }],
-  })
+  let text: string
+  let usage: LanguageModelUsage
+  try {
+    const response = await generateText({
+      model: geminiFlashLite,
+      maxOutputTokens: 100,
+      messages: [{
+        role: 'user',
+        content: `In the context of "${recipeTitle}", what is the effect of ${action === 'add' ? 'adding' : 'removing'} ${ingredient}? Reply in exactly 1-2 sentences focusing on flavor, texture, or nutrition. Be specific and helpful.`,
+      }],
+    })
+    text = response.text
+    usage = response.usage
+  } catch {
+    return Response.json({ error: 'AI service unavailable' }, { status: 503 })
+  }
 
   logAICall({
     feature: "ingredient-comment",

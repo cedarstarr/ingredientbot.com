@@ -49,28 +49,32 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const actionPrompt = actionPrompts[action]
   if (!actionPrompt) return new Response('Invalid action', { status: 400 })
 
-  const result = streamText({
-    model: geminiFlashLite,
-    maxOutputTokens: 2048,
-    system: 'You are an expert chef who helps people modify recipes. Present modifications clearly in markdown.',
-    messages: [{
-      role: 'user',
-      content: `Here is the current recipe:\n${recipe.rawText}\n\n${actionPrompt(recipe, { targetServings, targetMethod })}`,
-    }],
-    onFinish: ({ usage }) => {
-      logAICall({
-        feature: "recipe-modify",
-        provider: "google",
-        model: "gemini-2.5-flash-lite",
-        inputTokens: usage.inputTokens,
-        outputTokens: usage.outputTokens,
-        userId: session.user.id,
-      })
-    },
-  })
+  try {
+    const result = streamText({
+      model: geminiFlashLite,
+      maxOutputTokens: 2048,
+      system: 'You are an expert chef who helps people modify recipes. Present modifications clearly in markdown.',
+      messages: [{
+        role: 'user',
+        content: `Here is the current recipe:\n${recipe.rawText}\n\n${actionPrompt(recipe, { targetServings, targetMethod })}`,
+      }],
+      onFinish: ({ usage }) => {
+        logAICall({
+          feature: "recipe-modify",
+          provider: "google",
+          model: "gemini-2.5-flash-lite",
+          inputTokens: usage.inputTokens,
+          outputTokens: usage.outputTokens,
+          userId: session.user.id,
+        })
+      },
+    })
 
-  // Frontend reads raw text with getReader() — use toTextStreamResponse (not toDataStreamResponse)
-  return result.toTextStreamResponse({
-    headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' },
-  })
+    // Frontend reads raw text with getReader() — use toTextStreamResponse (not toDataStreamResponse)
+    return result.toTextStreamResponse({
+      headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' },
+    })
+  } catch {
+    return new Response('AI service unavailable', { status: 503 })
+  }
 }
