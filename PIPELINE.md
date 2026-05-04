@@ -4,7 +4,7 @@
 **Concept**: AI pantry-to-recipe generator — enter what you have, get streaming recipe suggestions. Make smart changes to recipes.
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
-**Last Updated**: 2026-04-24 (coming-soon gate deployed to production)
+**Last Updated**: 2026-05-03 23:01 (security re-audit run 2)
 
 ---
 
@@ -22,7 +22,7 @@
 | 8 | Database Review | /qa-db | DONE | 1 | 2026-04-14 | [view](reports/2026-04-14-site-db.md) |
 | 9 | QA / Bug Check | /qa-bugs | DONE | 2 | 2026-04-18 | [view](reports/2026-04-18-site-bugs.md) |
 | 10 | Re-verify Tests | /qa-tests-fix | DONE | 1 | 2026-04-23 | [view](reports/2026-04-23-tests-fix.md) |
-| 11 | Security Hardening | /qa-security | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-security.md) |
+| 11 | Security Hardening | /qa-security | DONE | 2 | 2026-05-03 23:01 | [view](reports/2026-05-03-site-security.md) |
 | 12 | UX/UI Pass | /qa-design | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
 | 13 | Copy Audit | /qa-copy | PENDING | 0 | — | — |
 | 14 | Navigation Audit | /qa-nav | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-nav.md) |
@@ -40,7 +40,7 @@
 
 **Progress: 17/25 stages complete**
 
-**Last Updated**: 2026-04-24 (coming-soon gate deployed to production)
+**Last Updated**: 2026-05-03 23:01 (security re-audit run 2)
 
 ---
 
@@ -80,3 +80,4 @@
 | 2026-04-23 | /qa-tests-reconcile | ~4m | SUCCESS | 24 new tests across 3 files (kitchen-modifiers-f74-f79, recipe-import-f62, recipe-tags-f38); 0 stale fixed, 0 code fixes; npm run build clean |
 | 2026-04-23 02:50 | /qa-tests-fix | ~55m | SUCCESS | 197/197 passing; initial 54/143 → systemic fixes (NEXTAUTH_URL → localhost, seed test user) recovered auth cascade → agent fixed 13 residuals (LOCKED_PUBLIC_PATHS, settings layout, streaming waits); commit 825a389 |
 | 2026-04-24 | coming-soon gate | ~2m | SUCCESS | Middleware gate + /coming-soon page deployed; COMING_SOON=true set on Vercel production; staging unaffected |
+| 2026-05-03 23:01 | /qa-security | ~30m | SUCCESS | 7 issues found (2 HIGH, 4 MEDIUM, 1 LOW), all 7 fixed; cron fail-open closed on welcome-drip + meal-plan-digest; NEXT_PUBLIC_CRON_SECRET removed via /api/admin/trigger-cron proxy; JSON-LD XSS hardened with safeJsonLdString helper on /r/[slug] + /; password reset/change now bump sessionsRevokedAt; password change route rate-limited; SSRF guard now decodes octal/hex/decimal IPv4 + redirect: 'manual' on import fetch; build clean |

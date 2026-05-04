@@ -6,8 +6,13 @@ import { childLogger } from '@/lib/logger'
 export const maxDuration = 60
 
 export async function GET(req: NextRequest) {
+  // Fail closed: if CRON_SECRET is unset, reject all callers. Previously this fell open
+  // and allowed unauthenticated callers to trigger bulk email sends.
+  if (!process.env.CRON_SECRET) {
+    return NextResponse.json({ error: 'Cron not configured' }, { status: 503 })
+  }
   const cronSecret = req.headers.get('authorization')?.replace('Bearer ', '')
-  if (process.env.CRON_SECRET && cronSecret !== process.env.CRON_SECRET) {
+  if (cronSecret !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
