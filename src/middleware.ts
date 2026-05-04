@@ -45,7 +45,7 @@ export default auth(async function middleware(request: NextAuthRequest) {
     return response
   }
 
-  if (process.env.COMING_SOON === 'true' && !pathname.startsWith('/api/') && pathname !== '/coming-soon') {
+  if (process.env.COMING_SOON === 'true' && !pathname.startsWith('/api/') && pathname !== '/coming-soon' && pathname !== '/login' && !request.auth?.user?.isAdmin) {
     const url = request.nextUrl.clone()
     url.pathname = '/coming-soon'
     const response = NextResponse.rewrite(url)
