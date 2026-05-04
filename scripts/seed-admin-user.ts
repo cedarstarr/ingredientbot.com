@@ -9,7 +9,7 @@ const prisma = new PrismaClient()
 
 export const ADMIN_EMAIL = 'cedarbarrett@gmail.com'
 export const ADMIN_NAME = 'Cedar Barrett'
-export const ADMIN_PASSWORD = 'iCedarAdmin2026!t'
+export const ADMIN_PASSWORD = 'iCedarAdmin2026!n'
 
 export async function buildAdminUserPayload(password: string) {
   const hash = await bcrypt.hash(password, 12)
