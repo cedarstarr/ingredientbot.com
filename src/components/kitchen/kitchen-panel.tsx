@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
@@ -12,9 +11,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { Slider } from '@/components/ui/slider'
 import {
-  X, ChefHat, Upload, Camera, Loader2, Sparkles, RefreshCw, Package, Timer,
+  X, ChefHat, Camera, Loader2, Sparkles, RefreshCw, Package, Timer,
   Mic, MicOff, Lock, BookOpen, DollarSign, UtensilsCrossed, Flame, Heart,
-  Bed, Dumbbell, Utensils,
+  Bed, Dumbbell, Utensils, ArrowRight, ChevronDown, Zap,
 } from 'lucide-react'
 import { RecipeSuggestionCard, type RecipeSuggestion } from './recipe-suggestion-card'
 import { UsageCounter } from './usage-counter'
@@ -73,6 +72,7 @@ interface PantryItem {
   id: string
   ingredient: string
   expiresAt: string | null
+  addedAt?: string | null
 }
 
 // F26: days until expiry (positive = future, negative = expired)
@@ -141,6 +141,8 @@ export function KitchenPanel() {
   // F55: voice input state
   const [isListening, setIsListening] = useState(false)
   const [voiceSupported, setVoiceSupported] = useState(true)
+  // Advanced options collapsible panel
+  const [showAdvanced, setShowAdvanced] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -588,637 +590,528 @@ export function KitchenPanel() {
     }).catch(() => {})
   }
 
+  // Count how many advanced options are active
+  const advancedActiveCount = [
+    cuisine !== 'any',
+    dietary !== 'any',
+    difficulty !== 'any',
+    cookingMethod !== 'any',
+    budgetMode,
+    leftoverMode,
+    dateNightMode,
+    prepTimeLimit !== null,
+  ].filter(Boolean).length
+
   return (
-    <div className="flex h-full overflow-hidden">
-      {/* Left panel */}
-      <div className="w-80 shrink-0 border-r border-border flex flex-col bg-card">
-        <div className="p-4 border-b border-border">
-          <h1 className="text-lg font-bold text-foreground flex items-center gap-2">
-            <ChefHat className="h-5 w-5 text-primary" />
-            What&apos;s in your kitchen?
-          </h1>
-          <p className="text-xs text-muted-foreground mt-1">Add 2+ ingredients to get recipe ideas</p>
+    <div className="h-full overflow-auto">
+      <div className="max-w-[1080px] mx-auto px-10 py-8 pb-16 space-y-6">
+
+        {/* Header */}
+        <div>
+          <h1 className="text-[30px] font-bold tracking-tight leading-[1.1] mb-1.5">What&apos;s in your fridge today?</h1>
+          <p className="text-muted-foreground text-[15px]">Type, snap, or paste a list. I&apos;ll cook up 4 ideas in about 8 seconds.</p>
         </div>
 
-        <Tabs defaultValue="type" className="flex-1 flex flex-col overflow-hidden">
-          <TabsList className="mx-4 mt-3 shrink-0">
-            <TabsTrigger value="type" className="flex-1">Type</TabsTrigger>
-            <TabsTrigger value="photo" className="flex-1">
-              <Camera className="h-3.5 w-3.5 mr-1.5" />
-              Photo
-            </TabsTrigger>
-          </TabsList>
+        {/* Composer card */}
+        <div className="rounded-xl bg-card ring-1 ring-foreground/10 p-5 space-y-3">
+          <Textarea
+            value={inputValue}
+            onChange={(e) => {
+              const text = e.target.value
+              setInputValue(text)
+              // Parse textarea into ingredients array
+              const parsed = text.split(/[,\n]+/).map(s => s.trim().toLowerCase()).filter(Boolean)
+              setIngredients(parsed)
+            }}
+            placeholder="2 chicken thighs, broccoli, garlic, sesame oil, gochujang..."
+            className="min-h-[80px] resize-none border-input focus-visible:ring-ring text-sm"
+          />
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            {/* 4 primary mode toggles as pills */}
+            <div className="flex gap-2 flex-wrap">
+              {/* Strict mode */}
+              <button
+                type="button"
+                onClick={() => setStrictMode(v => !v)}
+                className={cn(
+                  'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200',
+                  strictMode
+                    ? 'bg-primary/10 border-primary/30 text-primary'
+                    : 'bg-background border-input text-foreground hover:bg-muted/60',
+                )}
+              >
+                <Lock className="h-3.5 w-3.5" />
+                Strict ingredients only
+              </button>
+              {/* Exhausted mode */}
+              <button
+                type="button"
+                onClick={() => setExhaustedMode(v => !v)}
+                className={cn(
+                  'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200',
+                  exhaustedMode
+                    ? 'bg-primary/10 border-primary/30 text-primary'
+                    : 'bg-background border-input text-foreground hover:bg-muted/60',
+                )}
+                aria-pressed={exhaustedMode}
+              >
+                <Bed className="h-3.5 w-3.5" />
+                I&apos;m exhausted
+              </button>
+              {/* Protein-max */}
+              <button
+                type="button"
+                onClick={() => setProteinMax(v => !v)}
+                className={cn(
+                  'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200',
+                  proteinMax
+                    ? 'bg-primary/10 border-primary/30 text-primary'
+                    : 'bg-background border-input text-foreground hover:bg-muted/60',
+                )}
+                aria-pressed={proteinMax}
+              >
+                <Dumbbell className="h-3.5 w-3.5" />
+                Protein-Max
+              </button>
+              {/* Teach me mode */}
+              <button
+                type="button"
+                onClick={() => setTeachMode(v => !v)}
+                className={cn(
+                  'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200',
+                  teachMode
+                    ? 'bg-primary/10 border-primary/30 text-primary'
+                    : 'bg-background border-input text-foreground hover:bg-muted/60',
+                )}
+                aria-pressed={teachMode}
+              >
+                <BookOpen className="h-3.5 w-3.5" />
+                Teach me mode
+              </button>
+            </div>
+            {/* Action buttons */}
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isAnalyzingPhoto}>
+                {isAnalyzingPhoto ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Camera className="h-4 w-4 mr-1.5" />}
+                Snap fridge
+              </Button>
+              <Button size="sm" onClick={generateRecipes} disabled={allIngredients().length < 2 || isGenerating || impressMeLoading}>
+                {isGenerating ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : null}
+                Find recipes
+                {!isGenerating && <ArrowRight className="h-4 w-4 ml-1.5" />}
+              </Button>
+            </div>
+          </div>
+        </div>
 
-          <TabsContent value="type" className="flex-1 flex flex-col p-4 gap-3 overflow-auto">
-            {/* Input + F55 voice mic */}
-            <div>
-              <div className="flex gap-2">
-                <Input
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="e.g. chicken, rice, garlic..."
-                  className="flex-1"
+        {/* Advanced options (collapsible) */}
+        <div>
+          <button
+            type="button"
+            onClick={() => setShowAdvanced(v => !v)}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ChevronDown className={cn('h-4 w-4 transition-transform', showAdvanced && 'rotate-180')} />
+            Advanced options
+            {advancedActiveCount > 0 && (
+              <span className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold px-1">
+                {advancedActiveCount}
+              </span>
+            )}
+          </button>
+          {showAdvanced && (
+            <div className="mt-3 rounded-xl border border-border bg-card/50 p-4 space-y-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {/* F34: Cuisine selector */}
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground">Cuisine</label>
+                  <Select value={cuisine} onValueChange={setCuisine}>
+                    <SelectTrigger className="w-full text-sm">
+                      <SelectValue placeholder="Any cuisine" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="any">Any cuisine</SelectItem>
+                      <SelectItem value="Thai">Thai</SelectItem>
+                      <SelectItem value="Italian">Italian</SelectItem>
+                      <SelectItem value="Mexican">Mexican</SelectItem>
+                      <SelectItem value="Japanese">Japanese</SelectItem>
+                      <SelectItem value="Indian">Indian</SelectItem>
+                      <SelectItem value="Mediterranean">Mediterranean</SelectItem>
+                      <SelectItem value="French">French</SelectItem>
+                      <SelectItem value="American">American</SelectItem>
+                      <SelectItem value="Chinese">Chinese</SelectItem>
+                      <SelectItem value="Korean">Korean</SelectItem>
+                      <SelectItem value="Middle Eastern">Middle Eastern</SelectItem>
+                      <SelectItem value="Greek">Greek</SelectItem>
+                      <SelectItem value="Vietnamese">Vietnamese</SelectItem>
+                      <SelectItem value="Spanish">Spanish</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Dietary restrictions */}
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground">Dietary restrictions</label>
+                  <Select value={dietary} onValueChange={setDietary}>
+                    <SelectTrigger className="w-full text-sm">
+                      <SelectValue placeholder="No dietary restrictions" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="any">No restrictions</SelectItem>
+                      <SelectItem value="vegetarian">Vegetarian</SelectItem>
+                      <SelectItem value="vegan">Vegan</SelectItem>
+                      <SelectItem value="gluten-free">Gluten-free</SelectItem>
+                      <SelectItem value="dairy-free">Dairy-free</SelectItem>
+                      <SelectItem value="low-carb">Low-carb</SelectItem>
+                      <SelectItem value="keto">Keto</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* F35: Difficulty selector */}
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground">Difficulty</label>
+                  <Select value={difficulty} onValueChange={setDifficulty}>
+                    <SelectTrigger className="w-full text-sm">
+                      <SelectValue placeholder="Any difficulty" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="any">Any difficulty</SelectItem>
+                      <SelectItem value="beginner">Beginner / Easy</SelectItem>
+                      <SelectItem value="intermediate">Intermediate / Medium</SelectItem>
+                      <SelectItem value="advanced">Advanced / Hard</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* F74: Cooking method selector */}
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <Utensils className="h-3 w-3" />
+                    Cooking method
+                  </label>
+                  <Select value={cookingMethod} onValueChange={(v) => changeCookingMethod(v as CookingMethod)}>
+                    <SelectTrigger className="w-full text-sm">
+                      <SelectValue placeholder="Any method" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COOKING_METHODS.map(m => (
+                        <SelectItem key={m} value={m}>
+                          {m === 'any' ? 'Any method' : m}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* F77: Restaurant recreation */}
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground">Recreate restaurant style</label>
+                  <Input
+                    value={restaurantStyle}
+                    onChange={(e) => setRestaurantStyle(e.target.value)}
+                    placeholder="Recreate like Chipotle, Olive Garden…"
+                    className="text-sm"
+                    maxLength={120}
+                    aria-label="Recreate the flavor profile of a restaurant"
+                  />
+                </div>
+              </div>
+
+              {/* F78: Spice level slider */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <Flame className="h-3 w-3" />
+                    Spice level
+                  </span>
+                  <span className="text-[10px] font-medium text-primary">{SPICE_LABELS[spiceLevel]}</span>
+                </div>
+                <Slider
+                  value={[spiceLevel]}
+                  min={0}
+                  max={3}
+                  step={1}
+                  onValueChange={(v) => changeSpiceLevel(v[0] ?? 0)}
+                  aria-label="Spice level"
+                  className="focus-visible:outline-none"
                 />
-                {/* F55: mic button — hidden when Web Speech API unsupported */}
-                {voiceSupported && (
+                <div className="flex justify-between text-[10px] text-muted-foreground px-0.5">
+                  {SPICE_LABELS.map((label, i) => (
+                    <span
+                      key={label}
+                      className={cn(
+                        'transition-colors',
+                        spiceLevel === i && 'text-foreground font-medium',
+                      )}
+                    >
+                      {label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* F70: Chef personality */}
+              <div className="space-y-1.5">
+                <span className="text-xs font-medium text-muted-foreground">Chef style</span>
+                <div className="flex gap-1.5">
+                  {CHEF_PERSONALITIES.map(({ id, label, Icon }) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => changeChefPersonality(id)}
+                      title={label}
+                      aria-label={label}
+                      aria-pressed={chefPersonality === id}
+                      className={cn(
+                        'flex-1 flex flex-col items-center gap-1 rounded-md py-2 px-1 border text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                        chefPersonality === id
+                          ? 'bg-primary/15 border-primary text-primary font-medium'
+                          : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-primary/40',
+                      )}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                      <span className="leading-none text-center">{label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Generation mode toggles */}
+              <div className="space-y-1.5">
+                <span className="text-xs font-medium text-muted-foreground">Generation modes</span>
+                <div className="grid grid-cols-2 gap-2">
+                  {/* F28: Leftover optimizer */}
+                  <button
+                    type="button"
+                    onClick={() => setLeftoverMode(v => !v)}
+                    title="Use leftover ingredients as star of the dish"
+                    className={cn(
+                      'flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                      leftoverMode
+                        ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-400/60 text-orange-700 dark:text-orange-400 font-medium'
+                        : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-orange-400/40',
+                    )}
+                  >
+                    <Package className="h-3 w-3 shrink-0" />
+                    <span className="flex-1 text-left">Leftover optimizer</span>
+                    {leftoverMode && (
+                      <Badge className="bg-orange-500/20 text-orange-700 dark:text-orange-300 text-[10px] px-1.5 py-0 border-0">
+                        ON
+                      </Badge>
+                    )}
+                  </button>
+
+                  {/* F53: Budget mode */}
+                  <button
+                    type="button"
+                    onClick={toggleBudgetMode}
+                    title="Prioritize cheap, pantry-staple ingredients"
+                    className={cn(
+                      'flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                      budgetMode
+                        ? 'bg-green-50 dark:bg-green-900/20 border-green-400/60 text-green-700 dark:text-green-400 font-medium'
+                        : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-green-400/40',
+                    )}
+                  >
+                    <DollarSign className="h-3 w-3 shrink-0" />
+                    <span className="flex-1 text-left">Budget mode</span>
+                    {budgetMode && (
+                      <Badge className="bg-green-500/20 text-green-700 dark:text-green-300 text-[10px] px-1.5 py-0 border-0">
+                        ON
+                      </Badge>
+                    )}
+                  </button>
+
+                  {/* F71: Date Night mode */}
+                  <button
+                    type="button"
+                    onClick={() => setDateNightMode(v => !v)}
+                    title="Generate a full 3-course date night menu"
+                    className={cn(
+                      'flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                      dateNightMode
+                        ? 'bg-pink-50 dark:bg-pink-900/20 border-pink-400/60 text-pink-700 dark:text-pink-400 font-medium'
+                        : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-pink-400/40',
+                    )}
+                  >
+                    <Heart className="h-3 w-3 shrink-0" />
+                    <span className="flex-1 text-left">Date Night (3-course)</span>
+                    {dateNightMode && (
+                      <Badge className="bg-pink-500/20 text-pink-700 dark:text-pink-300 text-[10px] px-1.5 py-0 border-0">
+                        ON
+                      </Badge>
+                    )}
+                  </button>
+
+                  {/* F26: Expiry-first mode — only when expiring items exist */}
+                  {pantryItems.some(isExpiringSoon) && (
+                    <button
+                      type="button"
+                      onClick={() => setExpiryFirstMode(v => !v)}
+                      title="Prioritize expiring ingredients in recipe generation"
+                      className={cn(
+                        'flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                        expiryFirstMode
+                          ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-400/60 text-amber-700 dark:text-amber-400 font-medium'
+                          : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-amber-400/40',
+                      )}
+                    >
+                      <Timer className="h-3 w-3 shrink-0" />
+                      <span className="flex-1 text-left">Expiry-first mode</span>
+                      {expiryFirstMode && (
+                        <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[10px] text-amber-700 dark:text-amber-300">
+                          ON
+                        </span>
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                {/* F28: Leftover text input — only when mode active */}
+                {leftoverMode && (
+                  <Textarea
+                    value={leftoverText}
+                    onChange={(e) => setLeftoverText(e.target.value)}
+                    placeholder="e.g. roast chicken, half a bag of pasta, some leftover rice..."
+                    className="text-xs resize-none h-16 mt-2"
+                    aria-label="Leftover ingredients to use up"
+                  />
+                )}
+              </div>
+
+              {/* F32: Prep time filter */}
+              <div className="space-y-1.5">
+                <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                  <Timer className="h-3 w-3" />
+                  Time limit
+                </span>
+                <div className="flex flex-wrap gap-1">
+                  {PREP_TIMES.map(({ value, label }) => (
+                    <button
+                      key={String(value)}
+                      type="button"
+                      onClick={() => setPrepTimeLimit(value)}
+                      className={cn(
+                        'rounded-full px-2.5 py-0.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                        prepTimeLimit === value
+                          ? 'bg-primary text-primary-foreground border-primary font-medium'
+                          : 'bg-muted/30 text-muted-foreground border-border hover:border-primary/40 hover:text-foreground',
+                      )}
+                      aria-pressed={prepTimeLimit === value}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                {prepTimeLimit !== null && (
+                  <p className="text-[10px] text-amber-600 dark:text-amber-400">
+                    AI will target recipes completable in under {prepTimeLimit} min
+                  </p>
+                )}
+              </div>
+
+              {/* F44: Pantry section */}
+              {pantryItems.length > 0 && (
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                      <Package className="h-3 w-3" />
+                      Pantry
+                    </span>
+                    <Link
+                      href="/pantry"
+                      className="text-xs text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+                    >
+                      Manage
+                    </Link>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {pantryItems.map(item => {
+                      const active = activePantryIds.has(item.id)
+                      const expiringSoon = isExpiringSoon(item)
+                      const critical = item.expiresAt && daysUntilExpiry(item.expiresAt) <= 3
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => togglePantryItem(item.id)}
+                          title={active ? 'Click to exclude from this session' : 'Click to include'}
+                          className={cn(
+                            'inline-flex items-center gap-1 rounded-full text-xs px-2 py-0.5 border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                            active
+                              ? cn(
+                                  'bg-primary/15 text-primary border-primary/30',
+                                  critical && 'bg-red-100 dark:bg-red-900/30 border-red-400/50 text-red-700 dark:text-red-400',
+                                  !critical && expiringSoon && 'bg-amber-100 dark:bg-amber-900/30 border-amber-400/50 text-amber-700 dark:text-amber-400',
+                                )
+                              : 'bg-muted/40 text-muted-foreground border-border line-through'
+                          )}
+                        >
+                          {critical && active && <span aria-hidden className="text-[10px]">🔴</span>}
+                          {!critical && expiringSoon && active && <span aria-hidden className="text-[10px]">🟡</span>}
+                          {item.ingredient}
+                          {active && (
+                            <X
+                              className="h-2.5 w-2.5 opacity-60"
+                              aria-label={`Exclude ${item.ingredient}`}
+                            />
+                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* F54: Impress Me */}
+              <div className="pt-1">
+                <Button
+                  variant="outline"
+                  onClick={handleImpressMe}
+                  disabled={isGenerating || impressMeLoading}
+                  className="gap-2 text-sm border-primary/40 text-primary hover:bg-primary/5"
+                >
+                  {impressMeLoading ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-3.5 w-3.5" />
+                  )}
+                  Impress Me
+                </Button>
+              </div>
+
+              {/* F30: Usage counter */}
+              <UsageCounter refreshKey={usageRefreshKey} />
+
+              {/* F55: Voice input (secondary feature) */}
+              {voiceSupported && (
+                <div className="pt-1">
                   <button
                     type="button"
                     onClick={toggleVoice}
                     title={isListening ? 'Stop recording' : 'Speak ingredients'}
                     className={cn(
-                      'h-9 w-9 flex items-center justify-center rounded-md border border-border transition-colors shrink-0',
+                      'inline-flex items-center gap-2 h-8 px-3 rounded-md border text-xs transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                       isListening
                         ? 'bg-red-100 dark:bg-red-900/30 border-red-400/60 text-red-600 dark:text-red-400 animate-pulse'
-                        : 'bg-muted/40 text-muted-foreground hover:text-foreground hover:border-primary/40',
+                        : 'bg-muted/40 text-muted-foreground border-border hover:text-foreground hover:border-primary/40',
                     )}
                     aria-label={isListening ? 'Stop recording' : 'Start voice input'}
                   >
-                    {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                    {isListening ? <MicOff className="h-3.5 w-3.5" /> : <Mic className="h-3.5 w-3.5" />}
+                    {isListening ? 'Listening… speak your ingredients' : 'Speak ingredients'}
                   </button>
-                )}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {isListening
-                  ? 'Listening… speak your ingredients'
-                  : 'Press Enter or comma to add'}
-              </p>
-            </div>
-
-            {/* Tags */}
-            {ingredients.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {ingredients.map(ing => (
-                  <span
-                    key={ing}
-                    className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-xs px-2.5 py-1 font-medium"
-                  >
-                    {ing}
-                    <button
-                      onClick={() => removeIngredient(ing)}
-                      aria-label={`Remove ${ing}`}
-                      className="text-primary/60 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Filters */}
-            <div className="space-y-2 pt-1">
-              {/* F34: Cuisine selector — 14 cuisines + Any default */}
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">Cuisine</label>
-                <Select value={cuisine} onValueChange={setCuisine}>
-                  <SelectTrigger className="w-full text-sm">
-                    <SelectValue placeholder="Any cuisine" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="any">Any cuisine</SelectItem>
-                    <SelectItem value="Thai">Thai</SelectItem>
-                    <SelectItem value="Italian">Italian</SelectItem>
-                    <SelectItem value="Mexican">Mexican</SelectItem>
-                    <SelectItem value="Japanese">Japanese</SelectItem>
-                    <SelectItem value="Indian">Indian</SelectItem>
-                    <SelectItem value="Mediterranean">Mediterranean</SelectItem>
-                    <SelectItem value="French">French</SelectItem>
-                    <SelectItem value="American">American</SelectItem>
-                    <SelectItem value="Chinese">Chinese</SelectItem>
-                    <SelectItem value="Korean">Korean</SelectItem>
-                    <SelectItem value="Middle Eastern">Middle Eastern</SelectItem>
-                    <SelectItem value="Greek">Greek</SelectItem>
-                    <SelectItem value="Vietnamese">Vietnamese</SelectItem>
-                    <SelectItem value="Spanish">Spanish</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* F77: Restaurant recreation — free-text, session only */}
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">Recreate restaurant style</label>
-                <Input
-                  value={restaurantStyle}
-                  onChange={(e) => setRestaurantStyle(e.target.value)}
-                  placeholder="Recreate like Chipotle, Olive Garden…"
-                  className="text-sm"
-                  maxLength={120}
-                  aria-label="Recreate the flavor profile of a restaurant"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">Dietary restrictions</label>
-                <Select value={dietary} onValueChange={setDietary}>
-                  <SelectTrigger className="w-full text-sm">
-                    <SelectValue placeholder="No dietary restrictions" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="any">No restrictions</SelectItem>
-                    <SelectItem value="vegetarian">Vegetarian</SelectItem>
-                    <SelectItem value="vegan">Vegan</SelectItem>
-                    <SelectItem value="gluten-free">Gluten-free</SelectItem>
-                    <SelectItem value="dairy-free">Dairy-free</SelectItem>
-                    <SelectItem value="low-carb">Low-carb</SelectItem>
-                    <SelectItem value="keto">Keto</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* F35: Difficulty selector */}
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">Difficulty</label>
-                <Select value={difficulty} onValueChange={setDifficulty}>
-                  <SelectTrigger className="w-full text-sm">
-                    <SelectValue placeholder="Any difficulty" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="any">Any difficulty</SelectItem>
-                    <SelectItem value="beginner">Beginner / Easy</SelectItem>
-                    <SelectItem value="intermediate">Intermediate / Medium</SelectItem>
-                    <SelectItem value="advanced">Advanced / Hard</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* F74: Cooking method selector — persisted equipment constraint */}
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                  <Utensils className="h-3 w-3" />
-                  Cooking method
-                </label>
-                <Select value={cookingMethod} onValueChange={(v) => changeCookingMethod(v as CookingMethod)}>
-                  <SelectTrigger className="w-full text-sm">
-                    <SelectValue placeholder="Any method" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {COOKING_METHODS.map(m => (
-                      <SelectItem key={m} value={m}>
-                        {m === 'any' ? 'Any method' : m}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* F78: Spice level slider — always sent to AI so even Mild is explicit */}
-            <div className="space-y-1.5 pt-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                  <Flame className="h-3 w-3" />
-                  Spice level
-                </span>
-                <span className="text-[10px] font-medium text-primary">{SPICE_LABELS[spiceLevel]}</span>
-              </div>
-              <Slider
-                value={[spiceLevel]}
-                min={0}
-                max={3}
-                step={1}
-                onValueChange={(v) => changeSpiceLevel(v[0] ?? 0)}
-                aria-label="Spice level"
-                className="focus-visible:outline-none"
-              />
-              <div className="flex justify-between text-[10px] text-muted-foreground px-0.5">
-                {SPICE_LABELS.map((label, i) => (
-                  <span
-                    key={label}
-                    className={cn(
-                      'transition-colors',
-                      spiceLevel === i && 'text-foreground font-medium',
-                    )}
-                  >
-                    {label}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* F44: Pantry section — show active pantry items with toggle */}
-            {pantryItems.length > 0 && (
-              <div className="space-y-1.5 pt-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                    <Package className="h-3 w-3" />
-                    Pantry
-                  </span>
-                  <Link
-                    href="/pantry"
-                    className="text-xs text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
-                  >
-                    Manage
-                  </Link>
                 </div>
-
-                {/* F26: Expiry-first toggle — only shown when items have expiry dates */}
-                {pantryItems.some(isExpiringSoon) && (
-                  <button
-                    type="button"
-                    onClick={() => setExpiryFirstMode(v => !v)}
-                    title="Prioritize expiring ingredients in recipe generation"
-                    className={cn(
-                      'w-full flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                      expiryFirstMode
-                        ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-400/60 text-amber-700 dark:text-amber-400 font-medium'
-                        : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-amber-400/40',
-                    )}
-                  >
-                    <Timer className="h-3 w-3 shrink-0" />
-                    <span className="flex-1 text-left">Expiry-first mode</span>
-                    {expiryFirstMode && (
-                      <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[10px] text-amber-700 dark:text-amber-300">
-                        ON
-                      </span>
-                    )}
-                  </button>
-                )}
-
-                <div className="flex flex-wrap gap-1.5">
-                  {pantryItems.map(item => {
-                    const active = activePantryIds.has(item.id)
-                    const expiringSoon = isExpiringSoon(item)
-                    const critical = item.expiresAt && daysUntilExpiry(item.expiresAt) <= 3
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => togglePantryItem(item.id)}
-                        title={active ? 'Click to exclude from this session' : 'Click to include'}
-                        className={cn(
-                          'inline-flex items-center gap-1 rounded-full text-xs px-2 py-0.5 border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                          active
-                            ? cn(
-                                'bg-primary/15 text-primary border-primary/30',
-                                critical && 'bg-red-100 dark:bg-red-900/30 border-red-400/50 text-red-700 dark:text-red-400',
-                                !critical && expiringSoon && 'bg-amber-100 dark:bg-amber-900/30 border-amber-400/50 text-amber-700 dark:text-amber-400',
-                              )
-                            : 'bg-muted/40 text-muted-foreground border-border line-through'
-                        )}
-                      >
-                        {critical && active && <span aria-hidden className="text-[10px]">🔴</span>}
-                        {!critical && expiringSoon && active && <span aria-hidden className="text-[10px]">🟡</span>}
-                        {item.ingredient}
-                        {active && (
-                          <X
-                            className="h-2.5 w-2.5 opacity-60"
-                            aria-label={`Exclude ${item.ingredient}`}
-                          />
-                        )}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* F32: Prep time filter */}
-            <div className="space-y-1.5 pt-1">
-              <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                <Timer className="h-3 w-3" />
-                Time limit
-              </span>
-              <div className="flex flex-wrap gap-1">
-                {PREP_TIMES.map(({ value, label }) => (
-                  <button
-                    key={String(value)}
-                    type="button"
-                    onClick={() => setPrepTimeLimit(value)}
-                    className={cn(
-                      'rounded-full px-2.5 py-0.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                      prepTimeLimit === value
-                        ? 'bg-primary text-primary-foreground border-primary font-medium'
-                        : 'bg-muted/30 text-muted-foreground border-border hover:border-primary/40 hover:text-foreground',
-                    )}
-                    aria-pressed={prepTimeLimit === value}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-              {prepTimeLimit !== null && (
-                <p className="text-[10px] text-amber-600 dark:text-amber-400">
-                  AI will target recipes completable in under {prepTimeLimit} min
-                </p>
               )}
             </div>
-
-            {/* F70: Chef personality */}
-            <div className="space-y-1.5 pt-1">
-              <span className="text-xs font-medium text-muted-foreground">Chef style</span>
-              <div className="flex gap-1.5">
-                {CHEF_PERSONALITIES.map(({ id, label, Icon }) => (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => changeChefPersonality(id)}
-                    title={label}
-                    aria-label={label}
-                    aria-pressed={chefPersonality === id}
-                    className={cn(
-                      'flex-1 flex flex-col items-center gap-1 rounded-md py-2 px-1 border text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                      chefPersonality === id
-                        ? 'bg-primary/15 border-primary text-primary font-medium'
-                        : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-primary/40',
-                    )}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                    <span className="leading-none text-center">{label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* F28 / F53 / F61 / F64 / F71: Generation mode toggles */}
-            <div className="space-y-1.5 pt-1">
-              <span className="text-xs font-medium text-muted-foreground">Generation modes</span>
-
-              {/* F28: Leftover optimizer */}
-              <button
-                type="button"
-                onClick={() => setLeftoverMode(v => !v)}
-                title="Use leftover ingredients as star of the dish"
-                className={cn(
-                  'w-full flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  leftoverMode
-                    ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-400/60 text-orange-700 dark:text-orange-400 font-medium'
-                    : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-orange-400/40',
-                )}
-              >
-                <Package className="h-3 w-3 shrink-0" />
-                <span className="flex-1 text-left">Leftover optimizer</span>
-                {leftoverMode && (
-                  <Badge className="bg-orange-500/20 text-orange-700 dark:text-orange-300 text-[10px] px-1.5 py-0 border-0">
-                    ON
-                  </Badge>
-                )}
-              </button>
-
-              {/* F28: Leftover text input — only shown when mode active */}
-              {leftoverMode && (
-                <Textarea
-                  value={leftoverText}
-                  onChange={(e) => setLeftoverText(e.target.value)}
-                  placeholder="e.g. roast chicken, half a bag of pasta, some leftover rice..."
-                  className="text-xs resize-none h-16"
-                  aria-label="Leftover ingredients to use up"
-                />
-              )}
-
-              {/* F61: Strictness toggle */}
-              <button
-                type="button"
-                onClick={() => setStrictMode(v => !v)}
-                title="Only use the listed ingredients — no assumed pantry staples"
-                className={cn(
-                  'w-full flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  strictMode
-                    ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-400/60 text-purple-700 dark:text-purple-400 font-medium'
-                    : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-purple-400/40',
-                )}
-              >
-                <Lock className="h-3 w-3 shrink-0" />
-                <span className="flex-1 text-left">Strict ingredients only</span>
-                {strictMode && (
-                  <Badge className="bg-purple-500/20 text-purple-700 dark:text-purple-300 text-[10px] px-1.5 py-0 border-0">
-                    ON
-                  </Badge>
-                )}
-              </button>
-
-              {/* F64: Teach me mode */}
-              <button
-                type="button"
-                onClick={() => setTeachMode(v => !v)}
-                title="Include explanations for each cooking step"
-                className={cn(
-                  'w-full flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  teachMode
-                    ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-400/60 text-blue-700 dark:text-blue-400 font-medium'
-                    : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-blue-400/40',
-                )}
-              >
-                <BookOpen className="h-3 w-3 shrink-0" />
-                <span className="flex-1 text-left">Teach me mode</span>
-                {teachMode && (
-                  <Badge className="bg-blue-500/20 text-blue-700 dark:text-blue-300 text-[10px] px-1.5 py-0 border-0">
-                    ON
-                  </Badge>
-                )}
-              </button>
-
-              {/* F53: Budget mode */}
-              <button
-                type="button"
-                onClick={toggleBudgetMode}
-                title="Prioritize cheap, pantry-staple ingredients"
-                className={cn(
-                  'w-full flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  budgetMode
-                    ? 'bg-green-50 dark:bg-green-900/20 border-green-400/60 text-green-700 dark:text-green-400 font-medium'
-                    : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-green-400/40',
-                )}
-              >
-                <DollarSign className="h-3 w-3 shrink-0" />
-                <span className="flex-1 text-left">Budget mode</span>
-                {budgetMode && (
-                  <Badge className="bg-green-500/20 text-green-700 dark:text-green-300 text-[10px] px-1.5 py-0 border-0">
-                    ON
-                  </Badge>
-                )}
-              </button>
-
-              {/* F75: "I'm exhausted" — session-only, minimal active effort */}
-              <button
-                type="button"
-                onClick={() => setExhaustedMode(v => !v)}
-                title="Prefer dump-and-wait, 5-minute-effort recipes"
-                className={cn(
-                  'w-full flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  exhaustedMode
-                    ? 'bg-slate-100 dark:bg-slate-800/40 border-slate-400/60 text-slate-700 dark:text-slate-200 font-medium'
-                    : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-slate-400/40',
-                )}
-                aria-pressed={exhaustedMode}
-              >
-                <Bed className="h-3 w-3 shrink-0" />
-                <span className="flex-1 text-left">I&apos;m exhausted</span>
-                {exhaustedMode && (
-                  <Badge className="bg-slate-500/20 text-slate-700 dark:text-slate-200 text-[10px] px-1.5 py-0 border-0">
-                    ON
-                  </Badge>
-                )}
-              </button>
-
-              {/* F76: Protein-Max — session-only, 40g+ protein per serving */}
-              <button
-                type="button"
-                onClick={() => setProteinMax(v => !v)}
-                title="Force 40g+ protein per serving"
-                className={cn(
-                  'w-full flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  proteinMax
-                    ? 'bg-red-50 dark:bg-red-900/20 border-red-400/60 text-red-700 dark:text-red-400 font-medium'
-                    : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-red-400/40',
-                )}
-                aria-pressed={proteinMax}
-              >
-                <Dumbbell className="h-3 w-3 shrink-0" />
-                <span className="flex-1 text-left">Protein-Max (40g+)</span>
-                {proteinMax && (
-                  <Badge className="bg-red-500/20 text-red-700 dark:text-red-300 text-[10px] px-1.5 py-0 border-0">
-                    ON
-                  </Badge>
-                )}
-              </button>
-
-              {/* F71: Date Night mode */}
-              <button
-                type="button"
-                onClick={() => setDateNightMode(v => !v)}
-                title="Generate a full 3-course date night menu"
-                className={cn(
-                  'w-full flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  dateNightMode
-                    ? 'bg-pink-50 dark:bg-pink-900/20 border-pink-400/60 text-pink-700 dark:text-pink-400 font-medium'
-                    : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-pink-400/40',
-                )}
-              >
-                <Heart className="h-3 w-3 shrink-0" />
-                <span className="flex-1 text-left">Date Night (3-course)</span>
-                {dateNightMode && (
-                  <Badge className="bg-pink-500/20 text-pink-700 dark:text-pink-300 text-[10px] px-1.5 py-0 border-0">
-                    ON
-                  </Badge>
-                )}
-              </button>
-            </div>
-
-            {/* F30: Usage counter */}
-            <UsageCounter refreshKey={usageRefreshKey} />
-          </TabsContent>
-
-          <TabsContent value="photo" className="flex-1 p-4">
-            <div
-              className="flex flex-col items-center justify-center h-48 rounded-xl border-2 border-dashed border-border hover:border-primary/40 cursor-pointer transition-colors bg-muted/30"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              {isAnalyzingPhoto ? (
-                <>
-                  <Loader2 className="h-8 w-8 text-primary animate-spin mb-2" />
-                  <p className="text-sm text-muted-foreground">Analyzing photo...</p>
-                </>
-              ) : (
-                <>
-                  <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-                  <p className="text-sm font-medium text-foreground">Upload fridge photo</p>
-                  <p className="text-xs text-muted-foreground mt-1">JPG, PNG, WebP up to 5MB</p>
-                </>
-              )}
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              className="hidden"
-              onChange={handlePhotoUpload}
-            />
-            {ingredients.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {ingredients.map(ing => (
-                  <span key={ing} className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-xs px-2.5 py-1">
-                    {ing}
-                    <button
-                      onClick={() => removeIngredient(ing)}
-                      aria-label={`Remove ${ing}`}
-                      className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
-
-        <div className="p-4 border-t border-border shrink-0 space-y-2">
-          {/* Active mode badges on the generate button */}
-          {(prepTimeLimit !== null || budgetMode || dateNightMode) && (
-            <div className="flex flex-wrap gap-1">
-              {prepTimeLimit !== null && (
-                <Badge variant="outline" className="text-[10px] py-0 border-amber-400/50 text-amber-700 dark:text-amber-400">
-                  {prepTimeLimit}min limit
-                </Badge>
-              )}
-              {budgetMode && (
-                <Badge variant="outline" className="text-[10px] py-0 border-green-400/50 text-green-700 dark:text-green-400">
-                  Budget Mode
-                </Badge>
-              )}
-              {dateNightMode && (
-                <Badge variant="outline" className="text-[10px] py-0 border-pink-400/50 text-pink-700 dark:text-pink-400">
-                  Date Night
-                </Badge>
-              )}
-            </div>
-          )}
-
-          <Button
-            onClick={generateRecipes}
-            disabled={allIngredients().length < 2 || isGenerating || impressMeLoading}
-            className="w-full"
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Finding recipes...
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-4 w-4 mr-2" />
-                Find Recipes
-              </>
-            )}
-          </Button>
-
-          {/* F54: Impress Me — always visible; prominent when no ingredients, subtle otherwise */}
-          <Button
-            variant="outline"
-            onClick={handleImpressMe}
-            disabled={isGenerating || impressMeLoading}
-            className="w-full gap-2 text-sm border-primary/40 text-primary hover:bg-primary/5"
-          >
-            {impressMeLoading ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Sparkles className="h-3.5 w-3.5" />
-            )}
-            Impress Me
-          </Button>
-
-          {/* F24: Try Again — only visible after suggestions load */}
-          {suggestions.length > 0 && !isGenerating && !impressMeLoading && (
-            <Button
-              variant="outline"
-              onClick={handleTryAgain}
-              disabled={allIngredients().length < 2 || isGenerating}
-              className="w-full gap-2 text-sm"
-            >
-              <RefreshCw className="h-3.5 w-3.5" />
-              Try Different Recipes
-            </Button>
           )}
         </div>
-      </div>
 
-      {/* Right panel */}
-      <div className="flex-1 overflow-auto p-6">
-        {/* F30: Limit reached banner */}
+        {/* Limit reached banner */}
         {limitReached && (
-          <div className="mb-4 rounded-lg border border-amber-400/40 bg-amber-50 dark:bg-amber-900/10 px-4 py-3">
+          <div className="rounded-lg border border-amber-400/40 bg-amber-50 dark:bg-amber-900/10 px-4 py-3">
             <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
               You&apos;ve reached your 5 free recipes this month.
             </p>
@@ -1232,82 +1125,136 @@ export function KitchenPanel() {
           </div>
         )}
 
+        {/* Error banner */}
         {error && (
-          <div role="alert" className="mb-4 rounded-lg border border-destructive/30 bg-destructive/8 px-4 py-3 text-sm text-destructive">
+          <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive/8 px-4 py-3 text-sm text-destructive">
             {error}
           </div>
         )}
 
+        {/* Empty state */}
         {!isGenerating && !impressMeLoading && suggestions.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full text-center py-20">
+          <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
               <ChefHat className="h-8 w-8 text-primary" />
             </div>
             <h2 className="text-xl font-semibold text-foreground mb-2">Add your ingredients</h2>
             <p className="text-muted-foreground max-w-xs">
-              Type at least 2 ingredients on the left, or click &ldquo;Impress Me&rdquo; to let the AI choose.
+              Type at least 2 ingredients above, snap a fridge photo, or click &ldquo;Impress Me&rdquo; in Advanced options to let the AI choose.
             </p>
           </div>
         )}
 
+        {/* Skeleton loading state */}
         {(isGenerating || impressMeLoading) && suggestions.length === 0 && (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-4">
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="rounded-xl border border-border bg-card p-5 space-y-3">
                 <Skeleton className="h-5 w-3/4" />
-                <Skeleton className="h-3 w-full" />
-                <Skeleton className="h-3 w-2/3" />
-                <div className="flex gap-2">
-                  <Skeleton className="h-5 w-16 rounded-full" />
-                  <Skeleton className="h-5 w-12 rounded-full" />
-                </div>
+                <Skeleton className="h-3 w-full" /><Skeleton className="h-3 w-2/3" />
+                <div className="flex gap-2"><Skeleton className="h-5 w-16 rounded-full" /><Skeleton className="h-5 w-12 rounded-full" /></div>
                 <Skeleton className="h-9 w-full rounded-md" />
               </div>
             ))}
           </div>
         )}
 
+        {/* Recipe suggestions grid */}
         {suggestions.length > 0 && (
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-foreground">
-                Recipe Ideas
-                <span className="ml-2 text-sm font-normal text-muted-foreground">
-                  based on {ingredients.slice(0, 3).join(', ')}{ingredients.length > 3 ? '…' : ''}
-                </span>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-[18px] font-semibold tracking-tight">
+                {suggestions.length} {suggestions.length === 1 ? 'idea' : 'ideas'} for tonight
               </h2>
-              <div className="flex items-center gap-2">
-                {isGenerating && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
-                {/* F24: Try Again in header (compact variant) */}
+              <div className="flex items-center gap-3">
+                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                  <Zap className="h-3 w-3" />
+                  Generated · claude-sonnet-4-6
+                </span>
                 {!isGenerating && (
-                  <button
-                    onClick={handleTryAgain}
-                    disabled={isGenerating || allIngredients().length < 2}
-                    title="Generate new recipe ideas from the same ingredients"
-                    className={cn(
-                      'flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors rounded-md px-2 py-1',
-                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                    )}
-                  >
-                    <RefreshCw className="h-3 w-3" />
-                    Try again
+                  <button onClick={handleTryAgain} className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                    <RefreshCw className="h-3 w-3" />Try again
                   </button>
                 )}
               </div>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {suggestions.map((s, i) => (
                 <RecipeSuggestionCard
                   key={i}
                   suggestion={s}
                   onCook={() => handleCookThis(s, i)}
                   isCooking={cookingId === i}
+                  isPrimary={i === 0}
                 />
               ))}
             </div>
           </div>
         )}
+
+        {/* Pantry quick view — expiring soon items */}
+        {pantryItems.length > 0 && pantryItems.some(i => i.expiresAt && daysUntilExpiry(i.expiresAt) <= 7) && (
+          <div className="rounded-xl bg-card ring-1 ring-foreground/10 p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-[18px] font-semibold tracking-tight">Pantry · expiring soon</h2>
+              <Link href="/pantry" className="text-[13px] text-primary hover:underline">
+                View all {pantryItems.length} items →
+              </Link>
+            </div>
+            {pantryItems
+              .filter(i => i.expiresAt && daysUntilExpiry(i.expiresAt) <= 7)
+              .slice(0, 5)
+              .map(item => {
+                const days = item.expiresAt ? daysUntilExpiry(item.expiresAt) : null
+                const urgency = days !== null && days <= 1 ? 'danger' : days !== null && days <= 3 ? 'warning' : 'fresh'
+                return (
+                  <div key={item.id} className="grid grid-cols-[24px_1fr_auto_auto] gap-3 items-center py-2.5 border-b border-dashed border-border last:border-0">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/8 text-primary">
+                      <Package className="h-3.5 w-3.5" />
+                    </span>
+                    <div>
+                      <div className="text-sm font-medium capitalize">{item.ingredient}</div>
+                      {item.addedAt && (
+                        <div className="text-[11px] text-muted-foreground">
+                          added {Math.round((Date.now() - new Date(item.addedAt).getTime()) / (1000 * 60 * 60 * 24))}d ago
+                        </div>
+                      )}
+                    </div>
+                    <span className={cn(
+                      'text-[11px] px-2 py-0.5 rounded-full font-medium',
+                      urgency === 'danger' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                      urgency === 'warning' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                      'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                    )}>
+                      {days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days} days`}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs"
+                      onClick={() => {
+                        setInputValue(prev => prev ? `${prev}, ${item.ingredient}` : item.ingredient)
+                        setIngredients(prev => prev.includes(item.ingredient) ? prev : [...prev, item.ingredient])
+                      }}
+                    >
+                      Use it
+                    </Button>
+                  </div>
+                )
+              })}
+          </div>
+        )}
+
       </div>
+
+      {/* Hidden file input for photo upload */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={handlePhotoUpload}
+      />
     </div>
   )
 }

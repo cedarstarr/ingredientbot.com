@@ -19,6 +19,7 @@ interface Props {
   suggestion: RecipeSuggestion
   onCook: () => void
   isCooking: boolean
+  isPrimary?: boolean
 }
 
 const difficultyColor = {
@@ -27,7 +28,7 @@ const difficultyColor = {
   hard:   'bg-red-100   text-red-700   dark:bg-red-900/30   dark:text-red-400',
 }
 
-export function RecipeSuggestionCard({ suggestion, onCook, isCooking }: Props) {
+export function RecipeSuggestionCard({ suggestion, onCook, isCooking, isPrimary }: Props) {
   const totalMin = (suggestion.prepMin || 0) + (suggestion.cookMin || 0)
 
   return (
@@ -73,6 +74,7 @@ export function RecipeSuggestionCard({ suggestion, onCook, isCooking }: Props) {
 
       <Button
         size="sm"
+        variant={isPrimary ? 'default' : 'outline'}
         className="w-full"
         onClick={onCook}
         disabled={isCooking}
