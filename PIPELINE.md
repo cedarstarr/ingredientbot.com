@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-05-03 (qa-db re-run)
+**Last Updated**: 2026-05-04 (design-refresh merged to staging)
 
 ---
 
@@ -23,7 +23,7 @@
 | 8 | Database Review | /qa-db | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-site-db.md) |
 | 9 | QA / Bug Check | /qa-bugs | DONE | 3 | 2026-05-03 | [view](reports/2026-05-03-site-bugs.md) |
 | 10 | Re-verify Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
-| 11 | Security Hardening | /qa-security | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-security.md) |
+| 11 | Security Hardening | /qa-security | DONE | 2 | 2026-05-03 23:01 | [view](reports/2026-05-03-site-security.md) |
 | 12 | UX/UI Pass | /qa-design | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
 | 13 | Copy Audit | /qa-copy | DONE | 1 | 2026-05-03 | [view](reports/2026-05-03-ingredientbot-copy.md) |
 | 14 | Navigation Audit | /qa-nav | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-nav.md) |
@@ -41,7 +41,7 @@
 
 **Progress: 18/25 stages complete**
 
-**Last Updated**: 2026-05-03 (qa-bugs run 3)
+**Last Updated**: 2026-05-04 (design-refresh merged to staging)
 
 ---
 
@@ -85,3 +85,4 @@
 | 2026-05-03 | /qa-tests-fix | ~7m | SUCCESS | 210 passed, 27 skipped — R3: 5 fixes (env.ts preprocess, strict-mode locator, waitForResponse race fix, expiry-first API seed, networkidle→domcontentloaded) |
 | 2026-05-03 | /qa-db | ~5m | SUCCESS | 6 issues found (0 CRITICAL, 2 HIGH, 2 MEDIUM, 2 LOW); 2 HIGH fixed (unbounded findMany on meal-plan picker + dashboard streak query); MEDIUM/LOW reported only |
 | 2026-05-03 | /qa-bugs | ~8m | SUCCESS | 9 issues found (0 CRITICAL, 4 HIGH, 5 MEDIUM, 0 LOW); 4 HIGH fixed (AI route try/catch); 5 MEDIUM reported only |
+| 2026-05-03 23:01 | /qa-security | ~30m | SUCCESS | 7 issues found (2 HIGH, 4 MEDIUM, 1 LOW), all 7 fixed; cron fail-open closed on welcome-drip + meal-plan-digest; NEXT_PUBLIC_CRON_SECRET removed via /api/admin/trigger-cron proxy; JSON-LD XSS hardened with safeJsonLdString helper on /r/[slug] + /; password reset/change now bump sessionsRevokedAt; password change route rate-limited; SSRF guard now decodes octal/hex/decimal IPv4 + redirect: 'manual' on import fetch; build clean |

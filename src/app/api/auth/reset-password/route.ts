@@ -25,9 +25,11 @@ export async function POST(request: NextRequest) {
   }
 
   const hashedPassword = await bcrypt.hash(password, 12)
+  // Bump sessionsRevokedAt so any existing JWT sessions for the account become invalid.
+  // Without this an attacker who stole a session cookie keeps access after the user resets their password.
   const user = await prisma.user.update({
     where: { email: resetToken.email },
-    data: { password: hashedPassword },
+    data: { password: hashedPassword, sessionsRevokedAt: new Date() },
   })
 
   await prisma.passwordResetToken.delete({ where: { token } })

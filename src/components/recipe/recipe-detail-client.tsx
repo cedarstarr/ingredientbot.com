@@ -12,7 +12,7 @@ import { CookedThisButton } from './cooked-this-button'
 import { RecipeTags } from './recipe-tags'
 import { CollectionPicker } from './collection-picker'
 import { RecipeRating } from './recipe-rating'
-import { Clock, Users, ChevronLeft, Loader2, BookOpen, HelpCircle, Printer, Sparkles, UtensilsCrossed } from 'lucide-react'
+import { Clock, Users, ChevronLeft, Loader2, HelpCircle, Printer, Sparkles, UtensilsCrossed, Lightbulb } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface Ingredient {
@@ -122,6 +122,17 @@ export function RecipeDetailClient({ recipe, collections = [] }: Props) {
   // Quick-swap overrides: map from original ingredient name → swapped-in display string
   const [swappedIngredients, setSwappedIngredients] = useState<Map<string, string>>(new Map())
 
+  // Ingredient checkbox state
+  const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(new Set())
+  const toggleIngredientCheck = (i: number) => {
+    setCheckedIngredients(prev => {
+      const next = new Set(prev)
+      if (next.has(i)) next.delete(i)
+      else next.add(i)
+      return next
+    })
+  }
+
   const handleEstimateNutrition = async () => {
     setIsEstimatingNutrition(true)
     try {
@@ -177,7 +188,7 @@ export function RecipeDetailClient({ recipe, collections = [] }: Props) {
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-8">
+    <div className="max-w-[1080px] mx-auto px-10 py-8 pb-16">
       {/* Back button */}
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href="/kitchen">
@@ -187,7 +198,7 @@ export function RecipeDetailClient({ recipe, collections = [] }: Props) {
       </Button>
 
       {/* Header */}
-      <div>
+      <div className="mt-4">
         <h1 className="text-3xl font-bold text-foreground text-balance">{recipe.title}</h1>
         {recipe.description && (
           <p className="text-muted-foreground mt-2">{recipe.description}</p>
@@ -235,13 +246,17 @@ export function RecipeDetailClient({ recipe, collections = [] }: Props) {
       </div>
 
       {/* Tags (F38) */}
-      <RecipeTags recipeId={recipe.id} initialTags={recipe.tags ?? []} />
+      <div className="mt-6">
+        <RecipeTags recipeId={recipe.id} initialTags={recipe.tags ?? []} />
+      </div>
 
       {/* F51: Personal star rating */}
-      <RecipeRating recipeId={recipe.id} initialRating={recipe.rating ?? null} />
+      <div className="mt-4">
+        <RecipeRating recipeId={recipe.id} initialRating={recipe.rating ?? null} />
+      </div>
 
       {/* Actions row */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="mt-4 flex flex-wrap items-center gap-3">
         {/* F29: Cooking mode */}
         <Button variant="default" size="sm" asChild className="gap-1.5">
           <Link href={`/kitchen/cook/${recipe.id}`}>
@@ -272,198 +287,230 @@ export function RecipeDetailClient({ recipe, collections = [] }: Props) {
       </div>
 
       {/* Modification toolbar */}
-      <ModificationToolbar
-        recipeId={recipe.id}
-        servings={recipe.servings}
-        onModified={handleModified}
-      />
+      <div className="mt-6">
+        <ModificationToolbar
+          recipeId={recipe.id}
+          servings={recipe.servings}
+          onModified={handleModified}
+        />
+      </div>
 
-      {/* Modification stream output */}
-      {(modifiedText || isModifying) && (
-        <div className="rounded-xl border border-primary/20 bg-primary/5 p-6">
-          <div className="flex items-center gap-2 mb-3">
-            {isModifying && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
-            <h3 className="text-sm font-medium text-primary">Modified Recipe</h3>
-          </div>
-          <div className="prose prose-sm dark:prose-invert max-w-none">
-            <pre className="whitespace-pre-wrap font-sans text-sm text-foreground leading-relaxed">
-              {modifiedText}
-            </pre>
-          </div>
-        </div>
-      )}
+      {/* Two-column layout: main + sidebar */}
+      <div className="mt-6 grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start">
 
-      {/* Ingredients */}
-      <section>
-        <h2 className="text-xl font-semibold text-foreground mb-4">Ingredients</h2>
-        <ul className="space-y-2">
-          {recipeData.ingredients?.map((ing, i) => {
-            const swapped = swappedIngredients.get(ing.name)
-            // F33: scale amount by servings ratio
-            const scaledAmount = (() => {
-              const ratio = servings / originalServings
-              if (ratio === 1) return `${ing.amount} ${ing.unit}`.trim()
-              const qty = parseQuantity(ing.amount)
-              if (qty === null) return `${ing.amount} ${ing.unit}`.trim()
-              return `${formatQuantity(qty * ratio)} ${ing.unit}`.trim()
-            })()
-            return (
-              <li
-                key={i}
-                className={cn(
-                  'flex items-center gap-3 py-1.5 border-b border-border/50 last:border-0 group',
-                  swapped && 'opacity-75',
-                )}
-              >
-                <span className={cn(
-                  'font-medium text-sm w-20 shrink-0 text-right',
-                  swapped ? 'text-muted-foreground line-through' : 'text-primary',
-                )}>
-                  {scaledAmount}
-                </span>
-                <span className={cn(
-                  'text-foreground text-sm flex-1',
-                  swapped && 'line-through text-muted-foreground',
-                )}>
-                  {ing.name}
-                </span>
-                {swapped ? (
-                  <span className="text-xs text-primary font-medium bg-primary/10 rounded-md px-2 py-0.5 shrink-0">
-                    → {swapped}
-                  </span>
-                ) : null}
-                <button
-                  onClick={() => setSubstitutingIngredient(ing)}
-                  title={`I'm missing ${ing.name}`}
-                  className={cn(
-                    'shrink-0 rounded-md p-1 text-muted-foreground transition-colors',
-                    'hover:text-primary hover:bg-primary/10',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                    'opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
-                  )}
-                  aria-label={`Substitute for ${ing.name}`}
-                >
-                  <HelpCircle className="h-3.5 w-3.5" />
-                </button>
-              </li>
-            )
-          })}
-        </ul>
-        {swappedIngredients.size > 0 && (
-          <button
-            onClick={() => setSwappedIngredients(new Map())}
-            className="mt-3 text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
-          >
-            Reset all substitutions
-          </button>
-        )}
-      </section>
+        {/* Left: streaming + ingredients + steps */}
+        <div className="space-y-6">
 
-      {/* Substitution panel */}
-      <SubstitutionPanel
-        recipeId={recipe.id}
-        ingredient={substitutingIngredient}
-        onClose={() => setSubstitutingIngredient(null)}
-        onSwap={handleSwap}
-      />
-
-      {/* Instructions */}
-      <section>
-        <h2 className="text-xl font-semibold text-foreground mb-4">Instructions</h2>
-        <ol className="space-y-4">
-          {recipeData.steps?.map((step, i) => (
-            <li key={i} className="flex gap-4">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-sm">
-                {i + 1}
-              </span>
-              <p className="text-foreground pt-0.5 leading-relaxed">{step}</p>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      {/* Notes */}
-      {recipeData.notes && (
-        <section className="rounded-lg border border-border bg-muted/30 p-4">
-          <h3 className="text-sm font-medium text-foreground mb-2 flex items-center gap-2">
-            <BookOpen className="h-4 w-4 text-primary" />
-            Chef&apos;s Notes
-          </h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">{recipeData.notes}</p>
-        </section>
-      )}
-
-      {/* F36: Nutrition */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-foreground">Nutrition</h2>
-          {!nutrition && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleEstimateNutrition}
-              disabled={isEstimatingNutrition}
-            >
-              {isEstimatingNutrition ? (
-                <>
-                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                  Estimating…
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-                  Estimate Nutrition
-                </>
-              )}
-            </Button>
+          {/* Modification stream output */}
+          {(modifiedText || isModifying) && (
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-6">
+              <div className="flex items-center gap-2 mb-3">
+                {isModifying && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+                <h3 className="text-sm font-medium text-primary">Modified Recipe</h3>
+              </div>
+              <div className="prose prose-sm dark:prose-invert max-w-none">
+                <pre className="whitespace-pre-wrap font-sans text-sm text-foreground leading-relaxed">
+                  {modifiedText}
+                </pre>
+              </div>
+            </div>
           )}
+
+          {/* Ingredients */}
+          <section>
+            <h2 className="text-xl font-semibold text-foreground mb-4">Ingredients</h2>
+            <ul className="space-y-0">
+              {recipeData.ingredients?.map((ing, i) => {
+                const swapped = swappedIngredients.get(ing.name)
+                // F33: scale amount by servings ratio
+                const scaledAmount = (() => {
+                  const ratio = servings / originalServings
+                  if (ratio === 1) return `${ing.amount} ${ing.unit}`.trim()
+                  const qty = parseQuantity(ing.amount)
+                  if (qty === null) return `${ing.amount} ${ing.unit}`.trim()
+                  return `${formatQuantity(qty * ratio)} ${ing.unit}`.trim()
+                })()
+                return (
+                  <li
+                    key={i}
+                    className={cn(
+                      'flex items-start gap-2.5 py-2 border-b border-border/50 last:border-0 group cursor-pointer',
+                      checkedIngredients.has(i) && 'opacity-60',
+                    )}
+                    onClick={() => toggleIngredientCheck(i)}
+                  >
+                    {/* Checkbox */}
+                    <span className={cn(
+                      'mt-0.5 flex-shrink-0 h-[18px] w-[18px] rounded border-[1.5px] border-input transition-colors relative',
+                      checkedIngredients.has(i) && 'bg-primary border-primary',
+                    )}>
+                      {checkedIngredients.has(i) && (
+                        <svg className="absolute inset-0 m-auto w-2.5 h-2.5 text-white" viewBox="0 0 10 10" fill="none">
+                          <path d="M1.5 5L4 7.5L8.5 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      )}
+                    </span>
+                    {/* Amount */}
+                    <span className={cn(
+                      'font-medium text-sm w-20 shrink-0 text-right',
+                      swapped ? 'text-muted-foreground line-through' : 'text-primary',
+                      checkedIngredients.has(i) && 'line-through text-muted-foreground',
+                    )}>
+                      {scaledAmount}
+                    </span>
+                    {/* Name */}
+                    <span className={cn(
+                      'text-foreground text-sm flex-1 leading-snug',
+                      (swapped || checkedIngredients.has(i)) && 'line-through text-muted-foreground',
+                    )}>
+                      {ing.name}
+                    </span>
+                    {swapped ? (
+                      <span className="text-xs text-primary font-medium bg-primary/10 rounded-md px-2 py-0.5 shrink-0">
+                        → {swapped}
+                      </span>
+                    ) : null}
+                    {/* Substitute button — stopPropagation so it doesn't toggle the checkbox */}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setSubstitutingIngredient(ing) }}
+                      title={`I'm missing ${ing.name}`}
+                      className={cn(
+                        'shrink-0 rounded-md p-1 text-muted-foreground transition-colors',
+                        'hover:text-primary hover:bg-primary/10',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                        'opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
+                      )}
+                      aria-label={`Substitute for ${ing.name}`}
+                    >
+                      <HelpCircle className="h-3.5 w-3.5" />
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+            {swappedIngredients.size > 0 && (
+              <button
+                onClick={() => setSwappedIngredients(new Map())}
+                className="mt-3 text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+              >
+                Reset all substitutions
+              </button>
+            )}
+          </section>
+
+          {/* Substitution panel */}
+          <SubstitutionPanel
+            recipeId={recipe.id}
+            ingredient={substitutingIngredient}
+            onClose={() => setSubstitutingIngredient(null)}
+            onSwap={handleSwap}
+          />
+
+          {/* Instructions */}
+          <section>
+            <h2 className="text-xl font-semibold text-foreground mb-4">Instructions</h2>
+            <ol className="space-y-4">
+              {recipeData.steps?.map((step, i) => (
+                <li key={i} className="flex gap-4">
+                  <span className="rounded-full bg-primary/10 text-primary font-bold text-[13px] flex h-7 w-7 items-center justify-center shrink-0">
+                    {i + 1}
+                  </span>
+                  <p className="text-sm leading-relaxed flex-1 pt-0.5">{step}</p>
+                </li>
+              ))}
+            </ol>
+          </section>
+
         </div>
 
-        {nutrition ? (
-          // Nutrition facts panel — styled after the familiar FDA label aesthetic
-          <div className="rounded-xl border-2 border-border overflow-hidden max-w-xs">
-            <div className="bg-foreground text-background px-4 py-3">
-              <p className="font-black text-2xl leading-none">Nutrition Facts</p>
-              <p className="text-xs mt-1 opacity-80">Per serving · AI estimate</p>
+        {/* Right sidebar: nutrition + tip card */}
+        <aside className="space-y-4">
+
+          {/* F36: Nutrition */}
+          <section>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-base font-semibold text-foreground">Nutrition</h2>
             </div>
 
-            {/* Calories — prominent callout */}
-            <div className="px-4 py-3 border-b-4 border-border flex items-end justify-between">
-              <p className="text-sm font-medium text-muted-foreground">Calories</p>
-              <p className="text-5xl font-black text-foreground leading-none">{nutrition.calories}</p>
-            </div>
-
-            {/* Macros list */}
-            <dl className="divide-y divide-border/60 px-4">
-              {[
-                { label: 'Protein', value: nutrition.protein },
-                { label: 'Total Fat', value: nutrition.fat },
-                { label: 'Total Carbs', value: nutrition.carbs },
-                { label: 'Fiber', value: nutrition.fiber },
-              ].map(({ label, value }) => (
-                <div key={label} className="flex items-center justify-between py-2.5">
-                  <dt className="text-sm font-semibold text-foreground">{label}</dt>
-                  <dd className="text-sm text-foreground">
-                    <span className="font-bold">{value}</span>
-                    <span className="text-muted-foreground text-xs ml-0.5">g</span>
-                  </dd>
+            {nutrition ? (
+              // Nutrition facts panel — styled after the familiar FDA label aesthetic
+              <div className="rounded-xl border-2 border-border overflow-hidden">
+                <div className="bg-foreground text-background px-4 py-3">
+                  <p className="font-black text-2xl leading-none">Nutrition Facts</p>
+                  <p className="text-xs mt-1 opacity-80">Per serving · AI estimate</p>
                 </div>
-              ))}
-            </dl>
 
-            <div className="px-4 py-2 bg-muted/40 border-t border-border">
-              <p className="text-xs text-muted-foreground">
-                Values are approximate. Generated by AI from ingredient list.
-              </p>
+                {/* Calories — prominent callout */}
+                <div className="px-4 py-3 border-b-4 border-border flex items-end justify-between">
+                  <p className="text-sm font-medium text-muted-foreground">Calories</p>
+                  <p className="text-5xl font-black text-foreground leading-none">{nutrition.calories}</p>
+                </div>
+
+                {/* Macros list */}
+                <dl className="divide-y divide-border/60 px-4">
+                  {[
+                    { label: 'Protein', value: nutrition.protein },
+                    { label: 'Total Fat', value: nutrition.fat },
+                    { label: 'Total Carbs', value: nutrition.carbs },
+                    { label: 'Fiber', value: nutrition.fiber },
+                  ].map(({ label, value }) => (
+                    <div key={label} className="flex items-center justify-between py-2.5">
+                      <dt className="text-sm font-semibold text-foreground">{label}</dt>
+                      <dd className="text-sm text-foreground">
+                        <span className="font-bold">{value}</span>
+                        <span className="text-muted-foreground text-xs ml-0.5">g</span>
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+
+                <div className="px-4 py-2 bg-muted/40 border-t border-border">
+                  <p className="text-xs text-muted-foreground">
+                    General AI-generated guidelines — not medical advice.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  No nutrition data yet.
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleEstimateNutrition}
+                  disabled={isEstimatingNutrition}
+                  className="w-full"
+                >
+                  {isEstimatingNutrition ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                      Estimating…
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                      Estimate Nutrition
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+          </section>
+
+          {/* Heads up tip card — shown when notes exist */}
+          {recipeData.notes && (
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+              <div className="flex items-center gap-1.5 text-[13px] font-semibold text-primary mb-2">
+                <Lightbulb className="h-3.5 w-3.5" />
+                Heads up
+              </div>
+              <p className="text-[13px] leading-[1.55]">{recipeData.notes}</p>
             </div>
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            No nutrition data yet. Click &ldquo;Estimate Nutrition&rdquo; to have AI calculate
-            approximate values from the ingredient list.
-          </p>
-        )}
-      </section>
+          )}
+
+        </aside>
+      </div>
     </div>
   )
 }

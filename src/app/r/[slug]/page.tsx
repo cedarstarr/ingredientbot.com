@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Clock, Users, ChefHat, ArrowRight, Utensils } from 'lucide-react'
+import { safeJsonLdString } from '@/lib/utils'
 
 export const revalidate = 3600
 
@@ -121,7 +122,7 @@ export default async function PublicRecipePage({ params }: Props) {
     <div className="min-h-screen bg-background">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(recipeJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLdString(recipeJsonLd) }}
       />
       {/* Minimal nav — no auth required */}
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">

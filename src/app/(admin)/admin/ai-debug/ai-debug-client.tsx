@@ -25,11 +25,11 @@ export function AiDebugClient() {
     setDripLoading(true)
     setDripResult(null)
     try {
-      const res = await fetch('/api/cron/welcome-drip', {
-        method: 'GET',
-        headers: process.env.NEXT_PUBLIC_CRON_SECRET
-          ? { Authorization: `Bearer ${process.env.NEXT_PUBLIC_CRON_SECRET}` }
-          : {},
+      // Server-side admin proxy holds the CRON_SECRET; never bake secrets into the client.
+      const res = await fetch('/api/admin/trigger-cron', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'welcome-drip' }),
       })
       const data = await res.json()
       setDripResult({ ok: res.ok, data })

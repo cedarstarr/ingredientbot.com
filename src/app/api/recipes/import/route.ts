@@ -16,34 +16,67 @@ function startOfCurrentMonth(): Date {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
 }
 
+// SSRF guard — block private/loopback/link-local/cloud-metadata destinations.
+// Hostname blocklist over DNS resolution: covers the 99% attack surface
+// (cloud metadata IP, literal localhost, RFC1918 addresses) without an extra dep.
+function isPrivateIPv4(parts: number[]): boolean {
+  if (parts.length !== 4 || parts.some((p) => Number.isNaN(p) || p < 0 || p > 255)) return false
+  const [a, b] = parts
+  if (a === 0 || a === 127) return true                 // 0.0.0.0/8, 127.0.0.0/8
+  if (a === 10) return true                             // 10.0.0.0/8
+  if (a === 192 && b === 168) return true               // 192.168.0.0/16
+  if (a === 172 && b >= 16 && b <= 31) return true      // 172.16.0.0/12
+  if (a === 169 && b === 254) return true               // 169.254.0.0/16 (link-local + AWS/GCP metadata)
+  if (a >= 224) return true                             // multicast/reserved
+  return false
+}
+
+// Decode every IPv4 textual variant the URL parser leaves through:
+// dotted-decimal (1.2.3.4), 32-bit decimal (2130706433), octal (0177.0.0.1),
+// hex (0x7f.0.0.1). Anything that resolves to a private/loopback range fails.
+function decodeIPv4Variants(host: string): number[] | null {
+  const parts = host.split('.')
+  const parsed: number[] = []
+  for (const p of parts) {
+    if (p.length === 0) return null
+    let n: number
+    if (/^0x[0-9a-f]+$/i.test(p)) n = parseInt(p, 16)
+    else if (/^0[0-7]+$/.test(p)) n = parseInt(p, 8)
+    else if (/^[0-9]+$/.test(p)) n = parseInt(p, 10)
+    else return null
+    parsed.push(n)
+  }
+  // Single-integer form (http://2130706433/) collapses to a u32; explode to 4 octets.
+  if (parsed.length === 1) {
+    const n = parsed[0]
+    if (n < 0 || n > 0xffffffff) return null
+    return [(n >>> 24) & 0xff, (n >>> 16) & 0xff, (n >>> 8) & 0xff, n & 0xff]
+  }
+  if (parsed.length === 4) return parsed
+  return null
+}
+
 function isValidUrl(str: string): boolean {
   try {
     const url = new URL(str)
     if (url.protocol !== 'http:' && url.protocol !== 'https:') return false
-    // SSRF guard — block private/loopback/link-local/cloud-metadata hostnames
-    // Chose hostname blocklist over DNS resolution: we cannot reliably resolve
-    // DNS here without a bigger dep, and this covers the 99% attack surface
-    // (cloud metadata IP, literal localhost, RFC1918 addresses).
     const host = url.hostname.toLowerCase()
     if (
       host === 'localhost' ||
       host === '0.0.0.0' ||
       host.endsWith('.localhost') ||
       host.endsWith('.local') ||
-      host === '169.254.169.254' || // AWS/GCP/Azure instance metadata
       host === 'metadata.google.internal' ||
-      host.startsWith('127.') ||
-      host.startsWith('10.') ||
-      host.startsWith('192.168.') ||
-      /^172\.(1[6-9]|2\d|3[01])\./.test(host) ||
-      host.startsWith('169.254.') ||
+      host === '[::1]' || host === '::1' ||
       host.startsWith('::1') ||
-      host.startsWith('fc') || // fc00::/7 unique-local IPv6
-      host.startsWith('fd') ||
-      host.startsWith('fe80:') // link-local IPv6
+      host.startsWith('fc') || host.startsWith('fd') || // fc00::/7 unique-local IPv6
+      host.startsWith('fe80:')                          // link-local IPv6
     ) {
       return false
     }
+    // IPv4 in any encoding (dotted, decimal, octal, hex)
+    const ipv4 = decodeIPv4Variants(host)
+    if (ipv4 && isPrivateIPv4(ipv4)) return false
     return true
   } catch {
     return false
@@ -180,13 +213,37 @@ export async function POST(req: NextRequest) {
   try {
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 15000)
-    const res = await fetch(url, {
+    // SSRF: do not follow redirects. The initial URL passes our private-IP guard,
+    // but a 30x to http://localhost/ would bypass it if redirect: 'follow'.
+    // Manual mode lets us re-validate a single hop instead of trusting fetch.
+    let res = await fetch(url, {
       signal: controller.signal,
+      redirect: 'manual',
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; RecipeBot/1.0)',
         Accept: 'text/html,application/xhtml+xml',
       },
     })
+    if (res.status >= 300 && res.status < 400) {
+      const location = res.headers.get('location')
+      if (!location) {
+        clearTimeout(timeout)
+        return Response.json({ error: 'Redirect without location header' }, { status: 422 })
+      }
+      const next = new URL(location, url).toString()
+      if (!isValidUrl(next)) {
+        clearTimeout(timeout)
+        return Response.json({ error: 'Redirect target blocked' }, { status: 422 })
+      }
+      res = await fetch(next, {
+        signal: controller.signal,
+        redirect: 'manual',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; RecipeBot/1.0)',
+          Accept: 'text/html,application/xhtml+xml',
+        },
+      })
+    }
     clearTimeout(timeout)
 
     if (!res.ok) {
