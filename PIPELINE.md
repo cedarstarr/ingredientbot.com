@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-05-04 (design-refresh merged to staging)
+**Last Updated**: 2026-05-04 (qa-nav run 2 — refined nav section groupings)
 
 ---
 
@@ -26,7 +26,7 @@
 | 11 | Security Hardening | /qa-security | DONE | 2 | 2026-05-03 23:01 | [view](reports/2026-05-03-site-security.md) |
 | 12 | UX/UI Pass | /qa-design | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
 | 13 | Copy Audit | /qa-copy | DONE | 1 | 2026-05-03 | [view](reports/2026-05-03-ingredientbot-copy.md) |
-| 14 | Navigation Audit | /qa-nav | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-nav.md) |
+| 14 | Navigation Audit | /qa-nav | DONE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-nav.md) |
 | 15 | Performance Audit | /qa-perf | DONE | 1 | 2026-04-18 | — |
 | 16 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
 | 17 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
@@ -41,7 +41,7 @@
 
 **Progress: 18/25 stages complete**
 
-**Last Updated**: 2026-05-04 (design-refresh merged to staging)
+**Last Updated**: 2026-05-04 (qa-nav run 2 — refined nav section groupings)
 
 ---
 
@@ -86,3 +86,4 @@
 | 2026-05-03 | /qa-db | ~5m | SUCCESS | 6 issues found (0 CRITICAL, 2 HIGH, 2 MEDIUM, 2 LOW); 2 HIGH fixed (unbounded findMany on meal-plan picker + dashboard streak query); MEDIUM/LOW reported only |
 | 2026-05-03 | /qa-bugs | ~8m | SUCCESS | 9 issues found (0 CRITICAL, 4 HIGH, 5 MEDIUM, 0 LOW); 4 HIGH fixed (AI route try/catch); 5 MEDIUM reported only |
 | 2026-05-03 23:01 | /qa-security | ~30m | SUCCESS | 7 issues found (2 HIGH, 4 MEDIUM, 1 LOW), all 7 fixed; cron fail-open closed on welcome-drip + meal-plan-digest; NEXT_PUBLIC_CRON_SECRET removed via /api/admin/trigger-cron proxy; JSON-LD XSS hardened with safeJsonLdString helper on /r/[slug] + /; password reset/change now bump sessionsRevokedAt; password change route rate-limited; SSRF guard now decodes octal/hex/decimal IPv4 + redirect: 'manual' on import fetch; build clean |
+| 2026-05-04 | /qa-nav | ~5m | SUCCESS | 30 routes, 0 orphans, 0 dead links, 100% coverage; Option C applied (Kitchen/Recipes/Account groupings); fixed semantic mismatch (Collections+Import moved from ACCOUNT→RECIPES); removed unused LayoutDashboard import; tsc clean |
