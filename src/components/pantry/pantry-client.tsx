@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { X, Plus, Loader2, ChefHat, Package, Calendar, AlertTriangle, Circle } from 'lucide-react'
+import { X, Plus, Loader2, ChefHat, Package, Calendar, AlertTriangle, Circle, Camera } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface PantryItem {
@@ -69,6 +69,90 @@ function ExpiryBadge({ expiresAt }: { expiresAt: string | null }) {
       <Calendar className="h-3 w-3" />
       {days}d
     </span>
+  )
+}
+
+interface PantryItemRowProps {
+  item: PantryItem
+  editingExpiryId: string | null
+  removingId: string | null
+  onEditExpiry: (id: string | null) => void
+  onUpdateExpiry: (id: string, expiresAt: string | null) => void
+  onRemove: (id: string) => void
+}
+
+function PantryItemRow({ item, editingExpiryId, removingId, onEditExpiry, onUpdateExpiry, onRemove }: PantryItemRowProps) {
+  return (
+    <li className="group">
+      <div className="flex items-center gap-2 px-4 py-2.5">
+        <span className="text-sm text-foreground capitalize flex-1">{item.ingredient}</span>
+
+        {/* F26: Expiry badge / date editor */}
+        <div className="flex items-center gap-1.5">
+          {editingExpiryId === item.id ? (
+            <input
+              type="date"
+              aria-label={`Expiry date for ${item.ingredient}`}
+              defaultValue={item.expiresAt ? new Date(item.expiresAt).toISOString().split('T')[0] : ''}
+              autoFocus
+              min={new Date().toISOString().split('T')[0]}
+              className={cn(
+                'text-xs rounded border border-border bg-background px-2 py-0.5',
+                'text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              )}
+              onChange={e => {
+                if (e.target.value) onUpdateExpiry(item.id, e.target.value)
+              }}
+              onBlur={e => {
+                if (!e.target.value) onEditExpiry(null)
+              }}
+            />
+          ) : (
+            <>
+              <ExpiryBadge expiresAt={item.expiresAt} />
+              <button
+                type="button"
+                onClick={() => onEditExpiry(item.id)}
+                title="Set expiry date"
+                aria-label={`Set expiry date for ${item.ingredient}`}
+                className={cn(
+                  'rounded p-1 text-muted-foreground hover:text-primary transition-colors',
+                  'opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  item.expiresAt && 'opacity-100',
+                )}
+              >
+                <Calendar className="h-3.5 w-3.5" />
+              </button>
+              {item.expiresAt && (
+                <button
+                  type="button"
+                  onClick={() => onUpdateExpiry(item.id, null)}
+                  title="Clear expiry date"
+                  aria-label={`Clear expiry date for ${item.ingredient}`}
+                  className="rounded p-1 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+            </>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => onRemove(item.id)}
+          disabled={removingId === item.id}
+          aria-label={`Remove ${item.ingredient} from pantry`}
+          className="rounded p-1 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          {removingId === item.id
+            ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            : <X className="h-3.5 w-3.5" />
+          }
+        </button>
+      </div>
+    </li>
   )
 }
 
@@ -166,6 +250,14 @@ export function PantryClient() {
   // F26: count items expiring within 7 days for the info banner
   const expiringCount = items.filter(i => i.expiresAt && expiryUrgency(i.expiresAt) !== null).length
 
+  // Stat tile computations
+  const expiringCritical = items.filter(i => i.expiresAt && daysUntilExpiry(i.expiresAt) <= 3 && daysUntilExpiry(i.expiresAt) >= 0).length
+  const expiringWeek = items.filter(i => i.expiresAt && daysUntilExpiry(i.expiresAt) <= 7 && daysUntilExpiry(i.expiresAt) >= 0).length
+  const addedThisWeek = items.filter(i => {
+    const days = Math.round((Date.now() - new Date(i.addedAt).getTime()) / (1000 * 60 * 60 * 24))
+    return days <= 7
+  }).length
+
   return (
     <div className="space-y-5">
       {/* Add ingredient input — always rendered so it's immediately interactive */}
@@ -173,6 +265,7 @@ export function PantryClient() {
         <h2 className="text-sm font-medium text-foreground">Add to Pantry</h2>
         <div className="flex gap-2">
           <Input
+            id="pantry-add-input"
             value={inputValue}
             onChange={e => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -194,6 +287,42 @@ export function PantryClient() {
           <p className="text-xs text-destructive">{error}</p>
         )}
       </div>
+
+      {/* Stat tiles */}
+      {!loading && items.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {/* Tile 1: Total items */}
+          <div className="rounded-xl bg-card ring-1 ring-foreground/10 px-4 py-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground mb-1.5">Total items</p>
+            <p className="text-[30px] font-bold leading-none tracking-tight">{items.length}</p>
+            <p className="text-[11px] text-muted-foreground mt-1.5">in your pantry</p>
+          </div>
+          {/* Tile 2: Expiring ≤3 days (red if >0) */}
+          <div className="rounded-xl bg-card ring-1 ring-foreground/10 px-4 py-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground mb-1.5">Expiring ≤ 3 days</p>
+            <p className={cn('text-[30px] font-bold leading-none tracking-tight', expiringCritical > 0 && 'text-red-600 dark:text-red-400')}>
+              {expiringCritical}
+            </p>
+            <p className="text-[11px] text-muted-foreground mt-1.5">use these first</p>
+          </div>
+          {/* Tile 3: Expiring this week */}
+          <div className="rounded-xl bg-card ring-1 ring-foreground/10 px-4 py-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground mb-1.5">Expiring this week</p>
+            <p className={cn('text-[30px] font-bold leading-none tracking-tight', expiringWeek > 0 && 'text-amber-600 dark:text-amber-400')}>
+              {expiringWeek}
+            </p>
+            <p className="text-[11px] text-muted-foreground mt-1.5">plan ahead</p>
+          </div>
+          {/* Tile 4: Added this week */}
+          <div className="rounded-xl bg-card ring-1 ring-foreground/10 px-4 py-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground mb-1.5">Added this week</p>
+            <p className="text-[30px] font-bold leading-none tracking-tight text-primary">{addedThisWeek}</p>
+            <div className="mt-1.5">
+              <Link href="/kitchen" className="text-[11px] text-primary hover:underline">Cook in Kitchen →</Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* F26: Expiring soon banner */}
       {expiringCount > 0 && (
@@ -228,7 +357,7 @@ export function PantryClient() {
       {loading ? (
         <div className="flex items-center gap-2 text-muted-foreground text-sm py-8">
           <Loader2 className="h-4 w-4 animate-spin" />
-          Loading pantry...
+          Loading pantry…
         </div>
       ) : items.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border bg-muted/20 p-10 text-center space-y-2">
@@ -238,86 +367,87 @@ export function PantryClient() {
         </div>
       ) : (
         <div className="rounded-lg border border-border bg-card">
-          <div className="px-4 py-3 border-b border-border">
-            <h2 className="text-sm font-medium text-foreground">
-              Pantry Items
-              <Badge variant="secondary" className="ml-2 text-xs">{items.length}</Badge>
+          <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              All items
+              <Badge variant="secondary" className="text-xs">{items.length}</Badge>
             </h2>
+            <div className="flex gap-2">
+              {/* Camera scan - opens Kitchen for photo-based recipe generation */}
+              <Button variant="outline" size="sm" className="gap-1.5" asChild>
+                <Link href="/kitchen">
+                  <Camera className="h-3.5 w-3.5" />
+                  Scan fridge
+                </Link>
+              </Button>
+              <Button size="sm" className="gap-1.5" onClick={() => document.getElementById('pantry-add-input')?.focus()}>
+                <Plus className="h-3.5 w-3.5" />
+                Add item
+              </Button>
+            </div>
           </div>
-          <ul className="divide-y divide-border">
-            {items.map(item => (
-              <li key={item.id} className="group">
-                <div className="flex items-center gap-2 px-4 py-2.5">
-                  <span className="text-sm text-foreground capitalize flex-1">{item.ingredient}</span>
-
-                  {/* F26: Expiry badge / date editor */}
-                  <div className="flex items-center gap-1.5">
-                    {editingExpiryId === item.id ? (
-                      <input
-                        type="date"
-                        aria-label={`Expiry date for ${item.ingredient}`}
-                        defaultValue={item.expiresAt ? new Date(item.expiresAt).toISOString().split('T')[0] : ''}
-                        autoFocus
-                        min={new Date().toISOString().split('T')[0]}
-                        className={cn(
-                          'text-xs rounded border border-border bg-background px-2 py-0.5',
-                          'text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                        )}
-                        onChange={e => {
-                          if (e.target.value) updateExpiry(item.id, e.target.value)
-                        }}
-                        onBlur={e => {
-                          if (!e.target.value) setEditingExpiryId(null)
-                        }}
-                      />
-                    ) : (
-                      <>
-                        <ExpiryBadge expiresAt={item.expiresAt} />
-                        <button
-                          type="button"
-                          onClick={() => setEditingExpiryId(item.id)}
-                          title="Set expiry date"
-                          aria-label={`Set expiry date for ${item.ingredient}`}
-                          className={cn(
-                            'rounded p-1 text-muted-foreground hover:text-primary transition-colors',
-                            'opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
-                            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                            item.expiresAt && 'opacity-100',
-                          )}
-                        >
-                          <Calendar className="h-3.5 w-3.5" />
-                        </button>
-                        {item.expiresAt && (
-                          <button
-                            type="button"
-                            onClick={() => updateExpiry(item.id, null)}
-                            title="Clear expiry date"
-                            aria-label={`Clear expiry date for ${item.ingredient}`}
-                            className="rounded p-1 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        )}
-                      </>
-                    )}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => removeItem(item.id)}
-                    disabled={removingId === item.id}
-                    aria-label={`Remove ${item.ingredient} from pantry`}
-                    className="rounded p-1 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    {removingId === item.id
-                      ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      : <X className="h-3.5 w-3.5" />
-                    }
-                  </button>
+          <div className="divide-y divide-border">
+            {/* Use first — critical (≤3 days) */}
+            {items.filter(i => i.expiresAt && daysUntilExpiry(i.expiresAt) <= 3 && daysUntilExpiry(i.expiresAt) >= 0).length > 0 && (
+              <div>
+                <div className="px-4 py-2 flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-[0.06em] text-red-600 dark:text-red-400 bg-red-50/50 dark:bg-red-900/10">
+                  <AlertTriangle className="h-3.5 w-3.5" />
+                  Use first
                 </div>
-              </li>
-            ))}
-          </ul>
+                <ul className="divide-y divide-border">
+                  {items.filter(i => i.expiresAt && daysUntilExpiry(i.expiresAt) <= 3 && daysUntilExpiry(i.expiresAt) >= 0).map(item => (
+                    <PantryItemRow
+                      key={item.id}
+                      item={item}
+                      editingExpiryId={editingExpiryId}
+                      removingId={removingId}
+                      onEditExpiry={setEditingExpiryId}
+                      onUpdateExpiry={updateExpiry}
+                      onRemove={removeItem}
+                    />
+                  ))}
+                </ul>
+              </div>
+            )}
+            {/* Expiring soon (4–7 days) */}
+            {items.filter(i => i.expiresAt && daysUntilExpiry(i.expiresAt) > 3 && daysUntilExpiry(i.expiresAt) <= 7).length > 0 && (
+              <div>
+                <div className="px-4 py-2 flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-[0.06em] text-amber-600 dark:text-amber-400 bg-amber-50/50 dark:bg-amber-900/10">
+                  <AlertTriangle className="h-3.5 w-3.5" />
+                  Expiring soon
+                </div>
+                <ul className="divide-y divide-border">
+                  {items.filter(i => i.expiresAt && daysUntilExpiry(i.expiresAt) > 3 && daysUntilExpiry(i.expiresAt) <= 7).map(item => (
+                    <PantryItemRow
+                      key={item.id}
+                      item={item}
+                      editingExpiryId={editingExpiryId}
+                      removingId={removingId}
+                      onEditExpiry={setEditingExpiryId}
+                      onUpdateExpiry={updateExpiry}
+                      onRemove={removeItem}
+                    />
+                  ))}
+                </ul>
+              </div>
+            )}
+            {/* Fresh — >7 days or no expiry */}
+            {items.filter(i => !i.expiresAt || daysUntilExpiry(i.expiresAt) > 7).length > 0 && (
+              <ul className="divide-y divide-border">
+                {items.filter(i => !i.expiresAt || daysUntilExpiry(i.expiresAt) > 7).map(item => (
+                  <PantryItemRow
+                    key={item.id}
+                    item={item}
+                    editingExpiryId={editingExpiryId}
+                    removingId={removingId}
+                    onEditExpiry={setEditingExpiryId}
+                    onUpdateExpiry={updateExpiry}
+                    onRemove={removeItem}
+                  />
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import type { Prisma } from '@prisma/client'
-import { generateText } from 'ai'
-import { claudeSonnet } from '@/lib/ai'
+import { generateText, type LanguageModelUsage } from 'ai'
+import { geminiFlashLite } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { logAICall } from '@/lib/ai-log'
 
@@ -55,10 +55,13 @@ export async function POST(
     instructions?: string[]
   }
 
-  const { text, usage } = await generateText({
-    model: claudeSonnet,
-    maxOutputTokens: 800,
-    system: `You are a professional chef specializing in dietary adaptations. Convert recipes to fit specific dietary restrictions while maintaining flavor and texture. Respond with JSON:
+  let text: string
+  let usage: LanguageModelUsage
+  try {
+    const response = await generateText({
+      model: geminiFlashLite,
+      maxOutputTokens: 800,
+      system: `You are a professional chef specializing in dietary adaptations. Convert recipes to fit specific dietary restrictions while maintaining flavor and texture. Respond with JSON:
 {
   "convertedIngredients": ["ingredient 1 with quantity", "ingredient 2 with quantity"],
   "adjustedInstructions": ["step 1", "step 2"],
@@ -68,20 +71,25 @@ export async function POST(
   "flavorNotes": "brief note on how the dish will taste differently",
   "difficulty": "easier|same|harder"
 }`,
-    messages: [{
-      role: 'user',
-      content: `Convert this recipe to ${diet}:
+      messages: [{
+        role: 'user',
+        content: `Convert this recipe to ${diet}:
 
 Title: ${recipeData.title || recipe.title}
 Ingredients: ${JSON.stringify(recipeData.ingredients || recipe.sourceIngredients)}
 Instructions: ${JSON.stringify(recipeData.instructions || [])}`,
-    }],
-  })
+      }],
+    })
+    text = response.text
+    usage = response.usage
+  } catch {
+    return NextResponse.json({ error: 'AI service unavailable' }, { status: 503 })
+  }
 
   logAICall({
     feature: "diet-conversion",
-    provider: "anthropic",
-    model: "claude-sonnet-4-6",
+    provider: "google",
+    model: "gemini-2.5-flash-lite",
     inputTokens: usage.inputTokens,
     outputTokens: usage.outputTokens,
     userId: session.user.id,
@@ -92,7 +100,12 @@ Instructions: ${JSON.stringify(recipeData.instructions || [])}`,
     return NextResponse.json({ error: 'Failed to parse conversion' }, { status: 500 })
   }
 
-  const conversion = JSON.parse(jsonMatch[0])
+  let conversion: unknown
+  try {
+    conversion = JSON.parse(jsonMatch[0])
+  } catch {
+    return NextResponse.json({ error: 'Failed to parse conversion' }, { status: 500 })
+  }
 
   // Save as modification on the recipe
   const existingMods = Array.isArray(recipe.modifications) ? recipe.modifications : []

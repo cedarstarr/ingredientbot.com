@@ -52,7 +52,7 @@ export default function ScriptRunButton({
           {result?.error && <span className="text-xs text-destructive">{result.error}</span>}
           <Button size="sm" variant="destructive" onClick={handleRun} disabled={running || !confirmed}>
             {running ? <Loader2 className="h-3 w-3 animate-spin" /> : <AlertTriangle className="h-3 w-3" />}
-            {running ? 'Running...' : 'Run Anyway'}
+            {running ? 'Running…' : 'Run Anyway'}
           </Button>
         </div>
       </div>
@@ -65,7 +65,7 @@ export default function ScriptRunButton({
       {result?.error && <span className="text-xs text-destructive">{result.error}</span>}
       <Button size="sm" variant="outline" onClick={handleRun} disabled={running}>
         {running ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />}
-        {running ? 'Running...' : 'Run Now'}
+        {running ? 'Running…' : 'Run Now'}
       </Button>
     </div>
   )

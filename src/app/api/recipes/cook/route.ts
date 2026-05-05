@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateText } from 'ai'
-import { claudeSonnet } from '@/lib/ai'
+import { geminiFlashLite } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { Difficulty } from '@prisma/client'
 import { logAICall } from '@/lib/ai-log'
@@ -43,11 +43,24 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'Invalid suggestion' }, { status: 400 })
   }
 
-  // F30: Freemium gate — check + enforce monthly limit
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { isPro: true, recipeCount: true, monthlyResetDate: true },
-  })
+  // F30 + F31: Fetch user gate data and dietary profile in parallel — both needed before AI call
+  const [user, dietaryProfile] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { isPro: true, recipeCount: true, monthlyResetDate: true },
+    }),
+    prisma.dietaryProfile.findUnique({
+      where: { userId: session.user.id },
+      select: {
+        restrictions: true,
+        cuisinePrefs: true,
+        dislikedIngredients: true,
+        lowSodium: true,
+        lowFodmap: true,
+        diabetesFriendly: true,
+      },
+    }),
+  ])
 
   if (!user) return Response.json({ error: 'User not found' }, { status: 404 })
 
@@ -63,20 +76,6 @@ export async function POST(req: NextRequest) {
       )
     }
   }
-
-  // F31: Load dietary profile for AI system prompt injection
-  // F79: also load medical flags (low-sodium, low-FODMAP, diabetes-friendly)
-  const dietaryProfile = await prisma.dietaryProfile.findUnique({
-    where: { userId: session.user.id },
-    select: {
-      restrictions: true,
-      cuisinePrefs: true,
-      dislikedIngredients: true,
-      lowSodium: true,
-      lowFodmap: true,
-      diabetesFriendly: true,
-    },
-  })
 
   // F31: Build persistent profile context
   const profileLines: string[] = []
@@ -181,7 +180,7 @@ export async function POST(req: NextRequest) {
   const spiceContext = `\n\nSPICE LEVEL: ${spiceLabel}. Calibrate heat accordingly — use appropriate chiles, peppers, and spices. Do not exceed this level.`
 
   const { text, usage } = await generateText({
-    model: claudeSonnet,
+    model: geminiFlashLite,
     maxOutputTokens: 2048,
     system: `You are an expert chef. Generate a complete detailed recipe as JSON. Return ONLY valid JSON with no markdown, no code blocks.
 Schema:
@@ -206,8 +205,8 @@ Schema:
 
   logAICall({
     feature: "cooking-assistant",
-    provider: "anthropic",
-    model: "claude-sonnet-4-6",
+    provider: "google",
+    model: "gemini-2.5-flash-lite",
     inputTokens: usage.inputTokens,
     outputTokens: usage.outputTokens,
     userId: session.user.id,

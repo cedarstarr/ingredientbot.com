@@ -36,9 +36,12 @@ export default async function MealPlanPage() {
         },
       },
     }),
+    // Cap at 500 — meal planner picker; power users with larger libraries can search via /history.
+    // Without a cap, a heavy user could push thousands of recipes into the client bundle.
     prisma.recipe.findMany({
       where: { userId: session.user.id },
       orderBy: { createdAt: 'desc' },
+      take: 500,
       select: { id: true, title: true, cuisine: true, difficulty: true },
     }),
   ])

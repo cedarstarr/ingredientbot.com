@@ -2,9 +2,10 @@ import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { streamText } from 'ai'
-import { claudeSonnet } from '@/lib/ai'
+import { geminiFlashLite } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { logAICall } from '@/lib/ai-log'
+import { canonicalize, getCached, setCached, sha256 } from '@/lib/recipe-cache'
 
 export const maxDuration = 60
 
@@ -156,42 +157,79 @@ export async function POST(req: NextRequest) {
   // F78: spice level — always inject (even at 0=Mild) so AI knows to restrain itself
   const spiceContext = buildSpiceContext(spiceLevel)
 
-  const result = streamText({
-    model: claudeSonnet,
-    maxOutputTokens: 1024,
-    system: `You are an expert chef. When given a list of ingredients, suggest exactly 4 recipes that use most of them.
+  // Cache key: every input that affects the AI output, including the loaded
+  // dietary profile so a profile change invalidates the cache. Pantry array is
+  // sorted to be order-insensitive.
+  const sortedIngredients = Array.isArray(ingredients) ? [...ingredients].sort() : ingredients
+  const cacheKey = canonicalize({
+    ingredients: sortedIngredients, cuisine, dietary,
+    expiringIngredients, leftovers, strictMode, teachMode,
+    impressMe, prepTimeLimit, budgetMode, chefPersonality, dateNightMode, personalityPrompt,
+    cookingMethod, exhaustedMode, proteinMax, restaurantStyle, spiceLevel,
+    profile: dietaryProfile,
+  })
+  const inputHash = sha256(cacheKey)
+  const cached = await getCached<{ body: string }>('suggestions', inputHash)
+  if (cached?.body) {
+    // Return cached NDJSON as a plain text body — frontend reads newline-delimited
+    // chunks the same way it does the streamed response. No frontend change needed.
+    return new Response(cached.body, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'X-Content-Type-Options': 'nosniff',
+        'Cache-Control': 'no-cache',
+        'X-Cache': 'HIT',
+      },
+    })
+  }
+
+  try {
+    const result = streamText({
+      model: geminiFlashLite,
+      maxOutputTokens: 1024,
+      system: `You are an expert chef. When given a list of ingredients, suggest exactly 4 recipes that use most of them.
 
 CRITICAL: Respond with ONLY newline-delimited JSON objects, one recipe per line, NO other text before or after.
 Each line must be a complete valid JSON object with these exact keys:
 {"title":"Recipe Name","description":"One sentence description","prepMin":15,"cookMin":25,"servings":4,"cuisine":"Italian","difficulty":"easy"}
 
 difficulty must be exactly: "easy", "medium", or "hard"${personalityContext}${profileContext}${expiryContext}${leftoverContext}${strictContext}${teachContext}${prepTimeContext}${budgetContext}${dateNightContext}${impressMeContext}${cookingMethodContext}${exhaustedContext}${proteinMaxContext}${restaurantContext}${spiceContext}`,
-    messages: [{
-      role: 'user',
-      content: impressMe
-        ? 'Impress me with 4 creative recipes. Choose the ingredients yourself.'
-        : `I have these ingredients: ${ingredients.join(', ')}. ${cuisineStr} ${sessionDietaryStr} Suggest 4 recipes.`,
-    }],
-    onFinish: ({ usage }) => {
-      logAICall({
-        feature: "recipe-generation",
-        provider: "anthropic",
-        model: "claude-sonnet-4-6",
-        inputTokens: usage.inputTokens,
-        outputTokens: usage.outputTokens,
-        userId: session.user.id,
-      })
-    },
-  })
+      messages: [{
+        role: 'user',
+        content: impressMe
+          ? 'Impress me with 4 creative recipes. Choose the ingredients yourself.'
+          : `I have these ingredients: ${ingredients.join(', ')}. ${cuisineStr} ${sessionDietaryStr} Suggest 4 recipes.`,
+      }],
+      onFinish: ({ usage, text }) => {
+        logAICall({
+          feature: "recipe-generation",
+          provider: "google",
+          model: "gemini-2.5-flash-lite",
+          inputTokens: usage.inputTokens,
+          outputTokens: usage.outputTokens,
+          userId: session.user.id,
+        })
+        // Persist the full NDJSON body so subsequent identical requests skip the LLM.
+        // Only cache non-empty completions to avoid poisoning on partial failures.
+        if (text && text.trim()) {
+          setCached('suggestions', inputHash, { body: text }).catch((err) =>
+            console.error('RecipeCache write (suggestions) failed:', err),
+          )
+        }
+      },
+    })
 
-  // Frontend reads raw text chunks (newline-delimited JSON), not SSE data: events
-  return result.toTextStreamResponse({
-    headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'X-Content-Type-Options': 'nosniff',
-      'Cache-Control': 'no-cache',
-    },
-  })
+    // Frontend reads raw text chunks (newline-delimited JSON), not SSE data: events
+    return result.toTextStreamResponse({
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'X-Content-Type-Options': 'nosniff',
+        'Cache-Control': 'no-cache',
+      },
+    })
+  } catch {
+    return new Response('AI service unavailable', { status: 503 })
+  }
 }
 
 // F74: shared between generate and cook routes — map dropdown value to system-prompt injection

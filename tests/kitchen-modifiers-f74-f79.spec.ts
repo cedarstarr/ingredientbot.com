@@ -50,26 +50,33 @@ test.describe('Kitchen — F74 cooking method selector', () => {
     const trigger = label.locator('..').locator('[role="combobox"]')
     await trigger.click()
     await page.waitForTimeout(300)
+
+    // Set up PATCH waiter before clicking so we don't race the response
+    const patchDone = page.waitForResponse(
+      resp => resp.url().includes('/api/user/kitchen-prefs') && resp.request().method() === 'PATCH',
+      { timeout: 5000 }
+    ).catch(() => {})
     await page.getByRole('option', { name: /air fryer/i }).click()
+    await patchDone  // ensure preference is saved before reloading
 
-    // Allow PATCH to fly
-    await page.waitForTimeout(800)
-
-    // Reload — the kitchen panel should hydrate with the saved value
+    // Set up GET waiter before reloading so we don't race the response
+    const getAfterReload = page.waitForResponse(
+      resp => resp.url().includes('/api/user/kitchen-prefs') && resp.request().method() === 'GET',
+      { timeout: 8000 }
+    ).catch(() => {})
     await page.reload()
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('domcontentloaded')
+    await getAfterReload  // ensure preferences have been fetched after reload
 
-    const triggerText = await page.getByText('Cooking method', { exact: true })
+    // Wait for kitchen-prefs to hydrate by polling the combobox value
+    const reloadedTrigger = page.getByText('Cooking method', { exact: true })
       .locator('..')
       .locator('[role="combobox"]')
-      .textContent()
-    expect(triggerText).toMatch(/air fryer/i)
+    await expect(reloadedTrigger).toBeVisible()
+    await expect(reloadedTrigger).toContainText(/air fryer/i, { timeout: 5000 })
 
     // Reset to "any" so this test does not affect other tests
-    const resetTrigger = page.getByText('Cooking method', { exact: true })
-      .locator('..')
-      .locator('[role="combobox"]')
-    await resetTrigger.click()
+    await reloadedTrigger.click()
     await page.waitForTimeout(200)
     await page.getByRole('option', { name: /any method/i }).click()
   })

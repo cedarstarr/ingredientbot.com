@@ -7,9 +7,9 @@ const AI_CRAWLERS = [
 ]
 
 export default function robots(): MetadataRoute.Robots {
-  const isLocked = process.env.LAUNCH_LOCKED === 'true'
+  const noIndex = process.env.NO_INDEX === 'true'
 
-  if (isLocked) {
+  if (noIndex) {
     return {
       rules: [{ userAgent: '*', disallow: '/' }],
     }

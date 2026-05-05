@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 
 export function logAICall(opts: {
   feature: string;
-  provider: "anthropic" | "openai";
+  provider: "anthropic" | "openai" | "google";
   model: string;
   inputTokens: number | undefined;
   outputTokens: number | undefined;
@@ -18,5 +18,5 @@ export function logAICall(opts: {
       outputTokens: opts.outputTokens ?? 0,
       userId: opts.userId,
     },
-  }).catch(() => {});
+  }).catch((err) => console.error("AICallLog write failed:", err));
 }

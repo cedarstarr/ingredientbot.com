@@ -124,7 +124,7 @@ export function SettingsClient() {
           </div>
           {nameMsg && <p className={`text-sm ${nameMsg.includes('!') ? 'text-green-600 dark:text-green-400' : 'text-destructive'}`}>{nameMsg}</p>}
           <Button type="submit" disabled={nameLoading} size="sm">
-            {nameLoading ? 'Saving...' : 'Save Name'}
+            {nameLoading ? 'Saving…' : 'Save Name'}
           </Button>
         </form>
       </div>
@@ -147,7 +147,7 @@ export function SettingsClient() {
           </div>
           {passwordMsg && <p className={`text-sm ${passwordMsg.includes('!') ? 'text-green-600 dark:text-green-400' : 'text-destructive'}`}>{passwordMsg}</p>}
           <Button type="submit" disabled={passwordLoading} size="sm">
-            {passwordLoading ? 'Updating...' : 'Update Password'}
+            {passwordLoading ? 'Updating…' : 'Update Password'}
           </Button>
         </form>
       </div>
@@ -182,7 +182,7 @@ export function SettingsClient() {
           </div>
         </div>
         <Button size="sm" className="mt-4" onClick={handleNotifSave} disabled={notifLoading}>
-          {notifLoading ? 'Saving...' : 'Save Preferences'}
+          {notifLoading ? 'Saving…' : 'Save Preferences'}
         </Button>
       </div>
 
@@ -191,7 +191,7 @@ export function SettingsClient() {
         <h2 className="text-base font-semibold text-foreground mb-2">Sessions</h2>
         <p className="text-sm text-muted-foreground mb-4">Sign out from all devices and browsers.</p>
         <Button variant="outline" size="sm" onClick={handleSignOutAll} disabled={signOutAllLoading}>
-          {signOutAllLoading ? 'Signing out...' : 'Sign Out All Devices'}
+          {signOutAllLoading ? 'Signing out…' : 'Sign Out All Devices'}
         </Button>
       </div>
 
@@ -225,7 +225,7 @@ export function SettingsClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setDeleteOpen(false)}>Cancel</Button>
               <Button variant="destructive" onClick={handleDeleteAccount} disabled={deleteLoading || !deletePassword}>
-                {deleteLoading ? 'Deleting...' : 'Delete My Account'}
+                {deleteLoading ? 'Deleting…' : 'Delete My Account'}
               </Button>
             </DialogFooter>
           </DialogContent>

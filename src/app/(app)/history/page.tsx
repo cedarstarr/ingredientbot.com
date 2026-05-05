@@ -29,7 +29,7 @@ export default async function HistoryPage({
     ...(cooked === '1' && { cookedCount: { gt: 0 } }),
   }
 
-  const [recipes, total] = await Promise.all([
+  const [recipes, total, allTagRows] = await Promise.all([
     prisma.recipe.findMany({
       where,
       orderBy: { createdAt: 'desc' },
@@ -54,15 +54,14 @@ export default async function HistoryPage({
       },
     }),
     prisma.recipe.count({ where }),
+    // Gather all distinct tags for filter chips — take: 500 prevents unbounded scan
+    // (tags is a Postgres String[] so Prisma can't use distinct on it directly)
+    prisma.recipe.findMany({
+      where: { userId: session.user.id },
+      select: { tags: true },
+      take: 500,
+    }),
   ])
-
-  // Gather all distinct tags for filter chips — take: 500 prevents unbounded scan
-  // (tags is a Postgres String[] so Prisma can't use distinct on it directly)
-  const allTagRows = await prisma.recipe.findMany({
-    where: { userId: session.user.id },
-    select: { tags: true },
-    take: 500,
-  })
   const allTags = [...new Set(allTagRows.flatMap(r => r.tags))].sort()
 
   const totalPages = Math.ceil(total / PAGE_SIZE)

@@ -173,6 +173,10 @@ export default function LandingPage() {
           <span className="font-semibold text-foreground">IngredientBot</span>
         </div>
         <p>AI-powered recipe assistant. Cook smarter, eat better.</p>
+        <div className="flex items-center justify-center gap-4 mt-3">
+          <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+          <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
+        </div>
       </footer>
     </div>
   )

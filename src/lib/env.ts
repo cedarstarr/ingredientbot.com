@@ -6,7 +6,7 @@ export const env = createEnv({
     DATABASE_URL: z.string().min(1),
     NEXTAUTH_SECRET: z.string().min(1),
     ANTHROPIC_API_KEY: z.string().startsWith('sk-ant-').optional(),
-    UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+    UPSTASH_REDIS_REST_URL: z.preprocess(v => v === '' ? undefined : v, z.string().url().optional()),
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
     ZEPTOMAIL_API_KEY: z.string().optional(),
     EMAIL_FROM: z.string().optional(),
@@ -15,9 +15,9 @@ export const env = createEnv({
     LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).optional(),
   },
   client: {
-    NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
-    NEXT_PUBLIC_SITE_URL: z.string().url().optional(),
-    NEXT_PUBLIC_APP_URL: z.string().url().optional(),
+    NEXT_PUBLIC_SENTRY_DSN: z.preprocess(v => v === '' ? undefined : v, z.string().url().optional()),
+    NEXT_PUBLIC_SITE_URL: z.preprocess(v => v === '' ? undefined : v, z.string().url().optional()),
+    NEXT_PUBLIC_APP_URL: z.preprocess(v => v === '' ? undefined : v, z.string().url().optional()),
   },
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,

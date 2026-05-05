@@ -126,7 +126,7 @@ export function DietaryProfileSection() {
       <div className="rounded-lg border border-border bg-card p-5 space-y-3">
         <div className="flex items-center gap-2 text-muted-foreground text-sm">
           <Loader2 className="h-4 w-4 animate-spin" />
-          Loading dietary profile...
+          Loading dietary profile…
         </div>
         <p className="text-xs text-muted-foreground leading-relaxed">
           Medical dietary flags (low-sodium, low-FODMAP, diabetes-friendly) are general
@@ -276,7 +276,7 @@ export function DietaryProfileSection() {
           {saving ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Saving...
+              Saving…
             </>
           ) : (
             'Save Preferences'

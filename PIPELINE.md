@@ -4,7 +4,8 @@
 **Concept**: AI pantry-to-recipe generator — enter what you have, get streaming recipe suggestions. Make smart changes to recipes.
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
-**Last Updated**: 2026-05-03 23:01 (security re-audit run 2)
+**Design System**: Claude design system installed (2026-05-03)
+**Last Updated**: 2026-05-04 (qa-nav run 3 — normalized public footers on landing page + /r/[slug])
 
 ---
 
@@ -17,19 +18,19 @@
 | 3 | Feature Audit | /plan-feature-audit | DONE | 1 | 2026-04-11 | [view](reports/2026-04-11-site-audit.md) |
 | 4 | Feature Triage | /site-features | DONE | 1 | 2026-04-09 | [view](reports/2026-04-09-site-features.md) |
 | 5 | Feature Install | /site-install | DONE | 1 | 2026-04-10 00:00 | [view](reports/2026-04-10-site-install.md) |
-| 6 | Write Tests | /qa-tests-reconcile | DONE | 4 | 2026-04-23 | [view](reports/2026-04-23-tests-reconcile.md) |
-| 7 | Verify Build | /qa-tests-fix | DONE | 1 | 2026-04-16 | [view](reports/2026-04-16-tests-fix.md) |
-| 8 | Database Review | /qa-db | DONE | 1 | 2026-04-14 | [view](reports/2026-04-14-site-db.md) |
-| 9 | QA / Bug Check | /qa-bugs | DONE | 2 | 2026-04-18 | [view](reports/2026-04-18-site-bugs.md) |
-| 10 | Re-verify Tests | /qa-tests-fix | DONE | 1 | 2026-04-23 | [view](reports/2026-04-23-tests-fix.md) |
+| 6 | Write Tests | /qa-tests-reconcile | DONE | 5 | 2026-05-02 | [view](reports/2026-05-02-tests-reconcile.md) |
+| 7 | Verify Build | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
+| 8 | Database Review | /qa-db | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-site-db.md) |
+| 9 | QA / Bug Check | /qa-bugs | DONE | 3 | 2026-05-03 | [view](reports/2026-05-03-site-bugs.md) |
+| 10 | Re-verify Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 11 | Security Hardening | /qa-security | DONE | 2 | 2026-05-03 23:01 | [view](reports/2026-05-03-site-security.md) |
 | 12 | UX/UI Pass | /qa-design | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
-| 13 | Copy Audit | /qa-copy | PENDING | 0 | — | — |
-| 14 | Navigation Audit | /qa-nav | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-nav.md) |
-| 15 | Performance Audit | /qa-perf | DONE | 1 | 2026-04-18 | — |
+| 13 | Copy Audit | /qa-copy | DONE | 1 | 2026-05-03 | [view](reports/2026-05-03-ingredientbot-copy.md) |
+| 14 | Navigation Audit | /qa-nav | DONE | 3 | 2026-05-04 | [view](reports/2026-05-04-site-nav-2.md) |
+| 15 | Performance Audit | /qa-perf | DONE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-perf.md) |
 | 16 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
 | 17 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
-| 18 | Final E2E Tests | /qa-tests-fix | DONE | 1 | 2026-04-23 02:50 | [view](reports/2026-04-23-tests-fix.md) |
+| 18 | Final E2E Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 19 | iPhone Tests | /qa-tests-iphone | PENDING | 0 | — | — |
 | 20 | Android Tests | /qa-tests-android | PENDING | 0 | — | — |
 | 21 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
@@ -38,9 +39,9 @@
 | 24 | Client Update | /ops-client-report | PENDING | 0 | — | — |
 | 25 | Launch | /ops-launch | PENDING | 0 | — | — |
 
-**Progress: 17/25 stages complete**
+**Progress: 18/25 stages complete**
 
-**Last Updated**: 2026-05-03 23:01 (security re-audit run 2)
+**Last Updated**: 2026-05-04 (qa-nav run 3 — normalized public footers on landing page + /r/[slug])
 
 ---
 
@@ -80,4 +81,11 @@
 | 2026-04-23 | /qa-tests-reconcile | ~4m | SUCCESS | 24 new tests across 3 files (kitchen-modifiers-f74-f79, recipe-import-f62, recipe-tags-f38); 0 stale fixed, 0 code fixes; npm run build clean |
 | 2026-04-23 02:50 | /qa-tests-fix | ~55m | SUCCESS | 197/197 passing; initial 54/143 → systemic fixes (NEXTAUTH_URL → localhost, seed test user) recovered auth cascade → agent fixed 13 residuals (LOCKED_PUBLIC_PATHS, settings layout, streaming waits); commit 825a389 |
 | 2026-04-24 | coming-soon gate | ~2m | SUCCESS | Middleware gate + /coming-soon page deployed; COMING_SOON=true set on Vercel production; staging unaffected |
+| 2026-05-02 | /qa-tests-reconcile | ~10m | SUCCESS | 14 new tests written, 0 stale tests fixed, 0 code fixes |
+| 2026-05-03 | /qa-tests-fix | ~7m | SUCCESS | 210 passed, 27 skipped — R3: 5 fixes (env.ts preprocess, strict-mode locator, waitForResponse race fix, expiry-first API seed, networkidle→domcontentloaded) |
+| 2026-05-03 | /qa-db | ~5m | SUCCESS | 6 issues found (0 CRITICAL, 2 HIGH, 2 MEDIUM, 2 LOW); 2 HIGH fixed (unbounded findMany on meal-plan picker + dashboard streak query); MEDIUM/LOW reported only |
+| 2026-05-03 | /qa-bugs | ~8m | SUCCESS | 9 issues found (0 CRITICAL, 4 HIGH, 5 MEDIUM, 0 LOW); 4 HIGH fixed (AI route try/catch); 5 MEDIUM reported only |
 | 2026-05-03 23:01 | /qa-security | ~30m | SUCCESS | 7 issues found (2 HIGH, 4 MEDIUM, 1 LOW), all 7 fixed; cron fail-open closed on welcome-drip + meal-plan-digest; NEXT_PUBLIC_CRON_SECRET removed via /api/admin/trigger-cron proxy; JSON-LD XSS hardened with safeJsonLdString helper on /r/[slug] + /; password reset/change now bump sessionsRevokedAt; password change route rate-limited; SSRF guard now decodes octal/hex/decimal IPv4 + redirect: 'manual' on import fetch; build clean |
+| 2026-05-04 | /qa-nav | ~5m | SUCCESS | 30 routes, 0 orphans, 0 dead links, 100% coverage; Option C applied (Kitchen/Recipes/Account groupings); fixed semantic mismatch (Collections+Import moved from ACCOUNT→RECIPES); removed unused LayoutDashboard import; tsc clean |
+| 2026-05-04 | /qa-perf | ~10m | SUCCESS | 5 issues found (3 HIGH, 2 MEDIUM), all 5 fixed; removed 'use client' from collection-detail-client + cooking-heatmap; parallelized 3 sequential Prisma query pairs (recipe/[id], cook route, history allTagRows); build clean |
+| 2026-05-04 | /qa-nav | ~5m | SUCCESS | 30 routes, 0 orphans, 0 dead links, 100% coverage; Option C applied (normalize public footers); landing page + /r/[slug] now have Privacy/Terms footer links; tsc clean |

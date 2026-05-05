@@ -1,9 +1,10 @@
 import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
-import { generateText } from 'ai'
-import { claudeHaiku } from '@/lib/ai'
+import { generateText, type LanguageModelUsage } from 'ai'
+import { geminiFlashLite } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { logAICall } from '@/lib/ai-log'
+import { canonicalize, getCached, setCached, sha256 } from '@/lib/recipe-cache'
 
 export async function POST(req: NextRequest) {
   const session = await auth()
@@ -23,23 +24,38 @@ export async function POST(req: NextRequest) {
 
   const { recipeTitle, ingredient, action } = await req.json()
 
-  const { text, usage } = await generateText({
-    model: claudeHaiku,
-    maxOutputTokens: 100,
-    messages: [{
-      role: 'user',
-      content: `In the context of "${recipeTitle}", what is the effect of ${action === 'add' ? 'adding' : 'removing'} ${ingredient}? Reply in exactly 1-2 sentences focusing on flavor, texture, or nutrition. Be specific and helpful.`,
-    }],
-  })
+  // Comments are deterministic for the same (action, ingredient, recipeTitle) tuple.
+  const inputHash = sha256(canonicalize({ action, ingredient, recipeTitle }))
+  const cached = await getCached<{ comment: string }>('comment', inputHash)
+  if (cached) return Response.json(cached)
+
+  let text: string
+  let usage: LanguageModelUsage
+  try {
+    const response = await generateText({
+      model: geminiFlashLite,
+      maxOutputTokens: 100,
+      messages: [{
+        role: 'user',
+        content: `In the context of "${recipeTitle}", what is the effect of ${action === 'add' ? 'adding' : 'removing'} ${ingredient}? Reply in exactly 1-2 sentences focusing on flavor, texture, or nutrition. Be specific and helpful.`,
+      }],
+    })
+    text = response.text
+    usage = response.usage
+  } catch {
+    return Response.json({ error: 'AI service unavailable' }, { status: 503 })
+  }
 
   logAICall({
     feature: "ingredient-comment",
-    provider: "anthropic",
-    model: "claude-haiku-4-5-20251001",
+    provider: "google",
+    model: "gemini-2.5-flash-lite",
     inputTokens: usage.inputTokens,
     outputTokens: usage.outputTokens,
     userId: session.user.id,
   })
 
-  return Response.json({ comment: text })
+  const result = { comment: text }
+  await setCached('comment', inputHash, result)
+  return Response.json(result)
 }

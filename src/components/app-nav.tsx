@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { cn } from '@/lib/utils'
 import {
-  ChefHat, BookOpen, LayoutDashboard, Settings, Shield,
+  ChefHat, BookOpen, Settings, Shield,
   LogOut, Menu, X, CalendarDays, Link2, History, FolderOpen, Package, Sparkles,
   BarChart3,
 } from 'lucide-react'
@@ -22,24 +22,24 @@ function hasExpiringSoon(expiresAt: string): boolean {
   return days <= 7
 }
 
-// Nav grouped per design: Cooking | Activity | Account
-const COOKING_LINKS = [
-  { href: '/kitchen',    label: 'Kitchen',       icon: ChefHat },
-  { href: '/pantry',     label: 'Pantry',        icon: Package },
-  { href: '/saved',      label: 'Saved Recipes', icon: BookOpen },
-  { href: '/meal-plan',  label: 'Meal Plan',     icon: CalendarDays },
+// Nav grouped by user mental model: Kitchen (active cooking) | Recipes (library) | Account
+const KITCHEN_LINKS = [
+  { href: '/kitchen',    label: 'Kitchen',   icon: ChefHat },
+  { href: '/pantry',     label: 'Pantry',    icon: Package },
+  { href: '/meal-plan',  label: 'Meal Plan', icon: CalendarDays },
 ]
 
-const ACTIVITY_LINKS = [
-  { href: '/history',    label: 'History',   icon: History },
-  { href: '/dashboard',  label: 'Insights',  icon: BarChart3 },
+const RECIPES_LINKS = [
+  { href: '/saved',       label: 'Saved Recipes', icon: BookOpen },
+  { href: '/collections', label: 'Collections',   icon: FolderOpen },
+  { href: '/history',     label: 'History',       icon: History },
+  { href: '/import',      label: 'Import Recipe', icon: Link2 },
 ]
 
 const ACCOUNT_LINKS = [
-  { href: '/collections', label: 'Collections',   icon: FolderOpen },
-  { href: '/import',      label: 'Import Recipe', icon: Link2 },
-  { href: '/upgrade',     label: 'Upgrade',       icon: Sparkles },
-  { href: '/settings',    label: 'Settings',      icon: Settings },
+  { href: '/dashboard', label: 'Insights', icon: BarChart3 },
+  { href: '/upgrade',   label: 'Upgrade',  icon: Sparkles },
+  { href: '/settings',  label: 'Settings', icon: Settings },
 ]
 
 function NavSection({ label }: { label: string }) {
@@ -139,8 +139,8 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
 
       {/* Scrollable nav */}
       <nav aria-label="Main navigation" className="flex-1 overflow-y-auto px-2 py-1">
-        <NavSection label="Cooking" />
-        {COOKING_LINKS.map(({ href, label, icon }) => (
+        <NavSection label="Kitchen" />
+        {KITCHEN_LINKS.map(({ href, label, icon }) => (
           <NavLink
             key={href}
             href={href}
@@ -152,8 +152,8 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
           />
         ))}
 
-        <NavSection label="Activity" />
-        {ACTIVITY_LINKS.map(({ href, label, icon }) => (
+        <NavSection label="Recipes" />
+        {RECIPES_LINKS.map(({ href, label, icon }) => (
           <NavLink
             key={href}
             href={href}
