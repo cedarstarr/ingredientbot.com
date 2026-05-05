@@ -239,6 +239,14 @@ export default async function PublicRecipePage({ params }: Props) {
           </Button>
         </div>
       </main>
+
+      <footer className="border-t border-border py-6 text-center text-sm text-muted-foreground">
+        <div className="flex items-center justify-center gap-4">
+          <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
+          <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+          <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
+        </div>
+      </footer>
     </div>
   )
 }
