@@ -1,5 +1,3 @@
-'use client'
-
 // F47: 12-week contribution heatmap — GitHub-style grid showing cooking activity
 // Each cell = one day; darker green = more recipes cooked that day.
 

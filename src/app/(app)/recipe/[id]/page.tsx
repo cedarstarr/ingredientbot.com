@@ -9,21 +9,22 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
 
   const { id } = await params
 
-  const recipe = await prisma.recipe.findFirst({
-    where: { id, userId: session.user.id },
-    include: {
-      collection: { select: { id: true, name: true, color: true } },
-    },
-  })
+  // Fetch recipe and collections in parallel — both are needed before render
+  const [recipe, collections] = await Promise.all([
+    prisma.recipe.findFirst({
+      where: { id, userId: session.user.id },
+      include: {
+        collection: { select: { id: true, name: true, color: true } },
+      },
+    }),
+    prisma.recipeCollection.findMany({
+      where: { userId: session.user.id },
+      select: { id: true, name: true, color: true },
+      orderBy: { createdAt: 'asc' },
+    }),
+  ])
 
   if (!recipe) notFound()
-
-  // Fetch all user collections for the assign-to-collection picker
-  const collections = await prisma.recipeCollection.findMany({
-    where: { userId: session.user.id },
-    select: { id: true, name: true, color: true },
-    orderBy: { createdAt: 'asc' },
-  })
 
   return (
     <RecipeDetailClient

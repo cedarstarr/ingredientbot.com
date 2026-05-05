@@ -43,11 +43,24 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'Invalid suggestion' }, { status: 400 })
   }
 
-  // F30: Freemium gate — check + enforce monthly limit
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { isPro: true, recipeCount: true, monthlyResetDate: true },
-  })
+  // F30 + F31: Fetch user gate data and dietary profile in parallel — both needed before AI call
+  const [user, dietaryProfile] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { isPro: true, recipeCount: true, monthlyResetDate: true },
+    }),
+    prisma.dietaryProfile.findUnique({
+      where: { userId: session.user.id },
+      select: {
+        restrictions: true,
+        cuisinePrefs: true,
+        dislikedIngredients: true,
+        lowSodium: true,
+        lowFodmap: true,
+        diabetesFriendly: true,
+      },
+    }),
+  ])
 
   if (!user) return Response.json({ error: 'User not found' }, { status: 404 })
 
@@ -63,20 +76,6 @@ export async function POST(req: NextRequest) {
       )
     }
   }
-
-  // F31: Load dietary profile for AI system prompt injection
-  // F79: also load medical flags (low-sodium, low-FODMAP, diabetes-friendly)
-  const dietaryProfile = await prisma.dietaryProfile.findUnique({
-    where: { userId: session.user.id },
-    select: {
-      restrictions: true,
-      cuisinePrefs: true,
-      dislikedIngredients: true,
-      lowSodium: true,
-      lowFodmap: true,
-      diabetesFriendly: true,
-    },
-  })
 
   // F31: Build persistent profile context
   const profileLines: string[] = []
