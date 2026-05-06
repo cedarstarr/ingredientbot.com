@@ -10,7 +10,7 @@ type ResultState = { ok: boolean; data: unknown } | null
 function ResultBox({ result }: { result: ResultState }) {
   if (!result) return null
   return (
-    <pre className={`mt-3 rounded-lg border p-3 text-xs overflow-auto max-h-48 font-mono ${result.ok ? 'border-green-500/40 bg-green-500/10 text-green-700 dark:text-green-400' : 'border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-400'}`}>
+    <pre className={`mt-3 rounded-lg border p-3 text-xs overflow-auto max-h-48 font-mono ${result.ok ? 'border-[hsl(var(--color-success)/0.4)] bg-[hsl(var(--color-success)/0.1)] text-[hsl(var(--color-success-fg))]' : 'border-destructive/40 bg-destructive/10 text-destructive'}`}>
       {JSON.stringify(result.data, null, 2)}
     </pre>
   )

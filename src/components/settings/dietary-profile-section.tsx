@@ -283,7 +283,7 @@ export function DietaryProfileSection() {
           )}
         </Button>
         {saved && (
-          <span className="flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400">
+          <span className="flex items-center gap-1.5 text-sm text-[hsl(var(--color-success-fg))]">
             <CheckCircle className="h-4 w-4" />
             Saved!
           </span>

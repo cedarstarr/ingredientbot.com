@@ -78,6 +78,34 @@
   --sidebar-accent-foreground: oklch(0.18 0.02 50);
   --sidebar-border: oklch(0.88 0.01 60);
   --sidebar-ring: oklch(0.63 0.18 45);
+
+  /* ── Semantic palette (light) ── */
+  --color-success:       142 71% 38%;
+  --color-success-muted: 142 40% 93%;
+  --color-success-fg:    142 60% 25%;
+  --color-warning:       38 92% 45%;
+  --color-warning-muted: 38 80% 93%;
+  --color-warning-fg:    38 85% 28%;
+  --color-info:          215 70% 50%;
+  --color-info-muted:    215 60% 93%;
+  --color-info-fg:       215 70% 30%;
+
+  /* ── Categorical palette (light) — taxonomic identity only ── */
+  --cat-1: 260 70% 55%;
+  --cat-1-muted: 260 70% 95%;
+  --cat-1-fg:    260 60% 35%;
+  --cat-2: 210 80% 50%;
+  --cat-2-muted: 210 80% 95%;
+  --cat-2-fg:    210 80% 30%;
+  --cat-3: 28 90% 50%;
+  --cat-3-muted: 28 90% 95%;
+  --cat-3-fg:    28 90% 30%;
+  --cat-4: 320 70% 55%;
+  --cat-4-muted: 320 70% 95%;
+  --cat-4-fg:    320 60% 35%;
+  --cat-5: 165 65% 40%;
+  --cat-5-muted: 165 50% 92%;
+  --cat-5-fg:    165 65% 22%;
 }
 
 .dark {
@@ -112,6 +140,55 @@
   --sidebar-accent-foreground: oklch(0.94 0.008 70);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.68 0.18 48);
+
+  /* ── Semantic palette (dark) ── */
+  --color-success:       142 71% 55%;
+  --color-success-muted: 142 20% 15%;
+  --color-success-fg:    142 71% 80%;
+  --color-warning:       38 92% 55%;
+  --color-warning-muted: 38 60% 15%;
+  --color-warning-fg:    38 92% 80%;
+  --color-info:          215 70% 60%;
+  --color-info-muted:    215 50% 15%;
+  --color-info-fg:       215 70% 80%;
+
+  /* ── Categorical palette (dark) ── */
+  --cat-1: 260 65% 65%;
+  --cat-1-muted: 260 30% 18%;
+  --cat-1-fg:    260 70% 80%;
+  --cat-2: 210 70% 60%;
+  --cat-2-muted: 210 35% 18%;
+  --cat-2-fg:    210 75% 78%;
+  --cat-3: 28 85% 60%;
+  --cat-3-muted: 28 40% 16%;
+  --cat-3-fg:    28 90% 75%;
+  --cat-4: 320 60% 65%;
+  --cat-4-muted: 320 30% 18%;
+  --cat-4-fg:    320 70% 80%;
+  --cat-5: 165 55% 55%;
+  --cat-5-muted: 165 25% 14%;
+  --cat-5-fg:    165 60% 75%;
+}
+
+@layer utilities {
+  /* ── Categorical palette (cat-1..5) ──
+     For taxonomic identity — dietary tags, cuisine categories, difficulty levels.
+     Do NOT use for success/warning/error signals — use semantic tokens for those. */
+  .cat-1    { color: hsl(var(--cat-1-fg)); }
+  .cat-2    { color: hsl(var(--cat-2-fg)); }
+  .cat-3    { color: hsl(var(--cat-3-fg)); }
+  .cat-4    { color: hsl(var(--cat-4-fg)); }
+  .cat-5    { color: hsl(var(--cat-5-fg)); }
+  .cat-1-bg { background: hsl(var(--cat-1-muted)); color: hsl(var(--cat-1-fg)); }
+  .cat-2-bg { background: hsl(var(--cat-2-muted)); color: hsl(var(--cat-2-fg)); }
+  .cat-3-bg { background: hsl(var(--cat-3-muted)); color: hsl(var(--cat-3-fg)); }
+  .cat-4-bg { background: hsl(var(--cat-4-muted)); color: hsl(var(--cat-4-fg)); }
+  .cat-5-bg { background: hsl(var(--cat-5-muted)); color: hsl(var(--cat-5-fg)); }
+  .cat-1-border { border-color: hsl(var(--cat-1) / 0.35); }
+  .cat-2-border { border-color: hsl(var(--cat-2) / 0.35); }
+  .cat-3-border { border-color: hsl(var(--cat-3) / 0.35); }
+  .cat-4-border { border-color: hsl(var(--cat-4) / 0.35); }
+  .cat-5-border { border-color: hsl(var(--cat-5) / 0.35); }
 }
 
 @layer base {

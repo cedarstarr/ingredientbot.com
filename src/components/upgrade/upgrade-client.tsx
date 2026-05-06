@@ -79,7 +79,7 @@ export function UpgradeClient() {
           Free plan gives you 5 recipes per month. Pro unlocks unlimited generations and every premium feature.
         </p>
         {usage && !usage.isPro && (
-          <p className="text-sm text-amber-600 dark:text-amber-400 font-medium">
+          <p className="text-sm text-[hsl(var(--color-warning-fg))] font-medium">
             You&apos;ve used {usage.used} of {usage.limit} free recipes this month
             {usage.remaining === 0 ? ' — limit reached.' : '.'}
           </p>

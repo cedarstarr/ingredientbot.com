@@ -123,7 +123,7 @@ export default async function DashboardPage() {
         </div>
         <div className="rounded-xl border border-border bg-card p-5">
           <div className="flex items-center gap-2 mb-1">
-            <Flame className="h-4 w-4 text-orange-500" />
+            <Flame className="h-4 w-4 text-[hsl(var(--color-warning))]" />
             <p className="text-xs text-muted-foreground">Current cooking streak</p>
           </div>
           <p className="text-3xl font-bold text-foreground">

@@ -90,7 +90,7 @@ export function CollectionDetailClient({ collection }: Props) {
                     {recipe.title}
                   </Link>
                   {recipe.cookedCount > 0 && (
-                    <Badge className="text-xs gap-1 py-0 shrink-0 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800">
+                    <Badge className="text-xs gap-1 py-0 shrink-0 bg-[hsl(var(--color-success-muted))] text-[hsl(var(--color-success-fg))] border-[hsl(var(--color-success)/0.3)]">
                       <CheckCircle2 className="h-2.5 w-2.5" />
                       {recipe.cookedCount}×
                     </Badge>
