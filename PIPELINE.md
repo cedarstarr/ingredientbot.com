@@ -31,8 +31,8 @@
 | 16 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
 | 17 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
 | 18 | Final E2E Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
-| 19 | iPhone Tests | /qa-tests-iphone | PENDING | 0 | — | — |
-| 20 | Android Tests | /qa-tests-android | PENDING | 0 | — | — |
+| 19 | iPhone Tests + Fix | /qa-tests-iphone | PENDING | 0 | — | — |
+| 20 | Android Tests + Fix | /qa-tests-android | PENDING | 0 | — | — |
 | 21 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
 | 22 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
 | 23 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
