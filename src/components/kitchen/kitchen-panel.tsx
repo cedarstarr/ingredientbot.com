@@ -889,14 +889,14 @@ export function KitchenPanel() {
                     className={cn(
                       'flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                       leftoverMode
-                        ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-400/60 text-orange-700 dark:text-orange-400 font-medium'
-                        : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-orange-400/40',
+                        ? 'bg-[hsl(var(--cat-3-muted))] border-[hsl(var(--cat-3)/0.6)] text-[hsl(var(--cat-3-fg))] font-medium'
+                        : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-[hsl(var(--cat-3)/0.4)]',
                     )}
                   >
                     <Package className="h-3 w-3 shrink-0" />
                     <span className="flex-1 text-left">Leftover optimizer</span>
                     {leftoverMode && (
-                      <Badge className="bg-orange-500/20 text-orange-700 dark:text-orange-300 text-[10px] px-1.5 py-0 border-0">
+                      <Badge className="bg-[hsl(var(--cat-3)/0.2)] text-[hsl(var(--cat-3-fg))] text-[10px] px-1.5 py-0 border-0">
                         ON
                       </Badge>
                     )}
@@ -910,14 +910,14 @@ export function KitchenPanel() {
                     className={cn(
                       'flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                       budgetMode
-                        ? 'bg-green-50 dark:bg-green-900/20 border-green-400/60 text-green-700 dark:text-green-400 font-medium'
-                        : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-green-400/40',
+                        ? 'bg-[hsl(var(--color-success-muted))] border-[hsl(var(--color-success)/0.6)] text-[hsl(var(--color-success-fg))] font-medium'
+                        : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-[hsl(var(--color-success)/0.4)]',
                     )}
                   >
                     <DollarSign className="h-3 w-3 shrink-0" />
                     <span className="flex-1 text-left">Budget mode</span>
                     {budgetMode && (
-                      <Badge className="bg-green-500/20 text-green-700 dark:text-green-300 text-[10px] px-1.5 py-0 border-0">
+                      <Badge className="bg-[hsl(var(--color-success)/0.2)] text-[hsl(var(--color-success-fg))] text-[10px] px-1.5 py-0 border-0">
                         ON
                       </Badge>
                     )}
@@ -931,14 +931,14 @@ export function KitchenPanel() {
                     className={cn(
                       'flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                       dateNightMode
-                        ? 'bg-pink-50 dark:bg-pink-900/20 border-pink-400/60 text-pink-700 dark:text-pink-400 font-medium'
-                        : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-pink-400/40',
+                        ? 'bg-[hsl(var(--cat-4-muted))] border-[hsl(var(--cat-4)/0.6)] text-[hsl(var(--cat-4-fg))] font-medium'
+                        : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-[hsl(var(--cat-4)/0.4)]',
                     )}
                   >
                     <Heart className="h-3 w-3 shrink-0" />
                     <span className="flex-1 text-left">Date Night (3-course)</span>
                     {dateNightMode && (
-                      <Badge className="bg-pink-500/20 text-pink-700 dark:text-pink-300 text-[10px] px-1.5 py-0 border-0">
+                      <Badge className="bg-[hsl(var(--cat-4)/0.2)] text-[hsl(var(--cat-4-fg))] text-[10px] px-1.5 py-0 border-0">
                         ON
                       </Badge>
                     )}
@@ -953,14 +953,14 @@ export function KitchenPanel() {
                       className={cn(
                         'flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                         expiryFirstMode
-                          ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-400/60 text-amber-700 dark:text-amber-400 font-medium'
-                          : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-amber-400/40',
+                          ? 'bg-[hsl(var(--color-warning-muted))] border-[hsl(var(--color-warning)/0.6)] text-[hsl(var(--color-warning-fg))] font-medium'
+                          : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-[hsl(var(--color-warning)/0.4)]',
                       )}
                     >
                       <Timer className="h-3 w-3 shrink-0" />
                       <span className="flex-1 text-left">Expiry-first mode</span>
                       {expiryFirstMode && (
-                        <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[10px] text-amber-700 dark:text-amber-300">
+                        <span className="rounded-full bg-[hsl(var(--color-warning)/0.2)] px-1.5 py-0.5 text-[10px] text-[hsl(var(--color-warning-fg))]">
                           ON
                         </span>
                       )}
@@ -1005,7 +1005,7 @@ export function KitchenPanel() {
                   ))}
                 </div>
                 {prepTimeLimit !== null && (
-                  <p className="text-[10px] text-amber-600 dark:text-amber-400">
+                  <p className="text-[10px] text-[hsl(var(--color-warning-fg))]">
                     AI will target recipes completable in under {prepTimeLimit} min
                   </p>
                 )}
@@ -1042,8 +1042,8 @@ export function KitchenPanel() {
                             active
                               ? cn(
                                   'bg-primary/15 text-primary border-primary/30',
-                                  critical && 'bg-red-100 dark:bg-red-900/30 border-red-400/50 text-red-700 dark:text-red-400',
-                                  !critical && expiringSoon && 'bg-amber-100 dark:bg-amber-900/30 border-amber-400/50 text-amber-700 dark:text-amber-400',
+                                  critical && 'bg-destructive/10 border-destructive/50 text-destructive',
+                                  !critical && expiringSoon && 'bg-[hsl(var(--color-warning-muted))] border-[hsl(var(--color-warning)/0.5)] text-[hsl(var(--color-warning-fg))]',
                                 )
                               : 'bg-muted/40 text-muted-foreground border-border line-through'
                           )}
@@ -1095,7 +1095,7 @@ export function KitchenPanel() {
                       'inline-flex items-center gap-2 h-8 px-3 rounded-md border text-xs transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                       isListening
-                        ? 'bg-red-100 dark:bg-red-900/30 border-red-400/60 text-red-600 dark:text-red-400 animate-pulse'
+                        ? 'bg-destructive/10 border-destructive/60 text-destructive animate-pulse'
                         : 'bg-muted/40 text-muted-foreground border-border hover:text-foreground hover:border-primary/40',
                     )}
                     aria-label={isListening ? 'Stop recording' : 'Start voice input'}
@@ -1111,8 +1111,8 @@ export function KitchenPanel() {
 
         {/* Limit reached banner */}
         {limitReached && (
-          <div className="rounded-lg border border-amber-400/40 bg-amber-50 dark:bg-amber-900/10 px-4 py-3">
-            <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
+          <div className="rounded-lg border border-[hsl(var(--color-warning)/0.4)] bg-[hsl(var(--color-warning-muted))] px-4 py-3">
+            <p className="text-sm font-medium text-[hsl(var(--color-warning-fg))]">
               You&apos;ve reached your 5 free recipes this month.
             </p>
             <Link
@@ -1222,9 +1222,9 @@ export function KitchenPanel() {
                     </div>
                     <span className={cn(
                       'text-[11px] px-2 py-0.5 rounded-full font-medium',
-                      urgency === 'danger' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
-                      urgency === 'warning' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
-                      'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                      urgency === 'danger' ? 'bg-destructive/10 text-destructive' :
+                      urgency === 'warning' ? 'bg-[hsl(var(--color-warning-muted))] text-[hsl(var(--color-warning-fg))]' :
+                      'bg-[hsl(var(--color-success-muted))] text-[hsl(var(--color-success-fg))]',
                     )}>
                       {days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days} days`}
                     </span>

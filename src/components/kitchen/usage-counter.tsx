@@ -40,14 +40,14 @@ export function UsageCounter({ refreshKey }: Props) {
         isAtLimit
           ? 'border-destructive/40 bg-destructive/5'
           : isNearLimit
-          ? 'border-amber-400/40 bg-amber-50 dark:bg-amber-900/10'
+          ? 'border-[hsl(var(--color-warning)/0.4)] bg-[hsl(var(--color-warning-muted))]'
           : 'border-border bg-muted/30',
       )}
     >
       <div className="flex items-center justify-between gap-2">
         <span className={cn(
           'font-medium',
-          isAtLimit ? 'text-destructive' : isNearLimit ? 'text-amber-600 dark:text-amber-400' : 'text-foreground',
+          isAtLimit ? 'text-destructive' : isNearLimit ? 'text-[hsl(var(--color-warning-fg))]' : 'text-foreground',
         )}>
           {isAtLimit ? 'Monthly limit reached' : `${usage.remaining} recipe${usage.remaining === 1 ? '' : 's'} left`}
         </span>
@@ -59,7 +59,7 @@ export function UsageCounter({ refreshKey }: Props) {
         <div
           className={cn(
             'h-full rounded-full transition-all duration-300',
-            isAtLimit ? 'bg-destructive' : isNearLimit ? 'bg-amber-500' : 'bg-primary',
+            isAtLimit ? 'bg-destructive' : isNearLimit ? 'bg-[hsl(var(--color-warning))]' : 'bg-primary',
           )}
           style={{ width: `${pct}%` }}
         />

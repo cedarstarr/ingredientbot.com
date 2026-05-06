@@ -40,9 +40,9 @@ interface ExtractedRecipe {
 }
 
 const difficultyColor = {
-  easy: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  medium: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-  hard: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  easy: 'bg-[hsl(var(--color-success-muted))] text-[hsl(var(--color-success-fg))]',
+  medium: 'bg-[hsl(var(--color-warning-muted))] text-[hsl(var(--color-warning-fg))]',
+  hard: 'bg-destructive/10 text-destructive',
 }
 
 export function ImportClient() {

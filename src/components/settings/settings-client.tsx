@@ -122,7 +122,7 @@ export function SettingsClient() {
             <Label htmlFor="name">Display Name</Label>
             <Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder="Your name" />
           </div>
-          {nameMsg && <p className={`text-sm ${nameMsg.includes('!') ? 'text-green-600 dark:text-green-400' : 'text-destructive'}`}>{nameMsg}</p>}
+          {nameMsg && <p className={`text-sm ${nameMsg.includes('!') ? 'text-[hsl(var(--color-success-fg))]' : 'text-destructive'}`}>{nameMsg}</p>}
           <Button type="submit" disabled={nameLoading} size="sm">
             {nameLoading ? 'Saving…' : 'Save Name'}
           </Button>
@@ -145,7 +145,7 @@ export function SettingsClient() {
             <Label htmlFor="confirmNewPassword">Confirm New Password</Label>
             <Input id="confirmNewPassword" type="password" value={confirmNewPassword} onChange={e => setConfirmNewPassword(e.target.value)} required />
           </div>
-          {passwordMsg && <p className={`text-sm ${passwordMsg.includes('!') ? 'text-green-600 dark:text-green-400' : 'text-destructive'}`}>{passwordMsg}</p>}
+          {passwordMsg && <p className={`text-sm ${passwordMsg.includes('!') ? 'text-[hsl(var(--color-success-fg))]' : 'text-destructive'}`}>{passwordMsg}</p>}
           <Button type="submit" disabled={passwordLoading} size="sm">
             {passwordLoading ? 'Updating…' : 'Update Password'}
           </Button>

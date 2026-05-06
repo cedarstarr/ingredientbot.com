@@ -48,7 +48,7 @@ function ExpiryBadge({ expiresAt }: { expiresAt: string | null }) {
 
   if (urgency === 'critical') {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs px-1.5 py-0.5 font-medium">
+      <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 text-destructive text-xs px-1.5 py-0.5 font-medium">
         <Circle className="h-2.5 w-2.5 fill-current" aria-hidden="true" />
         {days === 0 ? 'Today' : `${days}d`}
       </span>
@@ -57,7 +57,7 @@ function ExpiryBadge({ expiresAt }: { expiresAt: string | null }) {
 
   if (urgency === 'soon') {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs px-1.5 py-0.5 font-medium">
+      <span className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--color-warning-muted))] text-[hsl(var(--color-warning-fg))] text-xs px-1.5 py-0.5 font-medium">
         <Circle className="h-2.5 w-2.5 fill-current" aria-hidden="true" />
         {days}d
       </span>
@@ -300,7 +300,7 @@ export function PantryClient() {
           {/* Tile 2: Expiring ≤3 days (red if >0) */}
           <div className="rounded-xl bg-card ring-1 ring-foreground/10 px-4 py-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground mb-1.5">Expiring ≤ 3 days</p>
-            <p className={cn('text-[30px] font-bold leading-none tracking-tight', expiringCritical > 0 && 'text-red-600 dark:text-red-400')}>
+            <p className={cn('text-[30px] font-bold leading-none tracking-tight', expiringCritical > 0 && 'text-destructive')}>
               {expiringCritical}
             </p>
             <p className="text-[11px] text-muted-foreground mt-1.5">use these first</p>
@@ -308,7 +308,7 @@ export function PantryClient() {
           {/* Tile 3: Expiring this week */}
           <div className="rounded-xl bg-card ring-1 ring-foreground/10 px-4 py-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground mb-1.5">Expiring this week</p>
-            <p className={cn('text-[30px] font-bold leading-none tracking-tight', expiringWeek > 0 && 'text-amber-600 dark:text-amber-400')}>
+            <p className={cn('text-[30px] font-bold leading-none tracking-tight', expiringWeek > 0 && 'text-[hsl(var(--color-warning-fg))]')}>
               {expiringWeek}
             </p>
             <p className="text-[11px] text-muted-foreground mt-1.5">plan ahead</p>
@@ -326,9 +326,9 @@ export function PantryClient() {
 
       {/* F26: Expiring soon banner */}
       {expiringCount > 0 && (
-        <div className="flex items-start gap-2.5 rounded-lg border border-amber-400/40 bg-amber-50 dark:bg-amber-900/10 px-4 py-3">
-          <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-          <p className="text-sm text-amber-800 dark:text-amber-300 flex-1">
+        <div className="flex items-start gap-2.5 rounded-lg border border-[hsl(var(--color-warning)/0.4)] bg-[hsl(var(--color-warning-muted))] px-4 py-3">
+          <AlertTriangle className="h-4 w-4 text-[hsl(var(--color-warning-fg))] shrink-0 mt-0.5" />
+          <p className="text-sm text-[hsl(var(--color-warning-fg))] flex-1">
             {expiringCount} item{expiringCount !== 1 ? 's' : ''} expiring within 7 days.{' '}
             <Link href="/kitchen" className="font-medium underline underline-offset-2">
               Use them in the Kitchen
@@ -390,7 +390,7 @@ export function PantryClient() {
             {/* Use first — critical (≤3 days) */}
             {items.filter(i => i.expiresAt && daysUntilExpiry(i.expiresAt) <= 3 && daysUntilExpiry(i.expiresAt) >= 0).length > 0 && (
               <div>
-                <div className="px-4 py-2 flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-[0.06em] text-red-600 dark:text-red-400 bg-red-50/50 dark:bg-red-900/10">
+                <div className="px-4 py-2 flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-[0.06em] text-destructive bg-destructive/5">
                   <AlertTriangle className="h-3.5 w-3.5" />
                   Use first
                 </div>
@@ -412,7 +412,7 @@ export function PantryClient() {
             {/* Expiring soon (4–7 days) */}
             {items.filter(i => i.expiresAt && daysUntilExpiry(i.expiresAt) > 3 && daysUntilExpiry(i.expiresAt) <= 7).length > 0 && (
               <div>
-                <div className="px-4 py-2 flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-[0.06em] text-amber-600 dark:text-amber-400 bg-amber-50/50 dark:bg-amber-900/10">
+                <div className="px-4 py-2 flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-[0.06em] text-[hsl(var(--color-warning-fg))] bg-[hsl(var(--color-warning)/0.05)]">
                   <AlertTriangle className="h-3.5 w-3.5" />
                   Expiring soon
                 </div>

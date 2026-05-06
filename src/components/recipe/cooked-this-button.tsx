@@ -55,7 +55,7 @@ export function CookedThisButton({ recipeId, initialCookedCount, initialLastCook
         disabled={loading}
         className={cn(
           'gap-2 transition-all',
-          justCooked && 'bg-green-600 hover:bg-green-700 border-green-600 text-white dark:bg-green-600 dark:hover:bg-green-700',
+          justCooked && 'bg-[hsl(var(--color-success))] hover:bg-[hsl(var(--color-success)/0.9)] border-[hsl(var(--color-success))] text-white',
         )}
         aria-label="Mark recipe as cooked"
       >

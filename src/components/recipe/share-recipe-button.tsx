@@ -111,7 +111,7 @@ export function ShareRecipeButton({ recipeId, initialSlug, initialIsPublic }: Pr
                     {publicUrl}
                   </code>
                   <Button size="sm" variant="outline" onClick={copyLink} className="shrink-0 gap-1.5">
-                    {copied ? <Check className="h-3.5 w-3.5 text-green-600" /> : <LinkIcon className="h-3.5 w-3.5" />}
+                    {copied ? <Check className="h-3.5 w-3.5 text-[hsl(var(--color-success))]" /> : <LinkIcon className="h-3.5 w-3.5" />}
                     {copied ? 'Copied!' : 'Copy'}
                   </Button>
                 </div>

@@ -34,7 +34,7 @@ export default function ScriptRunButton({
   if (!adminRunnable) {
     return (
       <div className="flex flex-col gap-2">
-        <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
+        <p className="text-xs text-[hsl(var(--color-warning-fg))] flex items-center gap-1">
           <AlertTriangle className="h-3 w-3" /> Destructive / one-time script
         </p>
         <div className="flex items-center gap-2">
@@ -48,7 +48,7 @@ export default function ScriptRunButton({
           </label>
         </div>
         <div className="flex items-center gap-2">
-          {result?.success && <span className="text-xs text-green-600 dark:text-green-400">✓ Ran successfully</span>}
+          {result?.success && <span className="text-xs text-[hsl(var(--color-success-fg))]">✓ Ran successfully</span>}
           {result?.error && <span className="text-xs text-destructive">{result.error}</span>}
           <Button size="sm" variant="destructive" onClick={handleRun} disabled={running || !confirmed}>
             {running ? <Loader2 className="h-3 w-3 animate-spin" /> : <AlertTriangle className="h-3 w-3" />}
@@ -61,7 +61,7 @@ export default function ScriptRunButton({
 
   return (
     <div className="flex items-center gap-2">
-      {result?.success && <span className="text-xs text-green-600 dark:text-green-400">✓ Ran successfully</span>}
+      {result?.success && <span className="text-xs text-[hsl(var(--color-success-fg))]">✓ Ran successfully</span>}
       {result?.error && <span className="text-xs text-destructive">{result.error}</span>}
       <Button size="sm" variant="outline" onClick={handleRun} disabled={running}>
         {running ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />}

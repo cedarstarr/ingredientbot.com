@@ -30,7 +30,7 @@ export function ModificationToolbar({ recipeId, servings, onModified }: Props) {
           onClick={() => onModified('lower_calories', {})}
           className="gap-1.5"
         >
-          <Flame className="h-3.5 w-3.5 text-orange-500" />
+          <Flame className="h-3.5 w-3.5 text-[hsl(var(--color-warning))]" />
           Lower calories
         </Button>
 
@@ -41,7 +41,7 @@ export function ModificationToolbar({ recipeId, servings, onModified }: Props) {
           onClick={() => onModified('reduce_fat', {})}
           className="gap-1.5"
         >
-          <Droplets className="h-3.5 w-3.5 text-blue-500" />
+          <Droplets className="h-3.5 w-3.5 text-[hsl(var(--color-info))]" />
           Reduce fat
         </Button>
 
@@ -52,7 +52,7 @@ export function ModificationToolbar({ recipeId, servings, onModified }: Props) {
           onClick={() => onModified('protein_max', {})}
           className="gap-1.5"
         >
-          <Dumbbell className="h-3.5 w-3.5 text-red-600" />
+          <Dumbbell className="h-3.5 w-3.5 text-destructive" />
           Protein-max
         </Button>
 
@@ -63,7 +63,7 @@ export function ModificationToolbar({ recipeId, servings, onModified }: Props) {
           onClick={() => onModified('make_vegetarian', {})}
           className="gap-1.5"
         >
-          <Leaf className="h-3.5 w-3.5 text-green-600" />
+          <Leaf className="h-3.5 w-3.5 text-[hsl(var(--color-success))]" />
           Make vegetarian
         </Button>
 
