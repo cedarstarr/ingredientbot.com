@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, master, staging]
+    branches: [main, staging]
   pull_request:
-    branches: [main, master]
+    branches: [main, staging]
 
 jobs:
   ci:
@@ -21,7 +21,16 @@ jobs:
         run: npm ci
 
       - name: Type check
-        run: npx tsc --noEmit
+        run: npx prisma generate && npx tsc --noEmit
+
+      - name: Unit tests
+        run: npm run test
+        continue-on-error: true
+
+      - name: Build
+        run: npx prisma generate && npx next build
+        env:
+          SKIP_ENV_VALIDATION: 'true'
 
       - name: Security audit
         run: npm audit --audit-level=high
