@@ -57,7 +57,7 @@ export function RecipeRating({ recipeId, initialRating }: RecipeRatingProps) {
               className={cn(
                 'h-5 w-5 transition-colors',
                 displayRating !== null && star <= displayRating
-                  ? 'fill-yellow-400 text-yellow-400'
+                  ? 'fill-[hsl(var(--color-warning))] text-[hsl(var(--color-warning))]'
                   : 'text-muted-foreground/40',
               )}
             />
