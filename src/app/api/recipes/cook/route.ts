@@ -2,10 +2,9 @@ import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateText } from 'ai'
-import { geminiFlashLite } from '@/lib/ai'
+import { trackedModel } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { Difficulty } from '@prisma/client'
-import { logAICall } from '@/lib/ai-log'
 
 export const maxDuration = 60
 
@@ -179,8 +178,8 @@ export async function POST(req: NextRequest) {
   const spiceLabel = ['Mild', 'Medium', 'Hot', 'Fire'][spiceN]
   const spiceContext = `\n\nSPICE LEVEL: ${spiceLabel}. Calibrate heat accordingly — use appropriate chiles, peppers, and spices. Do not exceed this level.`
 
-  const { text, usage } = await generateText({
-    model: geminiFlashLite,
+  const { text } = await generateText({
+    model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'cooking-assistant', userId: session.user.id }),
     maxOutputTokens: 2048,
     system: `You are an expert chef. Generate a complete detailed recipe as JSON. Return ONLY valid JSON with no markdown, no code blocks.
 Schema:
@@ -201,15 +200,6 @@ Schema:
       role: 'user',
       content: `Generate a full recipe for "${suggestion.title}". Description: ${suggestion.description}. Main ingredients available: ${ingredients.join(', ')}. Target servings: ${suggestion.servings || 4}.`,
     }],
-  })
-
-  logAICall({
-    feature: "cooking-assistant",
-    provider: "google",
-    model: "gemini-2.5-flash-lite",
-    inputTokens: usage.inputTokens,
-    outputTokens: usage.outputTokens,
-    userId: session.user.id,
   })
 
   let recipeData

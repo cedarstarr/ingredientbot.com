@@ -2,10 +2,9 @@ import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateText } from 'ai'
-import { geminiFlashLite } from '@/lib/ai'
+import { trackedModel } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { Difficulty } from '@prisma/client'
-import { logAICall } from '@/lib/ai-log'
 
 export const maxDuration = 60
 
@@ -266,8 +265,8 @@ export async function POST(req: NextRequest) {
   const maxChars = 80_000
   const truncatedHtml = html.length > maxChars ? html.slice(0, maxChars) : html
 
-  const { text, usage } = await generateText({
-    model: geminiFlashLite,
+  const { text } = await generateText({
+    model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'recipe-import', userId: session.user.id }),
     maxOutputTokens: 2048,
     system: `You are a recipe extraction expert. Given the HTML content of a recipe webpage, extract the recipe into structured JSON. Return ONLY valid JSON with no markdown, no code blocks, no extra text.
 
@@ -300,15 +299,6 @@ Rules:
       role: 'user',
       content: `Extract the recipe from this webpage. Source URL: ${url}\n\n${truncatedHtml}`,
     }],
-  })
-
-  logAICall({
-    feature: "recipe-import",
-    provider: "google",
-    model: "gemini-2.5-flash-lite",
-    inputTokens: usage.inputTokens,
-    outputTokens: usage.outputTokens,
-    userId: session.user.id,
   })
 
   try {

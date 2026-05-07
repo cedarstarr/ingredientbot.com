@@ -2,9 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateText } from 'ai'
-import { geminiFlashLite } from '@/lib/ai'
+import { trackedModel } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
-import { logAICall } from '@/lib/ai-log'
 
 export const maxDuration = 30
 
@@ -70,8 +69,8 @@ export async function POST(
     ? recipeData.ingredients.map(i => `${i.amount} ${i.unit} ${i.name}`.trim()).join(', ')
     : recipe.sourceIngredients.join(', ')
 
-  const { text, usage } = await generateText({
-    model: geminiFlashLite,
+  const { text } = await generateText({
+    model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'ingredient-substitute', userId: session.user.id }),
     maxOutputTokens: 800,
     system: `You are a professional chef and food scientist. Analyze the role an ingredient plays in a recipe and suggest practical substitutions. Respond with valid JSON only, no markdown fences:
 {
@@ -96,15 +95,6 @@ Missing ingredient: ${missingIngredient}
 
 Analyze what role "${missingIngredient}" plays in this specific recipe and suggest 2-3 substitutions ordered from best to last resort.`,
     }],
-  })
-
-  logAICall({
-    feature: "ingredient-substitute",
-    provider: "google",
-    model: "gemini-2.5-flash-lite",
-    inputTokens: usage.inputTokens,
-    outputTokens: usage.outputTokens,
-    userId: session.user.id,
   })
 
   const jsonMatch = text.match(/\{[\s\S]*\}/)
