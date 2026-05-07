@@ -2,10 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import type { Prisma } from '@prisma/client'
-import { generateText, type LanguageModelUsage } from 'ai'
-import { geminiFlashLite } from '@/lib/ai'
+import { generateText } from 'ai'
+import { trackedModel } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
-import { logAICall } from '@/lib/ai-log'
 
 export const maxDuration = 30
 
@@ -56,10 +55,9 @@ export async function POST(
   }
 
   let text: string
-  let usage: LanguageModelUsage
   try {
     const response = await generateText({
-      model: geminiFlashLite,
+      model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'diet-conversion', userId: session.user.id }),
       maxOutputTokens: 800,
       system: `You are a professional chef specializing in dietary adaptations. Convert recipes to fit specific dietary restrictions while maintaining flavor and texture. Respond with JSON:
 {
@@ -81,19 +79,9 @@ Instructions: ${JSON.stringify(recipeData.instructions || [])}`,
       }],
     })
     text = response.text
-    usage = response.usage
   } catch {
     return NextResponse.json({ error: 'AI service unavailable' }, { status: 503 })
   }
-
-  logAICall({
-    feature: "diet-conversion",
-    provider: "google",
-    model: "gemini-2.5-flash-lite",
-    inputTokens: usage.inputTokens,
-    outputTokens: usage.outputTokens,
-    userId: session.user.id,
-  })
 
   const jsonMatch = text.match(/\{[\s\S]*\}/)
   if (!jsonMatch) {

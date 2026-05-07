@@ -2,9 +2,8 @@ import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { streamText } from 'ai'
-import { geminiFlashLite } from '@/lib/ai'
+import { trackedModel } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
-import { logAICall } from '@/lib/ai-log'
 
 export const maxDuration = 60
 
@@ -75,20 +74,10 @@ Be concise but helpful. Reference specific steps from the recipe when relevant. 
   messages.push({ role: 'user', content: message.trim() })
 
   const result = streamText({
-    model: geminiFlashLite,
+    model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'cooking-chat', userId: session.user.id }),
     maxOutputTokens: 500,
     system: systemPrompt,
     messages,
-    onFinish: ({ usage }) => {
-      logAICall({
-        feature: "cooking-chat",
-        provider: "google",
-        model: "gemini-2.5-flash-lite",
-        inputTokens: usage.inputTokens,
-        outputTokens: usage.outputTokens,
-        userId: session.user.id,
-      })
-    },
   })
 
   // Emit SSE events as `data: {"text": "..."}` to match the original contract

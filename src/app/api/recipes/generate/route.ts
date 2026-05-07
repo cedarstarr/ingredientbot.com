@@ -2,9 +2,8 @@ import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { streamText } from 'ai'
-import { geminiFlashLite } from '@/lib/ai'
+import { trackedModel } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
-import { logAICall } from '@/lib/ai-log'
 import { canonicalize, getCached, setCached, sha256 } from '@/lib/recipe-cache'
 
 export const maxDuration = 60
@@ -185,7 +184,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = streamText({
-      model: geminiFlashLite,
+      model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'recipe-generation', userId: session.user.id }),
       maxOutputTokens: 1024,
       system: `You are an expert chef. When given a list of ingredients, suggest exactly 4 recipes that use most of them.
 
@@ -200,15 +199,7 @@ difficulty must be exactly: "easy", "medium", or "hard"${personalityContext}${pr
           ? 'Impress me with 4 creative recipes. Choose the ingredients yourself.'
           : `I have these ingredients: ${ingredients.join(', ')}. ${cuisineStr} ${sessionDietaryStr} Suggest 4 recipes.`,
       }],
-      onFinish: ({ usage, text }) => {
-        logAICall({
-          feature: "recipe-generation",
-          provider: "google",
-          model: "gemini-2.5-flash-lite",
-          inputTokens: usage.inputTokens,
-          outputTokens: usage.outputTokens,
-          userId: session.user.id,
-        })
+      onFinish: ({ text }) => {
         // Persist the full NDJSON body so subsequent identical requests skip the LLM.
         // Only cache non-empty completions to avoid poisoning on partial failures.
         if (text && text.trim()) {
