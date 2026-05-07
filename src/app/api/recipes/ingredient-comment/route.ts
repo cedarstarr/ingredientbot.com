@@ -1,9 +1,8 @@
 import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
-import { generateText, type LanguageModelUsage } from 'ai'
-import { geminiFlashLite } from '@/lib/ai'
+import { generateText } from 'ai'
+import { trackedModel } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
-import { logAICall } from '@/lib/ai-log'
 import { canonicalize, getCached, setCached, sha256 } from '@/lib/recipe-cache'
 
 export async function POST(req: NextRequest) {
@@ -30,10 +29,9 @@ export async function POST(req: NextRequest) {
   if (cached) return Response.json(cached)
 
   let text: string
-  let usage: LanguageModelUsage
   try {
     const response = await generateText({
-      model: geminiFlashLite,
+      model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'ingredient-comment', userId: session.user.id }),
       maxOutputTokens: 100,
       messages: [{
         role: 'user',
@@ -41,19 +39,9 @@ export async function POST(req: NextRequest) {
       }],
     })
     text = response.text
-    usage = response.usage
   } catch {
     return Response.json({ error: 'AI service unavailable' }, { status: 503 })
   }
-
-  logAICall({
-    feature: "ingredient-comment",
-    provider: "google",
-    model: "gemini-2.5-flash-lite",
-    inputTokens: usage.inputTokens,
-    outputTokens: usage.outputTokens,
-    userId: session.user.id,
-  })
 
   const result = { comment: text }
   await setCached('comment', inputHash, result)

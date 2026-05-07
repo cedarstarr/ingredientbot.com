@@ -1,9 +1,8 @@
 import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { generateText } from 'ai'
-import { geminiFlashLite } from '@/lib/ai'
+import { trackedModel } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
-import { logAICall } from '@/lib/ai-log'
 import { getCached, setCached, sha256 } from '@/lib/recipe-cache'
 
 export const maxDuration = 60
@@ -42,8 +41,8 @@ export async function POST(req: NextRequest) {
   const cached = await getCached<{ ingredients: string[] }>('photo', inputHash)
   if (cached) return Response.json(cached)
 
-  const { text, usage } = await generateText({
-    model: geminiFlashLite,
+  const { text } = await generateText({
+    model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'photo-analysis', userId: session.user.id }),
     maxOutputTokens: 512,
     messages: [{
       role: 'user',
@@ -55,15 +54,6 @@ export async function POST(req: NextRequest) {
         },
       ],
     }],
-  })
-
-  logAICall({
-    feature: "photo-analysis",
-    provider: "google",
-    model: "gemini-2.5-flash-lite",
-    inputTokens: usage.inputTokens,
-    outputTokens: usage.outputTokens,
-    userId: session.user.id,
   })
 
   try {

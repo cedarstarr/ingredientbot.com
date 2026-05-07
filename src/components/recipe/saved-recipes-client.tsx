@@ -189,7 +189,7 @@ export function SavedRecipesClient({ recipes }: SavedRecipesClientProps) {
                             key={s}
                             className={cn(
                               'h-3.5 w-3.5',
-                              s <= recipe.rating! ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/30',
+                              s <= recipe.rating! ? 'fill-[hsl(var(--color-warning))] text-[hsl(var(--color-warning))]' : 'text-muted-foreground/30',
                             )}
                           />
                         ))}

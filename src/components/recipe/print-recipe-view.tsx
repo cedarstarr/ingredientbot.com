@@ -45,6 +45,7 @@ interface Recipe {
 }
 
 export function PrintRecipeView({ recipe }: { recipe: Recipe }) {
+  // intentional: print-safe concrete colors
   const recipeData = recipe.recipeData as RecipeData
   const nutrition = recipe.nutrition as NutritionData | null
   const totalMin = (recipe.prepTimeMin ?? 0) + (recipe.cookTimeMin ?? 0)

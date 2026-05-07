@@ -2,9 +2,8 @@ import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { streamText } from 'ai'
-import { geminiFlashLite } from '@/lib/ai'
+import { trackedModel } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
-import { logAICall } from '@/lib/ai-log'
 
 export const maxDuration = 60
 
@@ -51,23 +50,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   try {
     const result = streamText({
-      model: geminiFlashLite,
+      model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'recipe-modify', userId: session.user.id }),
       maxOutputTokens: 2048,
       system: 'You are an expert chef who helps people modify recipes. Present modifications clearly in markdown.',
       messages: [{
         role: 'user',
         content: `Here is the current recipe:\n${recipe.rawText}\n\n${actionPrompt(recipe, { targetServings, targetMethod })}`,
       }],
-      onFinish: ({ usage }) => {
-        logAICall({
-          feature: "recipe-modify",
-          provider: "google",
-          model: "gemini-2.5-flash-lite",
-          inputTokens: usage.inputTokens,
-          outputTokens: usage.outputTokens,
-          userId: session.user.id,
-        })
-      },
     })
 
     // Frontend reads raw text with getReader() — use toTextStreamResponse (not toDataStreamResponse)

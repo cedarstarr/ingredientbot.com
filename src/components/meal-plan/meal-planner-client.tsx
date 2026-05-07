@@ -372,7 +372,7 @@ export function MealPlannerClient({
               >
                 {copied ? (
                   <>
-                    <Check className="h-3.5 w-3.5 text-green-500" />
+                    <Check className="h-3.5 w-3.5 text-[hsl(var(--color-success))]" />
                     Copied!
                   </>
                 ) : (

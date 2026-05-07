@@ -10,9 +10,9 @@ const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 function heatColor(count: number): string {
   if (count === 0) return 'bg-muted/60 dark:bg-muted/30'
-  if (count === 1) return 'bg-green-200 dark:bg-green-900'
-  if (count === 2) return 'bg-green-400 dark:bg-green-700'
-  return 'bg-green-600 dark:bg-green-500' // 3+
+  if (count === 1) return 'bg-[hsl(var(--color-success)/0.15)]'
+  if (count === 2) return 'bg-[hsl(var(--color-success)/0.3)]'
+  return 'bg-[hsl(var(--color-success)/0.55)]' // 3+
 }
 
 export function CookingHeatmap({ heatmapCounts, startDate }: CookingHeatmapProps) {
@@ -72,7 +72,12 @@ export function CookingHeatmap({ heatmapCounts, startDate }: CookingHeatmapProps
       {/* Legend */}
       <div className="flex items-center gap-1.5 mt-3">
         <span className="text-[10px] text-muted-foreground">Less</span>
-        {['bg-muted/60 dark:bg-muted/30', 'bg-green-200 dark:bg-green-900', 'bg-green-400 dark:bg-green-700', 'bg-green-600 dark:bg-green-500'].map((cls, i) => (
+        {[
+          'bg-muted/60 dark:bg-muted/30',
+          'bg-[hsl(var(--color-success)/0.15)]',
+          'bg-[hsl(var(--color-success)/0.3)]',
+          'bg-[hsl(var(--color-success)/0.55)]',
+        ].map((cls, i) => (
           <div key={i} className={`h-3 w-3 rounded-sm ${cls}`} />
         ))}
         <span className="text-[10px] text-muted-foreground">More</span>
