@@ -1,9 +1,13 @@
 import { prisma } from '@/lib/prisma'
 import { formatDate } from '@/lib/utils'
+import { requireAdmin } from '@/lib/admin'
 
 export const metadata = { title: 'Admin — IngredientBot' }
 
 export default async function AdminPage() {
+  // Defense-in-depth: middleware also gates /admin/*, but enforcing here
+  // means any future middleware-matcher edit cannot accidentally expose the page.
+  await requireAdmin()
   const [userCount, recipeCount, recentLogs] = await Promise.all([
     prisma.user.count(),
     prisma.recipe.count(),

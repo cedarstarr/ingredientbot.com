@@ -1,9 +1,12 @@
 import { prisma } from '@/lib/prisma'
 import { formatDate } from '@/lib/utils'
+import { requireAdmin } from '@/lib/admin'
 
 export const metadata = { title: 'Audit Logs — Admin — IngredientBot' }
 
 export default async function AdminAuditLogsPage() {
+  // Defense-in-depth (see /admin/page.tsx). Audit logs include user IDs and IPs.
+  await requireAdmin()
   const logs = await prisma.auditLog.findMany({
     orderBy: { createdAt: 'desc' },
     take: 100

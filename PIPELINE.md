@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-05-08
+**Last Updated**: 2026-05-08 (qa-security run 3)
 
 ---
 
@@ -23,7 +23,7 @@
 | 8 | Database Review | /qa-db | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-site-db.md) |
 | 9 | QA / Bug Check | /qa-bugs | DONE | 3 | 2026-05-03 | [view](reports/2026-05-03-site-bugs.md) |
 | 10 | Re-verify Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
-| 11 | Security Hardening | /qa-security | DONE | 2 | 2026-05-03 23:01 | [view](reports/2026-05-03-site-security.md) |
+| 11 | Security Hardening | /qa-security | DONE | 3 | 2026-05-08 | [view](reports/2026-05-08-site-security.md) |
 | 12 | Design System Install | /design-implement | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
 | 13 | Token Hygiene | /qa-tokens | PENDING | 0 | — | — |
 | 14 | Copy Audit | /qa-copy | DONE | 1 | 2026-05-03 | [view](reports/2026-05-03-ingredientbot-copy.md) |
@@ -42,7 +42,7 @@
 
 **Progress: 18/26 stages complete**
 
-**Last Updated**: 2026-05-08
+**Last Updated**: 2026-05-08 (qa-security run 3)
 
 ---
 
@@ -92,3 +92,4 @@
 | 2026-05-04 | /qa-nav | ~5m | SUCCESS | 30 routes, 0 orphans, 0 dead links, 100% coverage; Option C applied (normalize public footers); landing page + /r/[slug] now have Privacy/Terms footer links; tsc clean |
 | 2026-05-08 | /qa-tests-reconcile | ~4 min | SUCCESS | see 2026-05-08-tests-reconcile.md |
 | 2026-05-08 12:30 | /qa-tests-fix --project chromium | ~10m | SUCCESS | 63/63 passing — R1: middleware /r/ public path + dietary-profile testids + spice-slider testid + fresh-context anon test. [view](reports/2026-05-08-tests-fix.md) |
+| 2026-05-08 | /qa-security | ~10m | SUCCESS | 6 issues found (0 CRITICAL, 0 HIGH, 2 MEDIUM, 4 LOW); 3 fixed (2 MEDIUM + 1 LOW): NextAuth credentials login rate-limit, account-delete bcrypt rate-limit, requireAdmin() defense-in-depth on 3 admin pages; 3 LOW deferred. [view](reports/2026-05-08-site-security.md) |

@@ -1,10 +1,13 @@
 import { prisma } from '@/lib/prisma'
 import { formatDate } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
+import { requireAdmin } from '@/lib/admin'
 
 export const metadata = { title: 'Users — Admin — IngredientBot' }
 
 export default async function AdminUsersPage() {
+  // Defense-in-depth (see /admin/page.tsx). Page reads PII; double-gate.
+  await requireAdmin()
   const users = await prisma.user.findMany({
     orderBy: { createdAt: 'desc' },
     take: 200,
