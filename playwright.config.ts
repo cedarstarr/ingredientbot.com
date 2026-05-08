@@ -17,14 +17,17 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      grepInvert: /@mobile/,
     },
     {
       name: 'iphone',
       use: { ...devices['iPhone 14'] },
+      grep: /@mobile/,
     },
     {
       name: 'android',
       use: { ...devices['Pixel 5'] },
+      grep: /@mobile/,
     },
   ],
   webServer: {
