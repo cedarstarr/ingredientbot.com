@@ -50,9 +50,12 @@ test.describe('Pantry journey (F44)', () => {
     await expect(page.getByRole('main').getByText(ingredient)).not.toBeVisible()
   })
 
-  test('unauthenticated /pantry redirects to /login', async ({ page: anonPage }) => {
+  test('unauthenticated /pantry redirects to /login', async ({ browser }) => {
+    const ctx = await browser.newContext()
+    const anonPage = await ctx.newPage()
     await anonPage.goto('/pantry')
     await anonPage.waitForLoadState('domcontentloaded')
     expect(anonPage.url()).toContain('/login')
+    await ctx.close()
   })
 })

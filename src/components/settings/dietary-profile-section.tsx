@@ -234,7 +234,7 @@ export function DietaryProfileSection() {
       <div className="space-y-2">
         <h3 className="text-sm font-medium text-foreground">Medical</h3>
         <div className="flex flex-col gap-2">
-          <label className="flex items-center gap-2 cursor-pointer group">
+          <label className="flex items-center gap-2 cursor-pointer group" data-testid="medical-low-sodium">
             <Checkbox
               checked={lowSodium}
               onCheckedChange={(v) => { setLowSodium(Boolean(v)); setSaved(false) }}
@@ -244,7 +244,7 @@ export function DietaryProfileSection() {
               Low-sodium
             </span>
           </label>
-          <label className="flex items-center gap-2 cursor-pointer group">
+          <label className="flex items-center gap-2 cursor-pointer group" data-testid="medical-low-fodmap">
             <Checkbox
               checked={lowFodmap}
               onCheckedChange={(v) => { setLowFodmap(Boolean(v)); setSaved(false) }}
@@ -254,7 +254,7 @@ export function DietaryProfileSection() {
               Low-FODMAP
             </span>
           </label>
-          <label className="flex items-center gap-2 cursor-pointer group">
+          <label className="flex items-center gap-2 cursor-pointer group" data-testid="medical-diabetes-friendly">
             <Checkbox
               checked={diabetesFriendly}
               onCheckedChange={(v) => { setDiabetesFriendly(Boolean(v)); setSaved(false) }}
@@ -272,7 +272,7 @@ export function DietaryProfileSection() {
       </div>
 
       <div className="flex items-center gap-3 pt-1">
-        <Button onClick={handleSave} disabled={saving}>
+        <Button onClick={handleSave} disabled={saving} data-testid="dietary-save-preferences">
           {saving ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />

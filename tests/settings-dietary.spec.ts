@@ -16,7 +16,7 @@ test.describe('Dietary profile (F31, F79)', () => {
     await page.waitForLoadState('domcontentloaded')
 
     await expect(page.getByRole('heading', { name: /dietary profile/i })).toBeVisible()
-    await expect(page.getByRole('button', { name: /save preferences/i })).toBeVisible()
+    await expect(page.getByTestId('dietary-save-preferences')).toBeVisible()
   })
 
   test('F31: dietary restriction badges are present and clickable', async ({ page }) => {
@@ -52,9 +52,9 @@ test.describe('Dietary profile (F31, F79)', () => {
     await page.waitForTimeout(1000)
 
     await expect(page.getByRole('heading', { name: /^medical$/i })).toBeVisible()
-    await expect(page.getByLabel(/low-sodium/i)).toBeVisible()
-    await expect(page.getByLabel(/low-fodmap/i)).toBeVisible()
-    await expect(page.getByLabel(/diabetes-friendly/i)).toBeVisible()
+    await expect(page.getByTestId('medical-low-sodium')).toBeVisible()
+    await expect(page.getByTestId('medical-low-fodmap')).toBeVisible()
+    await expect(page.getByTestId('medical-diabetes-friendly')).toBeVisible()
   })
 
   test('F79: medical disclaimer copy is shown', async ({ page }) => {

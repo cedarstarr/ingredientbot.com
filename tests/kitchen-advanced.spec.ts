@@ -140,7 +140,7 @@ test.describe('Kitchen advanced options panel', () => {
 
   test('F78: Spice level slider is visible in advanced panel', async ({ page }) => {
     await page.getByRole('button', { name: /advanced options/i }).click()
-    await expect(page.getByRole('slider', { name: /spice level/i })).toBeVisible()
+    await expect(page.getByTestId('spice-level-slider')).toBeVisible()
   })
 
   test('F55: voice input button is present (or hidden on unsupported browsers)', async ({ page }) => {
