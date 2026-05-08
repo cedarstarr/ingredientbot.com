@@ -333,7 +333,7 @@ export function MealPlannerClient({
                         )}
                       >
                         <div className="flex flex-col gap-0.5">
-                          <span className="font-medium leading-tight">{recipe.title}</span>
+                          <span className="font-medium leading-tight truncate">{recipe.title}</span>
                           {recipe.cuisine && (
                             <span className="text-xs text-muted-foreground">{recipe.cuisine}</span>
                           )}
@@ -411,7 +411,7 @@ export function MealPlannerClient({
                     </span>
                     <span
                       className={cn(
-                        'flex-1 font-medium transition-colors',
+                        'flex-1 font-medium transition-colors truncate',
                         groceryChecked.has(recipe.id) && 'line-through text-muted-foreground',
                       )}
                     >
