@@ -201,7 +201,7 @@ export function HistoryClient({
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <Link
                         href={`/recipe/${recipe.id}`}
-                        className="font-semibold text-foreground hover:text-primary transition-colors leading-tight"
+                        className="font-semibold text-foreground hover:text-primary transition-colors leading-tight truncate max-w-full"
                       >
                         {recipe.title}
                       </Link>
