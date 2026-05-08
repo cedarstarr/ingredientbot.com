@@ -3,6 +3,9 @@
 import { useEffect } from 'react'
 import { Clock, Users, ChefHat } from 'lucide-react'
 
+// design-system-exempt: print-only grayscale ink values are intentional —
+// print stylesheets need hardcoded gray-N rather than HSL tokens.
+
 interface Ingredient {
   name: string
   amount: string
