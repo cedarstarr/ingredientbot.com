@@ -31,7 +31,7 @@
 | 16 | Performance Audit | /qa-perf | DONE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-perf.md) |
 | 17 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
 | 18 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
-| 19 | Final E2E Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
+| 19 | Final E2E Tests | /qa-tests-fix | DONE | 3 | 2026-05-08 12:30 | [view](reports/2026-05-08-tests-fix.md) |
 | 20 | iPhone Tests + Fix | /qa-tests-iphone | PENDING | 0 | — | — |
 | 21 | Android Tests + Fix | /qa-tests-android | PENDING | 0 | — | — |
 | 22 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
@@ -91,3 +91,4 @@
 | 2026-05-04 | /qa-perf | ~10m | SUCCESS | 5 issues found (3 HIGH, 2 MEDIUM), all 5 fixed; removed 'use client' from collection-detail-client + cooking-heatmap; parallelized 3 sequential Prisma query pairs (recipe/[id], cook route, history allTagRows); build clean |
 | 2026-05-04 | /qa-nav | ~5m | SUCCESS | 30 routes, 0 orphans, 0 dead links, 100% coverage; Option C applied (normalize public footers); landing page + /r/[slug] now have Privacy/Terms footer links; tsc clean |
 | 2026-05-08 | /qa-tests-reconcile | ~4 min | SUCCESS | see 2026-05-08-tests-reconcile.md |
+| 2026-05-08 12:30 | /qa-tests-fix --project chromium | ~10m | SUCCESS | 63/63 passing — R1: middleware /r/ public path + dietary-profile testids + spice-slider testid + fresh-context anon test. [view](reports/2026-05-08-tests-fix.md) |
