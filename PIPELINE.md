@@ -18,7 +18,7 @@
 | 3 | Feature Audit | /plan-feature-audit | DONE | 1 | 2026-04-11 | [view](reports/2026-04-11-site-audit.md) |
 | 4 | Feature Triage | /site-features | DONE | 1 | 2026-04-09 | [view](reports/2026-04-09-site-features.md) |
 | 5 | Feature Install | /site-install | DONE | 1 | 2026-04-10 00:00 | [view](reports/2026-04-10-site-install.md) |
-| 6 | Write Tests | /qa-tests-reconcile | DONE | 6 | 2026-05-08 | [view](reports/2026-05-02-tests-reconcile.md) |
+| 6 | Write Tests | /qa-tests-sync | DONE | 6 | 2026-05-08 | [view](reports/2026-05-02-tests-reconcile.md) |
 | 7 | Verify Build | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 8 | Database Review | /qa-db | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-site-db.md) |
 | 9 | QA / Bug Check | /qa-bugs | DONE | 3 | 2026-05-03 | [view](reports/2026-05-03-site-bugs.md) |
