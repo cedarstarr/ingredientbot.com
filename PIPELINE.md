@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-05-04 (qa-nav run 3 — normalized public footers on landing page + /r/[slug])
+**Last Updated**: 2026-05-08
 
 ---
 
@@ -18,30 +18,31 @@
 | 3 | Feature Audit | /plan-feature-audit | DONE | 1 | 2026-04-11 | [view](reports/2026-04-11-site-audit.md) |
 | 4 | Feature Triage | /site-features | DONE | 1 | 2026-04-09 | [view](reports/2026-04-09-site-features.md) |
 | 5 | Feature Install | /site-install | DONE | 1 | 2026-04-10 00:00 | [view](reports/2026-04-10-site-install.md) |
-| 6 | Write Tests | /qa-tests-reconcile | DONE | 5 | 2026-05-02 | [view](reports/2026-05-02-tests-reconcile.md) |
+| 6 | Write Tests | /qa-tests-reconcile | DONE | 6 | 2026-05-08 | [view](reports/2026-05-02-tests-reconcile.md) |
 | 7 | Verify Build | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 8 | Database Review | /qa-db | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-site-db.md) |
 | 9 | QA / Bug Check | /qa-bugs | DONE | 3 | 2026-05-03 | [view](reports/2026-05-03-site-bugs.md) |
 | 10 | Re-verify Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 11 | Security Hardening | /qa-security | DONE | 2 | 2026-05-03 23:01 | [view](reports/2026-05-03-site-security.md) |
-| 12 | UX/UI Pass | /qa-design | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
-| 13 | Copy Audit | /qa-copy | DONE | 1 | 2026-05-03 | [view](reports/2026-05-03-ingredientbot-copy.md) |
-| 14 | Navigation Audit | /qa-nav | DONE | 3 | 2026-05-04 | [view](reports/2026-05-04-site-nav-2.md) |
-| 15 | Performance Audit | /qa-perf | DONE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-perf.md) |
-| 16 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
-| 17 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
-| 18 | Final E2E Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
-| 19 | iPhone Tests + Fix | /qa-tests-iphone | PENDING | 0 | — | — |
-| 20 | Android Tests + Fix | /qa-tests-android | PENDING | 0 | — | — |
-| 21 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
-| 22 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
-| 23 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
-| 24 | Client Update | /ops-client-report | PENDING | 0 | — | — |
-| 25 | Launch | /ops-launch | PENDING | 0 | — | — |
+| 12 | Design System Install | /design-implement | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
+| 13 | Token Hygiene | /qa-tokens | PENDING | 0 | — | — |
+| 14 | Copy Audit | /qa-copy | DONE | 1 | 2026-05-03 | [view](reports/2026-05-03-ingredientbot-copy.md) |
+| 15 | Navigation Audit | /qa-nav | DONE | 3 | 2026-05-04 | [view](reports/2026-05-04-site-nav-2.md) |
+| 16 | Performance Audit | /qa-perf | DONE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-perf.md) |
+| 17 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
+| 18 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
+| 19 | Final E2E Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
+| 20 | iPhone Tests + Fix | /qa-tests-iphone | PENDING | 0 | — | — |
+| 21 | Android Tests + Fix | /qa-tests-android | PENDING | 0 | — | — |
+| 22 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
+| 23 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
+| 24 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
+| 25 | Client Update | /ops-client-report | PENDING | 0 | — | — |
+| 26 | Launch | /ops-launch | PENDING | 0 | — | — |
 
-**Progress: 18/25 stages complete**
+**Progress: 18/26 stages complete**
 
-**Last Updated**: 2026-05-04 (qa-nav run 3 — normalized public footers on landing page + /r/[slug])
+**Last Updated**: 2026-05-08
 
 ---
 
@@ -89,3 +90,4 @@
 | 2026-05-04 | /qa-nav | ~5m | SUCCESS | 30 routes, 0 orphans, 0 dead links, 100% coverage; Option C applied (Kitchen/Recipes/Account groupings); fixed semantic mismatch (Collections+Import moved from ACCOUNT→RECIPES); removed unused LayoutDashboard import; tsc clean |
 | 2026-05-04 | /qa-perf | ~10m | SUCCESS | 5 issues found (3 HIGH, 2 MEDIUM), all 5 fixed; removed 'use client' from collection-detail-client + cooking-heatmap; parallelized 3 sequential Prisma query pairs (recipe/[id], cook route, history allTagRows); build clean |
 | 2026-05-04 | /qa-nav | ~5m | SUCCESS | 30 routes, 0 orphans, 0 dead links, 100% coverage; Option C applied (normalize public footers); landing page + /r/[slug] now have Privacy/Terms footer links; tsc clean |
+| 2026-05-08 | /qa-tests-reconcile | ~4 min | SUCCESS | see 2026-05-08-tests-reconcile.md |
