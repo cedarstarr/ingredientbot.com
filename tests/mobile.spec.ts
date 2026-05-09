@@ -18,7 +18,9 @@ test.describe('@mobile public pages', () => {
 
   test('login form is usable on mobile', async ({ page }) => {
     await page.goto('/login')
-    await page.waitForLoadState('domcontentloaded')
+    // networkidle ensures the client-rendered LoginForm has fully hydrated
+    // before asserting — domcontentloaded fires too early for Suspense-wrapped components
+    await page.waitForLoadState('networkidle')
 
     await expect(page.getByLabel(/email/i)).toBeVisible()
     await expect(page.getByLabel(/password/i)).toBeVisible()
