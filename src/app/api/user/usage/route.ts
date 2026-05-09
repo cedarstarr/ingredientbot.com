@@ -1,13 +1,9 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { startOfCurrentMonth } from '@/lib/date-utils'
 
 const FREE_TIER_LIMIT = 5
-
-function startOfCurrentMonth(): Date {
-  const now = new Date()
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
-}
 
 export async function GET() {
   const session = await auth()

@@ -5,16 +5,11 @@ import { generateText } from 'ai'
 import { trackedModel } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { Difficulty } from '@prisma/client'
+import { startOfCurrentMonth } from '@/lib/date-utils'
 
 export const maxDuration = 60
 
 const FREE_TIER_LIMIT = 5
-
-// Returns the first day of the current month at midnight UTC
-function startOfCurrentMonth(): Date {
-  const now = new Date()
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
-}
 
 export async function POST(req: NextRequest) {
   const session = await auth()
