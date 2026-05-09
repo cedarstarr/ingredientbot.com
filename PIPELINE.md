@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-05-08 (qa-security run 3)
+**Last Updated**: 2026-05-09 (qa-bugs run 4)
 
 ---
 
@@ -21,7 +21,7 @@
 | 6 | Write Tests | /qa-tests-sync | DONE | 6 | 2026-05-08 | [view](reports/2026-05-02-tests-reconcile.md) |
 | 7 | Verify Build | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 8 | Database Review | /qa-db | DONE | 3 | 2026-05-08 | [view](reports/2026-05-08-site-db.md) |
-| 9 | QA / Bug Check | /qa-bugs | DONE | 3 | 2026-05-03 | [view](reports/2026-05-03-site-bugs.md) |
+| 9 | QA / Bug Check | /qa-bugs | DONE | 4 | 2026-05-09 | [view](reports/2026-05-09-site-bugs.md) |
 | 10 | Re-verify Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 11 | Security Hardening | /qa-security | DONE | 3 | 2026-05-08 | [view](reports/2026-05-08-site-security.md) |
 | 12 | Design System Install | /design-implement | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
@@ -42,7 +42,7 @@
 
 **Progress: 20/26 stages complete**
 
-**Last Updated**: 2026-05-08 22:09
+**Last Updated**: 2026-05-09 08:18
 
 ---
 
@@ -96,3 +96,4 @@
 | 2026-05-08 | /qa-db | ~8m | SUCCESS | 8 issues found (0 CRITICAL, 3 HIGH, 3 MEDIUM, 2 LOW); 6 fixed (all HIGH+MEDIUM): missing selects on chat/modify/cook/print routes, unbounded collection detail, AICallLog missing userId index + @@map; 2 LOW deferred (db push needed for table renames). [view](reports/2026-05-08-site-db.md) |
 | 2026-05-08 | /qa-tokens | ~3m | SUCCESS | 6 raw-palette grayscale fixes in print-recipe-view (screen vs print: classes), 1 text-white→text-primary-foreground in recipe-detail checkmark; cooking-mode dark overlay + emails/cron/global-error left intentional; tsc clean. [view](reports/2026-05-08-qa-tokens.md) |
 | 2026-05-08 22:09 | /qa-tests-iphone | ~1m | SUCCESS | 4/4 passed on iphone (WebKit/iPhone 14), no fixes needed. [view](reports/2026-05-08-tests-fix-2.md) |
+| 2026-05-09 08:18 | /qa-bugs | ~6m | SUCCESS | 5 issues found (0/0/4/1); 3 MEDIUM fixed (cron + verify-email-change try/catch); 1 MEDIUM deferred → FOU-61 (admin empty states); 1 LOW deferred (middleware→proxy portfolio sweep). [view](reports/2026-05-09-site-bugs.md) |
