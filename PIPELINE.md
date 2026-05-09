@@ -27,7 +27,7 @@
 | 12 | Design System Install | /design-implement | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
 | 13 | Token Hygiene | /qa-tokens | DONE | 1 | 2026-05-08 | [view](reports/2026-05-08-qa-tokens.md) |
 | 14 | Copy Audit | /qa-copy | DONE | 1 | 2026-05-03 | [view](reports/2026-05-03-ingredientbot-copy.md) |
-| 15 | Navigation Audit | /qa-nav | DONE | 3 | 2026-05-04 | [view](reports/2026-05-04-site-nav-2.md) |
+| 15 | Navigation Audit | /qa-nav | DONE | 4 | 2026-05-09 | [view](reports/2026-05-09-site-nav.md) |
 | 16 | Performance Audit | /qa-perf | DONE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-perf.md) |
 | 17 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
 | 18 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
@@ -42,7 +42,7 @@
 
 **Progress: 20/26 stages complete**
 
-**Last Updated**: 2026-05-09 08:18
+**Last Updated**: 2026-05-09
 
 ---
 
@@ -97,3 +97,4 @@
 | 2026-05-08 | /qa-tokens | ~3m | SUCCESS | 6 raw-palette grayscale fixes in print-recipe-view (screen vs print: classes), 1 text-white→text-primary-foreground in recipe-detail checkmark; cooking-mode dark overlay + emails/cron/global-error left intentional; tsc clean. [view](reports/2026-05-08-qa-tokens.md) |
 | 2026-05-08 22:09 | /qa-tests-iphone | ~1m | SUCCESS | 4/4 passed on iphone (WebKit/iPhone 14), no fixes needed. [view](reports/2026-05-08-tests-fix-2.md) |
 | 2026-05-09 08:18 | /qa-bugs | ~6m | SUCCESS | 5 issues found (0/0/4/1); 3 MEDIUM fixed (cron + verify-email-change try/catch); 1 MEDIUM deferred → FOU-61 (admin empty states); 1 LOW deferred (middleware→proxy portfolio sweep). [view](reports/2026-05-09-site-bugs.md) |
+| 2026-05-09 | /qa-nav | ~5m | SUCCESS | 30 routes, 0 orphaned, 0 dead links; Option C applied (Import moved Kitchen→Kitchen section; Recipes→Library label); build clean. [view](reports/2026-05-09-site-nav.md) |
