@@ -25,7 +25,7 @@
 | 10 | Re-verify Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 11 | Security Hardening | /qa-security | DONE | 3 | 2026-05-08 | [view](reports/2026-05-08-site-security.md) |
 | 12 | Design System Install | /design-implement | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
-| 13 | Token Hygiene | /qa-tokens | PENDING | 0 | — | — |
+| 13 | Token Hygiene | /qa-tokens | DONE | 1 | 2026-05-08 | [view](reports/2026-05-08-qa-tokens.md) |
 | 14 | Copy Audit | /qa-copy | DONE | 1 | 2026-05-03 | [view](reports/2026-05-03-ingredientbot-copy.md) |
 | 15 | Navigation Audit | /qa-nav | DONE | 3 | 2026-05-04 | [view](reports/2026-05-04-site-nav-2.md) |
 | 16 | Performance Audit | /qa-perf | DONE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-perf.md) |
@@ -40,9 +40,9 @@
 | 25 | Client Update | /ops-client-report | PENDING | 0 | — | — |
 | 26 | Launch | /ops-launch | PENDING | 0 | — | — |
 
-**Progress: 18/26 stages complete**
+**Progress: 19/26 stages complete**
 
-**Last Updated**: 2026-05-08 (qa-db run 3)
+**Last Updated**: 2026-05-08 (qa-tokens run 1)
 
 ---
 
@@ -94,3 +94,4 @@
 | 2026-05-08 12:30 | /qa-tests-fix --project chromium | ~10m | SUCCESS | 63/63 passing — R1: middleware /r/ public path + dietary-profile testids + spice-slider testid + fresh-context anon test. [view](reports/2026-05-08-tests-fix.md) |
 | 2026-05-08 | /qa-security | ~10m | SUCCESS | 6 issues found (0 CRITICAL, 0 HIGH, 2 MEDIUM, 4 LOW); 3 fixed (2 MEDIUM + 1 LOW): NextAuth credentials login rate-limit, account-delete bcrypt rate-limit, requireAdmin() defense-in-depth on 3 admin pages; 3 LOW deferred. [view](reports/2026-05-08-site-security.md) |
 | 2026-05-08 | /qa-db | ~8m | SUCCESS | 8 issues found (0 CRITICAL, 3 HIGH, 3 MEDIUM, 2 LOW); 6 fixed (all HIGH+MEDIUM): missing selects on chat/modify/cook/print routes, unbounded collection detail, AICallLog missing userId index + @@map; 2 LOW deferred (db push needed for table renames). [view](reports/2026-05-08-site-db.md) |
+| 2026-05-08 | /qa-tokens | ~3m | SUCCESS | 6 raw-palette grayscale fixes in print-recipe-view (screen vs print: classes), 1 text-white→text-primary-foreground in recipe-detail checkmark; cooking-mode dark overlay + emails/cron/global-error left intentional; tsc clean. [view](reports/2026-05-08-qa-tokens.md) |

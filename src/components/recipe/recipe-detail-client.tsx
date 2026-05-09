@@ -345,7 +345,7 @@ export function RecipeDetailClient({ recipe, collections = [] }: Props) {
                       checkedIngredients.has(i) && 'bg-primary border-primary',
                     )}>
                       {checkedIngredients.has(i) && (
-                        <svg className="absolute inset-0 m-auto w-2.5 h-2.5 text-white" viewBox="0 0 10 10" fill="none">
+                        <svg className="absolute inset-0 m-auto w-2.5 h-2.5 text-primary-foreground" viewBox="0 0 10 10" fill="none">
                           <path d="M1.5 5L4 7.5L8.5 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       )}
