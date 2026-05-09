@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-05-09
+**Last Updated**: 2026-05-09 16:30
 
 ---
 
@@ -23,7 +23,7 @@
 | 8 | Database Review | /qa-db | DONE | 3 | 2026-05-08 | [view](reports/2026-05-08-site-db.md) |
 | 9 | QA / Bug Check | /qa-bugs | DONE | 4 | 2026-05-09 | [view](reports/2026-05-09-site-bugs.md) |
 | 10 | Re-verify Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
-| 11 | Security Hardening | /qa-security | DONE | 3 | 2026-05-08 | [view](reports/2026-05-08-site-security.md) |
+| 11 | Security Hardening | /qa-security | DONE | 4 | 2026-05-09 16:30 | [view](reports/2026-05-09-site-security.md) |
 | 12 | Design System Install | /design-implement | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
 | 13 | Token Hygiene | /qa-tokens | DONE | 1 | 2026-05-08 | [view](reports/2026-05-08-qa-tokens.md) |
 | 14 | Copy Audit | /qa-copy | DONE | 1 | 2026-05-03 | [view](reports/2026-05-03-ingredientbot-copy.md) |
@@ -42,7 +42,7 @@
 
 **Progress: 20/26 stages complete**
 
-**Last Updated**: 2026-05-09
+**Last Updated**: 2026-05-09 16:30
 
 ---
 
@@ -99,3 +99,4 @@
 | 2026-05-09 08:18 | /qa-bugs | ~6m | SUCCESS | 5 issues found (0/0/4/1); 3 MEDIUM fixed (cron + verify-email-change try/catch); 1 MEDIUM deferred → FOU-61 (admin empty states); 1 LOW deferred (middleware→proxy portfolio sweep). [view](reports/2026-05-09-site-bugs.md) |
 | 2026-05-09 | /qa-nav | ~5m | SUCCESS | 30 routes, 0 orphaned, 0 dead links; Option C applied (Import moved Kitchen→Kitchen section; Recipes→Library label); build clean. [view](reports/2026-05-09-site-nav.md) |
 | 2026-05-09 | /qa-tests-sync | ~8m | SUCCESS | 2 new test files (3 features), 0 stale fixed |
+| 2026-05-09 16:30 | /qa-security | ~10m | SUCCESS | 5 issues found (0/0/1/4); 3 fixed (1 MEDIUM + 2 LOW): next@16.2.6 DoS advisory, analyze-photo mime allowlist, GOOGLE_GENERATIVE_AI_API_KEY env validation; 2 LOW deferred (verify-email-change rate-limit, share host-header trust). [view](reports/2026-05-09-site-security.md) |
