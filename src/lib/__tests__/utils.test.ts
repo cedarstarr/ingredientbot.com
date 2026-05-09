@@ -33,6 +33,21 @@ describe('getBaseUrl', () => {
     expect(getBaseUrl()).toBe('https://ingredientbot.com')
     delete process.env.NEXT_PUBLIC_SITE_URL
   })
+
+  it('uses VERCEL_URL (prefixed with https://) when NEXT_PUBLIC_SITE_URL is absent', () => {
+    delete process.env.NEXT_PUBLIC_SITE_URL
+    process.env.VERCEL_URL = 'ingredientbot-abc123.vercel.app'
+    expect(getBaseUrl()).toBe('https://ingredientbot-abc123.vercel.app')
+    delete process.env.VERCEL_URL
+  })
+
+  it('NEXT_PUBLIC_SITE_URL takes priority over VERCEL_URL', () => {
+    process.env.NEXT_PUBLIC_SITE_URL = 'https://ingredientbot.com'
+    process.env.VERCEL_URL = 'ingredientbot-abc123.vercel.app'
+    expect(getBaseUrl()).toBe('https://ingredientbot.com')
+    delete process.env.NEXT_PUBLIC_SITE_URL
+    delete process.env.VERCEL_URL
+  })
 })
 
 describe('safeJsonLdString — XSS-safe JSON-LD', () => {
