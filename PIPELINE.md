@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-05-09 (qa-bugs run 4)
+**Last Updated**: 2026-05-09
 
 ---
 
@@ -18,7 +18,7 @@
 | 3 | Feature Audit | /plan-feature-audit | DONE | 1 | 2026-04-11 | [view](reports/2026-04-11-site-audit.md) |
 | 4 | Feature Triage | /site-features | DONE | 1 | 2026-04-09 | [view](reports/2026-04-09-site-features.md) |
 | 5 | Feature Install | /site-install | DONE | 1 | 2026-04-10 00:00 | [view](reports/2026-04-10-site-install.md) |
-| 6 | Write Tests | /qa-tests-sync | DONE | 6 | 2026-05-08 | [view](reports/2026-05-02-tests-reconcile.md) |
+| 6 | Write Tests | /qa-tests-sync | DONE | 7 | 2026-05-08 | [view](reports/2026-05-09-tests-reconcile.md) |
 | 7 | Verify Build | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 8 | Database Review | /qa-db | DONE | 3 | 2026-05-08 | [view](reports/2026-05-08-site-db.md) |
 | 9 | QA / Bug Check | /qa-bugs | DONE | 4 | 2026-05-09 | [view](reports/2026-05-09-site-bugs.md) |
@@ -98,3 +98,4 @@
 | 2026-05-08 22:09 | /qa-tests-iphone | ~1m | SUCCESS | 4/4 passed on iphone (WebKit/iPhone 14), no fixes needed. [view](reports/2026-05-08-tests-fix-2.md) |
 | 2026-05-09 08:18 | /qa-bugs | ~6m | SUCCESS | 5 issues found (0/0/4/1); 3 MEDIUM fixed (cron + verify-email-change try/catch); 1 MEDIUM deferred → FOU-61 (admin empty states); 1 LOW deferred (middleware→proxy portfolio sweep). [view](reports/2026-05-09-site-bugs.md) |
 | 2026-05-09 | /qa-nav | ~5m | SUCCESS | 30 routes, 0 orphaned, 0 dead links; Option C applied (Import moved Kitchen→Kitchen section; Recipes→Library label); build clean. [view](reports/2026-05-09-site-nav.md) |
+| 2026-05-09 | /qa-tests-sync | ~8m | SUCCESS | 2 new test files (3 features), 0 stale fixed |
