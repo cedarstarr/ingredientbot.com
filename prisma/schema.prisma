@@ -323,6 +323,8 @@ model AICallLog {
 
   @@index([createdAt])
   @@index([feature])
+  @@index([userId])
+  @@map("ai_call_logs")
 }
 
 // Cache for expensive AI outputs keyed by content hash. Eliminates unbounded
@@ -330,15 +332,16 @@ model AICallLog {
 // re-uploaded fridge photos, repeat ingredient-comment requests).
 model RecipeCache {
   id        String   @id @default(cuid())
-  feature   String   // 'suggestions' | 'photo' | 'comment'
+  feature   String // 'suggestions' | 'photo' | 'comment'
   inputHash String
-  output    Json     // stored result (full JSON for non-streamed payloads)
+  output    Json // stored result (full JSON for non-streamed payloads)
   hitCount  Int      @default(0)
   createdAt DateTime @default(now())
   lastHitAt DateTime @default(now())
 
   @@unique([feature, inputHash])
   @@index([feature, lastHitAt])
+  @@map("recipe_caches")
 }
 
 // F44: Pantry inventory — persistent ingredient list tracked between sessions

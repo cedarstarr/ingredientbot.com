@@ -56,8 +56,10 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
   const { id } = await params
   try {
+    // Ownership check only — select id to avoid loading full recipeData JSON + rawText
     const recipe = await prisma.recipe.findFirst({
-      where: { id, userId: session.user.id }
+      where: { id, userId: session.user.id },
+      select: { id: true },
     })
     if (!recipe) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 

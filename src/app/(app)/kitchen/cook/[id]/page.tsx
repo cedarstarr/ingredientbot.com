@@ -13,6 +13,16 @@ export default async function CookingModePage({ params }: { params: Promise<{ id
 
   const recipe = await prisma.recipe.findFirst({
     where: { id, userId: session.user.id },
+    // Exclude rawText (db.Text) — cooking mode needs recipeData/steps but not the raw AI response
+    select: {
+      id: true, title: true, description: true, cuisine: true, difficulty: true,
+      servings: true, prepTimeMin: true, cookTimeMin: true, tags: true,
+      recipeData: true, modifications: true, nutrition: true,
+      sourceIngredients: true, fromPhoto: true,
+      cookedCount: true, lastCookedAt: true,
+      isPublic: true, publicSlug: true, rating: true,
+      collectionId: true, createdAt: true, updatedAt: true,
+    },
   })
 
   if (!recipe) notFound()

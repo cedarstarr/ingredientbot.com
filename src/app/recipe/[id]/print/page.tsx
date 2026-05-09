@@ -25,6 +25,13 @@ export default async function RecipePrintPage({ params }: { params: Promise<{ id
   const { id } = await params
   const recipe = await prisma.recipe.findFirst({
     where: { id, userId: session.user.id },
+    // Print view needs full recipe data but not rawText (AI response) or modification history
+    select: {
+      id: true, title: true, description: true, cuisine: true, difficulty: true,
+      servings: true, prepTimeMin: true, cookTimeMin: true, tags: true,
+      recipeData: true, nutrition: true, sourceIngredients: true,
+      isPublic: true, publicSlug: true, createdAt: true, updatedAt: true,
+    },
   })
 
   if (!recipe) notFound()

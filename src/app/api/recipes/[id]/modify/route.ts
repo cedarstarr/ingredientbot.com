@@ -27,7 +27,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const { id } = await params
   const recipe = await prisma.recipe.findFirst({
-    where: { id, userId: session.user.id }
+    where: { id, userId: session.user.id },
+    // rawText is needed here: it's the full AI-generated recipe text fed back into the modify prompt.
+    // Exclude heavier fields not needed (nutrition, sourceIngredients, tags, etc.)
+    select: {
+      id: true, title: true, servings: true, cuisine: true, difficulty: true,
+      recipeData: true, modifications: true, rawText: true,
+    },
   })
   if (!recipe) return new Response('Not found', { status: 404 })
 
