@@ -32,7 +32,7 @@
 | 17 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
 | 18 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
 | 19 | Final E2E Tests | /qa-tests-fix | DONE | 3 | 2026-05-08 12:30 | [view](reports/2026-05-08-tests-fix.md) |
-| 20 | iPhone Tests + Fix | /qa-tests-iphone | PENDING | 0 | — | — |
+| 20 | iPhone Tests + Fix | /qa-tests-iphone | DONE | 1 | 2026-05-08 22:09 | [view](reports/2026-05-08-tests-fix-2.md) |
 | 21 | Android Tests + Fix | /qa-tests-android | PENDING | 0 | — | — |
 | 22 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
 | 23 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
@@ -40,9 +40,9 @@
 | 25 | Client Update | /ops-client-report | PENDING | 0 | — | — |
 | 26 | Launch | /ops-launch | PENDING | 0 | — | — |
 
-**Progress: 19/26 stages complete**
+**Progress: 20/26 stages complete**
 
-**Last Updated**: 2026-05-08 (qa-tokens run 1)
+**Last Updated**: 2026-05-08 22:09
 
 ---
 
@@ -95,3 +95,4 @@
 | 2026-05-08 | /qa-security | ~10m | SUCCESS | 6 issues found (0 CRITICAL, 0 HIGH, 2 MEDIUM, 4 LOW); 3 fixed (2 MEDIUM + 1 LOW): NextAuth credentials login rate-limit, account-delete bcrypt rate-limit, requireAdmin() defense-in-depth on 3 admin pages; 3 LOW deferred. [view](reports/2026-05-08-site-security.md) |
 | 2026-05-08 | /qa-db | ~8m | SUCCESS | 8 issues found (0 CRITICAL, 3 HIGH, 3 MEDIUM, 2 LOW); 6 fixed (all HIGH+MEDIUM): missing selects on chat/modify/cook/print routes, unbounded collection detail, AICallLog missing userId index + @@map; 2 LOW deferred (db push needed for table renames). [view](reports/2026-05-08-site-db.md) |
 | 2026-05-08 | /qa-tokens | ~3m | SUCCESS | 6 raw-palette grayscale fixes in print-recipe-view (screen vs print: classes), 1 text-white→text-primary-foreground in recipe-detail checkmark; cooking-mode dark overlay + emails/cron/global-error left intentional; tsc clean. [view](reports/2026-05-08-qa-tokens.md) |
+| 2026-05-08 22:09 | /qa-tests-iphone | ~1m | SUCCESS | 4/4 passed on iphone (WebKit/iPhone 14), no fixes needed. [view](reports/2026-05-08-tests-fix-2.md) |
