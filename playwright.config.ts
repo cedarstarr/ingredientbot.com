@@ -3,6 +3,7 @@ import { defineConfig, devices } from '@playwright/test'
 const PORT = 3010
 const baseURL = process.env.PLAYWRIGHT_BASE_URL || `http://localhost:${PORT}`
 const isPreview = !!process.env.PLAYWRIGHT_BASE_URL
+const isVercelPreview = baseURL.includes('vercel.app')
 
 export default defineConfig({
   testDir: './tests',
@@ -14,6 +15,14 @@ export default defineConfig({
   use: {
     baseURL,
     trace: 'on-first-retry',
+    ...(isVercelPreview && process.env.VERCEL_AUTOMATION_BYPASS_SECRET
+      ? {
+          extraHTTPHeaders: {
+            'x-vercel-protection-bypass': process.env.VERCEL_AUTOMATION_BYPASS_SECRET,
+            'x-vercel-set-bypass-cookie': 'true',
+          },
+        }
+      : {}),
   },
   projects: [
     {
