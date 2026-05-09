@@ -22,18 +22,18 @@ function hasExpiringSoon(expiresAt: string): boolean {
   return days <= 7
 }
 
-// Nav grouped by user mental model: Kitchen (active cooking) | Recipes (library) | Account
+// Nav grouped by user mental model: Kitchen (active cooking ops) | Library (saved content) | Account
 const KITCHEN_LINKS = [
-  { href: '/kitchen',    label: 'Kitchen',   icon: ChefHat },
-  { href: '/pantry',     label: 'Pantry',    icon: Package },
-  { href: '/meal-plan',  label: 'Meal Plan', icon: CalendarDays },
+  { href: '/kitchen',    label: 'Kitchen',       icon: ChefHat },
+  { href: '/import',     label: 'Import Recipe', icon: Link2 },
+  { href: '/pantry',     label: 'Pantry',        icon: Package },
+  { href: '/meal-plan',  label: 'Meal Plan',     icon: CalendarDays },
 ]
 
 const RECIPES_LINKS = [
   { href: '/saved',       label: 'Saved Recipes', icon: BookOpen },
   { href: '/collections', label: 'Collections',   icon: FolderOpen },
   { href: '/history',     label: 'History',       icon: History },
-  { href: '/import',      label: 'Import Recipe', icon: Link2 },
 ]
 
 const ACCOUNT_LINKS = [
@@ -152,7 +152,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
           />
         ))}
 
-        <NavSection label="Recipes" />
+        <NavSection label="Library" />
         {RECIPES_LINKS.map(({ href, label, icon }) => (
           <NavLink
             key={href}
