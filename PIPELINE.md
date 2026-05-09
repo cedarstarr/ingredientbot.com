@@ -20,7 +20,7 @@
 | 5 | Feature Install | /site-install | DONE | 1 | 2026-04-10 00:00 | [view](reports/2026-04-10-site-install.md) |
 | 6 | Write Tests | /qa-tests-sync | DONE | 6 | 2026-05-08 | [view](reports/2026-05-02-tests-reconcile.md) |
 | 7 | Verify Build | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
-| 8 | Database Review | /qa-db | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-site-db.md) |
+| 8 | Database Review | /qa-db | DONE | 3 | 2026-05-08 | [view](reports/2026-05-08-site-db.md) |
 | 9 | QA / Bug Check | /qa-bugs | DONE | 3 | 2026-05-03 | [view](reports/2026-05-03-site-bugs.md) |
 | 10 | Re-verify Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 11 | Security Hardening | /qa-security | DONE | 3 | 2026-05-08 | [view](reports/2026-05-08-site-security.md) |
@@ -42,7 +42,7 @@
 
 **Progress: 18/26 stages complete**
 
-**Last Updated**: 2026-05-08 (qa-security run 3)
+**Last Updated**: 2026-05-08 (qa-db run 3)
 
 ---
 
@@ -93,3 +93,4 @@
 | 2026-05-08 | /qa-tests-reconcile | ~4 min | SUCCESS | see 2026-05-08-tests-reconcile.md |
 | 2026-05-08 12:30 | /qa-tests-fix --project chromium | ~10m | SUCCESS | 63/63 passing — R1: middleware /r/ public path + dietary-profile testids + spice-slider testid + fresh-context anon test. [view](reports/2026-05-08-tests-fix.md) |
 | 2026-05-08 | /qa-security | ~10m | SUCCESS | 6 issues found (0 CRITICAL, 0 HIGH, 2 MEDIUM, 4 LOW); 3 fixed (2 MEDIUM + 1 LOW): NextAuth credentials login rate-limit, account-delete bcrypt rate-limit, requireAdmin() defense-in-depth on 3 admin pages; 3 LOW deferred. [view](reports/2026-05-08-site-security.md) |
+| 2026-05-08 | /qa-db | ~8m | SUCCESS | 8 issues found (0 CRITICAL, 3 HIGH, 3 MEDIUM, 2 LOW); 6 fixed (all HIGH+MEDIUM): missing selects on chat/modify/cook/print routes, unbounded collection detail, AICallLog missing userId index + @@map; 2 LOW deferred (db push needed for table renames). [view](reports/2026-05-08-site-db.md) |
