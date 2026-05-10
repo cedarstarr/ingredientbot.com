@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma'
 import { generateText } from 'ai'
 import { trackedModel } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
+import * as Sentry from '@sentry/nextjs'
+import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
 export const maxDuration = 30
 
@@ -24,55 +26,56 @@ export async function POST(
   })
   if (!recipe) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  const { missingIngredient } = await req.json()
-  if (!missingIngredient) {
-    return NextResponse.json({ error: 'missingIngredient is required' }, { status: 400 })
-  }
+  try {
+    const { missingIngredient } = await req.json()
+    if (!missingIngredient) {
+      return NextResponse.json({ error: 'missingIngredient is required' }, { status: 400 })
+    }
 
-  if (process.env.PLAYWRIGHT_TEST === 'true') {
-    return NextResponse.json({
-      role: 'Fat and flavor base that crisps up and renders its fat into the dish.',
-      substitutions: [
-        {
-          name: 'Pancetta',
-          quantity: '150g',
-          flavorImpact: 'Less fatty than the original but delivers a similar cured-pork flavor.',
-          textureImpact: 'Crisps up similarly when rendered.',
-          confidence: 'works_great',
-          techniqueNote: null,
-        },
-        {
-          name: 'Thick-cut bacon',
-          quantity: '150g',
-          flavorImpact: 'Adds a smokier flavor that changes the character of the dish slightly.',
-          textureImpact: 'Crisps well; drain excess fat before combining.',
-          confidence: 'works_ok',
-          techniqueNote: 'Drain some of the rendered fat before adding pasta.',
-        },
-      ],
-      tip: 'Whichever you use, render the fat slowly over medium heat for the best texture.',
-    })
-  }
+    if (process.env.PLAYWRIGHT_TEST === 'true') {
+      return NextResponse.json({
+        role: 'Fat and flavor base that crisps up and renders its fat into the dish.',
+        substitutions: [
+          {
+            name: 'Pancetta',
+            quantity: '150g',
+            flavorImpact: 'Less fatty than the original but delivers a similar cured-pork flavor.',
+            textureImpact: 'Crisps up similarly when rendered.',
+            confidence: 'works_great',
+            techniqueNote: null,
+          },
+          {
+            name: 'Thick-cut bacon',
+            quantity: '150g',
+            flavorImpact: 'Adds a smokier flavor that changes the character of the dish slightly.',
+            textureImpact: 'Crisps well; drain excess fat before combining.',
+            confidence: 'works_ok',
+            techniqueNote: 'Drain some of the rendered fat before adding pasta.',
+          },
+        ],
+        tip: 'Whichever you use, render the fat slowly over medium heat for the best texture.',
+      })
+    }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return new Response('AI service not configured', { status: 503 })
-  }
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return new Response('AI service not configured', { status: 503 })
+    }
 
-  interface RecipeDataShape {
-    title?: string
-    ingredients?: Array<{ name: string; amount: string; unit: string }>
-    steps?: string[]
-  }
-  const recipeData = recipe.recipeData as RecipeDataShape
+    interface RecipeDataShape {
+      title?: string
+      ingredients?: Array<{ name: string; amount: string; unit: string }>
+      steps?: string[]
+    }
+    const recipeData = recipe.recipeData as RecipeDataShape
 
-  const ingredientList = recipeData.ingredients
-    ? recipeData.ingredients.map(i => `${i.amount} ${i.unit} ${i.name}`.trim()).join(', ')
-    : recipe.sourceIngredients.join(', ')
+    const ingredientList = recipeData.ingredients
+      ? recipeData.ingredients.map(i => `${i.amount} ${i.unit} ${i.name}`.trim()).join(', ')
+      : recipe.sourceIngredients.join(', ')
 
-  const { text } = await generateText({
-    model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'ingredient-substitute', userId: session.user.id }),
-    maxOutputTokens: 800,
-    system: `You are a professional chef and food scientist. Analyze the role an ingredient plays in a recipe and suggest practical substitutions. Respond with valid JSON only, no markdown fences:
+    const { text } = await generateText({
+      model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'ingredient-substitute', userId: session.user.id }),
+      maxOutputTokens: 800,
+      system: `You are a professional chef and food scientist. Analyze the role an ingredient plays in a recipe and suggest practical substitutions. Respond with valid JSON only, no markdown fences:
 {
   "role": "one sentence describing what role this ingredient plays (e.g., binder, acid, fat, leavener, flavor base)",
   "substitutions": [
@@ -87,24 +90,30 @@ export async function POST(
   ],
   "tip": "brief chef's tip about the substitution"
 }`,
-    messages: [{
-      role: 'user',
-      content: `Recipe: ${recipeData.title || recipe.title}
+      messages: [{
+        role: 'user',
+        content: `Recipe: ${recipeData.title || recipe.title}
 All ingredients: ${ingredientList}
 Missing ingredient: ${missingIngredient}
 
 Analyze what role "${missingIngredient}" plays in this specific recipe and suggest 2-3 substitutions ordered from best to last resort.`,
-    }],
-  })
+      }],
+    })
 
-  const jsonMatch = text.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) {
-    return NextResponse.json({ error: 'Failed to parse substitutions' }, { status: 500 })
-  }
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) {
+      return NextResponse.json({ error: 'Failed to parse substitutions' }, { status: 500 })
+    }
 
-  try {
-    return NextResponse.json(JSON.parse(jsonMatch[0]))
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON from AI' }, { status: 500 })
+    try {
+      return NextResponse.json(JSON.parse(jsonMatch[0]))
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON from AI' }, { status: 500 })
+    }
+  } catch (error) {
+    if (isRedirectError(error)) throw error
+    console.error('substitute error:', error)
+    Sentry.captureException(error)
+    return NextResponse.json({ error: 'Failed to find substitute' }, { status: 500 })
   }
 }

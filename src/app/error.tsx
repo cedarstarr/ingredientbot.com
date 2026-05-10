@@ -16,7 +16,10 @@ export default function Error({
   }, [error])
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
+    <div
+      data-testid="route-error-boundary"
+      className="flex min-h-screen items-center justify-center px-4"
+    >
       <div className="max-w-md text-center">
         <AlertCircle className="mx-auto mb-4 h-16 w-16 text-destructive" />
         <h1 className="mb-2 text-2xl font-bold">Something went wrong</h1>
