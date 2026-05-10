@@ -43,6 +43,11 @@ export default async function AdminUsersPage() {
                 <td className="px-4 py-2.5 text-muted-foreground text-xs">{formatDate(user.createdAt)}</td>
               </tr>
             ))}
+            {users.length === 0 && (
+              <tr>
+                <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">No users yet</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
