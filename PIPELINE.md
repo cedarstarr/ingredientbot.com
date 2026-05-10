@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-05-09 18:00
+**Last Updated**: 2026-05-09 19:00
 
 ---
 
@@ -28,7 +28,7 @@
 | 13 | Design System Install | /design-implement | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
 | 14 | Token Hygiene | /qa-tokens | DONE | 1 | 2026-05-08 | [view](reports/2026-05-08-qa-tokens.md) |
 | 15 | Copy Audit | /qa-copy | DONE | 1 | 2026-05-03 | [view](reports/2026-05-03-ingredientbot-copy.md) |
-| 16 | Navigation Audit | /qa-nav | DONE | 5 | 2026-05-09 | [view](reports/2026-05-09-site-nav-2.md) |
+| 16 | Navigation Audit | /qa-nav | DONE | 6 | 2026-05-09 19:00 | [view](reports/2026-05-09-nav-3.md) |
 | 17 | Performance Audit | /qa-perf | DONE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-perf.md) |
 | 18 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
 | 19 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
@@ -43,7 +43,7 @@
 
 **Progress: 21/27 stages complete**
 
-**Last Updated**: 2026-05-09 18:00
+**Last Updated**: 2026-05-09 19:00
 
 ---
 
@@ -103,3 +103,4 @@
 | 2026-05-09 16:30 | /qa-security | ~10m | SUCCESS | 5 issues found (0/0/1/4); 3 fixed (1 MEDIUM + 2 LOW): next@16.2.6 DoS advisory, analyze-photo mime allowlist, GOOGLE_GENERATIVE_AI_API_KEY env validation; 2 LOW deferred (verify-email-change rate-limit, share host-header trust). [view](reports/2026-05-09-site-security.md) |
 | 2026-05-09 17:00 | /qa-resilience | ~3m | SUCCESS | 4 findings, 0 AUTO, 4 MANUAL (2 MEDIUM unprotected handlers, 1 LOW no resilience spec, 1 LOW minimal health). No code changes. [view](reports/2026-05-09-resilience.md) |
 | 2026-05-09 | /qa-nav | ~5m | SUCCESS | 30 routes, 0 orphans, 0 dead links, 100% coverage; Option B applied (noun-led: Kitchen/Recipes/Insights/Account, Import moved to Recipes, Insights promoted to own section, in-app Privacy/Terms footer added); build clean. [view](reports/2026-05-09-site-nav-2.md) |
+| 2026-05-09 19:00 | /qa-nav | ~3m | SUCCESS | Re-audit of post-Run-2 state: 30 routes, 0 orphans, 0 dead links, 100% coverage; Option B confirmed correct, no changes applied. [view](reports/2026-05-09-nav-3.md) |
