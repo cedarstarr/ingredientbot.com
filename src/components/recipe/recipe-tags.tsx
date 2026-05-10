@@ -130,7 +130,7 @@ export function RecipeTags({ recipeId, initialTags }: RecipeTagsProps) {
                   <button
                     key={s}
                     onMouseDown={() => addTag(s)}
-                    className="w-full text-left px-2 py-1 text-xs hover:bg-muted transition-colors text-foreground"
+                    className="w-full text-left px-2 py-1 text-xs hover:bg-muted transition-colors text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     {s}
                   </button>

@@ -240,7 +240,7 @@ export function CookingModeClient({ recipe }: Props) {
           </span>
           <Link
             href={`/recipe/${recipe.id}`}
-            className="flex items-center gap-1.5 text-xs border border-white/20 text-white/70 hover:text-white hover:border-white/40 rounded-md px-3 py-1.5 transition-colors"
+            className="flex items-center gap-1.5 text-xs border border-white/20 text-white/70 hover:text-white hover:border-white/40 rounded-md px-3 py-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <X className="h-3.5 w-3.5" />
             Exit cook mode
@@ -259,7 +259,7 @@ export function CookingModeClient({ recipe }: Props) {
             onClick={() => setCurrentStep(i)}
             aria-label={`Go to step ${i + 1}`}
             className={cn(
-              'h-1.5 rounded-full transition-colors duration-200',
+              'h-1.5 rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
               i <= currentStep ? 'bg-primary' : 'bg-white/15',
             )}
           />
@@ -335,7 +335,7 @@ export function CookingModeClient({ recipe }: Props) {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => { setTimerRunning(false); setTimerElapsed(0) }}
-                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/70 hover:text-white hover:border-white/40 transition-colors"
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/70 hover:text-white hover:border-white/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     aria-label="Reset timer"
                   >
                     <RotateCcw className="h-4 w-4" />
@@ -343,7 +343,7 @@ export function CookingModeClient({ recipe }: Props) {
                   {!timerDone && (
                     <button
                       onClick={() => setTimerRunning(r => !r)}
-                      className="flex h-14 w-14 items-center justify-center rounded-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors"
+                      className="flex h-14 w-14 items-center justify-center rounded-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                       aria-label={timerRunning ? 'Pause timer' : 'Start timer'}
                     >
                       {timerRunning
@@ -355,7 +355,7 @@ export function CookingModeClient({ recipe }: Props) {
                   <button
                     onClick={goNext}
                     disabled={currentStep === steps.length - 1}
-                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/70 hover:text-white hover:border-white/40 transition-colors disabled:opacity-30"
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/70 hover:text-white hover:border-white/40 transition-colors disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     aria-label="Skip step"
                   >
                     <FastForward className="h-4 w-4" />
@@ -397,7 +397,7 @@ export function CookingModeClient({ recipe }: Props) {
 
               <button
                 onClick={() => setShowIngredients(v => !v)}
-                className="flex items-center gap-1.5 text-sm border border-white/20 text-white/70 hover:text-white hover:border-white/40 rounded-md px-3 py-2 transition-colors"
+                className="flex items-center gap-1.5 text-sm border border-white/20 text-white/70 hover:text-white hover:border-white/40 rounded-md px-3 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {showIngredients ? 'Hide' : 'Ingredients'}
               </button>
@@ -415,7 +415,7 @@ export function CookingModeClient({ recipe }: Props) {
                   onClick={() => setCurrentStep(i)}
                   aria-label={`Go to step ${i + 1}`}
                   className={cn(
-                    'h-1.5 rounded-full transition-all focus-visible:outline-none',
+                    'h-1.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                     i === currentStep
                       ? 'w-6 bg-primary'
                       : completedSteps.has(i)

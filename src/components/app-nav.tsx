@@ -134,7 +134,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
         {onClose && (
           <button
             onClick={onClose}
-            className="ml-1 rounded p-1 text-muted-foreground hover:text-foreground transition-colors"
+            className="ml-1 rounded p-1 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Close navigation"
           >
             <X className="h-4 w-4" />

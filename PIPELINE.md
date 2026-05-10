@@ -26,7 +26,7 @@
 | 11 | Security Hardening | /qa-security | DONE | 4 | 2026-05-09 16:30 | [view](reports/2026-05-09-site-security.md) |
 | 12 | Resilience Audit | /qa-resilience | DONE | 1 | 2026-05-09 17:00 | [view](reports/2026-05-09-resilience.md) |
 | 13 | Design System Install | /design-implement | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
-| 14 | Token Hygiene | /qa-tokens | DONE | 3 | 2026-05-10 | [view](reports/2026-05-10-qa-tokens-2.md) |
+| 14 | Token Hygiene | /qa-tokens | DONE | 4 | 2026-05-10 | [view](reports/2026-05-10-qa-tokens-3.md) |
 | 15 | Copy Audit | /qa-copy | DONE | 1 | 2026-05-03 | [view](reports/2026-05-03-ingredientbot-copy.md) |
 | 16 | Navigation Audit | /qa-nav | DONE | 7 | 2026-05-10 07:25 | [view](reports/2026-05-10-site-nav.md) |
 | 17 | Performance Audit | /qa-perf | DONE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-perf.md) |
@@ -106,3 +106,4 @@
 | 2026-05-09 19:00 | /qa-nav | ~3m | SUCCESS | Re-audit of post-Run-2 state: 30 routes, 0 orphans, 0 dead links, 100% coverage; Option B confirmed correct, no changes applied. [view](reports/2026-05-09-nav-3.md) |
 | 2026-05-10 07:25 | /qa-nav | ~5m | SUCCESS | 30 routes, 0 orphans, 0 dead links (2 scanner false-positives cleared), 100% coverage; Option B confirmed correct, no changes applied. [view](reports/2026-05-10-site-nav.md) |
 | 2026-05-10 | /qa-tokens | ~5m | SUCCESS | 2 focus-visible ring fixes (dietary-profile badge remove button, history tag filter buttons); 0 hex, 0 palette, 0 dark: changes needed. [view](reports/2026-05-10-qa-tokens-2.md) |
+| 2026-05-10 | /qa-tokens | ~5m | SUCCESS | Inline styles removed from global-error.tsx (→ Tailwind classes); 7 focus-visible rings added (cooking-mode: progress bar steps, timer reset/play/skip/ingredients, exit link; app-nav close button; recipe-tags autocomplete suggestion button); 0 raw palette or hex in non-exempt files. [view](reports/2026-05-10-qa-tokens-3.md) |

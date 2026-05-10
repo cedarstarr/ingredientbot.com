@@ -15,24 +15,15 @@ export default function GlobalError({
 
   return (
     <html>
-      <body style={{ margin: 0, background: '#0f0f0f', color: '#f5f5f5', fontFamily: 'system-ui, sans-serif' }}>
-        <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-          <div style={{ maxWidth: '28rem', textAlign: 'center' }}>
-            <p style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🤖</p>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>Something went wrong</h2>
-            <p style={{ marginBottom: '1.5rem', color: '#a3a3a3' }}>An unexpected error occurred. Our team has been notified.</p>
+      <body className="m-0 bg-[#0f0f0f] text-[#f5f5f5] font-sans">
+        <div className="flex min-h-screen items-center justify-center p-4">
+          <div className="max-w-md text-center">
+            <p className="text-4xl mb-2">🤖</p>
+            <h2 className="text-2xl font-bold mb-2">Something went wrong</h2>
+            <p className="mb-6 text-[#a3a3a3]">An unexpected error occurred. Our team has been notified.</p>
             <button
               onClick={reset}
-              style={{
-                padding: '0.5rem 1.25rem',
-                background: '#c2613c',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '0.375rem',
-                cursor: 'pointer',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-              }}
+              className="rounded-md bg-primary px-5 py-2 text-sm font-medium text-primary-foreground cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               Try Again
             </button>
