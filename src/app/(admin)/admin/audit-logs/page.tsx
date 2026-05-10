@@ -38,7 +38,7 @@ export default async function AdminAuditLogsPage() {
             ))}
             {logs.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">No audit logs yet.</td>
+                <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">No audit logs yet</td>
               </tr>
             )}
           </tbody>

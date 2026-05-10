@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-05-09 16:30
+**Last Updated**: 2026-05-09 17:00
 
 ---
 
@@ -24,25 +24,26 @@
 | 9 | QA / Bug Check | /qa-bugs | DONE | 4 | 2026-05-09 | [view](reports/2026-05-09-site-bugs.md) |
 | 10 | Re-verify Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 11 | Security Hardening | /qa-security | DONE | 4 | 2026-05-09 16:30 | [view](reports/2026-05-09-site-security.md) |
-| 12 | Design System Install | /design-implement | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
-| 13 | Token Hygiene | /qa-tokens | DONE | 1 | 2026-05-08 | [view](reports/2026-05-08-qa-tokens.md) |
-| 14 | Copy Audit | /qa-copy | DONE | 1 | 2026-05-03 | [view](reports/2026-05-03-ingredientbot-copy.md) |
-| 15 | Navigation Audit | /qa-nav | DONE | 4 | 2026-05-09 | [view](reports/2026-05-09-site-nav.md) |
-| 16 | Performance Audit | /qa-perf | DONE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-perf.md) |
-| 17 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
-| 18 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
-| 19 | Final E2E Tests | /qa-tests-fix | DONE | 3 | 2026-05-08 12:30 | [view](reports/2026-05-08-tests-fix.md) |
-| 20 | iPhone Tests + Fix | /qa-tests-iphone | DONE | 1 | 2026-05-08 22:09 | [view](reports/2026-05-08-tests-fix-2.md) |
-| 21 | Android Tests + Fix | /qa-tests-android | PENDING | 0 | — | — |
-| 22 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
-| 23 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
-| 24 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
-| 25 | Client Update | /ops-client-report | PENDING | 0 | — | — |
-| 26 | Launch | /ops-launch | PENDING | 0 | — | — |
+| 12 | Resilience Audit | /qa-resilience | DONE | 1 | 2026-05-09 17:00 | [view](reports/2026-05-09-resilience.md) |
+| 13 | Design System Install | /design-implement | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
+| 14 | Token Hygiene | /qa-tokens | DONE | 1 | 2026-05-08 | [view](reports/2026-05-08-qa-tokens.md) |
+| 15 | Copy Audit | /qa-copy | DONE | 1 | 2026-05-03 | [view](reports/2026-05-03-ingredientbot-copy.md) |
+| 16 | Navigation Audit | /qa-nav | DONE | 4 | 2026-05-09 | [view](reports/2026-05-09-site-nav.md) |
+| 17 | Performance Audit | /qa-perf | DONE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-perf.md) |
+| 18 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
+| 19 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
+| 20 | Final E2E Tests | /qa-tests-fix | DONE | 3 | 2026-05-08 12:30 | [view](reports/2026-05-08-tests-fix.md) |
+| 21 | iPhone Tests + Fix | /qa-tests-iphone | DONE | 1 | 2026-05-08 22:09 | [view](reports/2026-05-08-tests-fix-2.md) |
+| 22 | Android Tests + Fix | /qa-tests-android | PENDING | 0 | — | — |
+| 23 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
+| 24 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
+| 25 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
+| 26 | Client Update | /ops-client-report | PENDING | 0 | — | — |
+| 27 | Launch | /ops-launch | PENDING | 0 | — | — |
 
-**Progress: 20/26 stages complete**
+**Progress: 21/27 stages complete**
 
-**Last Updated**: 2026-05-09 16:30
+**Last Updated**: 2026-05-09 17:00
 
 ---
 
@@ -100,3 +101,4 @@
 | 2026-05-09 | /qa-nav | ~5m | SUCCESS | 30 routes, 0 orphaned, 0 dead links; Option C applied (Import moved Kitchen→Kitchen section; Recipes→Library label); build clean. [view](reports/2026-05-09-site-nav.md) |
 | 2026-05-09 | /qa-tests-sync | ~8m | SUCCESS | 2 new test files (3 features), 0 stale fixed |
 | 2026-05-09 16:30 | /qa-security | ~10m | SUCCESS | 5 issues found (0/0/1/4); 3 fixed (1 MEDIUM + 2 LOW): next@16.2.6 DoS advisory, analyze-photo mime allowlist, GOOGLE_GENERATIVE_AI_API_KEY env validation; 2 LOW deferred (verify-email-change rate-limit, share host-header trust). [view](reports/2026-05-09-site-security.md) |
+| 2026-05-09 17:00 | /qa-resilience | ~3m | SUCCESS | 4 findings, 0 AUTO, 4 MANUAL (2 MEDIUM unprotected handlers, 1 LOW no resilience spec, 1 LOW minimal health). No code changes. [view](reports/2026-05-09-resilience.md) |

@@ -52,7 +52,7 @@ export default async function AdminPage() {
               ))}
               {recentLogs.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="px-4 py-8 text-center text-muted-foreground">No audit logs yet.</td>
+                  <td colSpan={3} className="px-4 py-8 text-center text-muted-foreground">No recent activity</td>
                 </tr>
               )}
             </tbody>
