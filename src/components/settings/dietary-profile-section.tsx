@@ -219,7 +219,7 @@ export function DietaryProfileSection() {
                 <button
                   type="button"
                   onClick={() => removeDisliked(ing)}
-                  className="rounded hover:text-destructive transition-colors"
+                  className="rounded hover:text-destructive transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   aria-label={`Remove ${ing}`}
                 >
                   <X className="h-3 w-3" />

@@ -241,7 +241,7 @@ export function HistoryClient({
                             <button
                               key={t}
                               onClick={() => handleTagFilter(t)}
-                              className="text-xs text-primary hover:underline"
+                              className="text-xs text-primary hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded"
                             >
                               #{t}
                             </button>
