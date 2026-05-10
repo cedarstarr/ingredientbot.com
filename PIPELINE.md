@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-05-04 (qa-nav run 3 — normalized public footers on landing page + /r/[slug])
+**Last Updated**: 2026-05-09 17:00
 
 ---
 
@@ -18,30 +18,32 @@
 | 3 | Feature Audit | /plan-feature-audit | DONE | 1 | 2026-04-11 | [view](reports/2026-04-11-site-audit.md) |
 | 4 | Feature Triage | /site-features | DONE | 1 | 2026-04-09 | [view](reports/2026-04-09-site-features.md) |
 | 5 | Feature Install | /site-install | DONE | 1 | 2026-04-10 00:00 | [view](reports/2026-04-10-site-install.md) |
-| 6 | Write Tests | /qa-tests-reconcile | DONE | 5 | 2026-05-02 | [view](reports/2026-05-02-tests-reconcile.md) |
+| 6 | Write Tests | /qa-tests-sync | DONE | 7 | 2026-05-08 | [view](reports/2026-05-09-tests-reconcile.md) |
 | 7 | Verify Build | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
-| 8 | Database Review | /qa-db | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-site-db.md) |
-| 9 | QA / Bug Check | /qa-bugs | DONE | 3 | 2026-05-03 | [view](reports/2026-05-03-site-bugs.md) |
+| 8 | Database Review | /qa-db | DONE | 3 | 2026-05-08 | [view](reports/2026-05-08-site-db.md) |
+| 9 | QA / Bug Check | /qa-bugs | DONE | 4 | 2026-05-09 | [view](reports/2026-05-09-site-bugs.md) |
 | 10 | Re-verify Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
-| 11 | Security Hardening | /qa-security | DONE | 2 | 2026-05-03 23:01 | [view](reports/2026-05-03-site-security.md) |
-| 12 | UX/UI Pass | /qa-design | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
-| 13 | Copy Audit | /qa-copy | DONE | 1 | 2026-05-03 | [view](reports/2026-05-03-ingredientbot-copy.md) |
-| 14 | Navigation Audit | /qa-nav | DONE | 3 | 2026-05-04 | [view](reports/2026-05-04-site-nav-2.md) |
-| 15 | Performance Audit | /qa-perf | DONE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-perf.md) |
-| 16 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
-| 17 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
-| 18 | Final E2E Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
-| 19 | iPhone Tests + Fix | /qa-tests-iphone | PENDING | 0 | — | — |
-| 20 | Android Tests + Fix | /qa-tests-android | PENDING | 0 | — | — |
-| 21 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
-| 22 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
-| 23 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
-| 24 | Client Update | /ops-client-report | PENDING | 0 | — | — |
-| 25 | Launch | /ops-launch | PENDING | 0 | — | — |
+| 11 | Security Hardening | /qa-security | DONE | 4 | 2026-05-09 16:30 | [view](reports/2026-05-09-site-security.md) |
+| 12 | Resilience Audit | /qa-resilience | DONE | 1 | 2026-05-09 17:00 | [view](reports/2026-05-09-resilience.md) |
+| 13 | Design System Install | /design-implement | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
+| 14 | Token Hygiene | /qa-tokens | DONE | 1 | 2026-05-08 | [view](reports/2026-05-08-qa-tokens.md) |
+| 15 | Copy Audit | /qa-copy | DONE | 1 | 2026-05-03 | [view](reports/2026-05-03-ingredientbot-copy.md) |
+| 16 | Navigation Audit | /qa-nav | DONE | 4 | 2026-05-09 | [view](reports/2026-05-09-site-nav.md) |
+| 17 | Performance Audit | /qa-perf | DONE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-perf.md) |
+| 18 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
+| 19 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
+| 20 | Final E2E Tests | /qa-tests-fix | DONE | 3 | 2026-05-08 12:30 | [view](reports/2026-05-08-tests-fix.md) |
+| 21 | iPhone Tests + Fix | /qa-tests-iphone | DONE | 1 | 2026-05-08 22:09 | [view](reports/2026-05-08-tests-fix-2.md) |
+| 22 | Android Tests + Fix | /qa-tests-android | PENDING | 0 | — | — |
+| 23 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
+| 24 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
+| 25 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
+| 26 | Client Update | /ops-client-report | PENDING | 0 | — | — |
+| 27 | Launch | /ops-launch | PENDING | 0 | — | — |
 
-**Progress: 18/25 stages complete**
+**Progress: 21/27 stages complete**
 
-**Last Updated**: 2026-05-04 (qa-nav run 3 — normalized public footers on landing page + /r/[slug])
+**Last Updated**: 2026-05-09 17:00
 
 ---
 
@@ -89,3 +91,14 @@
 | 2026-05-04 | /qa-nav | ~5m | SUCCESS | 30 routes, 0 orphans, 0 dead links, 100% coverage; Option C applied (Kitchen/Recipes/Account groupings); fixed semantic mismatch (Collections+Import moved from ACCOUNT→RECIPES); removed unused LayoutDashboard import; tsc clean |
 | 2026-05-04 | /qa-perf | ~10m | SUCCESS | 5 issues found (3 HIGH, 2 MEDIUM), all 5 fixed; removed 'use client' from collection-detail-client + cooking-heatmap; parallelized 3 sequential Prisma query pairs (recipe/[id], cook route, history allTagRows); build clean |
 | 2026-05-04 | /qa-nav | ~5m | SUCCESS | 30 routes, 0 orphans, 0 dead links, 100% coverage; Option C applied (normalize public footers); landing page + /r/[slug] now have Privacy/Terms footer links; tsc clean |
+| 2026-05-08 | /qa-tests-reconcile | ~4 min | SUCCESS | see 2026-05-08-tests-reconcile.md |
+| 2026-05-08 12:30 | /qa-tests-fix --project chromium | ~10m | SUCCESS | 63/63 passing — R1: middleware /r/ public path + dietary-profile testids + spice-slider testid + fresh-context anon test. [view](reports/2026-05-08-tests-fix.md) |
+| 2026-05-08 | /qa-security | ~10m | SUCCESS | 6 issues found (0 CRITICAL, 0 HIGH, 2 MEDIUM, 4 LOW); 3 fixed (2 MEDIUM + 1 LOW): NextAuth credentials login rate-limit, account-delete bcrypt rate-limit, requireAdmin() defense-in-depth on 3 admin pages; 3 LOW deferred. [view](reports/2026-05-08-site-security.md) |
+| 2026-05-08 | /qa-db | ~8m | SUCCESS | 8 issues found (0 CRITICAL, 3 HIGH, 3 MEDIUM, 2 LOW); 6 fixed (all HIGH+MEDIUM): missing selects on chat/modify/cook/print routes, unbounded collection detail, AICallLog missing userId index + @@map; 2 LOW deferred (db push needed for table renames). [view](reports/2026-05-08-site-db.md) |
+| 2026-05-08 | /qa-tokens | ~3m | SUCCESS | 6 raw-palette grayscale fixes in print-recipe-view (screen vs print: classes), 1 text-white→text-primary-foreground in recipe-detail checkmark; cooking-mode dark overlay + emails/cron/global-error left intentional; tsc clean. [view](reports/2026-05-08-qa-tokens.md) |
+| 2026-05-08 22:09 | /qa-tests-iphone | ~1m | SUCCESS | 4/4 passed on iphone (WebKit/iPhone 14), no fixes needed. [view](reports/2026-05-08-tests-fix-2.md) |
+| 2026-05-09 08:18 | /qa-bugs | ~6m | SUCCESS | 5 issues found (0/0/4/1); 3 MEDIUM fixed (cron + verify-email-change try/catch); 1 MEDIUM deferred → FOU-61 (admin empty states); 1 LOW deferred (middleware→proxy portfolio sweep). [view](reports/2026-05-09-site-bugs.md) |
+| 2026-05-09 | /qa-nav | ~5m | SUCCESS | 30 routes, 0 orphaned, 0 dead links; Option C applied (Import moved Kitchen→Kitchen section; Recipes→Library label); build clean. [view](reports/2026-05-09-site-nav.md) |
+| 2026-05-09 | /qa-tests-sync | ~8m | SUCCESS | 2 new test files (3 features), 0 stale fixed |
+| 2026-05-09 16:30 | /qa-security | ~10m | SUCCESS | 5 issues found (0/0/1/4); 3 fixed (1 MEDIUM + 2 LOW): next@16.2.6 DoS advisory, analyze-photo mime allowlist, GOOGLE_GENERATIVE_AI_API_KEY env validation; 2 LOW deferred (verify-email-change rate-limit, share host-header trust). [view](reports/2026-05-09-site-security.md) |
+| 2026-05-09 17:00 | /qa-resilience | ~3m | SUCCESS | 4 findings, 0 AUTO, 4 MANUAL (2 MEDIUM unprotected handlers, 1 LOW no resilience spec, 1 LOW minimal health). No code changes. [view](reports/2026-05-09-resilience.md) |
