@@ -1,0 +1,7 @@
+{
+  "intentionally_unlinked": [
+    { "route": "/coming-soon", "reason": "Middleware-served launch gate" }
+  ],
+  "reachable_via_in_page_link": [],
+  "reachable_via_redirect_alias": []
+}
