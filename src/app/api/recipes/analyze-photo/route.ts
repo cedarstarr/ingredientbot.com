@@ -34,7 +34,15 @@ export async function POST(req: NextRequest) {
   const arrayBuffer = await photo.arrayBuffer()
   const buf = Buffer.from(arrayBuffer)
   const base64 = buf.toString('base64')
-  const mimeType = (photo.type || 'image/jpeg') as 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif'
+  // Validate the browser-supplied mime against an allowlist rather than trusting the
+  // type assertion — keeps malformed/unsupported uploads from burning a Gemini call.
+  const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'] as const
+  type AllowedMime = typeof ALLOWED_MIMES[number]
+  const candidate = (photo.type || 'image/jpeg').toLowerCase()
+  if (!ALLOWED_MIMES.includes(candidate as AllowedMime)) {
+    return Response.json({ error: 'Unsupported image type. Use JPEG, PNG, WEBP, or GIF.' }, { status: 400 })
+  }
+  const mimeType = candidate as AllowedMime
 
   // Cache by raw image bytes — identical re-uploads short-circuit the LLM call.
   const inputHash = sha256(buf)

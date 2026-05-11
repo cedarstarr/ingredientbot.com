@@ -12,6 +12,9 @@ import {
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 
+// Nav grouped by content type/feature (Option B): Kitchen (active cooking ops) | Recipes (saved/imported content) | Insights (usage stats) | Account
+// Decision (2026-05-09): /dashboard moved out of Account — usage stats aren't settings; /import moved under Recipes — import *creates* a recipe.
+
 // F26: expiry urgency check (mirrors pantry-client logic)
 function hasExpiringSoon(expiresAt: string): boolean {
   const now = new Date()
@@ -22,24 +25,26 @@ function hasExpiringSoon(expiresAt: string): boolean {
   return days <= 7
 }
 
-// Nav grouped by user mental model: Kitchen (active cooking) | Recipes (library) | Account
 const KITCHEN_LINKS = [
-  { href: '/kitchen',    label: 'Kitchen',   icon: ChefHat },
+  { href: '/kitchen',    label: 'Cook',      icon: ChefHat },
   { href: '/pantry',     label: 'Pantry',    icon: Package },
   { href: '/meal-plan',  label: 'Meal Plan', icon: CalendarDays },
 ]
 
 const RECIPES_LINKS = [
-  { href: '/saved',       label: 'Saved Recipes', icon: BookOpen },
-  { href: '/collections', label: 'Collections',   icon: FolderOpen },
-  { href: '/history',     label: 'History',       icon: History },
-  { href: '/import',      label: 'Import Recipe', icon: Link2 },
+  { href: '/saved',       label: 'Saved',          icon: BookOpen },
+  { href: '/collections', label: 'Collections',    icon: FolderOpen },
+  { href: '/history',     label: 'Recently Viewed', icon: History },
+  { href: '/import',      label: 'Import',         icon: Link2 },
+]
+
+const INSIGHTS_LINKS = [
+  { href: '/dashboard', label: 'Insights', icon: BarChart3 },
 ]
 
 const ACCOUNT_LINKS = [
-  { href: '/dashboard', label: 'Insights', icon: BarChart3 },
-  { href: '/upgrade',   label: 'Upgrade',  icon: Sparkles },
-  { href: '/settings',  label: 'Settings', icon: Settings },
+  { href: '/upgrade',  label: 'Upgrade',  icon: Sparkles },
+  { href: '/settings', label: 'Settings', icon: Settings },
 ]
 
 function NavSection({ label }: { label: string }) {
@@ -129,7 +134,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
         {onClose && (
           <button
             onClick={onClose}
-            className="ml-1 rounded p-1 text-muted-foreground hover:text-foreground transition-colors"
+            className="ml-1 rounded p-1 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Close navigation"
           >
             <X className="h-4 w-4" />
@@ -164,6 +169,18 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
           />
         ))}
 
+        <NavSection label="Insights" />
+        {INSIGHTS_LINKS.map(({ href, label, icon }) => (
+          <NavLink
+            key={href}
+            href={href}
+            label={label}
+            icon={icon}
+            active={isActive(href)}
+            onClick={onClose}
+          />
+        ))}
+
         <NavSection label="Account" />
         {ACCOUNT_LINKS.map(({ href, label, icon }) => (
           <NavLink
@@ -185,6 +202,25 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
             onClick={onClose}
           />
         )}
+
+        {/* Legal links — keeps Privacy/Terms reachable from inside the app, not just landing */}
+        <div className="px-3 pt-4 pb-1 flex items-center gap-3 text-[11px] text-muted-foreground/70">
+          <Link
+            href="/privacy"
+            onClick={onClose}
+            className="hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+          >
+            Privacy
+          </Link>
+          <span aria-hidden className="select-none">·</span>
+          <Link
+            href="/terms"
+            onClick={onClose}
+            className="hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+          >
+            Terms
+          </Link>
+        </div>
       </nav>
 
       {/* User row */}

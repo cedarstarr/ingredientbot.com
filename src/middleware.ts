@@ -31,6 +31,8 @@ const PUBLIC_PATHS = [
   // PWA assets — must be publicly accessible for install/offline flow
   '/manifest.json', '/sw.js', '/offline',
   '/coming-soon',
+  // Public recipe share pages — F27
+  '/r/',
 ]
 
 export default auth(async function middleware(request: NextAuthRequest) {

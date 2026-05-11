@@ -14,6 +14,9 @@ export default async function CollectionDetailPage({ params }: { params: Promise
     include: {
       recipes: {
         orderBy: { createdAt: 'desc' },
+        // Cap at 200 — collections are user-curated and rarely exceed this in practice.
+        // A heavy user with a massive collection can still browse via /history with pagination.
+        take: 200,
         select: {
           id: true,
           title: true,

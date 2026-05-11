@@ -3,6 +3,9 @@
 import { useEffect } from 'react'
 import { Clock, Users, ChefHat } from 'lucide-react'
 
+// design-system-exempt: print-only grayscale ink values are intentional —
+// print stylesheets need hardcoded gray-N rather than HSL tokens.
+
 interface Ingredient {
   name: string
   amount: string
@@ -83,7 +86,7 @@ export function PrintRecipeView({ recipe }: { recipe: Recipe }) {
         </p>
 
         {/* Title & meta */}
-        <header className="mb-8 pb-6 border-b-2 border-gray-900 print:border-gray-800">
+        <header className="mb-8 pb-6 border-b-2 border-foreground print:border-gray-800">
           <h1 className="text-4xl font-bold text-foreground print:text-black leading-tight text-balance">
             {recipe.title}
           </h1>
@@ -138,13 +141,13 @@ export function PrintRecipeView({ recipe }: { recipe: Recipe }) {
 
             {/* Nutrition facts — shown in sidebar on print */}
             {nutrition && (
-              <div className="mt-8 rounded-lg border-2 border-gray-900 print:border-gray-800 p-4 print:block">
-                <h3 className="font-bold text-sm uppercase tracking-wide mb-3 text-foreground print:text-black border-b border-gray-300 pb-2">
+              <div className="mt-8 rounded-lg border-2 border-foreground print:border-gray-800 p-4 print:block">
+                <h3 className="font-bold text-sm uppercase tracking-wide mb-3 text-foreground print:text-black border-b border-border print:border-gray-300 pb-2">
                   Nutrition Facts
                 </h3>
                 <p className="text-xs text-muted-foreground print:text-gray-500 mb-3">Per serving</p>
                 <dl className="space-y-1.5 text-sm">
-                  <div className="flex justify-between border-b border-gray-200 pb-1.5">
+                  <div className="flex justify-between border-b border-border print:border-gray-200 pb-1.5">
                     <dt className="font-bold text-foreground print:text-black">Calories</dt>
                     <dd className="font-bold text-foreground print:text-black">{nutrition.calories} kcal</dd>
                   </div>
@@ -175,7 +178,7 @@ export function PrintRecipeView({ recipe }: { recipe: Recipe }) {
             <ol className="space-y-4">
               {recipeData.steps?.map((step, i) => (
                 <li key={i} className="flex gap-3 text-sm leading-relaxed">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-900 text-white print:bg-gray-800 font-bold text-xs mt-0.5">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-foreground text-background print:bg-gray-800 print:text-white font-bold text-xs mt-0.5">
                     {i + 1}
                   </span>
                   <p className="text-foreground print:text-black flex-1">{step}</p>

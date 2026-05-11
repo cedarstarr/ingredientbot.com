@@ -201,7 +201,7 @@ export function HistoryClient({
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <Link
                         href={`/recipe/${recipe.id}`}
-                        className="font-semibold text-foreground hover:text-primary transition-colors leading-tight"
+                        className="font-semibold text-foreground hover:text-primary transition-colors leading-tight line-clamp-2"
                       >
                         {recipe.title}
                       </Link>
@@ -241,7 +241,7 @@ export function HistoryClient({
                             <button
                               key={t}
                               onClick={() => handleTagFilter(t)}
-                              className="text-xs text-primary hover:underline"
+                              className="text-xs text-primary hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded"
                             >
                               #{t}
                             </button>

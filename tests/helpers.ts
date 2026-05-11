@@ -1,20 +1,19 @@
 import { type Page } from '@playwright/test'
 
 /**
- * Log in as the staging test user via the NextAuth CSRF/callback pattern.
- * After calling this, the browser context is authenticated and will stay
- * authenticated for the rest of the test.
+ * Log in as the staging test user via the login form UI.
+ * This approach works in all environments (local, preview, production)
+ * because it goes through the real login page rather than the low-level
+ * NextAuth CSRF/callback API, which fails behind Vercel deployment protection.
  */
 export async function loginAsTestUser(page: Page) {
-  const csrfRes = await page.request.get('/api/auth/csrf')
-  const { csrfToken } = await csrfRes.json()
+  await page.goto('/login')
+  await page.waitForLoadState('networkidle')
 
-  await page.request.post('/api/auth/callback/credentials', {
-    form: {
-      csrfToken,
-      email: 'test@test.com',
-      password: 'Test1234!',
-      callbackUrl: 'http://localhost:3010/kitchen',
-    },
-  })
+  await page.getByLabel(/email/i).fill('test@test.com')
+  await page.getByLabel(/password/i).fill('Test1234!')
+  await page.getByRole('button', { name: /sign in/i }).click()
+
+  // Wait for redirect away from /login to confirm successful auth
+  await page.waitForURL(/\/(kitchen|dashboard)/, { timeout: 20_000 })
 }

@@ -21,6 +21,10 @@ export async function POST(
   const { id } = await params
   const recipe = await prisma.recipe.findFirst({
     where: { id, userId: session.user.id },
+    // Exclude rawText (db.Text) — chat only needs title/recipeData/sourceIngredients for context
+    select: {
+      id: true, title: true, recipeData: true, sourceIngredients: true,
+    },
   })
   if (!recipe) return new Response('Not found', { status: 404 })
 

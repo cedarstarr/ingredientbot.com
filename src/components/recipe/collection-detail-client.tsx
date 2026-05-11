@@ -85,7 +85,7 @@ export function CollectionDetailClient({ collection }: Props) {
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <Link
                     href={`/recipe/${recipe.id}`}
-                    className="font-semibold text-foreground hover:text-primary transition-colors leading-tight"
+                    className="font-semibold text-foreground hover:text-primary transition-colors leading-tight line-clamp-2"
                   >
                     {recipe.title}
                   </Link>

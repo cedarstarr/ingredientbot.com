@@ -3,9 +3,17 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { sendAccountDeletedEmail } from '@/lib/email'
 import { logAuditEvent } from '@/lib/audit'
+import { authLimiter, rateLimitResponse } from '@/lib/rate-limit'
 import bcrypt from 'bcryptjs'
 
 export async function DELETE(request: NextRequest) {
+  // Rate-limit before bcrypt-compare. A stolen session cookie otherwise allows
+  // unbounded password guesses against the account-delete confirm field, which
+  // would let an attacker phish out the password before deleting the account.
+  const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1'
+  const { success } = await authLimiter.check(`account-delete:${ip}`)
+  if (!success) return rateLimitResponse()
+
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

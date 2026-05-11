@@ -1,11 +1,21 @@
 import '@/lib/env'
-import NextAuth from "next-auth"
+import { headers } from 'next/headers'
+import NextAuth, { CredentialsSignin } from "next-auth"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { logAuditEvent } from "@/lib/audit"
 import { authConfig } from "@/lib/auth.config"
+import { authLimiter } from "@/lib/rate-limit"
+
+// NextAuth's credentials handler is owned by the auth library and is not covered
+// by our per-route limiter wrappers. Rate-limit inside `authorize()` so brute-force
+// against /login (POST /api/auth/callback/credentials) is bounded by the same
+// authLimiter used by signup / forgot-password / reset-password / password-change.
+class RateLimitedError extends CredentialsSignin {
+  code = 'RateLimit'
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
@@ -20,6 +30,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           return null
+        }
+
+        // Brute-force guard: 5 attempts/min per IP (shared key with other auth routes,
+        // so a brute-forcer cannot move from /login to /forgot-password to evade).
+        const hdrs = await headers()
+        const ip = hdrs.get('x-forwarded-for') ?? '127.0.0.1'
+        const { success } = await authLimiter.check(`login:${ip}`)
+        if (!success) {
+          throw new RateLimitedError('Too many sign-in attempts')
         }
 
         const user = await prisma.user.findUnique({

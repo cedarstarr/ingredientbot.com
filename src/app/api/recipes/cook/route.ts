@@ -4,17 +4,13 @@ import { prisma } from '@/lib/prisma'
 import { generateText } from 'ai'
 import { trackedModel } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
+import { buildCookingMethodContext, buildSpiceContext } from '@/lib/recipe-prompt-utils'
 import { Difficulty } from '@prisma/client'
+import { startOfCurrentMonth } from '@/lib/date-utils'
 
 export const maxDuration = 60
 
 const FREE_TIER_LIMIT = 5
-
-// Returns the first day of the current month at midnight UTC
-function startOfCurrentMonth(): Date {
-  const now = new Date()
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
-}
 
 export async function POST(req: NextRequest) {
   const session = await auth()
@@ -128,33 +124,8 @@ export async function POST(req: NextRequest) {
     ? `\n\nDATE NIGHT MODE: This is a Date Night recipe. Make it romantic, impressive, and special. Use elegant plating suggestions in the notes.`
     : ''
 
-  // F74: cooking method constraint
-  let cookingMethodContext = ''
-  if (typeof cookingMethod === 'string' && cookingMethod && cookingMethod !== 'any') {
-    switch (cookingMethod) {
-      case 'Sheet Pan':
-        cookingMethodContext = `\n\nSHEET PAN: All ingredients should cook on a single sheet pan in the oven. No separate pots or pans.`
-        break
-      case 'One-Pot':
-        cookingMethodContext = `\n\nONE-POT: All cooking must happen in a single pot/pan for minimal cleanup.`
-        break
-      case 'Air Fryer':
-        cookingMethodContext = `\n\nAIR FRYER: Recipe must be cookable entirely in a standard air fryer. No stovetop or oven.`
-        break
-      case 'Slow Cooker':
-        cookingMethodContext = `\n\nSLOW COOKER: Recipe must work in a slow cooker / Crock-Pot. Dump-and-wait style.`
-        break
-      case 'Instant Pot':
-        cookingMethodContext = `\n\nINSTANT POT: Recipe must use a pressure cooker / Instant Pot. Include pressure-release timing.`
-        break
-      case 'Microwave Only':
-        cookingMethodContext = `\n\nMICROWAVE ONLY: All cooking steps must be doable in a standard microwave. No stovetop, no oven.`
-        break
-      case 'No Stove':
-        cookingMethodContext = `\n\nNO STOVE: Do not use the stovetop or oven — assume they're unavailable. Oven-free, stovetop-free.`
-        break
-    }
-  }
+  // F74: cooking method constraint — shared with /generate via lib helper
+  const cookingMethodContext = buildCookingMethodContext(cookingMethod)
 
   // F75: exhausted mode
   const exhaustedContext = exhaustedMode
@@ -171,12 +142,8 @@ export async function POST(req: NextRequest) {
     ? `\n\nRESTAURANT RECREATION: Recreate the flavor profile and style of "${restaurantStyle.trim().slice(0, 120)}". Use their known signature techniques and flavors, but make it achievable with pantry ingredients.`
     : ''
 
-  // F78: spice level — always inject even at 0=Mild
-  const spiceN = typeof spiceLevel === 'number' && Number.isInteger(spiceLevel)
-    ? Math.max(0, Math.min(3, spiceLevel))
-    : 0
-  const spiceLabel = ['Mild', 'Medium', 'Hot', 'Fire'][spiceN]
-  const spiceContext = `\n\nSPICE LEVEL: ${spiceLabel}. Calibrate heat accordingly — use appropriate chiles, peppers, and spices. Do not exceed this level.`
+  // F78: spice level — always inject even at 0=Mild — shared with /generate
+  const spiceContext = buildSpiceContext(spiceLevel)
 
   const { text } = await generateText({
     model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'cooking-assistant', userId: session.user.id }),

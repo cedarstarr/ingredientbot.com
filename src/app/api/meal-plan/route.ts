@@ -64,9 +64,10 @@ export async function PUT(req: NextRequest) {
   }
 
   try {
-    // Verify recipe belongs to the user
+    // Verify recipe belongs to the user — select id only to avoid loading full recipeData/rawText
     const recipe = await prisma.recipe.findFirst({
       where: { id: recipeId, userId: session.user.id },
+      select: { id: true },
     })
     if (!recipe) return NextResponse.json({ error: 'Recipe not found' }, { status: 404 })
 

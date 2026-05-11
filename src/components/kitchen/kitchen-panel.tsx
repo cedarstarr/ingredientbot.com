@@ -834,6 +834,7 @@ export function KitchenPanel() {
                   step={1}
                   onValueChange={(v) => changeSpiceLevel(v[0] ?? 0)}
                   aria-label="Spice level"
+                  data-testid="spice-level-slider"
                   className="focus-visible:outline-none"
                 />
                 <div className="flex justify-between text-[10px] text-muted-foreground px-0.5">

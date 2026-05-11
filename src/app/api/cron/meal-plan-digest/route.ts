@@ -23,6 +23,7 @@ export async function GET(req: NextRequest) {
 
   const start = Date.now()
 
+  try {
   // Date range: next 7 days from today (UTC midnight)
   const today = new Date()
   today.setUTCHours(0, 0, 0, 0)
@@ -141,5 +142,20 @@ export async function GET(req: NextRequest) {
     },
   })
 
-  return NextResponse.json({ ok: true, total: mealPlans.length, sent, failed })
+    return NextResponse.json({ ok: true, total: mealPlans.length, sent, failed })
+  } catch (err) {
+    // DB drop or unexpected throw — record failure and surface 500 so cron monitor can flag it.
+    log.error({ err }, '[meal-plan-digest] Unhandled job failure')
+    await prisma.jobRun.create({
+      data: {
+        job: 'meal-plan-digest',
+        trigger: 'cron',
+        finishedAt: new Date(),
+        durationMs: Date.now() - start,
+        success: false,
+        result: { error: err instanceof Error ? err.message : String(err) },
+      },
+    }).catch(() => { /* swallow — DB itself may be the failure */ })
+    return NextResponse.json({ error: 'Job failed' }, { status: 500 })
+  }
 }
