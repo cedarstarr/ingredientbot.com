@@ -76,7 +76,7 @@ export function SavedRecipesClient({ recipes }: SavedRecipesClientProps) {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2" data-testid="saved-heading">
             <BookOpen className="h-6 w-6 text-primary" aria-hidden="true" />
             <span>Saved Recipes</span>
           </h1>
@@ -146,7 +146,7 @@ export function SavedRecipesClient({ recipes }: SavedRecipesClientProps) {
 
       {/* Results */}
       {recipes.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div className="flex flex-col items-center justify-center py-20 text-center" data-testid="saved-empty">
           <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
             <BookOpen className="h-8 w-8 text-primary" />
           </div>

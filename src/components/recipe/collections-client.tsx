@@ -91,7 +91,7 @@ export function CollectionsClient({ collections: initial }: CollectionsClientPro
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2" data-testid="collections-heading">
             <FolderOpen className="h-6 w-6 text-primary" aria-hidden="true" />
             <span>Collections</span>
           </h1>
@@ -99,7 +99,7 @@ export function CollectionsClient({ collections: initial }: CollectionsClientPro
             Organise your recipes into folders
           </p>
         </div>
-        <Button onClick={() => setCreating(true)}>
+        <Button onClick={() => setCreating(true)} data-testid="collections-new-btn">
           <Plus className="h-4 w-4 mr-2" />
           New Collection
         </Button>
@@ -107,7 +107,7 @@ export function CollectionsClient({ collections: initial }: CollectionsClientPro
 
       {/* Grid */}
       {collections.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div className="flex flex-col items-center justify-center py-20 text-center" data-testid="collections-empty">
           <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
             <FolderOpen className="h-8 w-8 text-primary" />
           </div>
