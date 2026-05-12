@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test'
-import { loginAsTestUser } from './helpers'
 
 /**
  * Kitchen advanced options panel — F32, F34, F35, F53, F54, F61, F64, F70, F71, F74, F75, F76, F78.
@@ -11,7 +10,6 @@ test.describe('Kitchen advanced options panel', () => {
   test.setTimeout(60000)
 
   test.beforeEach(async ({ page }) => {
-    await loginAsTestUser(page)
     await page.goto('/kitchen')
     await page.waitForLoadState('domcontentloaded')
   })

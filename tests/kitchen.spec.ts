@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test'
-import { loginAsTestUser } from './helpers'
 
 /**
  * Core kitchen-page journey — the heart of the product.
@@ -14,7 +13,6 @@ test.describe('Kitchen — ingredient input journey', () => {
   test.setTimeout(60000)
 
   test.beforeEach(async ({ page }) => {
-    await loginAsTestUser(page)
     await page.goto('/kitchen')
     await page.waitForLoadState('domcontentloaded')
   })

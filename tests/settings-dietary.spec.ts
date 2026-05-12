@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test'
-import { loginAsTestUser } from './helpers'
 
 /**
  * Settings — dietary profile (F31) and medical flags (F79).
@@ -11,7 +10,6 @@ test.describe('Dietary profile (F31, F79)', () => {
   test.setTimeout(60000)
 
   test('settings page shows Dietary Profile section with Save button', async ({ page }) => {
-    await loginAsTestUser(page)
     await page.goto('/settings')
     await page.waitForLoadState('domcontentloaded')
 
@@ -20,7 +18,6 @@ test.describe('Dietary profile (F31, F79)', () => {
   })
 
   test('F31: dietary restriction badges are present and clickable', async ({ page }) => {
-    await loginAsTestUser(page)
     await page.goto('/settings')
     await page.waitForLoadState('domcontentloaded')
 
@@ -36,7 +33,6 @@ test.describe('Dietary profile (F31, F79)', () => {
   })
 
   test('F31: cuisine preference badges are present', async ({ page }) => {
-    await loginAsTestUser(page)
     await page.goto('/settings')
     await page.waitForLoadState('domcontentloaded')
     await page.waitForTimeout(1000)
@@ -46,7 +42,6 @@ test.describe('Dietary profile (F31, F79)', () => {
   })
 
   test('F79: medical dietary flags section is present', async ({ page }) => {
-    await loginAsTestUser(page)
     await page.goto('/settings')
     await page.waitForLoadState('domcontentloaded')
     await page.waitForTimeout(1000)
@@ -58,7 +53,6 @@ test.describe('Dietary profile (F31, F79)', () => {
   })
 
   test('F79: medical disclaimer copy is shown', async ({ page }) => {
-    await loginAsTestUser(page)
     await page.goto('/settings')
     await page.waitForLoadState('domcontentloaded')
     await page.waitForTimeout(1000)
@@ -68,11 +62,10 @@ test.describe('Dietary profile (F31, F79)', () => {
   })
 })
 
-test.describe('Recipe URL import (F62)', () => {
+test.describe('Recipe URL import (F62) — authenticated', () => {
   test.setTimeout(60000)
 
   test('/import page loads and shows URL input', async ({ page }) => {
-    await loginAsTestUser(page)
     await page.goto('/import')
     await page.waitForLoadState('domcontentloaded')
 
@@ -81,6 +74,11 @@ test.describe('Recipe URL import (F62)', () => {
     // Import page has a URL input field
     await expect(page.getByRole('textbox').first()).toBeVisible()
   })
+})
+
+test.describe('Recipe URL import (F62) — unauthenticated', () => {
+  test.use({ storageState: undefined })
+  test.setTimeout(60000)
 
   test('unauthenticated /import redirects to /login', async ({ page }) => {
     await page.goto('/import')

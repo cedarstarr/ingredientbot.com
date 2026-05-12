@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test'
-import { loginAsTestUser } from './helpers'
 
 /**
  * Recipe history page (F37) — search bar, filter chips, "Cooked" filter button.
@@ -12,7 +11,6 @@ test.describe('Recipe history search and filters (F37)', () => {
   test.setTimeout(60000)
 
   test.beforeEach(async ({ page }) => {
-    await loginAsTestUser(page)
     await page.goto('/history')
     await page.waitForLoadState('domcontentloaded')
   })
@@ -53,7 +51,6 @@ test.describe('Cooking mode (F29) — structural smoke', () => {
   test.setTimeout(60000)
 
   test('GET /kitchen/cook/nonexistent-id returns not-found (not 500)', async ({ page }) => {
-    await loginAsTestUser(page)
     const res = await page.goto('/kitchen/cook/nonexistent-id-that-does-not-exist')
     await page.waitForLoadState('domcontentloaded')
     expect(res?.status()).not.toBe(500)
@@ -62,6 +59,11 @@ test.describe('Cooking mode (F29) — structural smoke', () => {
     const isNotFound = res?.status() === 404 || /404|not found/i.test(body ?? '')
     expect(isNotFound).toBe(true)
   })
+})
+
+test.describe('Cooking mode (F29) — unauthenticated', () => {
+  test.use({ storageState: undefined })
+  test.setTimeout(60000)
 
   test('unauthenticated /kitchen/cook/any-id redirects to /login', async ({ page }) => {
     await page.goto('/kitchen/cook/some-id')

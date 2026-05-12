@@ -7,6 +7,7 @@ const isVercelPreview = baseURL.includes('vercel.app')
 
 export default defineConfig({
   testDir: './tests',
+  globalSetup: './tests/global-setup.ts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -27,17 +28,17 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices['Desktop Chrome'], storageState: './playwright/.auth/user.json' },
       grepInvert: /@mobile/,
     },
     {
       name: 'iphone',
-      use: { ...devices['iPhone 14'] },
+      use: { ...devices['iPhone 14'], storageState: './playwright/.auth/user.json' },
       grep: /@mobile/,
     },
     {
       name: 'android',
-      use: { ...devices['Pixel 5'] },
+      use: { ...devices['Pixel 5'], storageState: './playwright/.auth/user.json' },
       grep: /@mobile/,
     },
   ],
@@ -49,7 +50,7 @@ export default defineConfig({
           command: 'PATH=$HOME/.nvm/versions/node/v20.20.0/bin:$PATH npm run start',
           port: PORT,
           reuseExistingServer: !process.env.CI,
-          timeout: 30000,
+          timeout: 90000,
           env: { PORT: String(PORT), PLAYWRIGHT_TEST: 'true' },
         },
       }),
