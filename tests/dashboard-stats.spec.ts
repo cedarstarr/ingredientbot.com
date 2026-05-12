@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test'
-import { loginAsTestUser } from './helpers'
 
 /**
  * Dashboard stats panel — F47 (cooking streak + monthly count) and F69 (heatmap).
@@ -11,7 +10,6 @@ test.describe('Dashboard cooking stats (F47, F69)', () => {
   test.setTimeout(60000)
 
   test.beforeEach(async ({ page }) => {
-    await loginAsTestUser(page)
     await page.goto('/dashboard')
     await page.waitForLoadState('domcontentloaded')
   })

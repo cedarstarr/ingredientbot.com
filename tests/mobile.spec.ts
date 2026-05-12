@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test'
-import { loginAsTestUser } from './helpers'
 
 /**
  * Mobile-critical journeys — runs on iphone + android projects (gated
@@ -32,7 +31,6 @@ test.describe('@mobile authenticated', () => {
   test.setTimeout(60000)
 
   test('kitchen ingredient input is reachable on mobile', async ({ page }) => {
-    await loginAsTestUser(page)
     await page.goto('/kitchen')
     await page.waitForLoadState('domcontentloaded')
 
@@ -44,7 +42,6 @@ test.describe('@mobile authenticated', () => {
   })
 
   test('mobile nav surfaces the theme toggle', async ({ page }) => {
-    await loginAsTestUser(page)
     await page.goto('/dashboard')
     await page.waitForLoadState('networkidle')
 

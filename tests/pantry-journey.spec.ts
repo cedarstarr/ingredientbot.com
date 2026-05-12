@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test'
-import { loginAsTestUser } from './helpers'
 
 /**
  * Pantry journey — F44 persistent pantry, F26 expiry badges.
@@ -10,7 +9,6 @@ test.describe('Pantry journey (F44)', () => {
   test.setTimeout(60000)
 
   test.beforeEach(async ({ page }) => {
-    await loginAsTestUser(page)
     await page.goto('/pantry')
     await page.waitForLoadState('domcontentloaded')
   })
