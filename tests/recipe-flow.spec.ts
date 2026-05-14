@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test'
-import { loginAsTestUser } from './helpers'
 
 /**
  * Authenticated app-shell pages — verify each loads without 500 and shows
@@ -10,10 +9,6 @@ import { loginAsTestUser } from './helpers'
 
 test.describe('Authenticated app shell', () => {
   test.setTimeout(60000)
-
-  test.beforeEach(async ({ page }) => {
-    await loginAsTestUser(page)
-  })
 
   test('/dashboard, /saved, /history, /collections, /pantry all load', async ({ page }) => {
     for (const path of ['/dashboard', '/saved', '/history', '/collections', '/pantry']) {
