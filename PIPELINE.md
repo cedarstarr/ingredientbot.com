@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-05-16
+**Last Updated**: 2026-05-15 (/qa-tests-android run)
 
 ---
 
@@ -35,7 +35,7 @@
 | 20 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
 | 21 | Final E2E Tests | /qa-tests-fix | DONE | 3 | 2026-05-08 12:30 | [view](reports/2026-05-08-tests-fix.md) |
 | 22 | iPhone Tests + Fix | /qa-tests-iphone | DONE | 1 | 2026-05-08 22:09 | [view](reports/2026-05-08-tests-fix-2.md) |
-| 23 | Android Tests + Fix | /qa-tests-android | DONE | 1 | 2026-05-15 | [view](reports/2026-05-15-qa-tests-android.md) |
+| 23 | Android Tests + Fix | /qa-tests-android | DONE | 2 | 2026-05-15 | [view](reports/2026-05-15-qa-tests-android.md) |
 | 24 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
 | 25 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
 | 26 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
@@ -109,3 +109,4 @@
 | 2026-05-10 | /qa-tokens | ~5m | SUCCESS | 2 focus-visible ring fixes (dietary-profile badge remove button, history tag filter buttons); 0 hex, 0 palette, 0 dark: changes needed. [view](reports/2026-05-10-qa-tokens-2.md) |
 | 2026-05-10 | /qa-tokens | ~5m | SUCCESS | Inline styles removed from global-error.tsx (→ Tailwind classes); 7 focus-visible rings added (cooking-mode: progress bar steps, timer reset/play/skip/ingredients, exit link; app-nav close button; recipe-tags autocomplete suggestion button); 0 raw palette or hex in non-exempt files. [view](reports/2026-05-10-qa-tokens-3.md) |
 | 2026-05-15 | /qa-tests-android | 16m | PARTIAL | 3/4 pass, 1 fail (login form test for authed user — needs clearCookies) [view](reports/2026-05-15-qa-tests-android.md) |
+| 2026-05-15 | /qa-tests-android | 1m | SUCCESS | android: 100% pass after auth/CSP fixes [view](reports/2026-05-15-qa-tests-android.md) |

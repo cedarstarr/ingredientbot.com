@@ -16,6 +16,8 @@ test.describe('@mobile public pages', () => {
   })
 
   test('login form is usable on mobile', async ({ page }) => {
+    // Authenticated storageState (default) redirects /login away — clear cookies first
+    await page.context().clearCookies()
     await page.goto('/login')
     // networkidle ensures the client-rendered LoginForm has fully hydrated
     // before asserting — domcontentloaded fires too early for Suspense-wrapped components

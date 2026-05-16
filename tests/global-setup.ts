@@ -39,7 +39,7 @@ export default async function globalSetup() {
     await page.waitForURL(/\/(kitchen|dashboard)/, { timeout: 120000, waitUntil: 'commit' })
 
     await context.storageState({ path: AUTH_FILE })
-    console.log(`[global-setup] Auth state saved to ${AUTH_FILE}`)
+    console.error(`[global-setup] Auth state saved to ${AUTH_FILE}`)
   } catch (err) {
     console.error('[global-setup] Authentication failed:', err)
     // Write empty storageState so project storageState config doesn't error on missing file
