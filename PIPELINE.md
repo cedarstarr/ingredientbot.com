@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-05-10 07:25
+**Last Updated**: 2026-05-15 (/qa-tests-android run)
 
 ---
 
@@ -14,36 +14,37 @@
 | # | Stage | Command | Status | Runs | Last Run | Report |
 |---|-------|---------|--------|------|----------|--------|
 | 1 | Scaffold | /plan-init | DONE | 1 | 2026-04-06 | — |
-| 2 | Feature Research | /plan-research | DONE | 2 | 2026-04-09 | [view](reports/2026-04-09-site-research.md) |
-| 3 | Feature Audit | /plan-feature-audit | DONE | 1 | 2026-04-11 | [view](reports/2026-04-11-site-audit.md) |
-| 4 | Feature Triage | /site-features | DONE | 1 | 2026-04-09 | [view](reports/2026-04-09-site-features.md) |
-| 5 | Feature Install | /site-install | DONE | 1 | 2026-04-10 00:00 | [view](reports/2026-04-10-site-install.md) |
-| 6 | Write Tests | /qa-tests-sync | DONE | 7 | 2026-05-08 | [view](reports/2026-05-09-tests-reconcile.md) |
-| 7 | Verify Build | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
-| 8 | Database Review | /qa-db | DONE | 3 | 2026-05-08 | [view](reports/2026-05-08-site-db.md) |
-| 9 | QA / Bug Check | /qa-bugs | DONE | 4 | 2026-05-09 | [view](reports/2026-05-09-site-bugs.md) |
-| 10 | Re-verify Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
-| 11 | Security Hardening | /qa-security | DONE | 4 | 2026-05-09 16:30 | [view](reports/2026-05-09-site-security.md) |
-| 12 | Resilience Audit | /qa-resilience | DONE | 1 | 2026-05-09 17:00 | [view](reports/2026-05-09-resilience.md) |
-| 13 | Design System Install | /design-implement | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
-| 14 | Token Hygiene | /qa-tokens | DONE | 4 | 2026-05-10 | [view](reports/2026-05-10-qa-tokens-3.md) |
-| 15 | Copy Audit | /qa-copy | DONE | 1 | 2026-05-03 | [view](reports/2026-05-03-ingredientbot-copy.md) |
-| 16 | Navigation Audit | /qa-nav | DONE | 7 | 2026-05-10 07:25 | [view](reports/2026-05-10-site-nav.md) |
-| 17 | Performance Audit | /qa-perf | DONE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-perf.md) |
-| 18 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
-| 19 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
-| 20 | Final E2E Tests | /qa-tests-fix | DONE | 3 | 2026-05-08 12:30 | [view](reports/2026-05-08-tests-fix.md) |
-| 21 | iPhone Tests + Fix | /qa-tests-iphone | DONE | 1 | 2026-05-08 22:09 | [view](reports/2026-05-08-tests-fix-2.md) |
-| 22 | Android Tests + Fix | /qa-tests-android | PENDING | 0 | — | — |
-| 23 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
-| 24 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
-| 25 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
-| 26 | Client Update | /ops-client-report | PENDING | 0 | — | — |
-| 27 | Launch | /ops-launch | PENDING | 0 | — | — |
+| 2 | Code Scaffold | /build-scaffold | SKIPPED | 0 | — | — |
+| 3 | Feature Research | /plan-research | DONE | 2 | 2026-04-09 | [view](reports/2026-04-09-site-research.md) |
+| 4 | Feature Audit | /plan-feature-audit | DONE | 1 | 2026-04-11 | [view](reports/2026-04-11-site-audit.md) |
+| 5 | Feature Triage | /site-features | DONE | 1 | 2026-04-09 | [view](reports/2026-04-09-site-features.md) |
+| 6 | Feature Install | /site-install | DONE | 1 | 2026-04-10 00:00 | [view](reports/2026-04-10-site-install.md) |
+| 7 | Write Tests | /qa-tests-sync | DONE | 7 | 2026-05-08 | [view](reports/2026-05-09-tests-reconcile.md) |
+| 8 | Verify Build | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
+| 9 | Database Review | /qa-db | DONE | 3 | 2026-05-08 | [view](reports/2026-05-08-site-db.md) |
+| 10 | QA / Bug Check | /qa-bugs | DONE | 4 | 2026-05-09 | [view](reports/2026-05-09-site-bugs.md) |
+| 11 | Re-verify Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
+| 12 | Security Hardening | /qa-security | DONE | 4 | 2026-05-09 16:30 | [view](reports/2026-05-09-site-security.md) |
+| 13 | Resilience Audit | /qa-resilience | DONE | 1 | 2026-05-09 17:00 | [view](reports/2026-05-09-resilience.md) |
+| 14 | Design System Install | /design-implement | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
+| 15 | Token Hygiene | /qa-tokens | DONE | 4 | 2026-05-10 | [view](reports/2026-05-10-qa-tokens-3.md) |
+| 16 | Copy Audit | /qa-copy | DONE | 1 | 2026-05-03 | [view](reports/2026-05-03-ingredientbot-copy.md) |
+| 17 | Navigation Audit | /qa-nav | DONE | 7 | 2026-05-10 07:25 | [view](reports/2026-05-10-site-nav.md) |
+| 18 | Performance Audit | /qa-perf | DONE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-perf.md) |
+| 19 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
+| 20 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
+| 21 | Final E2E Tests | /qa-tests-fix | DONE | 3 | 2026-05-08 12:30 | [view](reports/2026-05-08-tests-fix.md) |
+| 22 | iPhone Tests + Fix | /qa-tests-iphone | DONE | 1 | 2026-05-08 22:09 | [view](reports/2026-05-08-tests-fix-2.md) |
+| 23 | Android Tests + Fix | /qa-tests-android | DONE | 2 | 2026-05-15 | [view](reports/2026-05-15-qa-tests-android.md) |
+| 24 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
+| 25 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
+| 26 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
+| 27 | Client Update | /ops-client-report | PENDING | 0 | — | — |
+| 28 | Launch | /ops-launch | PENDING | 0 | — | — |
 
-**Progress: 21/27 stages complete**
+**Progress: 22/28 stages complete (1 skipped)**
 
-**Last Updated**: 2026-05-10 07:25
+**Last Updated**: 2026-05-15 (/qa-tests-android run)
 
 ---
 
@@ -107,3 +108,5 @@
 | 2026-05-10 07:25 | /qa-nav | ~5m | SUCCESS | 30 routes, 0 orphans, 0 dead links (2 scanner false-positives cleared), 100% coverage; Option B confirmed correct, no changes applied. [view](reports/2026-05-10-site-nav.md) |
 | 2026-05-10 | /qa-tokens | ~5m | SUCCESS | 2 focus-visible ring fixes (dietary-profile badge remove button, history tag filter buttons); 0 hex, 0 palette, 0 dark: changes needed. [view](reports/2026-05-10-qa-tokens-2.md) |
 | 2026-05-10 | /qa-tokens | ~5m | SUCCESS | Inline styles removed from global-error.tsx (→ Tailwind classes); 7 focus-visible rings added (cooking-mode: progress bar steps, timer reset/play/skip/ingredients, exit link; app-nav close button; recipe-tags autocomplete suggestion button); 0 raw palette or hex in non-exempt files. [view](reports/2026-05-10-qa-tokens-3.md) |
+| 2026-05-15 | /qa-tests-android | 16m | PARTIAL | 3/4 pass, 1 fail (login form test for authed user — needs clearCookies) [view](reports/2026-05-15-qa-tests-android.md) |
+| 2026-05-15 | /qa-tests-android | 1m | SUCCESS | android: 100% pass after auth/CSP fixes [view](reports/2026-05-15-qa-tests-android.md) |
