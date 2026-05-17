@@ -1,22 +1,15 @@
-import { anthropic } from '@ai-sdk/anthropic'
 import { google } from '@ai-sdk/google'
 import { wrapLanguageModel, type LanguageModelMiddleware } from 'ai'
 import type { LanguageModelV3StreamPart } from '@ai-sdk/provider'
 import { logAICall } from './ai-log'
 
-export const claudeSonnet = anthropic('claude-sonnet-4-6')
-export const claudeHaiku = anthropic('claude-haiku-4-5-20251001')
-
 export const geminiFlashLite = google('gemini-2.5-flash-lite')
-export const geminiFlash = google('gemini-2.5-flash')
 
-// When switching any call to `geminiFlash`, also pass:
-//   providerOptions: { google: { thinkingConfig: { thinkingBudget: 0 } } }
-// Flash has thinking mode ON by default — without this, hidden reasoning
-// tokens can 2-6× the output cost. Flash-lite has no thinking mode, so
-// the option is a no-op there.
+// Portfolio standard: Gemini Flash Lite only. Claude Sonnet/Haiku and
+// Gemini Flash were removed 2026-05-16 — Flash has thinking mode on by
+// default (2-6× output cost) and no recipe route needed a larger model.
 
-type Provider = 'anthropic' | 'google'
+type Provider = 'google'
 type ModelCtx = { feature: string; userId?: string | null }
 
 function loggingMiddleware(provider: Provider, modelId: string, ctx: ModelCtx): LanguageModelMiddleware {
@@ -55,6 +48,5 @@ function loggingMiddleware(provider: Provider, modelId: string, ctx: ModelCtx): 
 }
 
 export function trackedModel(provider: Provider, modelId: string, ctx: ModelCtx) {
-  const base = provider === 'anthropic' ? anthropic(modelId) : google(modelId)
-  return wrapLanguageModel({ model: base, middleware: loggingMiddleware(provider, modelId, ctx) })
+  return wrapLanguageModel({ model: google(modelId), middleware: loggingMiddleware(provider, modelId, ctx) })
 }

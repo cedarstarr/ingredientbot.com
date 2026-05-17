@@ -195,10 +195,12 @@ export async function POST(req: NextRequest) {
   const maxChars = 80_000
   const truncatedHtml = html.length > maxChars ? html.slice(0, maxChars) : html
 
-  const { text } = await generateText({
-    model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'recipe-import', userId: session.user.id }),
-    maxOutputTokens: 2048,
-    system: `You are a recipe extraction expert. Given the HTML content of a recipe webpage, extract the recipe into structured JSON. Return ONLY valid JSON with no markdown, no code blocks, no extra text.
+  let text: string
+  try {
+    const result = await generateText({
+      model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'recipe-import', userId: session.user.id }),
+      maxOutputTokens: 2048,
+      system: `You are a recipe extraction expert. Given the HTML content of a recipe webpage, extract the recipe into structured JSON. Return ONLY valid JSON with no markdown, no code blocks, no extra text.
 
 If the page does not contain a recognizable recipe, return: {"error": "No recipe found on this page"}
 
@@ -225,11 +227,16 @@ Rules:
 - If prep/cook times are not stated, estimate them based on the recipe complexity.
 - If nutrition info is not provided, estimate it reasonably.
 - If servings are not stated, estimate based on ingredient quantities.`,
-    messages: [{
-      role: 'user',
-      content: `Extract the recipe from this webpage. Source URL: ${url}\n\n${truncatedHtml}`,
-    }],
-  })
+      messages: [{
+        role: 'user',
+        content: `Extract the recipe from this webpage. Source URL: ${url}\n\n${truncatedHtml}`,
+      }],
+    })
+    text = result.text
+  } catch (err) {
+    console.error('recipe-import generateText failed:', err)
+    return Response.json({ error: 'Failed to import recipe' }, { status: 503 })
+  }
 
   try {
     const match = text.match(/\{[\s\S]*\}/)
