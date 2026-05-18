@@ -23,26 +23,27 @@
 | 8 | Verify Build | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 9 | Database Review | /qa-db | DONE | 3 | 2026-05-08 | [view](reports/2026-05-08-site-db.md) |
 | 10 | QA / Bug Check | /qa-bugs | DONE | 4 | 2026-05-09 | [view](reports/2026-05-09-site-bugs.md) |
-| 11 | Re-verify Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
-| 12 | Security Hardening | /qa-security | DONE | 4 | 2026-05-09 16:30 | [view](reports/2026-05-09-site-security.md) |
-| 13 | Resilience Audit | /qa-resilience | DONE | 1 | 2026-05-09 17:00 | [view](reports/2026-05-09-resilience.md) |
-| 14 | Design System Install | /design-implement | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
-| 15 | Token Hygiene | /qa-tokens | DONE | 4 | 2026-05-10 | [view](reports/2026-05-10-qa-tokens-3.md) |
-| 16 | Copy Audit | /qa-copy | DONE | 1 | 2026-05-03 | [view](reports/2026-05-03-ingredientbot-copy.md) |
-| 17 | Navigation Audit | /qa-nav | DONE | 7 | 2026-05-10 07:25 | [view](reports/2026-05-10-site-nav.md) |
-| 18 | Performance Audit | /qa-perf | DONE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-perf.md) |
-| 19 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
-| 20 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
-| 21 | Final E2E Tests | /qa-tests-fix | DONE | 3 | 2026-05-08 12:30 | [view](reports/2026-05-08-tests-fix.md) |
-| 22 | iPhone Tests + Fix | /qa-tests-iphone | DONE | 1 | 2026-05-08 22:09 | [view](reports/2026-05-08-tests-fix-2.md) |
-| 23 | Android Tests + Fix | /qa-tests-android | DONE | 2 | 2026-05-15 | [view](reports/2026-05-15-qa-tests-android.md) |
-| 24 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
-| 25 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
-| 26 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
-| 27 | Client Update | /ops-client-report | PENDING | 0 | — | — |
-| 28 | Launch | /ops-launch | PENDING | 0 | — | — |
+| 11 | Button Audit | /qa-button-fix | PENDING | 0 | — | — |
+| 12 | Re-verify Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
+| 13 | Security Hardening | /qa-security | DONE | 4 | 2026-05-09 16:30 | [view](reports/2026-05-09-site-security.md) |
+| 14 | Resilience Audit | /qa-resilience | DONE | 1 | 2026-05-09 17:00 | [view](reports/2026-05-09-resilience.md) |
+| 15 | Design System Install | /design-implement | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
+| 16 | Token Hygiene | /qa-tokens | DONE | 4 | 2026-05-10 | [view](reports/2026-05-10-qa-tokens-3.md) |
+| 17 | Copy Audit | /qa-copy | DONE | 1 | 2026-05-03 | [view](reports/2026-05-03-ingredientbot-copy.md) |
+| 18 | Navigation Audit | /qa-nav | DONE | 7 | 2026-05-10 07:25 | [view](reports/2026-05-10-site-nav.md) |
+| 19 | Performance Audit | /qa-perf | DONE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-perf.md) |
+| 20 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
+| 21 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
+| 22 | Final E2E Tests | /qa-tests-fix | DONE | 3 | 2026-05-08 12:30 | [view](reports/2026-05-08-tests-fix.md) |
+| 23 | iPhone Tests + Fix | /qa-tests-iphone | DONE | 1 | 2026-05-08 22:09 | [view](reports/2026-05-08-tests-fix-2.md) |
+| 24 | Android Tests + Fix | /qa-tests-android | DONE | 2 | 2026-05-15 | [view](reports/2026-05-15-qa-tests-android.md) |
+| 25 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
+| 26 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
+| 27 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
+| 28 | Client Update | /ops-client-report | PENDING | 0 | — | — |
+| 29 | Launch | /ops-launch | PENDING | 0 | — | — |
 
-**Progress: 22/28 stages complete (1 skipped)**
+**Progress: 22/29 stages complete (1 skipped)**
 
 **Last Updated**: 2026-05-15 (/qa-tests-android run)
 
