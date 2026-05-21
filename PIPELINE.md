@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-05-15 (/qa-tests-android run)
+**Last Updated**: 2026-05-15 (/qa-spec-android run)
 
 ---
 
@@ -19,12 +19,12 @@
 | 4 | Feature Audit | /plan-feature-audit | DONE | 1 | 2026-04-11 | [view](reports/2026-04-11-site-audit.md) |
 | 5 | Feature Triage | /site-features | DONE | 1 | 2026-04-09 | [view](reports/2026-04-09-site-features.md) |
 | 6 | Feature Install | /site-install | DONE | 1 | 2026-04-10 00:00 | [view](reports/2026-04-10-site-install.md) |
-| 7 | Write Tests | /qa-tests-sync | DONE | 7 | 2026-05-08 | [view](reports/2026-05-09-tests-reconcile.md) |
-| 8 | Verify Build | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
+| 7 | Write Tests | /qa-spec-sync | DONE | 7 | 2026-05-08 | [view](reports/2026-05-09-tests-reconcile.md) |
+| 8 | Verify Build | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 9 | Database Review | /qa-db | DONE | 3 | 2026-05-08 | [view](reports/2026-05-08-site-db.md) |
 | 10 | QA / Bug Check | /qa-bugs | DONE | 4 | 2026-05-09 | [view](reports/2026-05-09-site-bugs.md) |
 | 11 | Button Audit | /qa-button-fix | PENDING | 0 | — | — |
-| 12 | Re-verify Tests | /qa-tests-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
+| 12 | Re-verify Tests | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 13 | Security Hardening | /qa-security | DONE | 4 | 2026-05-09 16:30 | [view](reports/2026-05-09-site-security.md) |
 | 14 | Resilience Audit | /qa-resilience | DONE | 1 | 2026-05-09 17:00 | [view](reports/2026-05-09-resilience.md) |
 | 15 | Design System Install | /design-implement | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
@@ -34,9 +34,9 @@
 | 19 | Performance Audit | /qa-perf | DONE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-perf.md) |
 | 20 | SEO Audit | /qa-seo | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
 | 21 | Accessibility Audit | /qa-a11y | DONE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
-| 22 | Final E2E Tests | /qa-tests-fix | DONE | 3 | 2026-05-08 12:30 | [view](reports/2026-05-08-tests-fix.md) |
-| 23 | iPhone Tests + Fix | /qa-tests-iphone | DONE | 1 | 2026-05-08 22:09 | [view](reports/2026-05-08-tests-fix-2.md) |
-| 24 | Android Tests + Fix | /qa-tests-android | DONE | 2 | 2026-05-15 | [view](reports/2026-05-15-qa-tests-android.md) |
+| 22 | Final E2E Tests | /qa-spec-fix | DONE | 3 | 2026-05-08 12:30 | [view](reports/2026-05-08-tests-fix.md) |
+| 23 | iPhone Tests + Fix | /qa-spec-iphone | DONE | 1 | 2026-05-08 22:09 | [view](reports/2026-05-08-tests-fix-2.md) |
+| 24 | Android Tests + Fix | /qa-spec-android | DONE | 2 | 2026-05-15 | [view](reports/2026-05-15-qa-tests-android.md) |
 | 25 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
 | 26 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
 | 27 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
@@ -45,7 +45,7 @@
 
 **Progress: 22/29 stages complete (1 skipped)**
 
-**Last Updated**: 2026-05-15 (/qa-tests-android run)
+**Last Updated**: 2026-05-15 (/qa-spec-android run)
 
 ---
 
