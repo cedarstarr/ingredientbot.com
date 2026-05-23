@@ -42,3 +42,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# qa-button-fix generated files (regenerated each run)
+tests/_button-smoke.spec.ts
+tests/_button-smoke-config.ts
