@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { generateText } from 'ai'
-import { trackedModel } from '@/lib/ai'
+import { geminiFlashVision } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { getCached, setCached, sha256 } from '@/lib/recipe-cache'
 import * as Sentry from '@sentry/nextjs'
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     if (cached) return Response.json(cached)
 
     const { text } = await generateText({
-      model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'photo-analysis', userId: session.user.id }),
+      model: geminiFlashVision,
       maxOutputTokens: 512,
       messages: [{
         role: 'user',
