@@ -787,4 +787,6 @@ async function main() {
   console.log(`\nDone — ${created} recipes seeded.`)
 }
 
-main().catch(console.error).finally(() => prisma.$disconnect())
+if (require.main === module) {
+  main().catch(console.error).finally(() => prisma.$disconnect())
+}
