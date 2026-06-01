@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
@@ -12,7 +13,7 @@ import { CookedThisButton } from './cooked-this-button'
 import { RecipeTags } from './recipe-tags'
 import { CollectionPicker } from './collection-picker'
 import { RecipeRating } from './recipe-rating'
-import { Clock, Users, ChevronLeft, Loader2, HelpCircle, Printer, Sparkles, UtensilsCrossed, Lightbulb } from 'lucide-react'
+import { Clock, Users, ChevronLeft, Loader2, HelpCircle, Printer, Sparkles, UtensilsCrossed, Lightbulb, Save } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface Ingredient {
@@ -105,6 +106,7 @@ function formatQuantity(value: number): string {
 }
 
 export function RecipeDetailClient({ recipe, collections = [] }: Props) {
+  const router = useRouter()
   const recipeData = recipe.recipeData as RecipeData
   const [nutrition, setNutrition] = useState<RecipeData['nutrition'] | null>(
     recipe.nutrition as RecipeData['nutrition'] | null
@@ -113,14 +115,18 @@ export function RecipeDetailClient({ recipe, collections = [] }: Props) {
   const [modifiedText, setModifiedText] = useState('')
   const [isModifying, setIsModifying] = useState(false)
 
+  // Saving an AI variant (modification or substitution) as its own new recipe
+  const [isSavingVariant, setIsSavingVariant] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+
   // F33: Serving size slider — originalServings is fixed at parse time, never changes
   const originalServings = recipe.servings ?? 4
   const [servings, setServings] = useState(originalServings)
 
   // Substitution panel state
   const [substitutingIngredient, setSubstitutingIngredient] = useState<Ingredient | null>(null)
-  // Quick-swap overrides: map from original ingredient name → swapped-in display string
-  const [swappedIngredients, setSwappedIngredients] = useState<Map<string, string>>(new Map())
+  // Quick-swap overrides: map from original ingredient name → structured substitute
+  const [swappedIngredients, setSwappedIngredients] = useState<Map<string, { display: string; name: string; quantity: string }>>(new Map())
 
   // Ingredient checkbox state
   const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(new Set())
@@ -149,10 +155,57 @@ export function RecipeDetailClient({ recipe, collections = [] }: Props) {
   const handleSwap = (original: Ingredient, substitute: { name: string; quantity: string }) => {
     setSwappedIngredients(prev => {
       const next = new Map(prev)
-      next.set(original.name, `${substitute.quantity} ${substitute.name}`)
+      next.set(original.name, {
+        display: `${substitute.quantity} ${substitute.name}`.trim(),
+        name: substitute.name,
+        quantity: substitute.quantity,
+      })
       return next
     })
   }
+
+  // Persist the current AI variant as a brand-new recipe, then navigate to it.
+  const saveVariant = async (payload: Record<string, unknown>) => {
+    setIsSavingVariant(true)
+    setSaveError(null)
+    try {
+      const res = await fetch(`/api/recipes/${recipe.id}/save-variant`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        router.push(`/recipe/${data.id}`)
+        return
+      }
+      if (res.status === 402) {
+        setSaveError('You’ve hit your free monthly recipe limit. Upgrade to Pro to save more.')
+      } else {
+        const data = await res.json().catch(() => null)
+        setSaveError(data?.error === 'Failed to structure the modified recipe'
+          ? 'Couldn’t read the modified recipe — try regenerating it.'
+          : 'Couldn’t save. Please try again.')
+      }
+    } catch {
+      setSaveError('Couldn’t save. Please try again.')
+    } finally {
+      setIsSavingVariant(false)
+    }
+  }
+
+  const handleSaveModification = () =>
+    saveVariant({ kind: 'modification', modifiedText })
+
+  const handleSaveSubstitutions = () =>
+    saveVariant({
+      kind: 'substitution',
+      swaps: Array.from(swappedIngredients.entries()).map(([original, s]) => ({
+        original,
+        name: s.name,
+        quantity: s.quantity,
+      })),
+    })
 
   const totalMin = (recipe.prepTimeMin || 0) + (recipe.cookTimeMin || 0)
 
@@ -313,6 +366,26 @@ export function RecipeDetailClient({ recipe, collections = [] }: Props) {
                   {modifiedText}
                 </pre>
               </div>
+
+              {/* Save the modified version as its own recipe — it's ephemeral until persisted */}
+              {!isModifying && modifiedText && (
+                <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-primary/15 pt-4">
+                  <Button
+                    size="sm"
+                    onClick={handleSaveModification}
+                    disabled={isSavingVariant}
+                    className="gap-1.5"
+                  >
+                    {isSavingVariant ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Save className="h-3.5 w-3.5" />
+                    )}
+                    Save as new recipe
+                  </Button>
+                  {saveError && <p className="text-xs text-destructive">{saveError}</p>}
+                </div>
+              )}
             </div>
           )}
 
@@ -367,7 +440,7 @@ export function RecipeDetailClient({ recipe, collections = [] }: Props) {
                     </span>
                     {swapped ? (
                       <span className="text-xs text-primary font-medium bg-primary/10 rounded-md px-2 py-0.5 shrink-0">
-                        → {swapped}
+                        → {swapped.display}
                       </span>
                     ) : null}
                     {/* Substitute button — stopPropagation so it doesn't toggle the checkbox */}
@@ -389,12 +462,28 @@ export function RecipeDetailClient({ recipe, collections = [] }: Props) {
               })}
             </ul>
             {swappedIngredients.size > 0 && (
-              <button
-                onClick={() => setSwappedIngredients(new Map())}
-                className="mt-3 text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
-              >
-                Reset all substitutions
-              </button>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <Button
+                  size="sm"
+                  onClick={handleSaveSubstitutions}
+                  disabled={isSavingVariant}
+                  className="gap-1.5"
+                >
+                  {isSavingVariant ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Save className="h-3.5 w-3.5" />
+                  )}
+                  Save as new recipe
+                </Button>
+                <button
+                  onClick={() => setSwappedIngredients(new Map())}
+                  className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+                >
+                  Reset all substitutions
+                </button>
+                {saveError && <p className="text-xs text-destructive w-full">{saveError}</p>}
+              </div>
             )}
           </section>
 

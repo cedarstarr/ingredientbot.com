@@ -15,6 +15,10 @@ const actionPrompts: Record<string, (recipe: any, options: any) => string> = {
   change_servings: (recipe: any, { targetServings }: any) => `Adapt this recipe from ${recipe.servings} servings to ${targetServings} servings. Adjust all ingredient quantities proportionally. Show the complete modified recipe.`,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   change_method: (_: any, { targetMethod }: any) => `Rewrite this recipe to use ${targetMethod} cooking instead of the original method. Adjust times, temperatures, and any technique-specific instructions. Show the complete modified recipe.`,
+  protein_max: () => `Modify this recipe so each serving contains at least 40g of protein. Add or swap in protein-dense ingredients (chicken, beef, eggs, Greek yogurt, cottage cheese, tofu, tempeh, legumes) without breaking the dish. Show the complete modified recipe.`,
+  make_vegetarian: () => `Modify this recipe to be fully vegetarian. Replace any meat or fish with satisfying vegetarian substitutes that keep the texture and flavor profile. Show the complete modified recipe.`,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  change_cuisine: (_: any, { cuisine }: any) => `Reinterpret this recipe in the style of ${cuisine} cuisine. Adjust seasonings, techniques, and ingredients to match that cuisine authentically while keeping the core dish recognizable. Show the complete modified recipe.`,
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
