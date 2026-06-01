@@ -112,3 +112,4 @@
 | 2026-05-15 | /qa-tests-android | 16m | PARTIAL | 3/4 pass, 1 fail (login form test for authed user — needs clearCookies) [view](reports/2026-05-15-qa-tests-android.md) |
 | 2026-05-15 | /qa-tests-android | 1m | SUCCESS | android: 100% pass after auth/CSP fixes [view](reports/2026-05-15-qa-tests-android.md) |
 | 2026-05-23 | /qa-spec-sync | 8m | SUCCESS | Reconciled E2E specs: added utility-pages.spec.ts (auth/public utility routes). 11 stale testids and 3 orphan specs were scanner false positives (template literals). Skipped 300+ admin/dynamic/token routes. [view](reports/2026-05-09-tests-reconcile.md) |
+| 2026-06-01 | /qa-smoke | ~5m | SUCCESS | @smoke tier setup — tagged 15 critical tests @smoke (auth/conversion/core happy-path/error+empty) + added test:e2e:smoke (--grep @smoke) and test:e2e:full scripts. Two-tier E2E: fast smoke vs full suite. |
