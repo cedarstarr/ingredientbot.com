@@ -10,7 +10,7 @@ import { test, expect } from '@playwright/test'
 test.describe('Authenticated app shell', () => {
   test.setTimeout(60000)
 
-  test('/dashboard, /saved, /history, /collections, /pantry all load', async ({ page }) => {
+  test('/dashboard, /saved, /history, /collections, /pantry all load @smoke', async ({ page }) => {
     for (const path of ['/dashboard', '/saved', '/history', '/collections', '/pantry']) {
       const res = await page.goto(path)
       await page.waitForLoadState('domcontentloaded')
@@ -30,7 +30,7 @@ test.describe('Authenticated app shell', () => {
     ).toBeVisible()
   })
 
-  test('/recipe/nonexistent-id returns 404 (not 500)', async ({ page }) => {
+  test('/recipe/nonexistent-id returns 404 (not 500) @smoke', async ({ page }) => {
     const res = await page.goto('/recipe/nonexistent-id-that-does-not-exist')
     await page.waitForLoadState('domcontentloaded')
     expect(res?.status()).not.toBe(500)

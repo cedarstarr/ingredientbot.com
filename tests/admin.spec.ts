@@ -25,7 +25,7 @@ test.describe('Admin access control (unauthenticated)', () => {
   test.use({ storageState: undefined })
   test.setTimeout(60000)
 
-  test('unauthenticated /admin redirects to /login', async ({ page }) => {
+  test('unauthenticated /admin redirects to /login @smoke', async ({ page }) => {
     await page.goto('/admin')
     await page.waitForLoadState('domcontentloaded')
     expect(page.url()).toContain('/login')

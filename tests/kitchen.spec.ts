@@ -17,14 +17,14 @@ test.describe('Kitchen — ingredient input journey', () => {
     await page.waitForLoadState('domcontentloaded')
   })
 
-  test('ingredient textarea is visible and accepts input', async ({ page }) => {
+  test('ingredient textarea is visible and accepts input @smoke', async ({ page }) => {
     const input = page.getByPlaceholder(KITCHEN_PLACEHOLDER)
     await expect(input).toBeVisible()
     await input.fill('chicken, rice')
     await expect(input).toHaveValue('chicken, rice')
   })
 
-  test('Find recipes button is gated until 2+ ingredients are entered', async ({ page }) => {
+  test('Find recipes button is gated until 2+ ingredients are entered @smoke', async ({ page }) => {
     const input = page.getByPlaceholder(KITCHEN_PLACEHOLDER)
     const btn = page.getByRole('button', { name: /find recipes/i })
 
@@ -46,7 +46,7 @@ test.describe('Kitchen — ingredient input journey', () => {
     ).toBeVisible()
   })
 
-  test('Find recipes click does not navigate away from /kitchen', async ({ page }) => {
+  test('Find recipes click does not navigate away from /kitchen @smoke', async ({ page }) => {
     // Mock the AI endpoint so we don't burn tokens on a real generation
     await page.route('/api/recipes/generate', async (route) => {
       const fakeNdjson =

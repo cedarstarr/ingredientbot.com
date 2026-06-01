@@ -15,7 +15,7 @@ test.describe('Saved Recipes (unauthenticated)', () => {
 })
 
 test.describe('Saved Recipes (authenticated)', () => {
-  test('authenticated user sees the Saved Recipes heading', async ({ page }) => {
+  test('authenticated user sees the Saved Recipes heading @smoke', async ({ page }) => {
     await page.goto('/saved')
     await expect(page.getByTestId('saved-heading')).toBeVisible({ timeout: 10_000 })
   })

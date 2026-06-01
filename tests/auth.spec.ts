@@ -5,7 +5,7 @@ import { loginAsTestUser } from './helpers'
 test.use({ storageState: undefined })
 
 test.describe('Auth — login & signup pages', () => {
-  test('login page renders email field, password field, and Sign in button', async ({ page }) => {
+  test('login page renders email field, password field, and Sign in button @smoke', async ({ page }) => {
     await page.goto('/login')
     await page.waitForLoadState('domcontentloaded')
 
@@ -14,7 +14,7 @@ test.describe('Auth — login & signup pages', () => {
     await expect(page.getByRole('button', { name: /sign in/i })).toBeVisible()
   })
 
-  test('signup page renders name, email, password, and confirm password fields', async ({ page }) => {
+  test('signup page renders name, email, password, and confirm password fields @smoke', async ({ page }) => {
     await page.goto('/signup')
     await page.waitForLoadState('domcontentloaded')
 
@@ -27,7 +27,7 @@ test.describe('Auth — login & signup pages', () => {
   test.describe('login flow', () => {
     test.setTimeout(60000)
 
-    test('valid credentials redirect to /kitchen', async ({ page }) => {
+    test('valid credentials redirect to /kitchen @smoke', async ({ page }) => {
       await loginAsTestUser(page)
       await page.goto('/kitchen')
       await page.waitForLoadState('domcontentloaded')
@@ -36,7 +36,7 @@ test.describe('Auth — login & signup pages', () => {
       expect(page.url()).toContain('/kitchen')
     })
 
-    test('invalid password keeps user on /login (or shows error)', async ({ page }) => {
+    test('invalid password keeps user on /login (or shows error) @smoke', async ({ page }) => {
       await page.goto('/login')
       await page.waitForLoadState('domcontentloaded')
 
