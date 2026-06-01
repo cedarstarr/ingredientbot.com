@@ -10,7 +10,9 @@
     "seed:admin": "tsx scripts/seed-admin-user.ts",
     "seed:test": "tsx scripts/seed-test-user.ts",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:smoke": "playwright test --grep @smoke",
+    "test:e2e:full": "playwright test"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.78",

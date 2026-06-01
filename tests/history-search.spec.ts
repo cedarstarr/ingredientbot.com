@@ -15,7 +15,7 @@ test.describe('Recipe history search and filters (F37)', () => {
     await page.waitForLoadState('domcontentloaded')
   })
 
-  test('history page shows search input and Search button', async ({ page }) => {
+  test('history page shows search input and Search button @smoke', async ({ page }) => {
     await expect(
       page.getByPlaceholder(/search by title or ingredient/i),
     ).toBeVisible()

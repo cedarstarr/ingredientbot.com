@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test'
  */
 
 test.describe('API smoke', () => {
-  test('GET /api/health returns 200 with status ok', async ({ request }) => {
+  test('GET /api/health returns 200 with status ok @smoke', async ({ request }) => {
     const res = await request.get('/api/health')
     expect(res.status()).toBe(200)
     const body = await res.json()
