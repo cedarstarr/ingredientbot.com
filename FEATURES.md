@@ -13,6 +13,7 @@
 - ✅ F03 Recipe detail pages with structured data [Core]
 - ✅ F04 Photo-based recipe analysis [Hook]
 - ✅ F05 Recipe modification system + modification toolbar [Sticky]
+- ✅ F80 Save AI variant as new recipe (modifications + substitutions) [Sticky]
 - ✅ F06 Saved recipes collection [Sticky]
 - ✅ F07 Meal planner with weekly slots [Sticky]
 - ✅ F08 Grocery list sheet (generated from recipes) [Sticky]
@@ -149,6 +150,8 @@ F04. **Photo-based recipe analysis** [Hook] — POST /api/recipes/analyze-photo 
 F05. **Recipe modification system** [Sticky] — POST /api/recipes/[id]/modify + one-click toolbar: make it vegan, double servings, simplify for beginners, spice it up, make it faster. Modifications stored as JSON array on Recipe model. (Feasibility: built)
 
 F06. **Saved recipes collection** [Sticky] — /saved page listing every recipe the user has generated and kept, with search and filter. The personal cookbook. (Feasibility: built)
+
+F80. **Save AI variant as new recipe** [Sticky] — POST /api/recipes/[id]/save-variant. The modify stream and ingredient substitutions were ephemeral (client-state only, lost on refresh). A "Save as new recipe" button now forks either into its own persisted Recipe: modifications are re-structured from markdown into the canonical recipe JSON via a cheap Gemini-flash-lite pass; substitutions apply the user's swaps to the stored recipe (no AI). The original is never mutated — it's always a copy. Counts against the free-tier monthly limit like /cook to prevent an unlimited-recipe bypass. Also fixed the modify route's missing action prompts (protein_max, make_vegetarian, change_cuisine) which previously returned "Invalid action." (Feasibility: built)
 
 F07. **Meal planner with weekly slots** [Sticky] — /meal-plan calendar grid. Assign saved recipes to breakfast/lunch/dinner for each day of the week. (Feasibility: built)
 
