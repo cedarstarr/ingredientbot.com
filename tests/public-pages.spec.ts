@@ -26,7 +26,7 @@ test.describe('Public pages', () => {
     expect(body.toLowerCase()).toMatch(/user-agent/)
   })
 
-  test('/sitemap.xml is served', async ({ request }) => {
+  test('/sitemap.xml is served @smoke', async ({ request }) => {
     const res = await request.get('/sitemap.xml')
     expect(res.status()).toBe(200)
     const body = await res.text()

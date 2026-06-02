@@ -145,9 +145,11 @@ export async function POST(req: NextRequest) {
   // F78: spice level — always inject even at 0=Mild — shared with /generate
   const spiceContext = buildSpiceContext(spiceLevel)
 
-  const { text } = await generateText({
-    model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'cooking-assistant', userId: session.user.id }),
-    maxOutputTokens: 2048,
+  let text: string
+  try {
+    const aiResult = await generateText({
+      model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'cooking-assistant', userId: session.user.id }),
+      maxOutputTokens: 2048,
     system: `You are an expert chef. Generate a complete detailed recipe as JSON. Return ONLY valid JSON with no markdown, no code blocks.
 Schema:
 {
@@ -167,7 +169,11 @@ Schema:
       role: 'user',
       content: `Generate a full recipe for "${suggestion.title}". Description: ${suggestion.description}. Main ingredients available: ${ingredients.join(', ')}. Target servings: ${suggestion.servings || 4}.`,
     }],
-  })
+    })
+    text = aiResult.text
+  } catch {
+    return Response.json({ error: 'AI service error' }, { status: 500 })
+  }
 
   let recipeData
   try {

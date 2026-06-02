@@ -14,7 +14,7 @@ test.describe('Kitchen advanced options panel', () => {
     await page.waitForLoadState('domcontentloaded')
   })
 
-  test('Advanced options section is present and can be opened', async ({ page }) => {
+  test('Advanced options section is present and can be opened @smoke', async ({ page }) => {
     const toggle = page.getByRole('button', { name: /advanced options/i })
     await expect(toggle).toBeVisible()
     await toggle.click()
