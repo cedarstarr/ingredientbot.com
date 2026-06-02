@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-05-23 (/qa-spec-sync run)
+**Last Updated**: 2026-06-01 (/qa-spec-sync run)
 
 ---
 
@@ -19,7 +19,7 @@
 | 4 | Feature Audit | /plan-feature-audit | DONE | 1 | 2026-04-11 | [view](reports/2026-04-11-site-audit.md) |
 | 5 | Feature Triage | /site-features | DONE | 1 | 2026-04-09 | [view](reports/2026-04-09-site-features.md) |
 | 6 | Feature Install | /site-install | DONE | 1 | 2026-04-10 00:00 | [view](reports/2026-04-10-site-install.md) |
-| 7 | Write Tests | /qa-spec-sync | DONE | 8 | 2026-05-23 | [view](reports/2026-05-09-tests-reconcile.md) |
+| 7 | Write Tests | /qa-spec-sync | DONE | 9 | 2026-06-01 | [view](reports/2026-05-09-tests-reconcile.md) |
 | 8 | Verify Build | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 9 | Database Review | /qa-db | DONE | 3 | 2026-05-08 | [view](reports/2026-05-08-site-db.md) |
 | 10 | QA / Bug Check | /qa-bugs | DONE | 4 | 2026-05-09 | [view](reports/2026-05-09-site-bugs.md) |
@@ -45,7 +45,7 @@
 
 **Progress: 22/29 stages complete (1 skipped)**
 
-**Last Updated**: 2026-05-23 (/qa-spec-sync run)
+**Last Updated**: 2026-06-01 (/qa-spec-sync run)
 
 ---
 
@@ -113,3 +113,4 @@
 | 2026-05-15 | /qa-tests-android | 1m | SUCCESS | android: 100% pass after auth/CSP fixes [view](reports/2026-05-15-qa-tests-android.md) |
 | 2026-05-23 | /qa-spec-sync | 8m | SUCCESS | Reconciled E2E specs: added utility-pages.spec.ts (auth/public utility routes). 11 stale testids and 3 orphan specs were scanner false positives (template literals). Skipped 300+ admin/dynamic/token routes. [view](reports/2026-05-09-tests-reconcile.md) |
 | 2026-06-01 | /qa-smoke | ~5m | SUCCESS | @smoke tier setup — tagged 15 critical tests @smoke (auth/conversion/core happy-path/error+empty) + added test:e2e:smoke (--grep @smoke) and test:e2e:full scripts. Two-tier E2E: fast smoke vs full suite. |
+| 2026-06-01 | /qa-spec-sync | 1m | PARTIAL | 5 missing specs: all admin or dynamic [id] routes — skipped intentionally untestable routes [view](reports/2026-05-09-tests-reconcile.md) |
