@@ -322,6 +322,7 @@ model AICallLog {
   createdAt    DateTime @default(now())
 
   @@index([createdAt])
+  @@index([site])
   @@index([feature])
   @@index([userId])
   @@map("ai_call_logs")

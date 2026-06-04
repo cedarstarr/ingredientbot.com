@@ -180,7 +180,7 @@ export function SavedRecipesClient({ recipes }: SavedRecipesClientProps) {
               >
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground leading-tight">{recipe.title}</h3>
+                    <h3 className="font-semibold text-foreground leading-tight line-clamp-2">{recipe.title}</h3>
                     {/* F51: star rating display */}
                     {recipe.rating !== null && recipe.rating !== undefined && (
                       <div className="flex items-center gap-0.5 mt-1" aria-label={`Rated ${recipe.rating} out of 5 stars`}>

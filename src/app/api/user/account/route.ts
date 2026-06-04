@@ -25,7 +25,10 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: 'Password is required' }, { status: 400 })
   }
 
-  const user = await prisma.user.findUnique({ where: { id: session.user.id } })
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { id: true, password: true, email: true, name: true },
+  })
   if (!user?.password) {
     return NextResponse.json({ error: 'No password set' }, { status: 400 })
   }
