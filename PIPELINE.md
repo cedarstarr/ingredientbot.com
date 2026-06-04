@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-06-03 (/qa-db run)
+**Last Updated**: 2026-06-04 (/qa-bugs run)
 
 ---
 
@@ -22,7 +22,7 @@
 | 7 | Write Tests | /qa-spec-sync | DONE | 9 | 2026-06-01 | [view](reports/2026-05-09-tests-reconcile.md) |
 | 8 | Verify Build | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 9 | Database Review | /qa-db | DONE | 4 | 2026-06-03 | [view](reports/2026-06-04-site-db.md) |
-| 10 | QA / Bug Check | /qa-bugs | STALE | 4 | 2026-05-09 | [view](reports/2026-05-09-site-bugs.md) |
+| 10 | QA / Bug Check | /qa-bugs | DONE | 5 | 2026-06-04 | [view](reports/2026-06-04-site-bugs.md) |
 | 11 | Button Audit | /qa-button-fix | PENDING | 0 | — | — |
 | 12 | Re-verify Tests | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 13 | Security Hardening | /qa-security | DONE | 4 | 2026-05-09 16:30 | [view](reports/2026-05-09-site-security.md) |
@@ -45,7 +45,7 @@
 
 **Progress: 22/29 stages complete (1 skipped)**
 
-**Last Updated**: 2026-06-03 (/qa-db run)
+**Last Updated**: 2026-06-04 (/qa-bugs run)
 
 ---
 
@@ -115,3 +115,4 @@
 | 2026-06-01 | /qa-smoke | ~5m | SUCCESS | @smoke tier setup — tagged 15 critical tests @smoke (auth/conversion/core happy-path/error+empty) + added test:e2e:smoke (--grep @smoke) and test:e2e:full scripts. Two-tier E2E: fast smoke vs full suite. |
 | 2026-06-01 | /qa-spec-sync | 1m | PARTIAL | 5 missing specs: all admin or dynamic [id] routes — skipped intentionally untestable routes [view](reports/2026-05-09-tests-reconcile.md) |
 | 2026-06-03 | /qa-db | 8 minutes | SUCCESS | 4 issues found, 4 fixed (1 missing index, 2 broad selects, 1 cron cap) [view](reports/2026-06-04-site-db.md) |
+| 2026-06-04 | /qa-bugs | 4m | SUCCESS | 1 MEDIUM (text overflow on saved-recipe card title), fixed; build passed [view](reports/2026-06-04-site-bugs.md) |
