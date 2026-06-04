@@ -41,6 +41,9 @@ export async function GET(req: NextRequest) {
       weekStart: { gte: windowStart, lte: nextWeek },
       user: { notifyProduct: true },
     },
+    // Safety cap — date window bounds this in practice, but cap prevents
+    // a runaway batch if clock drift or a schema change widens the window.
+    take: 5000,
     include: {
       user: { select: { id: true, email: true, name: true } },
       slots: {
