@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 import { loginAsTestUser } from './helpers'
 
 // Auth tests run without pre-loaded session — they test the login flow itself
-test.use({ storageState: undefined })
+test.use({ storageState: { cookies: [], origins: [] } })
 
 test.describe('Auth — login & signup pages', () => {
   test('login page renders email field, password field, and Sign in button @smoke', async ({ page }) => {

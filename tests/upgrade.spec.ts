@@ -19,7 +19,7 @@ test.describe('Upgrade page (authenticated)', () => {
 })
 
 test.describe('Upgrade page (unauthenticated)', () => {
-  test.use({ storageState: undefined })
+  test.use({ storageState: { cookies: [], origins: [] } })
   test.setTimeout(60000)
 
   test('unauthenticated /upgrade redirects to /login', async ({ page }) => {
