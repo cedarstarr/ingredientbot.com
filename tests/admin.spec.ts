@@ -22,7 +22,7 @@ test.describe('Admin access control (authenticated)', () => {
 })
 
 test.describe('Admin access control (unauthenticated)', () => {
-  test.use({ storageState: undefined })
+  test.use({ storageState: { cookies: [], origins: [] } })
   test.setTimeout(60000)
 
   test('unauthenticated /admin redirects to /login @smoke', async ({ page }) => {

@@ -62,7 +62,7 @@ test.describe('Cooking mode (F29) — structural smoke', () => {
 })
 
 test.describe('Cooking mode (F29) — unauthenticated', () => {
-  test.use({ storageState: undefined })
+  test.use({ storageState: { cookies: [], origins: [] } })
   test.setTimeout(60000)
 
   test('unauthenticated /kitchen/cook/any-id redirects to /login', async ({ page }) => {
