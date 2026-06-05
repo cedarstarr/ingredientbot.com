@@ -77,7 +77,7 @@ test.describe('Recipe URL import (F62) — authenticated', () => {
 })
 
 test.describe('Recipe URL import (F62) — unauthenticated', () => {
-  test.use({ storageState: undefined })
+  test.use({ storageState: { cookies: [], origins: [] } })
   test.setTimeout(60000)
 
   test('unauthenticated /import redirects to /login', async ({ page }) => {

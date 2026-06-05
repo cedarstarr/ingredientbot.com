@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test'
  */
 
 test.describe('Saved Recipes (unauthenticated)', () => {
-  test.use({ storageState: undefined })
+  test.use({ storageState: { cookies: [], origins: [] } })
 
   test('unauthenticated visitor is redirected to /login', async ({ page }) => {
     await page.goto('/saved')
