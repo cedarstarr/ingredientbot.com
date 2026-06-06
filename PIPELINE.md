@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-06-05 (/qa-spec-fix run)
+**Last Updated**: 2026-06-06 (/qa-security run)
 
 ---
 
@@ -25,16 +25,16 @@
 | 10 | QA / Bug Check | /qa-bugs | DONE | 5 | 2026-06-04 | [view](reports/2026-06-04-site-bugs.md) |
 | 11 | Button Audit | /qa-button-fix | PENDING | 0 | — | — |
 | 12 | Re-verify Tests | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
-| 13 | Security Hardening | /qa-security | DONE | 4 | 2026-05-09 16:30 | [view](reports/2026-05-09-site-security.md) |
-| 14 | Resilience Audit | /qa-resilience | DONE | 1 | 2026-05-09 17:00 | [view](reports/2026-05-09-resilience.md) |
-| 15 | Design System Install | /design-implement | DONE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
-| 16 | Token Hygiene | /qa-tokens | DONE | 4 | 2026-05-10 | [view](reports/2026-05-10-qa-tokens-3.md) |
-| 17 | Copy Audit | /qa-copy | DONE | 1 | 2026-05-03 | [view](reports/2026-05-03-ingredientbot-copy.md) |
-| 18 | Navigation Audit | /qa-nav | DONE | 7 | 2026-05-10 07:25 | [view](reports/2026-05-10-site-nav.md) |
-| 19 | Performance Audit | /qa-perf | DONE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-perf.md) |
+| 13 | Security Hardening | /qa-security | DONE | 5 | 2026-06-06 | [view](reports/2026-06-06-site-security.md) |
+| 14 | Resilience Audit | /qa-resilience | STALE | 1 | 2026-05-09 17:00 | [view](reports/2026-05-09-resilience.md) |
+| 15 | Design System Install | /design-implement | STALE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
+| 16 | Token Hygiene | /qa-tokens | STALE | 4 | 2026-05-10 | [view](reports/2026-05-10-qa-tokens-3.md) |
+| 17 | Copy Audit | /qa-copy | STALE | 1 | 2026-05-03 | [view](reports/2026-05-03-ingredientbot-copy.md) |
+| 18 | Navigation Audit | /qa-nav | STALE | 7 | 2026-05-10 07:25 | [view](reports/2026-05-10-site-nav.md) |
+| 19 | Performance Audit | /qa-perf | STALE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-perf.md) |
 | 20 | SEO Audit | /qa-seo | STALE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
 | 21 | Accessibility Audit | /qa-a11y | STALE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
-| 22 | Final E2E Tests | /qa-spec-fix | DONE | 4 | 2026-06-05 | [view](reports/2026-06-05-e2e-reconcile.md) |
+| 22 | Final E2E Tests | /qa-spec-fix | STALE | 4 | 2026-06-05 | [view](reports/2026-06-05-e2e-reconcile.md) |
 | 23 | iPhone Tests + Fix | /qa-spec-iphone | DONE | 1 | 2026-05-08 22:09 | [view](reports/2026-05-08-tests-fix-2.md) |
 | 24 | Android Tests + Fix | /qa-spec-android | DONE | 2 | 2026-05-15 | [view](reports/2026-05-15-qa-tests-android.md) |
 | 25 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
@@ -45,7 +45,7 @@
 
 **Progress: 22/29 stages complete (1 skipped)**
 
-**Last Updated**: 2026-06-05 (/qa-spec-fix run)
+**Last Updated**: 2026-06-06 (/qa-security run)
 
 ---
 
@@ -117,3 +117,4 @@
 | 2026-06-03 | /qa-db | 8 minutes | SUCCESS | 4 issues found, 4 fixed (1 missing index, 2 broad selects, 1 cron cap) [view](reports/2026-06-04-site-db.md) |
 | 2026-06-04 | /qa-bugs | 4m | SUCCESS | 1 MEDIUM (text overflow on saved-recipe card title), fixed; build passed [view](reports/2026-06-04-site-bugs.md) |
 | 2026-06-05 | /qa-spec-fix | 8m | PARTIAL | 42->31: storageState; <main>+form residuals (FOU-134) [view](reports/2026-06-05-e2e-reconcile.md) |
+| 2026-06-06 | /qa-security | 12m | SUCCESS | 3 LOW found, 3 fixed (next 16.2.7 bump, share host hardened, verify-email-change rate limit); 0 deferred [view](reports/2026-06-06-site-security.md) |

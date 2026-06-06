@@ -40,9 +40,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       data: { isPublic: true, publicSlug: slug },
     })
 
-    const host = req.headers.get('host') ?? 'ingredientbot.com'
-    const protocol = req.headers.get('x-forwarded-proto') ?? 'https'
-    const url = `${protocol}://${host}/r/${slug}`
+    // Prefer NEXT_PUBLIC_SITE_URL — the host header is attacker-controlled in some hosting
+    // configs (Host header injection) and could be used to mint share links pointing at a
+    // phishing domain. Fall back to the request host only when the env var is absent.
+    const baseUrl =
+      process.env.NEXT_PUBLIC_SITE_URL ??
+      `${req.headers.get('x-forwarded-proto') ?? 'https'}://${req.headers.get('host') ?? 'ingredientbot.com'}`
+    const url = `${baseUrl.replace(/\/$/, '')}/r/${slug}`
     return NextResponse.json({ url, slug })
   } catch {
     return NextResponse.json({ error: 'Failed to share recipe' }, { status: 500 })
