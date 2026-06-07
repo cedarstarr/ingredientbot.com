@@ -54,7 +54,8 @@ export function Toaster({ children }: { children?: React.ReactNode }) {
             </div>
             <button
               onClick={() => dismiss(t.id)}
-              className="shrink-0 p-0.5 rounded text-muted-foreground hover:text-foreground"
+              aria-label="Dismiss notification"
+              className="shrink-0 p-0.5 rounded text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <X className="h-4 w-4" />
             </button>
