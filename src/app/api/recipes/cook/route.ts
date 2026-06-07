@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateText } from 'ai'
@@ -13,6 +13,7 @@ export const maxDuration = 60
 const FREE_TIER_LIMIT = 5
 
 export async function POST(req: NextRequest) {
+  try {
   const session = await auth()
   if (!session) return new Response('Unauthorized', { status: 401 })
 
@@ -227,4 +228,9 @@ Schema:
   ])
 
   return Response.json({ id: recipe.id })
+  } catch (err) {
+    if ((err as { digest?: string }).digest?.startsWith('NEXT_REDIRECT')) throw err
+    console.error(err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }

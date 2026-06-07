@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-06-06 (/qa-security run)
+**Last Updated**: 2026-06-06 (/qa-resilience run)
 
 ---
 
@@ -26,7 +26,7 @@
 | 11 | Button Audit | /qa-button-fix | PENDING | 0 | — | — |
 | 12 | Re-verify Tests | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 13 | Security Hardening | /qa-security | DONE | 5 | 2026-06-06 | [view](reports/2026-06-06-site-security.md) |
-| 14 | Resilience Audit | /qa-resilience | STALE | 1 | 2026-05-09 17:00 | [view](reports/2026-05-09-resilience.md) |
+| 14 | Resilience Audit | /qa-resilience | DONE | 2 | 2026-06-06 | [view](reports/2026-05-09-resilience.md) |
 | 15 | Design System Install | /design-implement | STALE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
 | 16 | Token Hygiene | /qa-tokens | STALE | 4 | 2026-05-10 | [view](reports/2026-05-10-qa-tokens-3.md) |
 | 17 | Copy Audit | /qa-copy | STALE | 1 | 2026-05-03 | [view](reports/2026-05-03-ingredientbot-copy.md) |
@@ -45,7 +45,7 @@
 
 **Progress: 22/29 stages complete (1 skipped)**
 
-**Last Updated**: 2026-06-06 (/qa-security run)
+**Last Updated**: 2026-06-06 (/qa-resilience run)
 
 ---
 
@@ -118,3 +118,4 @@
 | 2026-06-04 | /qa-bugs | 4m | SUCCESS | 1 MEDIUM (text overflow on saved-recipe card title), fixed; build passed [view](reports/2026-06-04-site-bugs.md) |
 | 2026-06-05 | /qa-spec-fix | 8m | PARTIAL | 42->31: storageState; <main>+form residuals (FOU-134) [view](reports/2026-06-05-e2e-reconcile.md) |
 | 2026-06-06 | /qa-security | 12m | SUCCESS | 3 LOW found, 3 fixed (next 16.2.7 bump, share host hardened, verify-email-change rate limit); 0 deferred [view](reports/2026-06-06-site-security.md) |
+| 2026-06-06 | /qa-resilience | 3m | SUCCESS | try/catch wrap on 5 AI recipe routes (chat, save-variant, cook, generate, import) [view](reports/2026-05-09-resilience.md) |
