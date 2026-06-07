@@ -2,14 +2,23 @@ import { NextRequest } from 'next/server'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { logAuditEvent } from '@/lib/audit'
+import { authLimiter } from '@/lib/rate-limit'
 
 export async function GET(req: NextRequest) {
+  const ip = req.headers.get('x-forwarded-for') ?? 'anonymous'
+
+  // Symmetric rate-limit with signup / forgot / reset / password-change. Token entropy makes
+  // brute-force infeasible in practice; this is defense-in-depth against accidental token-leak
+  // replay storms (e.g., an email forwarder bouncing the same token thousands of times).
+  const { success } = await authLimiter.check(`email-verify-change:${ip}`)
+  if (!success) {
+    redirect('/settings?error=rate_limited')
+  }
+
   const token = req.nextUrl.searchParams.get('token')
   if (!token) {
     redirect('/settings?error=invalid_token')
   }
-
-  const ip = req.headers.get('x-forwarded-for') ?? 'anonymous'
 
   // Wrap DB ops so a transient Prisma failure surfaces as a friendly error redirect
   // rather than a bare 500 that loses the user mid-flow.
