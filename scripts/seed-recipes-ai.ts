@@ -15,12 +15,11 @@ import { resolve } from 'node:path'
 config({ path: resolve(__dirname, '../../.env') })
 config({ path: resolve(__dirname, '../.env') })
 
-import { PrismaClient } from '@prisma/client'
+import { prisma } from './_prisma'
 import { z } from 'zod'
 import { batchMap, getStats } from './lib/ai-batch'
 import { buildRecipeRecord, type RecipeInput } from './seed-recipes'
 
-const prisma = new PrismaClient()
 
 // Diverse dish prompts — cuisine, dietary, and difficulty are intentionally varied
 const DEFAULT_DISHES = [

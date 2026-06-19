@@ -1,16 +1,13 @@
 import { describe, it, expect, vi } from 'vitest'
 
-// Mock @prisma/client before importing the module under test
-vi.mock('@prisma/client', () => {
-  const PrismaClient = function () {
-    return {
-      user: { findUnique: vi.fn() },
-      recipe: { create: vi.fn() },
-      $disconnect: vi.fn(),
-    }
-  }
-  return { PrismaClient }
-})
+// Mock the shared Prisma client before importing the module under test
+vi.mock('../_prisma', () => ({
+  prisma: {
+    user: { findUnique: vi.fn() },
+    recipe: { create: vi.fn() },
+    $disconnect: vi.fn(),
+  },
+}))
 
 import { buildRawText, buildRecipeRecord, type RecipeInput } from '../seed-recipes'
 

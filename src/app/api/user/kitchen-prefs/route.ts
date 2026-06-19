@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
-import { ChefPersonality } from '@prisma/client'
+import { ChefPersonality } from '@/generated/prisma/client'
 
 // F53 + F70 + F74 + F78: Load and save kitchen-level user preferences
 // (budgetMode, chefPersonality, cookingMethod, spiceLevel)

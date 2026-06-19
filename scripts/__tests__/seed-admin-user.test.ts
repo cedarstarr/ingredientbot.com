@@ -1,15 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-// Mock @prisma/client before importing the module under test
-vi.mock('@prisma/client', () => {
-  const PrismaClient = function () {
-    return {
-      user: { upsert: vi.fn() },
-      $disconnect: vi.fn(),
-    }
-  }
-  return { PrismaClient }
-})
+// Mock the shared Prisma client before importing the module under test
+vi.mock('../_prisma', () => ({
+  prisma: {
+    user: { upsert: vi.fn() },
+    $disconnect: vi.fn(),
+  },
+}))
 
 // Mock bcryptjs — we don't want real hashing in unit tests
 vi.mock('bcryptjs', () => ({
