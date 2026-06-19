@@ -2,9 +2,9 @@
  * @description Seeds comprehensive demo data for the admin user: pantry items, dietary profile, collections, a meal plan, and recipe completions. Idempotent — safe to run multiple times. Depends on seed-admin-user.ts and seed-recipes.ts running first.
  * @tables pantry_items, dietary_profiles, recipe_collections, meal_plans, meal_plan_slots, recipe_completions
  */
-import { PrismaClient, MealType } from '@prisma/client'
+import { prisma } from './_prisma'
+import { MealType } from '../src/generated/prisma/client'
 
-const prisma = new PrismaClient()
 
 const ADMIN_EMAIL = 'cedarbarrett@gmail.com'
 

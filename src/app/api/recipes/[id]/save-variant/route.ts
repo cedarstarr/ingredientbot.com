@@ -1,10 +1,10 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateText } from 'ai'
 import { trackedModel } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
-import { Difficulty } from '@prisma/client'
+import { Difficulty } from '@/generated/prisma/client'
 import { startOfCurrentMonth } from '@/lib/date-utils'
 
 export const maxDuration = 60
@@ -45,6 +45,7 @@ function buildRawText(r: StructuredRecipe): string {
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
   const session = await auth()
   if (!session) return new Response('Unauthorized', { status: 401 })
 
@@ -181,4 +182,9 @@ Preserve every ingredient and step from the modified recipe exactly. If a field 
   ])
 
   return Response.json({ id: recipe.id })
+  } catch (err) {
+    if ((err as { digest?: string }).digest?.startsWith('NEXT_REDIRECT')) throw err
+    console.error(err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }

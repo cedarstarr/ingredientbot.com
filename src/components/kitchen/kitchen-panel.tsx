@@ -633,8 +633,9 @@ export function KitchenPanel() {
               <button
                 type="button"
                 onClick={() => setStrictMode(v => !v)}
+                aria-pressed={strictMode}
                 className={cn(
-                  'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200',
+                  'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   strictMode
                     ? 'bg-primary/10 border-primary/30 text-primary'
                     : 'bg-background border-input text-foreground hover:bg-muted/60',
@@ -648,7 +649,7 @@ export function KitchenPanel() {
                 type="button"
                 onClick={() => setExhaustedMode(v => !v)}
                 className={cn(
-                  'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200',
+                  'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   exhaustedMode
                     ? 'bg-primary/10 border-primary/30 text-primary'
                     : 'bg-background border-input text-foreground hover:bg-muted/60',
@@ -663,7 +664,7 @@ export function KitchenPanel() {
                 type="button"
                 onClick={() => setProteinMax(v => !v)}
                 className={cn(
-                  'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200',
+                  'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   proteinMax
                     ? 'bg-primary/10 border-primary/30 text-primary'
                     : 'bg-background border-input text-foreground hover:bg-muted/60',
@@ -678,7 +679,7 @@ export function KitchenPanel() {
                 type="button"
                 onClick={() => setTeachMode(v => !v)}
                 className={cn(
-                  'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200',
+                  'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   teachMode
                     ? 'bg-primary/10 border-primary/30 text-primary'
                     : 'bg-background border-input text-foreground hover:bg-muted/60',
@@ -709,7 +710,8 @@ export function KitchenPanel() {
           <button
             type="button"
             onClick={() => setShowAdvanced(v => !v)}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            aria-expanded={showAdvanced}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
           >
             <ChevronDown className={cn('h-4 w-4 transition-transform', showAdvanced && 'rotate-180')} />
             Advanced options

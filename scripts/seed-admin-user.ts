@@ -2,10 +2,9 @@
  * @description Seeds the production admin user (cedarbarrett@gmail.com) with isAdmin=true. Safe to run multiple times (upsert).
  * @tables users
  */
-import { PrismaClient } from '@prisma/client'
+import { prisma } from './_prisma'
 import bcrypt from 'bcryptjs'
 
-const prisma = new PrismaClient()
 
 export const ADMIN_EMAIL = 'cedarbarrett@gmail.com'
 export const ADMIN_NAME = 'Cedar Barrett'

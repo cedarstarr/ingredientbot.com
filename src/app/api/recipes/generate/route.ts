@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { streamText } from 'ai'
@@ -10,6 +10,7 @@ import { buildCookingMethodContext, buildSpiceContext } from '@/lib/recipe-promp
 export const maxDuration = 60
 
 export async function POST(req: NextRequest) {
+  try {
   const session = await auth()
   if (!session) return new Response('Unauthorized', { status: 401 })
 
@@ -221,6 +222,11 @@ difficulty must be exactly: "easy", "medium", or "hard"${personalityContext}${pr
     })
   } catch {
     return new Response('AI service unavailable', { status: 503 })
+  }
+  } catch (err) {
+    if ((err as { digest?: string }).digest?.startsWith('NEXT_REDIRECT')) throw err
+    console.error(err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
