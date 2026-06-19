@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { MealType } from '@prisma/client'
+import { MealType } from '@/generated/prisma/client'
 
 // GET /api/meal-plan?weekStart=YYYY-MM-DD
 export async function GET(req: NextRequest) {

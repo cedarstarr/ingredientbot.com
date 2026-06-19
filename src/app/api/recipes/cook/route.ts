@@ -5,7 +5,7 @@ import { generateText } from 'ai'
 import { trackedModel } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { buildCookingMethodContext, buildSpiceContext } from '@/lib/recipe-prompt-utils'
-import { Difficulty } from '@prisma/client'
+import { Difficulty } from '@/generated/prisma/client'
 import { startOfCurrentMonth } from '@/lib/date-utils'
 
 export const maxDuration = 60

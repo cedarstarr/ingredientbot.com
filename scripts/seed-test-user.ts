@@ -2,10 +2,9 @@
  * @description Seeds the staging test user (test@test.com) for QA and E2E testing. Safe to run multiple times (upsert). Do NOT run against production.
  * @tables users
  */
-import { PrismaClient } from '@prisma/client'
+import { prisma } from './_prisma'
 import bcrypt from 'bcryptjs'
 
-const prisma = new PrismaClient()
 
 export const TEST_EMAIL = 'test@test.com'
 export const TEST_NAME = 'Test User'

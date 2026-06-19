@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import type { Prisma } from '@prisma/client'
+import type { Prisma } from '@/generated/prisma/client'
 import { generateText } from 'ai'
 import { trackedModel } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
