@@ -9,6 +9,23 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    # Prisma 7 moved the datasource URL into prisma.config.ts, whose env("DIRECT_URL")
+    # helper throws at load time if the var is unset. `npm ci` runs `postinstall: prisma generate`,
+    # so without these placeholders install fails before any real step. generate never connects,
+    # so dummy URLs are fine; real migrate/runtime use Vercel/Railway-provided values.
+    # SDK clients (Stripe/Anthropic/OpenAI/Resend) are constructed at module load in some
+    # modules and throw on an undefined key — placeholders keep unit tests from crashing on import.
+    # These are fake values — CI never makes real API calls; runtime uses Vercel secrets.
+    env:
+      DIRECT_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
+      DATABASE_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
+      STRIPE_SECRET_KEY: sk_test_placeholder
+      STRIPE_WEBHOOK_SECRET: whsec_placeholder
+      ANTHROPIC_API_KEY: sk-ant-placeholder
+      OPENAI_API_KEY: sk-placeholder
+      RESEND_API_KEY: re_placeholder
+      ZEPTOMAIL_API_KEY: placeholder
+      NEXTAUTH_SECRET: ci-placeholder-secret
     steps:
       - uses: actions/checkout@v4
 
@@ -27,10 +44,10 @@ jobs:
         run: npm run test
         continue-on-error: true
 
-      - name: Build
-        run: npx prisma generate && npx next build
-        env:
-          SKIP_ENV_VALIDATION: 'true'
+      # NOTE: production build is verified by Vercel on every PR with real env + DB.
+      # A second `next build` here would need a reachable database (pages query the DB
+      # in generateStaticParams), which CI doesn't have — so it's intentionally omitted
+      # rather than duplicated. tsc --noEmit above is the type gate Vercel may skip.
 
       - name: Security audit
         run: npm audit --audit-level=high
