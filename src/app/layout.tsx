@@ -61,9 +61,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         >
           Skip to main content
         </a>
+        {/* next-plausible v4: domain + outbound-link tracking move from props to the
+            script src + data-domain. Outbound links are tracked via the .outbound-links script. */}
         <PlausibleProvider
-          domain={process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN ?? 'ingredientbot.com'}
-          trackOutboundLinks
+          src="https://plausible.io/js/script.outbound-links.js"
+          scriptProps={{
+            'data-domain': process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN ?? 'ingredientbot.com',
+          } as React.ScriptHTMLAttributes<HTMLScriptElement>}
           enabled={plausibleEnabled}
         >
           <Providers>
