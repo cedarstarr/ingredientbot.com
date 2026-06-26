@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-06-07 (/qa-spec-sync run)
+**Last Updated**: 2026-06-24 (/qa-tokens run)
 
 ---
 
@@ -28,7 +28,7 @@
 | 13 | Security Hardening | /qa-security | DONE | 5 | 2026-06-06 | [view](reports/2026-06-06-site-security.md) |
 | 14 | Resilience Audit | /qa-resilience | DONE | 2 | 2026-06-06 | [view](reports/2026-05-09-resilience.md) |
 | 15 | Design System Install | /design-implement | STALE | 1 | 2026-04-18 | [view](reports/2026-04-18-site-design.md) |
-| 16 | Token Hygiene | /qa-tokens | DONE | 5 | 2026-06-06 | [view](reports/2026-06-06-qa-tokens.md) |
+| 16 | Token Hygiene | /qa-tokens | DONE | 6 | 2026-06-24 | [view](reports/2026-06-24-qa-tokens.md) |
 | 17 | Copy Audit | /qa-copy | DONE | 2 | 2026-06-07 | [view](reports/2026-06-07-ingredientbot-copy.md) |
 | 18 | Navigation Audit | /qa-nav | STALE | 7 | 2026-05-10 07:25 | [view](reports/2026-05-10-site-nav.md) |
 | 19 | Performance Audit | /qa-perf | STALE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-perf.md) |
@@ -45,7 +45,7 @@
 
 **Progress: 22/29 stages complete (1 skipped)**
 
-**Last Updated**: 2026-06-07 (/qa-spec-sync run)
+**Last Updated**: 2026-06-24 (/qa-tokens run)
 
 ---
 
@@ -122,3 +122,4 @@
 | 2026-06-06 | /qa-tokens | 5m | SUCCESS | mechanical token hygiene pass — focus-visible rings added to 6 bare buttons; all raw palette violations were intentional (cook mode, email, print) [view](reports/2026-06-06-qa-tokens.md) |
 | 2026-06-07 | /qa-copy | 4m | SUCCESS | Copy audit: 0 blockers, 0 typos, 0 voice/CTA issues — clean copy throughout [view](reports/2026-06-07-ingredientbot-copy.md) |
 | 2026-06-07 | /qa-spec-sync | 5m | SUCCESS | E2E reconcile — 2 new spec files (5 routes) [view](reports/2026-05-09-tests-reconcile.md) |
+| 2026-06-24 | /qa-tokens | 5m | SUCCESS | Mechanical token hygiene: hardcoded hex → semantic tokens; print/email/Satori/dynamic-color exemptions documented [view](reports/2026-06-24-qa-tokens.md) |

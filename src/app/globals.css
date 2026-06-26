@@ -45,6 +45,213 @@
 }
 
 /* Robot Food — warm orange/amber palette */
+/* >>> portfolio-tokens-base v1 >>>
+ *
+ * Shared design tokens — spacing + type scales, a status (success/error/warning/info)
+ * and categorical color system, plus elevation and tabular-numeric utility classes.
+ *
+ * Self-contained: these are plain CSS custom properties and utility classes inlined
+ * directly into this stylesheet. There is NO import, package, or external dependency —
+ * this site builds and ships standalone. Brand tokens declared in this site's own
+ * `:root` (below) override any default here, so re-theming a status/categorical hue is
+ * just a one-line override in your `:root`.
+ *
+ * The `>>>` / `<<<` sentinel comments let an optional generator refresh this block in
+ * place; editing it by hand is perfectly fine when maintaining this site on its own. */
+
+@theme inline {
+  /* Status semantic colors → Tailwind utilities (bg-status-success, text-status-error-fg, …) */
+  --color-status-success: hsl(var(--color-success));
+  --color-status-success-muted: hsl(var(--color-success-muted));
+  --color-status-success-fg: hsl(var(--color-success-fg));
+  --color-status-error: hsl(var(--color-error));
+  --color-status-error-muted: hsl(var(--color-error-muted));
+  --color-status-error-fg: hsl(var(--color-error-fg));
+  --color-status-warning: hsl(var(--color-warning));
+  --color-status-warning-muted: hsl(var(--color-warning-muted));
+  --color-status-warning-fg: hsl(var(--color-warning-fg));
+  --color-status-info: hsl(var(--color-info));
+  --color-status-info-muted: hsl(var(--color-info-muted));
+  --color-status-info-fg: hsl(var(--color-info-fg));
+
+  /* Categorical palette → utilities (text-cat-1, bg-cat-2, …) */
+  --color-cat-1: hsl(var(--cat-1));
+  --color-cat-2: hsl(var(--cat-2));
+  --color-cat-3: hsl(var(--cat-3));
+  --color-cat-4: hsl(var(--cat-4));
+  --color-cat-5: hsl(var(--cat-5));
+}
+
+@layer base {
+  :root {
+    /* ── Type scale ── */
+    --text-micro: 11px;
+    --text-xs:    12px;
+    --text-sm:    14px;
+    --text-base:  16px;
+    --text-lg:    18px;
+    --text-xl:    24px;
+    --text-2xl:   32px;
+    --text-3xl:   40px;
+    --text-4xl:   56px;
+
+    /* ── Tracking ── */
+    --tracking-caps:  0.04em;
+    --tracking-data:  0.02em;
+    --tracking-tight: -0.025em;
+
+    /* ── Spacing scale (4-pt) ── */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 48px;
+    --space-8: 64px;
+
+    /* ── Status semantic colors (override per-brand in the site's own :root) ── */
+    --color-success: 142 71% 45%;
+    --color-success-muted: 142 71% 93%;
+    --color-success-fg: 142 71% 20%;
+    --color-error: 0 84% 60%;
+    --color-error-muted: 0 84% 93%;
+    --color-error-fg: 0 84% 30%;
+    --color-warning: 38 92% 50%;
+    --color-warning-muted: 38 92% 93%;
+    --color-warning-fg: 38 92% 20%;
+    --color-info: 215 70% 50%;
+    --color-info-muted: 215 70% 93%;
+    --color-info-fg: 215 70% 20%;
+
+    /* ── Categorical palette — taxonomic identity only (no signal) ── */
+    --cat-1: 260 70% 55%;       /* violet */
+    --cat-1-muted: 260 70% 95%;
+    --cat-1-fg:    260 60% 35%;
+    --cat-2: 210 80% 50%;       /* blue */
+    --cat-2-muted: 210 80% 95%;
+    --cat-2-fg:    210 80% 30%;
+    --cat-3: 28 90% 50%;        /* orange */
+    --cat-3-muted: 28 90% 95%;
+    --cat-3-fg:    28 90% 30%;
+    --cat-4: 320 70% 55%;       /* fuchsia */
+    --cat-4-muted: 320 70% 95%;
+    --cat-4-fg:    320 60% 35%;
+    --cat-5: 165 65% 40%;       /* jade */
+    --cat-5-muted: 165 50% 92%;
+    --cat-5-fg:    165 65% 22%;
+  }
+
+  .dark {
+    --color-success: 142 71% 55%;
+    --color-success-muted: 142 20% 15%;
+    --color-success-fg: 142 71% 80%;
+    --color-error: 0 84% 65%;
+    --color-error-muted: 0 50% 15%;
+    --color-error-fg: 0 84% 80%;
+    --color-warning: 38 92% 55%;
+    --color-warning-muted: 38 60% 15%;
+    --color-warning-fg: 38 92% 80%;
+    --color-info: 215 70% 60%;
+    --color-info-muted: 215 50% 15%;
+    --color-info-fg: 215 70% 80%;
+
+    --cat-1: 260 65% 65%;
+    --cat-1-muted: 260 30% 18%;
+    --cat-1-fg:    260 70% 80%;
+    --cat-2: 210 70% 60%;
+    --cat-2-muted: 210 35% 18%;
+    --cat-2-fg:    210 75% 78%;
+    --cat-3: 28 85% 60%;
+    --cat-3-muted: 28 40% 16%;
+    --cat-3-fg:    28 90% 75%;
+    --cat-4: 320 60% 65%;
+    --cat-4-muted: 320 30% 18%;
+    --cat-4-fg:    320 70% 80%;
+    --cat-5: 165 55% 55%;
+    --cat-5-muted: 165 25% 14%;
+    --cat-5-fg:    165 60% 75%;
+  }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+
+  /* ── Depth / elevation ── */
+  .glow-sm {
+    box-shadow: 0 1px 4px hsl(220 30% 8% / 0.08), 0 2px 10px hsl(220 30% 8% / 0.06);
+  }
+  .glow {
+    box-shadow: 0 2px 8px hsl(220 30% 8% / 0.10), 0 4px 20px hsl(220 30% 8% / 0.07);
+  }
+  .glow-lg {
+    box-shadow: 0 4px 16px hsl(220 30% 8% / 0.12), 0 8px 32px hsl(220 30% 8% / 0.08);
+  }
+  .glow-accent {
+    box-shadow: 0 2px 8px hsl(var(--accent) / 0.14), 0 4px 20px hsl(var(--accent) / 0.08);
+  }
+  .text-glow { text-shadow: 0 1px 8px hsl(var(--primary) / 0.20); }
+  .border-glow {
+    border-color: hsl(var(--primary) / 0.35);
+    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.08), inset 0 0 0 1px hsl(var(--primary) / 0.04);
+  }
+  .card-shadow {
+    box-shadow: 0 1px 3px hsl(220 30% 8% / 0.08), 0 4px 14px hsl(220 30% 8% / 0.06);
+  }
+  .dark .card-shadow {
+    box-shadow: 0 1px 4px hsl(220 25% 4% / 0.50), 0 4px 16px hsl(220 25% 4% / 0.30), 0 0 0 1px hsl(var(--primary) / 0.06);
+  }
+  .card-hover { transition: all 200ms ease-out; }
+  .card-hover:hover {
+    border-color: hsl(var(--primary) / 0.20);
+    box-shadow: 0 4px 20px hsl(220 30% 8% / 0.10), 0 0 0 1px hsl(var(--primary) / 0.08);
+  }
+  .dark .card-hover:hover {
+    box-shadow: 0 4px 20px hsl(220 25% 4% / 0.50), 0 0 0 1px hsl(var(--primary) / 0.14);
+  }
+
+  /* ── Numeric / terminal typography (tabular-nums) ── */
+  .font-data {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+  .caps {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 10.5px; font-weight: 500;
+    letter-spacing: var(--tracking-caps, 0.04em);
+    text-transform: uppercase;
+    color: hsl(var(--muted-foreground));
+  }
+  .data {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 14px; font-variant-numeric: tabular-nums;
+    letter-spacing: var(--tracking-data, 0.02em);
+    font-feature-settings: "tnum" 1, "ss01" 1;
+  }
+  .num {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums;
+    letter-spacing: var(--tracking-data, 0.02em);
+    font-feature-settings: "tnum" 1, "ss01" 1;
+    color: hsl(var(--foreground));
+  }
+
+  /* ── Categorical palette utilities (taxonomic identity only) ── */
+  .cat-1 { color: hsl(var(--cat-1-fg)); }
+  .cat-2 { color: hsl(var(--cat-2-fg)); }
+  .cat-3 { color: hsl(var(--cat-3-fg)); }
+  .cat-4 { color: hsl(var(--cat-4-fg)); }
+  .cat-5 { color: hsl(var(--cat-5-fg)); }
+  .cat-1-bg { background: hsl(var(--cat-1-muted)); color: hsl(var(--cat-1-fg)); }
+  .cat-2-bg { background: hsl(var(--cat-2-muted)); color: hsl(var(--cat-2-fg)); }
+  .cat-3-bg { background: hsl(var(--cat-3-muted)); color: hsl(var(--cat-3-fg)); }
+  .cat-4-bg { background: hsl(var(--cat-4-muted)); color: hsl(var(--cat-4-fg)); }
+  .cat-5-bg { background: hsl(var(--cat-5-muted)); color: hsl(var(--cat-5-fg)); }
+}
+
+/* <<< portfolio-tokens-base v1 <<< */
+
 :root {
   --background: oklch(0.98 0.005 75);
   --foreground: oklch(0.18 0.02 50);
