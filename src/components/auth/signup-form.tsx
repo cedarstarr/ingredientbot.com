@@ -140,7 +140,7 @@ export function SignupForm() {
       <div className="mt-6 border-t border-border pt-6 text-center text-sm text-muted-foreground">
         Already have an account?{' '}
         <Link href="/login" className="text-primary hover:underline font-medium">
-          Sign in
+          Sign In
         </Link>
       </div>
     </div>
