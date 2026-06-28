@@ -115,9 +115,9 @@ export function ModificationToolbar({ recipeId, servings, onModified }: Props) {
               <SelectContent>
                 <SelectItem value="original">Original</SelectItem>
                 <SelectItem value="Bake">Bake</SelectItem>
-                <SelectItem value="Air-Fry">Air-Fry</SelectItem>
+                <SelectItem value="Air Fryer">Air Fryer</SelectItem>
                 <SelectItem value="Grill">Grill</SelectItem>
-                <SelectItem value="Slow Cook">Slow Cook</SelectItem>
+                <SelectItem value="Slow Cooker">Slow Cooker</SelectItem>
               </SelectContent>
             </Select>
           </div>
