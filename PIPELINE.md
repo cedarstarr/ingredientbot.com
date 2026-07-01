@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-06-26 (/qa-copy run)
+**Last Updated**: 2026-06-27 (/qa-nav run)
 
 ---
 
@@ -19,7 +19,7 @@
 | 4 | Feature Audit | /plan-feature-audit | DONE | 1 | 2026-04-11 | [view](reports/2026-04-11-site-audit.md) |
 | 5 | Feature Triage | /site-features | DONE | 1 | 2026-04-09 | [view](reports/2026-04-09-site-features.md) |
 | 6 | Feature Install | /site-install | DONE | 1 | 2026-04-10 00:00 | [view](reports/2026-04-10-site-install.md) |
-| 7 | Write Tests | /qa-spec-sync | STALE | 10 | 2026-06-07 | [view](reports/2026-05-09-tests-reconcile.md) |
+| 7 | Write Tests | /qa-spec-reconcile | STALE | 10 | 2026-06-07 | [view](reports/2026-05-09-tests-reconcile.md) |
 | 8 | Verify Build | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 9 | Database Review | /qa-db | DONE | 4 | 2026-06-03 | [view](reports/2026-06-04-site-db.md) |
 | 10 | QA / Bug Check | /qa-bugs | DONE | 5 | 2026-06-04 | [view](reports/2026-06-04-site-bugs.md) |
@@ -30,7 +30,7 @@
 | 15 | Design System Install | /design-implement | DONE | 2 | 2026-06-25 | [view](reports/2026-04-18-site-design.md) |
 | 16 | Token Hygiene | /qa-tokens | DONE | 6 | 2026-06-24 | [view](reports/2026-06-24-qa-tokens.md) |
 | 17 | Copy Audit | /qa-copy | DONE | 3 | 2026-06-26 | [view](reports/2026-06-26-ingredientbot-copy.md) |
-| 18 | Navigation Audit | /qa-nav | STALE | 7 | 2026-05-10 07:25 | [view](reports/2026-05-10-site-nav.md) |
+| 18 | Navigation Audit | /qa-nav | DONE | 9 | 2026-06-27 | [view](reports/2026-05-10-site-nav.md) |
 | 19 | Performance Audit | /qa-perf | STALE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-perf.md) |
 | 20 | SEO Audit | /qa-seo | STALE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
 | 21 | Accessibility Audit | /qa-a11y | STALE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
@@ -45,7 +45,7 @@
 
 **Progress: 22/29 stages complete (1 skipped)**
 
-**Last Updated**: 2026-06-26 (/qa-copy run)
+**Last Updated**: 2026-06-27 (/qa-nav run)
 
 ---
 
@@ -125,3 +125,5 @@
 | 2026-06-24 | /qa-tokens | 5m | SUCCESS | Mechanical token hygiene: hardcoded hex → semantic tokens; print/email/Satori/dynamic-color exemptions documented [view](reports/2026-06-24-qa-tokens.md) |
 | 2026-06-25 | /design-implement | — | SUCCESS | Manual design-system pass; recorded retroactively [view](reports/2026-04-18-site-design.md) |
 | 2026-06-26 | /qa-copy | 5m | SUCCESS | Copy audit: 2 fixes (method label consistency + auth casing); 1 ambiguous blocker (dead Stripe CTA); 4 voice drift + 3 weak CTAs flagged for review [view](reports/2026-06-26-ingredientbot-copy.md) |
+| 2026-06-27 | /qa-nav | 5m | SUCCESS | Nav audit: orphans classified, reorg proposals issued [view](reports/2026-05-10-site-nav.md) |
+| 2026-06-27 | /qa-nav | 3m | SUCCESS | Nav audit: 2 orphans, 0 dead links [view](reports/2026-05-10-site-nav.md) |
