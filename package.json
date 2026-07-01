@@ -69,7 +69,7 @@
     ]
   },
   "devDependencies": {
-    "@ai-sdk/cerebras": "^2.0.57",
+    "@ai-sdk/cerebras": "^3.0.2",
     "@ai-sdk/groq": "^3.0.42",
     "@playwright/test": "^1.61.0",
     "@tailwindcss/postcss": "^4",
