@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-06-27 (/qa-nav run)
+**Last Updated**: 2026-06-30 (/qa-spec-reconcile run)
 
 ---
 
@@ -19,7 +19,7 @@
 | 4 | Feature Audit | /plan-feature-audit | DONE | 1 | 2026-04-11 | [view](reports/2026-04-11-site-audit.md) |
 | 5 | Feature Triage | /site-features | DONE | 1 | 2026-04-09 | [view](reports/2026-04-09-site-features.md) |
 | 6 | Feature Install | /site-install | DONE | 1 | 2026-04-10 00:00 | [view](reports/2026-04-10-site-install.md) |
-| 7 | Write Tests | /qa-spec-reconcile | STALE | 10 | 2026-06-07 | [view](reports/2026-05-09-tests-reconcile.md) |
+| 7 | Write Tests | /qa-spec-reconcile | DONE | 11 | 2026-06-30 | [view](reports/2026-07-01-qa-spec-reconcile.md) |
 | 8 | Verify Build | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 9 | Database Review | /qa-db | DONE | 4 | 2026-06-03 | [view](reports/2026-06-04-site-db.md) |
 | 10 | QA / Bug Check | /qa-bugs | DONE | 5 | 2026-06-04 | [view](reports/2026-06-04-site-bugs.md) |
@@ -45,7 +45,7 @@
 
 **Progress: 22/29 stages complete (1 skipped)**
 
-**Last Updated**: 2026-06-27 (/qa-nav run)
+**Last Updated**: 2026-06-30 (/qa-spec-reconcile run)
 
 ---
 
@@ -127,3 +127,4 @@
 | 2026-06-26 | /qa-copy | 5m | SUCCESS | Copy audit: 2 fixes (method label consistency + auth casing); 1 ambiguous blocker (dead Stripe CTA); 4 voice drift + 3 weak CTAs flagged for review [view](reports/2026-06-26-ingredientbot-copy.md) |
 | 2026-06-27 | /qa-nav | 5m | SUCCESS | Nav audit: orphans classified, reorg proposals issued [view](reports/2026-05-10-site-nav.md) |
 | 2026-06-27 | /qa-nav | 3m | SUCCESS | Nav audit: 2 orphans, 0 dead links [view](reports/2026-05-10-site-nav.md) |
+| 2026-06-30 | /qa-spec-reconcile | 8m | SUCCESS | 3 findings, all false positives (dynamic admin routes). [view](reports/2026-07-01-qa-spec-reconcile.md) |
