@@ -23,6 +23,14 @@ test.describe('API smoke', () => {
     expect(body.csrfToken.length).toBeGreaterThan(0)
   })
 
+})
+
+// These assert the UNAUTHENTICATED behavior of protected routes. The `request`
+// fixture inherits the project storageState (authenticated test user), so without
+// clearing it these POSTs run authenticated and return 200 — masking the auth gate.
+test.describe('API smoke — unauthenticated', () => {
+  test.use({ storageState: { cookies: [], origins: [] } })
+
   test('protected route returns non-200 when unauthenticated', async ({ request }) => {
     const res = await request.post('/api/recipes/generate', {
       data: { ingredients: ['chicken', 'rice'] },

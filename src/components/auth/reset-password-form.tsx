@@ -66,7 +66,8 @@ export function ResetPasswordForm() {
   if (!token) {
     return (
       <div className="rounded-lg border border-border bg-card px-8 py-10 text-center">
-        <p className="text-muted-foreground mb-4">Invalid or missing reset token.</p>
+        <h1 className="text-xl font-bold text-foreground mb-2">Invalid reset link</h1>
+        <p className="text-muted-foreground mb-4">This password reset link is invalid or missing its token.</p>
         <Link href="/forgot-password" className="text-primary hover:underline">Request a new link</Link>
       </div>
     )
