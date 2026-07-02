@@ -266,6 +266,7 @@ export function PantryClient() {
         <div className="flex gap-2">
           <Input
             id="pantry-add-input"
+            data-testid="pantry-add-input"
             value={inputValue}
             onChange={e => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}

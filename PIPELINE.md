@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-06-30 (/qa-spec-reconcile run)
+**Last Updated**: 2026-07-01 (/qa-spec-fix run)
 
 ---
 
@@ -34,7 +34,7 @@
 | 19 | Performance Audit | /qa-perf | STALE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-perf.md) |
 | 20 | SEO Audit | /qa-seo | STALE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
 | 21 | Accessibility Audit | /qa-a11y | STALE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
-| 22 | Final E2E Tests | /qa-spec-fix | STALE | 4 | 2026-06-05 | [view](reports/2026-06-05-e2e-reconcile.md) |
+| 22 | Final E2E Tests | /qa-spec-fix | DONE | 6 | 2026-07-01 | [view](reports/2026-07-01-qa-spec-fix.md) |
 | 23 | iPhone Tests + Fix | /qa-spec-iphone | DONE | 1 | 2026-05-08 22:09 | [view](reports/2026-05-08-tests-fix-2.md) |
 | 24 | Android Tests + Fix | /qa-spec-android | DONE | 2 | 2026-05-15 | [view](reports/2026-05-15-qa-tests-android.md) |
 | 25 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
@@ -45,7 +45,7 @@
 
 **Progress: 22/29 stages complete (1 skipped)**
 
-**Last Updated**: 2026-06-30 (/qa-spec-reconcile run)
+**Last Updated**: 2026-07-01 (/qa-spec-fix run)
 
 ---
 
@@ -128,3 +128,5 @@
 | 2026-06-27 | /qa-nav | 5m | SUCCESS | Nav audit: orphans classified, reorg proposals issued [view](reports/2026-05-10-site-nav.md) |
 | 2026-06-27 | /qa-nav | 3m | SUCCESS | Nav audit: 2 orphans, 0 dead links [view](reports/2026-05-10-site-nav.md) |
 | 2026-06-30 | /qa-spec-reconcile | 8m | SUCCESS | 3 findings, all false positives (dynamic admin routes). [view](reports/2026-07-01-qa-spec-reconcile.md) |
+| 2026-07-01 | /qa-spec-fix | N/A | PARTIAL | E2E 29->3: auth-gate + reset-password heading; 3 pantry/history residuals [view](reports/2026-07-01-qa-spec-fix.md) |
+| 2026-07-01 | /qa-spec-fix | N/A | SUCCESS | E2E 29->0: auth-gate storageState + selector/testid fixes (warm DB) [view](reports/2026-07-01-qa-spec-fix.md) |

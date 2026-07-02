@@ -37,8 +37,11 @@ test.describe('Recipe history search and filters (F37)', () => {
   })
 
   test('history heading shows total recipe count', async ({ page }) => {
-    // Page always shows "X recipes generated" — value may be 0 on fresh account
-    const body = await page.locator('[role="main"]').textContent()
+    // Page always shows "X recipes generated" — value may be 0 on fresh account.
+    // Use getByRole('main') (accessibility role) not [role="main"]: <main> carries the
+    // implicit ARIA role but has no literal role attribute, so the CSS attribute selector
+    // matched nothing and the locator timed out.
+    const body = await page.getByRole('main').textContent()
     expect(body).toMatch(/\d+ recipe/)
   })
 
