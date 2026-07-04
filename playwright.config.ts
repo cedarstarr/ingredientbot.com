@@ -34,12 +34,12 @@ export default defineConfig({
     {
       name: 'iphone',
       use: { ...devices['iPhone 14'], storageState: './playwright/.auth/user.json' },
-      grep: /@mobile/,
+      grep: /@smoke|@mobile/,
     },
     {
       name: 'android',
       use: { ...devices['Pixel 5'], storageState: './playwright/.auth/user.json' },
-      grep: /@mobile/,
+      grep: /@smoke|@mobile/,
     },
   ],
 
