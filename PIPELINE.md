@@ -34,16 +34,14 @@
 | 19 | Performance Audit | /qa-perf | DONE | 3 | 2026-07-02 | [view](reports/2026-07-02-site-perf.md) |
 | 20 | SEO Audit | /qa-seo | STALE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
 | 21 | Accessibility Audit | /qa-a11y | STALE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
-| 22 | Final E2E Tests | /qa-spec-fix | STALE | 6 | 2026-07-01 | [view](reports/2026-07-01-qa-spec-fix.md) |
-| 23 | iPhone Tests + Fix | /qa-spec-iphone | DONE | 1 | 2026-05-08 22:09 | [view](reports/2026-05-08-tests-fix-2.md) |
-| 24 | Android Tests + Fix | /qa-spec-android | DONE | 2 | 2026-05-15 | [view](reports/2026-05-15-qa-tests-android.md) |
-| 25 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
-| 26 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
-| 27 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
-| 28 | Client Update | /ops-client-report | PENDING | 0 | — | — |
-| 29 | Launch | /ops-launch | PENDING | 0 | — | — |
+| 22 | E2E Gate | /qa-e2e | STALE | 9 | 2026-07-01 | [view](reports/2026-07-01-qa-spec-fix.md) |
+| 23 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
+| 24 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
+| 25 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
+| 26 | Client Update | /ops-client-report | PENDING | 0 | — | — |
+| 27 | Launch | /ops-launch | PENDING | 0 | — | — |
 
-**Progress: 22/29 stages complete (1 skipped)**
+**Progress: 20/27 stages complete (1 skipped)**
 
 **Last Updated**: 2026-07-02 (/qa-perf run)
 
