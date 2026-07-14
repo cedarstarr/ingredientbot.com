@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-07-01 (/qa-spec-fix run)
+**Last Updated**: 2026-07-13 (/qa-seo run)
 
 ---
 
@@ -30,22 +30,20 @@
 | 15 | Design System Install | /design-implement | DONE | 2 | 2026-06-25 | [view](reports/2026-04-18-site-design.md) |
 | 16 | Token Hygiene | /qa-tokens | DONE | 6 | 2026-06-24 | [view](reports/2026-06-24-qa-tokens.md) |
 | 17 | Copy Audit | /qa-copy | DONE | 3 | 2026-06-26 | [view](reports/2026-06-26-ingredientbot-copy.md) |
-| 18 | Navigation Audit | /qa-nav | DONE | 9 | 2026-06-27 | [view](reports/2026-05-10-site-nav.md) |
-| 19 | Performance Audit | /qa-perf | STALE | 2 | 2026-05-04 | [view](reports/2026-05-04-site-perf.md) |
-| 20 | SEO Audit | /qa-seo | STALE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-seo.md) |
+| 18 | Navigation Audit | /qa-nav | DONE | 11 | 2026-07-13 | [view](reports/2026-07-13-qa-nav.md) |
+| 19 | Performance Audit | /qa-perf | DONE | 3 | 2026-07-02 | [view](reports/2026-07-02-site-perf.md) |
+| 20 | SEO Audit | /qa-seo | DONE | 2 | 2026-07-13 | [view](reports/2026-04-19-site-seo.md) |
 | 21 | Accessibility Audit | /qa-a11y | STALE | 1 | 2026-04-19 | [view](reports/2026-04-19-site-a11y.md) |
-| 22 | Final E2E Tests | /qa-spec-fix | DONE | 6 | 2026-07-01 | [view](reports/2026-07-01-qa-spec-fix.md) |
-| 23 | iPhone Tests + Fix | /qa-spec-iphone | DONE | 1 | 2026-05-08 22:09 | [view](reports/2026-05-08-tests-fix-2.md) |
-| 24 | Android Tests + Fix | /qa-spec-android | DONE | 2 | 2026-05-15 | [view](reports/2026-05-15-qa-tests-android.md) |
-| 25 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
-| 26 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
-| 27 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
-| 28 | Client Update | /ops-client-report | PENDING | 0 | — | — |
-| 29 | Launch | /ops-launch | PENDING | 0 | — | — |
+| 22 | E2E Gate | /qa-e2e | STALE | 9 | 2026-07-01 | [view](reports/2026-07-01-qa-spec-fix.md) |
+| 23 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
+| 24 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
+| 25 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
+| 26 | Client Update | /ops-client-report | PENDING | 0 | — | — |
+| 27 | Launch | /ops-launch | PENDING | 0 | — | — |
 
-**Progress: 22/29 stages complete (1 skipped)**
+**Progress: 20/27 stages complete (1 skipped)**
 
-**Last Updated**: 2026-07-01 (/qa-spec-fix run)
+**Last Updated**: 2026-07-13 (/qa-seo run)
 
 ---
 
@@ -130,3 +128,7 @@
 | 2026-06-30 | /qa-spec-reconcile | 8m | SUCCESS | 3 findings, all false positives (dynamic admin routes). [view](reports/2026-07-01-qa-spec-reconcile.md) |
 | 2026-07-01 | /qa-spec-fix | N/A | PARTIAL | E2E 29->3: auth-gate + reset-password heading; 3 pantry/history residuals [view](reports/2026-07-01-qa-spec-fix.md) |
 | 2026-07-01 | /qa-spec-fix | N/A | SUCCESS | E2E 29->0: auth-gate storageState + selector/testid fixes (warm DB) [view](reports/2026-07-01-qa-spec-fix.md) |
+| 2026-07-02 | /qa-perf | 4m | SUCCESS | 0 perf issues found, 0 fixed — tree clean across all 5 phases [view](reports/2026-07-02-site-perf.md) |
+| 2026-07-13 | /qa-nav | 1m | SUCCESS | Clean — 0 orphans, 0 dead links [view](reports/2026-07-13-qa-nav.md) |
+| 2026-07-13 | /qa-nav | 1m | SUCCESS | Nav audit: 0 dead links, orphans within existing structure (no reorg needed) [view](reports/2026-07-13-qa-nav.md) |
+| 2026-07-13 | /qa-seo | 1m | SUCCESS | SEO presence audit clean — sitemap/robots/metadataBase/rootMeta/JSON-LD/OG/page-meta all present, 0 findings [view](reports/2026-04-19-site-seo.md) |
