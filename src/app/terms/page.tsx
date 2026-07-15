@@ -112,7 +112,7 @@ export default function TermsPage() {
               Questions about these terms? Email us at{' '}
               <a
                 href="mailto:hello@ingredientbot.com"
-                className="text-primary underline underline-offset-4 hover:opacity-80"
+                className="text-primary underline underline-offset-4 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 hello@ingredientbot.com
               </a>.

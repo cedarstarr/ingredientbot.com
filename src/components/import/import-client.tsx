@@ -338,7 +338,7 @@ export function ImportClient() {
                   href={recipe.sourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary hover:underline"
+                  className="text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   {new URL(recipe.sourceUrl).hostname}
                 </a>

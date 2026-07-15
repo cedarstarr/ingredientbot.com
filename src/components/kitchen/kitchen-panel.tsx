@@ -1175,7 +1175,7 @@ export function KitchenPanel() {
                   Generated · claude-sonnet-4-6
                 </span>
                 {!isGenerating && (
-                  <button onClick={handleTryAgain} className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                  <button onClick={handleTryAgain} className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
                     <RefreshCw className="h-3 w-3" />Try again
                   </button>
                 )}
@@ -1255,6 +1255,7 @@ export function KitchenPanel() {
         ref={fileInputRef}
         type="file"
         accept="image/jpeg,image/png,image/webp"
+        aria-label="Upload photo"
         className="hidden"
         onChange={handlePhotoUpload}
       />
