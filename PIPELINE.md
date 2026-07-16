@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-07-15 (/qa-a11y run)
+**Last Updated**: 2026-07-15 (/qa-e2e run)
 
 ---
 
@@ -34,7 +34,7 @@
 | 19 | Performance Audit | /qa-perf | DONE | 3 | 2026-07-02 | [view](reports/2026-07-02-site-perf.md) |
 | 20 | SEO Audit | /qa-seo | DONE | 2 | 2026-07-13 | [view](reports/2026-04-19-site-seo.md) |
 | 21 | Accessibility Audit | /qa-a11y | DONE | 2 | 2026-07-15 | [view](reports/2026-07-15-qa-a11y.md) |
-| 22 | E2E Gate | /qa-e2e | STALE | 9 | 2026-07-01 | [view](reports/2026-07-01-qa-spec-fix.md) |
+| 22 | E2E Gate | /qa-e2e | DONE | 10 | 2026-07-15 | [view](reports/2026-07-01-qa-spec-fix.md) |
 | 23 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
 | 24 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
 | 25 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
@@ -43,7 +43,7 @@
 
 **Progress: 20/27 stages complete (1 skipped)**
 
-**Last Updated**: 2026-07-15 (/qa-a11y run)
+**Last Updated**: 2026-07-15 (/qa-e2e run)
 
 ---
 
@@ -133,3 +133,4 @@
 | 2026-07-13 | /qa-nav | 1m | SUCCESS | Nav audit: 0 dead links, orphans within existing structure (no reorg needed) [view](reports/2026-07-13-qa-nav.md) |
 | 2026-07-13 | /qa-seo | 1m | SUCCESS | SEO presence audit clean — sitemap/robots/metadataBase/rootMeta/JSON-LD/OG/page-meta all present, 0 findings [view](reports/2026-04-19-site-seo.md) |
 | 2026-07-15 | /qa-a11y | 3m | SUCCESS | a11y: 6 fixed (5 focus-ring, 1 input-label); 2 skipped (skip-link/primitive); tsc clean [view](reports/2026-07-15-qa-a11y.md) |
+| 2026-07-15 | /qa-e2e | 25m | SUCCESS | E2E suite green (chromium full + @smoke mobile). [view](reports/2026-07-01-qa-spec-fix.md) |
