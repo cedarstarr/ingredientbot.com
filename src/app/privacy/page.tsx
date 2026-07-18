@@ -67,7 +67,7 @@ export default function PrivacyPage() {
                   href="https://www.anthropic.com/privacy"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary underline underline-offset-4 hover:opacity-80"
+                  className="text-primary underline underline-offset-4 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   Anthropic&apos;s privacy policy
                 </a>{' '}
@@ -122,7 +122,7 @@ export default function PrivacyPage() {
               Questions about this policy or your data? Email us at{' '}
               <a
                 href="mailto:hello@ingredientbot.com"
-                className="text-primary underline underline-offset-4 hover:opacity-80"
+                className="text-primary underline underline-offset-4 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 hello@ingredientbot.com
               </a>.
