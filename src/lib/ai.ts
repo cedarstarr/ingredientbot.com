@@ -2,7 +2,7 @@ import { cerebras } from '@ai-sdk/cerebras'
 import { groq } from '@ai-sdk/groq'
 import { google } from '@ai-sdk/google'
 import { wrapLanguageModel, type LanguageModelMiddleware } from 'ai'
-import type { LanguageModelV3StreamPart } from '@ai-sdk/provider'
+import type { LanguageModelV4StreamPart } from '@ai-sdk/provider'
 import { logAICall } from './ai-log'
 
 // Vision side-path: gpt-oss-120b is text-only, so the photo-analysis route
@@ -29,7 +29,7 @@ function describe(err: unknown): string {
 
 function fallbackMiddleware(): LanguageModelMiddleware {
   return {
-    specificationVersion: 'v3',
+    specificationVersion: 'v4',
     wrapGenerate: async ({ doGenerate, params }) => {
       try { return await doGenerate() } catch (err) {
         if (!isRetryable(err)) throw err
@@ -56,7 +56,7 @@ type ModelCtx = { feature: string; userId?: string | null }
 
 function loggingMiddleware(_provider: Provider, _modelId: string, ctx: ModelCtx): LanguageModelMiddleware {
   return {
-    specificationVersion: 'v3',
+    specificationVersion: 'v4',
     wrapGenerate: async ({ doGenerate }) => {
       const result = await doGenerate()
       logAICall({
@@ -72,7 +72,7 @@ function loggingMiddleware(_provider: Provider, _modelId: string, ctx: ModelCtx)
     wrapStream: async ({ doStream }) => {
       const { stream, ...rest } = await doStream()
       const transformed = stream.pipeThrough(
-        new TransformStream<LanguageModelV3StreamPart, LanguageModelV3StreamPart>({
+        new TransformStream<LanguageModelV4StreamPart, LanguageModelV4StreamPart>({
           transform(chunk, controller) {
             if (chunk.type === 'finish') {
               logAICall({
