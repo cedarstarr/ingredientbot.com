@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-07-19 (/qa-bugs run)
+**Last Updated**: 2026-07-20 (/qa-security run)
 
 ---
 
@@ -25,13 +25,13 @@
 | 10 | QA / Bug Check | /qa-bugs | DONE | 6 | 2026-07-19 | [view](reports/2026-07-19-site-bugs.md) |
 | 11 | Button Audit | /qa-button-fix | DONE | 1 | 2026-07-18 | [view](reports/2026-07-19-qa-buttons.md) |
 | 12 | Re-verify Tests | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
-| 13 | Security Hardening | /qa-security | DONE | 5 | 2026-06-06 | [view](reports/2026-06-06-site-security.md) |
-| 14 | Resilience Audit | /qa-resilience | DONE | 2 | 2026-06-06 | [view](reports/2026-05-09-resilience.md) |
-| 15 | Design System Install | /design-implement | DONE | 2 | 2026-06-25 | [view](reports/2026-04-18-site-design.md) |
-| 16 | Token Hygiene | /qa-tokens | DONE | 6 | 2026-06-24 | [view](reports/2026-06-24-qa-tokens.md) |
-| 17 | Copy Audit | /qa-copy | DONE | 3 | 2026-06-26 | [view](reports/2026-06-26-ingredientbot-copy.md) |
-| 18 | Navigation Audit | /qa-nav | DONE | 11 | 2026-07-13 | [view](reports/2026-07-13-qa-nav.md) |
-| 19 | Performance Audit | /qa-perf | DONE | 3 | 2026-07-02 | [view](reports/2026-07-02-site-perf.md) |
+| 13 | Security Hardening | /qa-security | DONE | 6 | 2026-07-20 | [view](reports/2026-07-20-site-security.md) |
+| 14 | Resilience Audit | /qa-resilience | STALE | 2 | 2026-06-06 | [view](reports/2026-05-09-resilience.md) |
+| 15 | Design System Install | /design-implement | STALE | 2 | 2026-06-25 | [view](reports/2026-04-18-site-design.md) |
+| 16 | Token Hygiene | /qa-tokens | STALE | 6 | 2026-06-24 | [view](reports/2026-06-24-qa-tokens.md) |
+| 17 | Copy Audit | /qa-copy | STALE | 3 | 2026-06-26 | [view](reports/2026-06-26-ingredientbot-copy.md) |
+| 18 | Navigation Audit | /qa-nav | STALE | 11 | 2026-07-13 | [view](reports/2026-07-13-qa-nav.md) |
+| 19 | Performance Audit | /qa-perf | STALE | 3 | 2026-07-02 | [view](reports/2026-07-02-site-perf.md) |
 | 20 | SEO Audit | /qa-seo | STALE | 2 | 2026-07-13 | [view](reports/2026-04-19-site-seo.md) |
 | 21 | Accessibility Audit | /qa-a11y | STALE | 2 | 2026-07-15 | [view](reports/2026-07-15-qa-a11y.md) |
 | 22 | E2E Gate | /qa-e2e | STALE | 10 | 2026-07-15 | [view](reports/2026-07-01-qa-spec-fix.md) |
@@ -43,7 +43,7 @@
 
 **Progress: 21/27 stages complete (1 skipped)**
 
-**Last Updated**: 2026-07-19 (/qa-bugs run)
+**Last Updated**: 2026-07-20 (/qa-security run)
 
 ---
 
@@ -136,3 +136,4 @@
 | 2026-07-15 | /qa-e2e | 25m | SUCCESS | E2E suite green (chromium full + @smoke mobile). [view](reports/2026-07-01-qa-spec-fix.md) |
 | 2026-07-18 | /qa-button-fix | 1s | SUCCESS | 0/0, no public CTA to test [view](reports/2026-07-19-qa-buttons.md) |
 | 2026-07-19 | /qa-bugs | 5m | SUCCESS | 3 findings, 0 fixed, clean (1 MEDIUM deferred) [view](reports/2026-07-19-site-bugs.md) |
+| 2026-07-20 | /qa-security | 15m | SUCCESS | 5 issues (3 HIGH deps, 1 MEDIUM postcss-in-next → FOU-239 deferred, 1 LOW verify-email limiter); 4 fixed, 1 deferred [view](reports/2026-07-20-site-security.md) |
