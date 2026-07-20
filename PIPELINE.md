@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-07-15 (/qa-e2e run)
+**Last Updated**: 2026-07-18 (/qa-button-fix run)
 
 ---
 
@@ -22,8 +22,8 @@
 | 7 | Write Tests | /qa-spec-reconcile | DONE | 11 | 2026-06-30 | [view](reports/2026-07-01-qa-spec-reconcile.md) |
 | 8 | Verify Build | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 9 | Database Review | /qa-db | DONE | 4 | 2026-06-03 | [view](reports/2026-06-04-site-db.md) |
-| 10 | QA / Bug Check | /qa-bugs | DONE | 5 | 2026-06-04 | [view](reports/2026-06-04-site-bugs.md) |
-| 11 | Button Audit | /qa-button-fix | PENDING | 0 | — | — |
+| 10 | QA / Bug Check | /qa-bugs | STALE | 5 | 2026-06-04 | [view](reports/2026-06-04-site-bugs.md) |
+| 11 | Button Audit | /qa-button-fix | DONE | 1 | 2026-07-18 | [view](reports/2026-07-19-qa-buttons.md) |
 | 12 | Re-verify Tests | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 13 | Security Hardening | /qa-security | DONE | 5 | 2026-06-06 | [view](reports/2026-06-06-site-security.md) |
 | 14 | Resilience Audit | /qa-resilience | DONE | 2 | 2026-06-06 | [view](reports/2026-05-09-resilience.md) |
@@ -32,18 +32,18 @@
 | 17 | Copy Audit | /qa-copy | DONE | 3 | 2026-06-26 | [view](reports/2026-06-26-ingredientbot-copy.md) |
 | 18 | Navigation Audit | /qa-nav | DONE | 11 | 2026-07-13 | [view](reports/2026-07-13-qa-nav.md) |
 | 19 | Performance Audit | /qa-perf | DONE | 3 | 2026-07-02 | [view](reports/2026-07-02-site-perf.md) |
-| 20 | SEO Audit | /qa-seo | DONE | 2 | 2026-07-13 | [view](reports/2026-04-19-site-seo.md) |
-| 21 | Accessibility Audit | /qa-a11y | DONE | 2 | 2026-07-15 | [view](reports/2026-07-15-qa-a11y.md) |
-| 22 | E2E Gate | /qa-e2e | DONE | 10 | 2026-07-15 | [view](reports/2026-07-01-qa-spec-fix.md) |
+| 20 | SEO Audit | /qa-seo | STALE | 2 | 2026-07-13 | [view](reports/2026-04-19-site-seo.md) |
+| 21 | Accessibility Audit | /qa-a11y | STALE | 2 | 2026-07-15 | [view](reports/2026-07-15-qa-a11y.md) |
+| 22 | E2E Gate | /qa-e2e | STALE | 10 | 2026-07-15 | [view](reports/2026-07-01-qa-spec-fix.md) |
 | 23 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
 | 24 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
 | 25 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
 | 26 | Client Update | /ops-client-report | PENDING | 0 | — | — |
 | 27 | Launch | /ops-launch | PENDING | 0 | — | — |
 
-**Progress: 20/27 stages complete (1 skipped)**
+**Progress: 21/27 stages complete (1 skipped)**
 
-**Last Updated**: 2026-07-15 (/qa-e2e run)
+**Last Updated**: 2026-07-18 (/qa-button-fix run)
 
 ---
 
@@ -134,3 +134,4 @@
 | 2026-07-13 | /qa-seo | 1m | SUCCESS | SEO presence audit clean — sitemap/robots/metadataBase/rootMeta/JSON-LD/OG/page-meta all present, 0 findings [view](reports/2026-04-19-site-seo.md) |
 | 2026-07-15 | /qa-a11y | 3m | SUCCESS | a11y: 6 fixed (5 focus-ring, 1 input-label); 2 skipped (skip-link/primitive); tsc clean [view](reports/2026-07-15-qa-a11y.md) |
 | 2026-07-15 | /qa-e2e | 25m | SUCCESS | E2E suite green (chromium full + @smoke mobile). [view](reports/2026-07-01-qa-spec-fix.md) |
+| 2026-07-18 | /qa-button-fix | 1s | SUCCESS | 0/0, no public CTA to test [view](reports/2026-07-19-qa-buttons.md) |
