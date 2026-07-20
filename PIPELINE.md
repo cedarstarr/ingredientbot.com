@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-07-18 (/qa-button-fix run)
+**Last Updated**: 2026-07-19 (/qa-bugs run)
 
 ---
 
@@ -22,7 +22,7 @@
 | 7 | Write Tests | /qa-spec-reconcile | DONE | 11 | 2026-06-30 | [view](reports/2026-07-01-qa-spec-reconcile.md) |
 | 8 | Verify Build | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 9 | Database Review | /qa-db | DONE | 4 | 2026-06-03 | [view](reports/2026-06-04-site-db.md) |
-| 10 | QA / Bug Check | /qa-bugs | STALE | 5 | 2026-06-04 | [view](reports/2026-06-04-site-bugs.md) |
+| 10 | QA / Bug Check | /qa-bugs | DONE | 6 | 2026-07-19 | [view](reports/2026-07-19-site-bugs.md) |
 | 11 | Button Audit | /qa-button-fix | DONE | 1 | 2026-07-18 | [view](reports/2026-07-19-qa-buttons.md) |
 | 12 | Re-verify Tests | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 13 | Security Hardening | /qa-security | DONE | 5 | 2026-06-06 | [view](reports/2026-06-06-site-security.md) |
@@ -43,7 +43,7 @@
 
 **Progress: 21/27 stages complete (1 skipped)**
 
-**Last Updated**: 2026-07-18 (/qa-button-fix run)
+**Last Updated**: 2026-07-19 (/qa-bugs run)
 
 ---
 
@@ -135,3 +135,4 @@
 | 2026-07-15 | /qa-a11y | 3m | SUCCESS | a11y: 6 fixed (5 focus-ring, 1 input-label); 2 skipped (skip-link/primitive); tsc clean [view](reports/2026-07-15-qa-a11y.md) |
 | 2026-07-15 | /qa-e2e | 25m | SUCCESS | E2E suite green (chromium full + @smoke mobile). [view](reports/2026-07-01-qa-spec-fix.md) |
 | 2026-07-18 | /qa-button-fix | 1s | SUCCESS | 0/0, no public CTA to test [view](reports/2026-07-19-qa-buttons.md) |
+| 2026-07-19 | /qa-bugs | 5m | SUCCESS | 3 findings, 0 fixed, clean (1 MEDIUM deferred) [view](reports/2026-07-19-site-bugs.md) |
