@@ -19,7 +19,7 @@ vi.mock('bcryptjs', () => ({
 import {
   ADMIN_EMAIL,
   ADMIN_NAME,
-  ADMIN_PASSWORD,
+  adminSeedPassword,
   buildAdminUserPayload,
   buildAdminUpsertArgs,
 } from '../seed-admin-user'
@@ -33,8 +33,25 @@ describe('seed-admin-user constants', () => {
     expect(ADMIN_NAME).toBe('Cedar Barrett')
   })
 
-  it('exports the correct admin password', () => {
-    expect(ADMIN_PASSWORD).toBe('CedarAdmin2026!')
+  it('adminSeedPassword reads ADMIN_SEED_PASSWORD from env', () => {
+    const prev = process.env.ADMIN_SEED_PASSWORD
+    try {
+      process.env.ADMIN_SEED_PASSWORD = 'env-password'
+      expect(adminSeedPassword()).toBe('env-password')
+    } finally {
+      if (prev === undefined) delete process.env.ADMIN_SEED_PASSWORD
+      else process.env.ADMIN_SEED_PASSWORD = prev
+    }
+  })
+
+  it('adminSeedPassword throws when ADMIN_SEED_PASSWORD is unset', () => {
+    const prev = process.env.ADMIN_SEED_PASSWORD
+    try {
+      delete process.env.ADMIN_SEED_PASSWORD
+      expect(() => adminSeedPassword()).toThrow(/ADMIN_SEED_PASSWORD not set/)
+    } finally {
+      if (prev !== undefined) process.env.ADMIN_SEED_PASSWORD = prev
+    }
   })
 })
 
