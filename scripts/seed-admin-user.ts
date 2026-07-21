@@ -1,5 +1,5 @@
 /**
- * @description Seeds the production admin user (cedarbarrett@gmail.com) with isAdmin=true. Safe to run multiple times (upsert).
+ * @description Seeds the production admin user (cedarbarrett@gmail.com) with isAdmin=true. Safe to run multiple times (upsert). Requires the ADMIN_SEED_PASSWORD env var (password no longer hardcoded).
  * @tables users
  */
 import { prisma } from './_prisma'
@@ -8,7 +8,15 @@ import bcrypt from 'bcryptjs'
 
 export const ADMIN_EMAIL = 'cedarbarrett@gmail.com'
 export const ADMIN_NAME = 'Cedar Barrett'
-export const ADMIN_PASSWORD = 'iCedarAdmin2026!n'
+// Deliberately a function (not a const) so import-time evaluation never throws —
+// the env check only runs when the seed actually executes.
+export function adminSeedPassword(): string {
+  const seedPassword = process.env.ADMIN_SEED_PASSWORD
+  if (!seedPassword) {
+    throw new Error('ADMIN_SEED_PASSWORD not set — admin password rotated 2026-07-20, no longer hardcoded')
+  }
+  return seedPassword
+}
 
 export async function buildAdminUserPayload(password: string) {
   const hash = await bcrypt.hash(password, 12)
@@ -30,7 +38,7 @@ export function buildAdminUpsertArgs(createPayload: Awaited<ReturnType<typeof bu
 }
 
 async function main() {
-  const createPayload = await buildAdminUserPayload(ADMIN_PASSWORD)
+  const createPayload = await buildAdminUserPayload(adminSeedPassword())
   const user = await prisma.user.upsert(buildAdminUpsertArgs(createPayload))
   console.log('Admin user seeded:', user.email)
 }
