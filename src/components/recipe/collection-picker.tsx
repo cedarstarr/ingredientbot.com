@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useToast } from '@/components/ui/toaster'
 import { FolderOpen, Folder } from 'lucide-react'
 
 interface Collection {
@@ -23,18 +24,27 @@ interface CollectionPickerProps {
 }
 
 export function CollectionPicker({ recipeId, collections, currentCollectionId }: CollectionPickerProps) {
+  const { toast } = useToast()
   const [value, setValue] = useState<string>(currentCollectionId ?? 'none')
   const [saving, setSaving] = useState(false)
 
   const handleChange = async (newValue: string) => {
+    const prev = value
     setValue(newValue)
     setSaving(true)
     try {
-      await fetch(`/api/recipes/${recipeId}/collection`, {
+      const res = await fetch(`/api/recipes/${recipeId}/collection`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ collectionId: newValue === 'none' ? null : newValue }),
       })
+      if (!res.ok) {
+        setValue(prev) // revert optimistic selection on failure
+        toast({ title: 'Could not update collection', description: 'Please try again.', variant: 'destructive' })
+      }
+    } catch {
+      setValue(prev)
+      toast({ title: 'Could not update collection', description: 'Please try again.', variant: 'destructive' })
     } finally {
       setSaving(false)
     }

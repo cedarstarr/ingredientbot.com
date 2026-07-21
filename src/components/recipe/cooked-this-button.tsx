@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ChefHat, Check, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useToast } from '@/components/ui/toaster'
 
 interface CookedThisButtonProps {
   recipeId: string
@@ -18,6 +19,7 @@ export function CookedThisButton({ recipeId, initialCookedCount, initialLastCook
   )
   const [loading, setLoading] = useState(false)
   const [justCooked, setJustCooked] = useState(false)
+  const { toast } = useToast()
 
   const handleCook = async () => {
     setLoading(true)
@@ -30,7 +32,11 @@ export function CookedThisButton({ recipeId, initialCookedCount, initialLastCook
         setJustCooked(true)
         // Reset the "just cooked" indicator after 3s
         setTimeout(() => setJustCooked(false), 3000)
+      } else {
+        toast({ title: 'Could not log cook', description: 'Please try again.', variant: 'destructive' })
       }
+    } catch {
+      toast({ title: 'Could not log cook', description: 'Please try again.', variant: 'destructive' })
     } finally {
       setLoading(false)
     }

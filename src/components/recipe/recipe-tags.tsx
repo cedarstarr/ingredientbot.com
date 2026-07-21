@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Tag, X, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useToast } from '@/components/ui/toaster'
 
 interface RecipeTagsProps {
   recipeId: string
@@ -22,6 +23,7 @@ const SUGGESTIONS = [
 ]
 
 export function RecipeTags({ recipeId, initialTags }: RecipeTagsProps) {
+  const { toast } = useToast()
   const [tags, setTags] = useState<string[]>(initialTags)
   const [input, setInput] = useState('')
   const [editing, setEditing] = useState(false)
@@ -51,11 +53,16 @@ export function RecipeTags({ recipeId, initialTags }: RecipeTagsProps) {
   const saveTags = async (next: string[]) => {
     setSaving(true)
     try {
-      await fetch(`/api/recipes/${recipeId}/tags`, {
+      const res = await fetch(`/api/recipes/${recipeId}/tags`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tags: next }),
       })
+      if (!res.ok) {
+        toast({ title: 'Could not save tags', description: 'Please try again.', variant: 'destructive' })
+      }
+    } catch {
+      toast({ title: 'Could not save tags', description: 'Please try again.', variant: 'destructive' })
     } finally {
       setSaving(false)
     }
