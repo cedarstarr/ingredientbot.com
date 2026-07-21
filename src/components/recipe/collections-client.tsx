@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { useToast } from '@/components/ui/toaster'
 import { FolderOpen, Plus, ArrowRight, Trash2, BookOpen, ChefHat } from 'lucide-react'
 
 const PALETTE = [
@@ -44,6 +45,7 @@ interface CollectionsClientProps {
 
 export function CollectionsClient({ collections: initial }: CollectionsClientProps) {
   const router = useRouter()
+  const { toast } = useToast()
   const [collections, setCollections] = useState(initial)
   const [creating, setCreating] = useState(false)
   const [newName, setNewName] = useState('')
@@ -68,7 +70,11 @@ export function CollectionsClient({ collections: initial }: CollectionsClientPro
         setNewName('')
         setNewDesc('')
         setNewColor(PALETTE[0])
+      } else {
+        toast({ title: 'Could not create collection', description: 'Please try again.', variant: 'destructive' })
       }
+    } catch {
+      toast({ title: 'Could not create collection', description: 'Please try again.', variant: 'destructive' })
     } finally {
       setSaving(false)
     }
@@ -80,7 +86,11 @@ export function CollectionsClient({ collections: initial }: CollectionsClientPro
       const res = await fetch(`/api/collections/${id}`, { method: 'DELETE' })
       if (res.ok) {
         setCollections(prev => prev.filter(c => c.id !== id))
+      } else {
+        toast({ title: 'Could not delete collection', description: 'Please try again.', variant: 'destructive' })
       }
+    } catch {
+      toast({ title: 'Could not delete collection', description: 'Please try again.', variant: 'destructive' })
     } finally {
       setDeletingId(null)
     }

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Share2, Link as LinkIcon, X, Check, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { useToast } from '@/components/ui/toaster'
 
 interface Props {
   recipeId: string
@@ -17,6 +18,7 @@ export function ShareRecipeButton({ recipeId, initialSlug, initialIsPublic }: Pr
   const [loading, setLoading] = useState(false)
   const [copied, setCopied] = useState(false)
   const [open, setOpen] = useState(false)
+  const { toast } = useToast()
 
   const publicUrl = slug ? `${typeof window !== 'undefined' ? window.location.origin : ''}/r/${slug}` : null
 
@@ -28,7 +30,13 @@ export function ShareRecipeButton({ recipeId, initialSlug, initialIsPublic }: Pr
         const data = await res.json()
         setSlug(data.slug)
         setIsPublic(true)
+      } else {
+        setOpen(false)
+        toast({ title: 'Could not create share link', description: 'Please try again.', variant: 'destructive' })
       }
+    } catch {
+      setOpen(false)
+      toast({ title: 'Could not create share link', description: 'Please try again.', variant: 'destructive' })
     } finally {
       setLoading(false)
     }
@@ -42,7 +50,11 @@ export function ShareRecipeButton({ recipeId, initialSlug, initialIsPublic }: Pr
         setSlug(null)
         setIsPublic(false)
         setOpen(false)
+      } else {
+        toast({ title: 'Could not revoke share link', description: 'Please try again.', variant: 'destructive' })
       }
+    } catch {
+      toast({ title: 'Could not revoke share link', description: 'Please try again.', variant: 'destructive' })
     } finally {
       setLoading(false)
     }

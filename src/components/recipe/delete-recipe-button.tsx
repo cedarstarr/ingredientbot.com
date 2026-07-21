@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useToast } from '@/components/ui/toaster'
 import {
   Dialog,
   DialogContent,
@@ -16,15 +17,25 @@ import {
 
 export function DeleteRecipeButton({ id }: { id: string }) {
   const router = useRouter()
+  const { toast } = useToast()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const handleDelete = async () => {
     setLoading(true)
-    await fetch(`/api/recipes/${id}`, { method: 'DELETE' })
-    setOpen(false)
-    setLoading(false)
-    router.refresh()
+    try {
+      const res = await fetch(`/api/recipes/${id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        toast({ title: 'Could not delete recipe', description: 'Please try again.', variant: 'destructive' })
+        return
+      }
+      setOpen(false)
+      router.refresh()
+    } catch {
+      toast({ title: 'Could not delete recipe', description: 'Please try again.', variant: 'destructive' })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

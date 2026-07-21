@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useToast } from '@/components/ui/toaster'
 
 interface RecipeRatingProps {
   recipeId: string
@@ -10,6 +11,7 @@ interface RecipeRatingProps {
 }
 
 export function RecipeRating({ recipeId, initialRating }: RecipeRatingProps) {
+  const { toast } = useToast()
   const [rating, setRating] = useState<number | null>(initialRating)
   const [hovered, setHovered] = useState<number | null>(null)
   const [saving, setSaving] = useState(false)
@@ -19,12 +21,18 @@ export function RecipeRating({ recipeId, initialRating }: RecipeRatingProps) {
     const newRating = rating === star ? null : star
     setSaving(true)
     try {
-      await fetch(`/api/recipes/${recipeId}`, {
+      const res = await fetch(`/api/recipes/${recipeId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ rating: newRating }),
       })
+      if (!res.ok) {
+        toast({ title: 'Could not save rating', description: 'Please try again.', variant: 'destructive' })
+        return
+      }
       setRating(newRating)
+    } catch {
+      toast({ title: 'Could not save rating', description: 'Please try again.', variant: 'destructive' })
     } finally {
       setSaving(false)
     }

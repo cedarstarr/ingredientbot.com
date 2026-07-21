@@ -13,6 +13,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Plus, X, ShoppingCart, Check, Copy, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useToast } from '@/components/ui/toaster'
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
 const MEALS = ['breakfast', 'lunch', 'dinner'] as const
@@ -64,6 +65,7 @@ export function MealPlannerClient({
   initialPlan,
   savedRecipes,
 }: MealPlannerClientProps) {
+  const { toast } = useToast()
   const [slots, setSlots] = useState<Slot[]>(initialPlan.slots)
   const [pickerOpen, setPickerOpen] = useState(false)
   const [pickerDay, setPickerDay] = useState<number | null>(null)
@@ -118,7 +120,11 @@ export function MealPlannerClient({
           )
           return [...filtered, newSlot]
         })
+      } else {
+        toast({ title: 'Could not add recipe to plan', description: 'Please try again.', variant: 'destructive' })
       }
+    } catch {
+      toast({ title: 'Could not add recipe to plan', description: 'Please try again.', variant: 'destructive' })
     } finally {
       setLoading(null)
     }
@@ -127,8 +133,14 @@ export function MealPlannerClient({
   const removeSlot = async (slot: Slot) => {
     setLoading(slot.id)
     try {
-      await fetch(`/api/meal-plan/slot/${slot.id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/meal-plan/slot/${slot.id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        toast({ title: 'Could not remove recipe from plan', description: 'Please try again.', variant: 'destructive' })
+        return
+      }
       setSlots(prev => prev.filter(s => s.id !== slot.id))
+    } catch {
+      toast({ title: 'Could not remove recipe from plan', description: 'Please try again.', variant: 'destructive' })
     } finally {
       setLoading(null)
     }

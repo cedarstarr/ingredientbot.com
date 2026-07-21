@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
+import { useToast } from '@/components/ui/toaster'
 import { X, Plus, Loader2, CheckCircle } from 'lucide-react'
 
 const RESTRICTION_OPTIONS = [
@@ -38,6 +39,7 @@ const CUISINE_OPTIONS = [
 ]
 
 export function DietaryProfileSection() {
+  const { toast } = useToast()
   const [restrictions, setRestrictions] = useState<string[]>([])
   const [cuisinePrefs, setCuisinePrefs] = useState<string[]>([])
   const [dislikedIngredients, setDislikedIngredients] = useState<string[]>([])
@@ -101,7 +103,7 @@ export function DietaryProfileSection() {
     setSaving(true)
     setSaved(false)
     try {
-      await fetch('/api/user/dietary', {
+      const res = await fetch('/api/user/dietary', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -113,9 +115,15 @@ export function DietaryProfileSection() {
           diabetesFriendly,
         }),
       })
+      if (!res.ok) {
+        toast({ title: 'Could not save preferences', description: 'Please try again.', variant: 'destructive' })
+        return
+      }
       setSaved(true)
       // clear confirmation after 3s
       setTimeout(() => setSaved(false), 3000)
+    } catch {
+      toast({ title: 'Could not save preferences', description: 'Please try again.', variant: 'destructive' })
     } finally {
       setSaving(false)
     }
