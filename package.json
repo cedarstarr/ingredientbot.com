@@ -71,6 +71,7 @@
   "devDependencies": {
     "@ai-sdk/cerebras": "^3.0.12",
     "@ai-sdk/groq": "^4.0.12",
+    "@ai-sdk/provider": "^4.0.1",
     "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^2.4.6",
