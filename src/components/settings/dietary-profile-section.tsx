@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useToast } from '@/components/ui/toaster'
+import { AllergenDisclaimer } from '@/components/allergen-disclaimer'
 import { X, Plus, Loader2, CheckCircle } from 'lucide-react'
 
 const RESTRICTION_OPTIONS = [
@@ -173,6 +174,7 @@ export function DietaryProfileSection() {
             </button>
           ))}
         </div>
+        <AllergenDisclaimer className="mt-3" />
       </div>
 
       {/* Cuisine preferences */}

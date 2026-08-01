@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { Clock, Users, ChefHat } from 'lucide-react'
+import { AllergenDisclaimer } from '@/components/allergen-disclaimer'
 
 // design-system-exempt: print-only grayscale ink values are intentional —
 // print stylesheets need hardcoded gray-N rather than HSL tokens.
@@ -138,6 +139,10 @@ export function PrintRecipeView({ recipe }: { recipe: Recipe }) {
                 </li>
               ))}
             </ul>
+
+            {/* Same recipe, on paper — the printed copy leaves the app entirely, so it
+                needs the allergen notice more than the screen version, not less. */}
+            <AllergenDisclaimer compact className="mt-6 break-inside-avoid" />
 
             {/* Nutrition facts — shown in sidebar on print */}
             {nutrition && (

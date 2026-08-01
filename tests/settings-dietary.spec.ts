@@ -60,6 +60,22 @@ test.describe('Dietary profile (F31, F79)', () => {
     const body = await page.locator('body').textContent()
     expect(body).toMatch(/not medical advice/i)
   })
+
+  // Safety-critical UI: the allergen notice is the only thing telling a user the
+  // AI filters can be wrong. Tagged @smoke so it is also verified on Pixel 5 and
+  // iPhone 14 — a disclaimer that collapses on mobile is a disclaimer nobody read.
+  test('allergen disclaimer is shown alongside the dietary restrictions @smoke', async ({ page }) => {
+    await page.goto('/settings')
+    await page.waitForLoadState('domcontentloaded')
+    await page.waitForTimeout(1000)
+
+    const disclaimer = page.getByTestId('allergen-disclaimer')
+    await expect(disclaimer).toBeVisible()
+    // Assert the two failure modes the copy exists to name, not just that a box
+    // rendered — a disclaimer that lost its text would still pass a bare toBeVisible.
+    await expect(disclaimer).toContainText(/cross-contamination/i)
+    await expect(disclaimer).toContainText(/read the labels/i)
+  })
 })
 
 test.describe('Recipe URL import (F62) — authenticated', () => {
