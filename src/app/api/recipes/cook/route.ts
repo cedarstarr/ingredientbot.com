@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateText } from 'ai'
-import { trackedModel } from '@/lib/ai'
+import { dietaryModel } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { buildCookingMethodContext, buildSpiceContext } from '@/lib/recipe-prompt-utils'
 import { Difficulty } from '@/generated/prisma/client'
@@ -149,7 +149,10 @@ export async function POST(req: NextRequest) {
   let text: string
   try {
     const aiResult = await generateText({
-      model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'cooking-assistant', userId: session.user.id }),
+      model: dietaryModel(dietaryProfile?.restrictions, {
+        feature: 'cooking-assistant',
+        userId: session.user.id,
+      }),
       maxOutputTokens: 2048,
     system: `You are an expert chef. Generate a complete detailed recipe as JSON. Return ONLY valid JSON with no markdown, no code blocks.
 Schema:
