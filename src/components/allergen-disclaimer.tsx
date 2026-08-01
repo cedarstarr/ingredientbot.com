@@ -20,15 +20,18 @@ export function AllergenDisclaimer({
       role="note"
       data-testid="allergen-disclaimer"
       className={cn(
+        // print: browsers drop background colors by default, so the notice falls back
+        // to a solid border + black text rather than disappearing into the page.
         'flex gap-2.5 rounded-md border border-[hsl(var(--color-warning))]/35 bg-[hsl(var(--color-warning-muted))] p-3',
+        'print:border-gray-800 print:bg-transparent',
         className
       )}
     >
       <AlertTriangle
         aria-hidden="true"
-        className="h-4 w-4 shrink-0 mt-0.5 text-[hsl(var(--color-warning-fg))]"
+        className="h-4 w-4 shrink-0 mt-0.5 text-[hsl(var(--color-warning-fg))] print:text-black"
       />
-      <div className="text-xs leading-relaxed text-[hsl(var(--color-warning-fg))]">
+      <div className="text-xs leading-relaxed text-[hsl(var(--color-warning-fg))] print:text-black">
         {compact ? (
           <p>
             <span className="font-semibold">Allergen safety:</span> this recipe is AI-generated.

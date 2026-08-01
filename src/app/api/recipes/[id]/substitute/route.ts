@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateText } from 'ai'
-import { trackedModel } from '@/lib/ai'
+import { dietaryModel, hasAllergenRestriction } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import * as Sentry from '@sentry/nextjs'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
@@ -57,7 +57,23 @@ export async function POST(
       })
     }
 
-    if (!process.env.ANTHROPIC_API_KEY) {
+    // F31: substitution advice has to respect the same persistent restrictions the
+    // generator applies. Without this the route will cheerfully answer "swap the
+    // peanut butter for almond butter" for a tree-nut-allergic user — the single
+    // highest-risk question in the app was the one call that read no profile.
+    const dietaryProfile = await prisma.dietaryProfile.findUnique({
+      where: { userId: session.user.id },
+      select: { restrictions: true, dislikedIngredients: true },
+    })
+    const restrictions = dietaryProfile?.restrictions ?? []
+    const isAllergenCall = hasAllergenRestriction(restrictions)
+
+    // Guard the lane we will actually use. The old guard checked ANTHROPIC_API_KEY
+    // while the call ran on the free tier, so it never fired when it mattered.
+    const laneConfigured = isAllergenCall
+      ? Boolean(process.env.ANTHROPIC_API_KEY)
+      : Boolean(process.env.CEREBRAS_API_KEY || process.env.GROQ_API_KEY)
+    if (!laneConfigured) {
       return new Response('AI service not configured', { status: 503 })
     }
 
@@ -72,8 +88,21 @@ export async function POST(
       ? recipeData.ingredients.map(i => `${i.amount} ${i.unit} ${i.name}`.trim()).join(', ')
       : recipe.sourceIngredients.join(', ')
 
+    const restrictionLines: string[] = []
+    if (restrictions.length) {
+      restrictionLines.push(
+        isAllergenCall
+          ? `HARD CONSTRAINT — the user has allergen-bearing restrictions: ${restrictions.join(', ')}. Every suggested substitute must be safe under all of them. If a common substitute would violate one (e.g. almond butter for a nut allergy), do not list it at all — do not list it with a warning. If no safe substitute exists, return an empty substitutions array and say so in "tip".`
+          : `User dietary restrictions (always apply): ${restrictions.join(', ')}.`
+      )
+    }
+    if (dietaryProfile?.dislikedIngredients?.length) {
+      restrictionLines.push(`User dislikes these ingredients (avoid): ${dietaryProfile.dislikedIngredients.join(', ')}.`)
+    }
+    const restrictionContext = restrictionLines.length ? `\n\n${restrictionLines.join('\n')}` : ''
+
     const { text } = await generateText({
-      model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'ingredient-substitute', userId: session.user.id }),
+      model: dietaryModel(restrictions, { feature: 'ingredient-substitute', userId: session.user.id }),
       maxOutputTokens: 800,
       system: `You are a professional chef and food scientist. Analyze the role an ingredient plays in a recipe and suggest practical substitutions. Respond with valid JSON only, no markdown fences:
 {
@@ -94,7 +123,7 @@ export async function POST(
         role: 'user',
         content: `Recipe: ${recipeData.title || recipe.title}
 All ingredients: ${ingredientList}
-Missing ingredient: ${missingIngredient}
+Missing ingredient: ${missingIngredient}${restrictionContext}
 
 Analyze what role "${missingIngredient}" plays in this specific recipe and suggest 2-3 substitutions ordered from best to last resort.`,
       }],
