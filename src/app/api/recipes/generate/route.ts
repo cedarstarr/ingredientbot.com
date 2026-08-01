@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { streamText } from 'ai'
-import { trackedModel } from '@/lib/ai'
+import { dietaryModel } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { canonicalize, getCached, setCached, sha256 } from '@/lib/recipe-cache'
 import { buildCookingMethodContext, buildSpiceContext } from '@/lib/recipe-prompt-utils'
@@ -186,7 +186,12 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = streamText({
-      model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'recipe-generation', userId: session.user.id }),
+      // Escalates to the paid safety model when an allergen restriction is in play,
+      // from either the saved profile or this request's one-off selections.
+      model: dietaryModel([...(dietaryProfile?.restrictions ?? []), ...(dietary ?? [])], {
+        feature: 'recipe-generation',
+        userId: session.user.id,
+      }),
       maxOutputTokens: 1024,
       system: `You are an expert chef. When given a list of ingredients, suggest exactly 4 recipes that use most of them.
 

@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import type { Prisma } from '@/generated/prisma/client'
 import { generateText } from 'ai'
-import { trackedModel } from '@/lib/ai'
+import { dietaryModel } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 
 export const maxDuration = 30
@@ -57,7 +57,8 @@ export async function POST(
   let text: string
   try {
     const response = await generateText({
-      model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'diet-conversion', userId: session.user.id }),
+      // "Make this dairy-free" is an allergen claim when the target diet is allergen-bearing.
+      model: dietaryModel([diet], { feature: 'diet-conversion', userId: session.user.id }),
       maxOutputTokens: 800,
       system: `You are a professional chef specializing in dietary adaptations. Convert recipes to fit specific dietary restrictions while maintaining flavor and texture. Respond with JSON:
 {
