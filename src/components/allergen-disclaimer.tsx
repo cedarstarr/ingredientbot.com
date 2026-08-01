@@ -1,0 +1,58 @@
+import { AlertTriangle } from 'lucide-react'
+import { cn } from '@/lib/utils'
+
+/**
+ * Allergen safety notice. Shown anywhere the app implies an allergen-free
+ * result — the dietary-restriction picker and any recipe rendered from it.
+ *
+ * Deliberately names the two failure modes a model cannot see: an ingredient
+ * it misclassified, and cross-contamination in a product the user buys.
+ */
+export function AllergenDisclaimer({
+  compact = false,
+  className,
+}: {
+  compact?: boolean
+  className?: string
+}) {
+  return (
+    <div
+      role="note"
+      data-testid="allergen-disclaimer"
+      className={cn(
+        'flex gap-2.5 rounded-md border border-[hsl(var(--color-warning))]/35 bg-[hsl(var(--color-warning-muted))] p-3',
+        className
+      )}
+    >
+      <AlertTriangle
+        aria-hidden="true"
+        className="h-4 w-4 shrink-0 mt-0.5 text-[hsl(var(--color-warning-fg))]"
+      />
+      <div className="text-xs leading-relaxed text-[hsl(var(--color-warning-fg))]">
+        {compact ? (
+          <p>
+            <span className="font-semibold">Allergen safety:</span> this recipe is AI-generated.
+            Dietary filters can be wrong or incomplete, and cross-contamination is not accounted
+            for — always read the labels on the ingredients you buy. Do not rely on this for a
+            severe allergy.
+          </p>
+        ) : (
+          <>
+            <p className="font-semibold">Allergen safety</p>
+            <p className="mt-1">
+              Filters such as nut-free, dairy-free, and gluten-free are applied by AI and can be
+              incomplete or wrong. IngredientBot cannot account for cross-contamination, shared
+              equipment, or how a specific product was manufactured, so always read the labels on
+              the ingredients you actually buy.
+            </p>
+            <p className="mt-1">
+              If you or someone you cook for has a severe or anaphylactic allergy, do not rely on
+              these filters. Confirm every ingredient yourself and talk to your doctor or
+              allergist.
+            </p>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}

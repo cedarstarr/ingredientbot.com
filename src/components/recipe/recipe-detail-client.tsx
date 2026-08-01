@@ -13,6 +13,7 @@ import { CookedThisButton } from './cooked-this-button'
 import { RecipeTags } from './recipe-tags'
 import { CollectionPicker } from './collection-picker'
 import { RecipeRating } from './recipe-rating'
+import { AllergenDisclaimer } from '@/components/allergen-disclaimer'
 import { Clock, Users, ChevronLeft, Loader2, HelpCircle, Printer, Sparkles, UtensilsCrossed, Lightbulb, Save } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -485,6 +486,7 @@ export function RecipeDetailClient({ recipe, collections = [] }: Props) {
                 {saveError && <p className="text-xs text-destructive w-full">{saveError}</p>}
               </div>
             )}
+            <AllergenDisclaimer compact className="mt-4" />
           </section>
 
           {/* Substitution panel */}
