@@ -16,7 +16,7 @@ All AI goes through `@ai-sdk/*` provider packages via `src/lib/ai.ts`. Never imp
 
 | Lane | Provider | Model | Used by |
 |---|---|---|---|
-| Primary (text) | Cerebras, Groq fallback on 429/5xx | `gpt-oss-120b` | everything not listed below |
+| Primary (text) | Shared AI broker (`AI_BROKER_URL`), direct Cerebras only if the broker is *down* | `gpt-oss-120b` | everything not listed below |
 | Vision | Google | `gemini-2.5-flash-lite` | `analyze-photo` only — `gpt-oss-120b` is text-only |
 | **Allergen safety** | Anthropic | `claude-opus-5` | any call applying an allergen-bearing restriction |
 
@@ -27,5 +27,13 @@ exact failure it exists to prevent. Any new route that applies dietary restricti
 use `dietaryModel()`, not `trackedModel()`.
 
 Note: `trackedModel(provider, modelId, ctx)` ignores its `provider`/`modelId` arguments
-for routing — they are logging labels only, and the call always goes to Cerebras+Groq.
+entirely — the call always goes to the broker and is logged as `ai-broker`.
 Passing `'google'` there does not make it a Google call.
+
+The broker owns the Cerebras/Groq keys for the whole portfolio and schedules all 11
+sites against the ONE shared free-tier budget. Prefer `brokerModel({ feature, priority })`
+for new call sites; `priority` defaults to `interactive` (a user is waiting). Cron/batch
+callers must pass `priority: 'batch'` **and** `maxRetries: 0` — the broker already retries
+across lanes, and an SDK retry on top can exceed Vercel's 300s cron limit. A broker-relayed
+429 is never bypassed; only an unreachable broker (no status, or 502/503/504) falls through
+to direct Cerebras.
