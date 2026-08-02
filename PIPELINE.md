@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-08-01 (/qa-e2e run)
+**Last Updated**: 2026-08-01 (/qa-resilience run)
 
 ---
 
@@ -25,16 +25,16 @@
 | 10 | QA / Bug Check | /qa-bugs | DONE | 6 | 2026-07-19 | [view](reports/2026-07-19-site-bugs.md) |
 | 11 | Button Audit | /qa-button-fix | DONE | 1 | 2026-07-18 | [view](reports/2026-07-19-qa-buttons.md) |
 | 12 | Re-verify Tests | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
-| 13 | Security Hardening | /qa-security | DONE | 6 | 2026-07-20 | [view](reports/2026-07-20-site-security.md) |
-| 14 | Resilience Audit | /qa-resilience | DONE | 3 | 2026-07-20 | [view](reports/2026-07-20-qa-resilience.md) |
+| 13 | Security Hardening | /qa-security | DONE | 7 | 2026-08-01 | [view](reports/2026-08-02-site-security.md) |
+| 14 | Resilience Audit | /qa-resilience | DONE | 4 | 2026-08-01 | [view](reports/2026-08-02-site-resilience.md) |
 | 15 | Design System Install | /design-implement | STALE | 2 | 2026-06-25 | [view](reports/2026-04-18-site-design.md) |
 | 16 | Token Hygiene | /qa-tokens | STALE | 6 | 2026-06-24 | [view](reports/2026-06-24-qa-tokens.md) |
 | 17 | Copy Audit | /qa-copy | STALE | 3 | 2026-06-26 | [view](reports/2026-06-26-ingredientbot-copy.md) |
-| 18 | Navigation Audit | /qa-nav | DONE | 12 | 2026-07-20 | [view](reports/2026-07-13-qa-nav.md) |
+| 18 | Navigation Audit | /qa-nav | STALE | 12 | 2026-07-20 | [view](reports/2026-07-13-qa-nav.md) |
 | 19 | Performance Audit | /qa-perf | STALE | 3 | 2026-07-02 | [view](reports/2026-07-02-site-perf.md) |
 | 20 | SEO Audit | /qa-seo | STALE | 2 | 2026-07-13 | [view](reports/2026-04-19-site-seo.md) |
 | 21 | Accessibility Audit | /qa-a11y | STALE | 2 | 2026-07-15 | [view](reports/2026-07-15-qa-a11y.md) |
-| 22 | E2E Gate | /qa-e2e | DONE | 11 | 2026-08-01 | [view](reports/2026-07-01-qa-spec-fix.md) |
+| 22 | E2E Gate | /qa-e2e | STALE | 11 | 2026-08-01 | [view](reports/2026-07-01-qa-spec-fix.md) |
 | 23 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
 | 24 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
 | 25 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
@@ -43,7 +43,7 @@
 
 **Progress: 21/27 stages complete (1 skipped)**
 
-**Last Updated**: 2026-08-01 (/qa-e2e run)
+**Last Updated**: 2026-08-01 (/qa-resilience run)
 
 ---
 
@@ -140,3 +140,5 @@
 | 2026-07-20 | /qa-resilience | 1m | SUCCESS | Clean — no findings (err/health/mw/rl/sentry/prisma/api/cron all pass) [view](reports/2026-07-20-qa-resilience.md) |
 | 2026-07-20 | /qa-nav | 1m | SUCCESS | Clean nav coverage, no orphans or dead links. [view](reports/2026-07-13-qa-nav.md) |
 | 2026-08-01 | /qa-e2e | 25m | SUCCESS | 101/101 chromium pass (46s); added allergen-disclaimer @smoke test, verified on iphone+android; runner 1200s timeout was tooling not tests [view](reports/2026-07-01-qa-spec-fix.md) |
+| 2026-08-01 | /qa-security | 20m | SUCCESS | 8 issues (2 HIGH allergen-safety, 6 MEDIUM deps); 2 fixed (modify+chat now use dietaryModel); 6 deferred to FOU-239 (upstream-blocked) [view](reports/2026-08-02-site-security.md) |
+| 2026-08-01 | /qa-resilience | 1m | SUCCESS | clean — no findings across all resilience checks [view](reports/2026-08-02-site-resilience.md) |
