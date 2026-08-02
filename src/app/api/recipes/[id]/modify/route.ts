@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { streamText } from 'ai'
-import { trackedModel } from '@/lib/ai'
+import { dietaryModel, hasAllergenRestriction } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 
 export const maxDuration = 60
@@ -48,21 +48,52 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     })
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return new Response('AI service not configured', { status: 503 })
-  }
-
   const body = await req.json()
   const { action, targetServings, targetMethod } = body
 
   const actionPrompt = actionPrompts[action]
   if (!actionPrompt) return new Response('Invalid action', { status: 400 })
 
+  // F31 + allergen safety: every modify action rewrites ingredients. Without the user's
+  // dietary profile the AI could cheerfully suggest almond butter to a tree-nut-allergic
+  // user asking to "make vegetarian". Load restrictions and escalate to the paid safety
+  // lane whenever an allergen restriction is in play — same rule already applied to
+  // /generate, /cook, /substitute, /convert-diet.
+  const dietaryProfile = await prisma.dietaryProfile.findUnique({
+    where: { userId: session.user.id },
+    select: { restrictions: true, dislikedIngredients: true },
+  })
+  const restrictions = dietaryProfile?.restrictions ?? []
+  const isAllergenCall = hasAllergenRestriction(restrictions)
+
+  // Guard the lane actually being used. Allergen calls require Anthropic; free-tier
+  // calls only need Cerebras/Groq. The old guard checked ANTHROPIC_API_KEY unconditionally
+  // while the call ran on the free tier — it never fired when it mattered.
+  const laneConfigured = isAllergenCall
+    ? Boolean(process.env.ANTHROPIC_API_KEY)
+    : Boolean(process.env.CEREBRAS_API_KEY || process.env.GROQ_API_KEY)
+  if (!laneConfigured) {
+    return new Response('AI service not configured', { status: 503 })
+  }
+
+  const restrictionLines: string[] = []
+  if (restrictions.length) {
+    restrictionLines.push(
+      isAllergenCall
+        ? `HARD CONSTRAINT — the user has allergen-bearing restrictions: ${restrictions.join(', ')}. Every ingredient in the modified recipe must be safe under all of them. If a common substitute would violate one (e.g. almond flour for a nut allergy), do not use it — choose a different substitute. If no safe modification exists, say so clearly instead of guessing.`
+        : `User dietary restrictions (always apply): ${restrictions.join(', ')}.`
+    )
+  }
+  if (dietaryProfile?.dislikedIngredients?.length) {
+    restrictionLines.push(`User dislikes these ingredients (avoid): ${dietaryProfile.dislikedIngredients.join(', ')}.`)
+  }
+  const restrictionContext = restrictionLines.length ? `\n\n${restrictionLines.join('\n')}` : ''
+
   try {
     const result = streamText({
-      model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'recipe-modify', userId: session.user.id }),
+      model: dietaryModel(restrictions, { feature: 'recipe-modify', userId: session.user.id }),
       maxOutputTokens: 2048,
-      system: 'You are an expert chef who helps people modify recipes. Present modifications clearly in markdown.',
+      system: `You are an expert chef who helps people modify recipes. Present modifications clearly in markdown.${restrictionContext}`,
       messages: [{
         role: 'user',
         content: `Here is the current recipe:\n${recipe.rawText}\n\n${actionPrompt(recipe, { targetServings, targetMethod })}`,

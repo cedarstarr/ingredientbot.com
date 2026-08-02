@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { streamText } from 'ai'
-import { trackedModel } from '@/lib/ai'
+import { dietaryModel, hasAllergenRestriction } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 
 export const maxDuration = 60
@@ -46,7 +46,20 @@ export async function POST(
       })
     }
 
-    if (!process.env.ANTHROPIC_API_KEY) {
+    // Load the dietary profile so allergen-bearing chat questions ("can I use peanut butter?")
+    // route to the paid safety lane rather than the free tier. Chat frequently drifts into
+    // substitution advice — same class of output as /substitute, so same rule applies.
+    const dietaryProfile = await prisma.dietaryProfile.findUnique({
+      where: { userId: session.user.id },
+      select: { restrictions: true, dislikedIngredients: true },
+    })
+    const restrictions = dietaryProfile?.restrictions ?? []
+    const isAllergenCall = hasAllergenRestriction(restrictions)
+
+    const laneConfigured = isAllergenCall
+      ? Boolean(process.env.ANTHROPIC_API_KEY)
+      : Boolean(process.env.CEREBRAS_API_KEY || process.env.GROQ_API_KEY)
+    if (!laneConfigured) {
       return new Response('AI service not configured', { status: 503 })
     }
 
@@ -55,6 +68,19 @@ export async function POST(
       ingredients?: string[]
       instructions?: string[]
     }
+
+    const restrictionLines: string[] = []
+    if (restrictions.length) {
+      restrictionLines.push(
+        isAllergenCall
+          ? `\n\nHARD CONSTRAINT — the user has allergen-bearing restrictions: ${restrictions.join(', ')}. Any substitution or ingredient suggestion you make must be safe under all of them. If the user asks about an ingredient that would violate one (e.g. peanut butter for a nut allergy), refuse it clearly rather than qualifying it.`
+          : `\n\nUser dietary restrictions (always respect): ${restrictions.join(', ')}.`
+      )
+    }
+    if (dietaryProfile?.dislikedIngredients?.length) {
+      restrictionLines.push(`\nUser dislikes these ingredients (avoid suggesting): ${dietaryProfile.dislikedIngredients.join(', ')}.`)
+    }
+    const restrictionContext = restrictionLines.join('')
 
     const systemPrompt = `You are a friendly, knowledgeable cooking coach. The user is currently cooking a specific recipe and might ask about:
 - Technique questions (how to properly sear, when to flip, how to know it's done)
@@ -67,7 +93,7 @@ Title: ${recipeData.title || recipe.title}
 Ingredients: ${JSON.stringify(recipeData.ingredients || recipe.sourceIngredients)}
 Instructions: ${JSON.stringify(recipeData.instructions || [])}
 
-Be concise but helpful. Reference specific steps from the recipe when relevant. If you don't know something, say so. Add a practical tip when possible.`
+Be concise but helpful. Reference specific steps from the recipe when relevant. If you don't know something, say so. Add a practical tip when possible.${restrictionContext}`
 
     // Build message history
     const messages: Array<{ role: 'user' | 'assistant'; content: string }> = []
@@ -79,7 +105,7 @@ Be concise but helpful. Reference specific steps from the recipe when relevant. 
     messages.push({ role: 'user', content: message.trim() })
 
     const result = streamText({
-      model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'cooking-chat', userId: session.user.id }),
+      model: dietaryModel(restrictions, { feature: 'cooking-chat', userId: session.user.id }),
       maxOutputTokens: 500,
       system: systemPrompt,
       messages,
