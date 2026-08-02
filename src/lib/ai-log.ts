@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 
 export function logAICall(opts: {
   feature: string;
-  provider: "anthropic" | "openai" | "google" | "cerebras" | "groq";
+  provider: "anthropic" | "openai" | "google" | "cerebras" | "groq" | "ai-broker";
   model: string;
   inputTokens: number | undefined;
   outputTokens: number | undefined;
