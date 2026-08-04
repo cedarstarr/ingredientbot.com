@@ -33,6 +33,9 @@ const PUBLIC_PATHS = [
   '/coming-soon',
   // Public recipe share pages — F27
   '/r/',
+  // Public browse + ingredient glossary — server-rendered, no client API calls
+  '/recipes',
+  '/ingredients',
 ]
 
 export default auth(async function middleware(request: NextAuthRequest) {

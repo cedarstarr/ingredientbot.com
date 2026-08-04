@@ -42,6 +42,8 @@
 - ✅ F39 Recipe collections/folders [Core]
 - ✅ F40 Print recipe view [Core]
 - ✅ F41 Recipe completion tracking ("cooked this") [Core]
+- ✅ F81 Public recipe browse by cuisine at `/recipes` [Core]
+- ✅ F82 Ingredient glossary at `/ingredients` [Core]
 
 ## 🛠 Planned / In Progress
 
@@ -220,6 +222,10 @@ F48. **Nutritional summary over time** [Sticky] — Weekly and monthly roll-up o
 F49. **Family profile (multi-eater)** [Sticky] — Multiple dietary profiles in one account. "Generate one dinner that works for a vegan adult and a picky 7-year-old." The household cooking use case is underserved by every competitor except Mealime (and Mealime doesn't do AI generation). (Feasibility: Medium — user profile schema extension)
 
 ✅ F51. **Recipe rating (personal 1–5 stars)** [Sticky] — Rate saved recipes; "Your favorites" auto-surfaces top-rated recipes. Simple feedback loop that makes the cookbook more useful over time. (Feasibility: Low — rating field on Recipe model + UI)
+
+✅ F81. **Public recipe browse by cuisine** [Core] — `/recipes` server-rendered browse page for all publicly shared recipes (F27), sectioned by cuisine with per-cuisine "view all" filtering via `?cuisine=`. Fixes the orphan-page problem: hundreds of `/r/[slug]` pages had zero internal links. Each public recipe page also gets a "More {cuisine} recipes" cross-link strip (one query, 4 cards). Linked from the homepage nav/footer and added to the sitemap. Two fixed queries (groupBy + one capped findMany) regardless of cuisine count — no N+1. (Feasibility: built)
+
+✅ F82. **Ingredient glossary** [Core] — `/ingredients` grouped, client-searchable index plus `/ingredients/[slug]` detail pages rendering the Ingredient reference corpus: description, storage, seasonality, allergen profile, hidden sources, cross-contamination, and substitutions (allergen-adjacent sections sit next to the compact allergen disclaimer). Mirrors the `/r/[slug]` public-page patterns (generateMetadata, canonical, ISR) and both routes are in the sitemap and middleware public whitelist. Gives the 364-row Ingredient seeder a public surface. (Feasibility: built)
 
 F52. **Referral program** [Sticky] — Share a link; both user and referee get bonus recipe credits. Standard referral loop. DishGen lets users earn credits via social shares; we do it via direct referral. Portfolio referral system pattern already established. (Feasibility: Medium — referral model already in portfolio pattern)
 

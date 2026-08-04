@@ -9,9 +9,18 @@ const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ingredientbot.com'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Fetch public recipe slugs for dynamic recipe pages
+  // NOTE: both take: 1000 caps below need raising (or splitting into sitemap
+  // index files) as the recipe/ingredient libraries grow past them.
   const publicRecipes = await prisma.recipe.findMany({
     where: { isPublic: true, publicSlug: { not: null } },
     select: { publicSlug: true, updatedAt: true },
+    orderBy: { updatedAt: 'desc' },
+    take: 1000,
+  })
+
+  // Ingredient glossary pages — mirrors the public-recipe pattern above
+  const ingredients = await prisma.ingredient.findMany({
+    select: { slug: true, updatedAt: true },
     orderBy: { updatedAt: 'desc' },
     take: 1000,
   })
@@ -25,6 +34,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }))
 
+  const ingredientEntries: MetadataRoute.Sitemap = ingredients.map((i) => ({
+    url: `${baseUrl}/ingredients/${i.slug}`,
+    lastModified: i.updatedAt,
+    changeFrequency: 'monthly' as const,
+    priority: 0.5,
+  }))
+
   return [
     {
       url: `${baseUrl}/`,
@@ -33,6 +49,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1.0,
     },
     // /kitchen is auth-gated — excluded to avoid crawl budget waste on redirect
+    {
+      url: `${baseUrl}/recipes`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/ingredients`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    },
     {
       url: `${baseUrl}/signup`,
       lastModified: new Date(),
@@ -58,5 +86,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.3,
     },
     ...recipeEntries,
+    ...ingredientEntries,
   ]
 }

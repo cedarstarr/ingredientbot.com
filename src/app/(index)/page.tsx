@@ -48,6 +48,9 @@ export default function LandingPage() {
             <span className="font-bold text-lg text-foreground">IngredientBot</span>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="ghost" asChild className="hidden sm:inline-flex">
+              <Link href="/recipes">Recipes</Link>
+            </Button>
             <Button variant="ghost" asChild>
               <Link href="/login">Sign In</Link>
             </Button>
@@ -174,6 +177,8 @@ export default function LandingPage() {
         </div>
         <p>AI-powered recipe assistant. Cook smarter, eat better.</p>
         <div className="flex items-center justify-center gap-4 mt-3">
+          <Link href="/recipes" className="hover:text-foreground transition-colors">Recipes</Link>
+          <Link href="/ingredients" className="hover:text-foreground transition-colors">Ingredients</Link>
           <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
           <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
         </div>
