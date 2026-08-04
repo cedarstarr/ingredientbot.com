@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Clock, Users, ChefHat, ArrowRight, Utensils } from 'lucide-react'
 import { safeJsonLdString } from '@/lib/utils'
+import { AllergenDisclaimer } from '@/components/allergen-disclaimer'
+import { allergenLabel } from '@/lib/allergens'
 
 export const revalidate = 3600
 
@@ -73,6 +75,9 @@ export default async function PublicRecipePage({ params }: Props) {
   }
 
   const totalMin = (recipe.prepTimeMin ?? 0) + (recipe.cookTimeMin ?? 0)
+
+  const hasAllergenInfo =
+    recipe.allergens.length > 0 || recipe.mayContain.length > 0 || recipe.allergenNotes != null
 
   const difficultyColor: Record<string, string> = {
     easy: 'bg-[hsl(var(--color-success-muted))] text-[hsl(var(--color-success-fg))]',
@@ -186,6 +191,47 @@ export default async function PublicRecipePage({ params }: Props) {
                 </li>
               ))}
             </ul>
+
+            {/* Allergens — rendered only alongside the safety disclaimer; the
+                data is dual-model verified but absence of a flag is still never
+                an allergen-free guarantee (three-state: contains / may contain / absent). */}
+            {hasAllergenInfo && (
+              <div className="mt-6 rounded-lg border border-border bg-muted/30 p-4" data-testid="recipe-allergen-info">
+                <h3 className="text-sm font-semibold text-foreground mb-2">Allergen information</h3>
+                {recipe.allergens.length > 0 && (
+                  <div className="mb-2">
+                    <p className="text-xs font-medium text-muted-foreground mb-1.5">Contains</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {recipe.allergens.map((a) => (
+                        <Badge key={a} variant="secondary" className="bg-destructive/10 text-destructive hover:bg-destructive/10">
+                          {allergenLabel(a)}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {recipe.mayContain.length > 0 && (
+                  <div className="mb-2">
+                    <p className="text-xs font-medium text-muted-foreground mb-1.5">May contain</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {recipe.mayContain.map((a) => (
+                        <Badge key={a} variant="secondary">
+                          {allergenLabel(a)}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {recipe.allergenNotes && (
+                  <p className="text-xs text-muted-foreground mb-2">{recipe.allergenNotes}</p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Only the allergens listed above were checked. An allergen not being listed is{' '}
+                  <span className="font-medium text-foreground">not</span> a guarantee that it is absent.
+                </p>
+                <AllergenDisclaimer compact className="mt-3" />
+              </div>
+            )}
 
             {/* Nutrition */}
             {data.nutrition && (
