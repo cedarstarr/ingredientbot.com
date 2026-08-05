@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Clock, Users, ChefHat, ArrowRight, Utensils } from 'lucide-react'
 import { safeJsonLdString } from '@/lib/utils'
 import { AllergenDisclaimer } from '@/components/allergen-disclaimer'
+import { AllergyAwarenessNotice } from '@/components/allergy-awareness-notice'
 import { allergenLabel } from '@/lib/allergens'
 
 export const revalidate = 3600
@@ -353,6 +354,7 @@ export default async function PublicRecipePage({ params }: Props) {
       </main>
 
       <footer className="border-t border-border py-6 text-center text-sm text-muted-foreground">
+        <AllergyAwarenessNotice className="mb-5 px-4" />
         <div className="flex items-center justify-center gap-4">
           <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
           <Link href="/recipes" className="hover:text-foreground transition-colors">Recipes</Link>

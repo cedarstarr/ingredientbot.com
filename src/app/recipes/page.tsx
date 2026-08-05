@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ChefHat, ArrowRight, ArrowLeft, Clock, UtensilsCrossed } from 'lucide-react'
+import { AllergyAwarenessNotice } from '@/components/allergy-awareness-notice'
 
 export const revalidate = 3600
 
@@ -254,6 +255,7 @@ function BrowseShell({ children }: { children: React.ReactNode }) {
       <main className="max-w-5xl mx-auto px-4 py-10">{children}</main>
 
       <footer className="border-t border-border py-6 text-center text-sm text-muted-foreground">
+        <AllergyAwarenessNotice className="mb-5 px-4" />
         <div className="flex items-center justify-center gap-4">
           <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
           <Link href="/ingredients" className="hover:text-foreground transition-colors">Ingredients</Link>

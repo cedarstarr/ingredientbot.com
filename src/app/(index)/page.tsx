@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ChefHat, Camera, Sparkles, Sliders, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { safeJsonLdString } from '@/lib/utils'
+import { AllergyAwarenessNotice } from '@/components/allergy-awareness-notice'
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ingredientbot.com'
 
@@ -171,6 +172,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
+        <AllergyAwarenessNotice className="mb-6 px-4" />
         <div className="flex items-center justify-center gap-2 mb-2">
           <ChefHat className="h-4 w-4 text-primary" />
           <span className="font-semibold text-foreground">IngredientBot</span>

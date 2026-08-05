@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ChefHat, ArrowRight, ArrowLeft, Archive, CalendarDays, ShieldAlert, Replace } from 'lucide-react'
 import { AllergenDisclaimer } from '@/components/allergen-disclaimer'
+import { AllergyAwarenessNotice } from '@/components/allergy-awareness-notice'
 import { allergenLabel } from '@/lib/allergens'
 
 export const revalidate = 3600
@@ -227,6 +228,7 @@ export default async function IngredientDetailPage({ params }: Props) {
       </main>
 
       <footer className="border-t border-border py-6 text-center text-sm text-muted-foreground">
+        <AllergyAwarenessNotice className="mb-5 px-4" />
         <div className="flex items-center justify-center gap-4">
           <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
           <Link href="/recipes" className="hover:text-foreground transition-colors">Recipes</Link>
