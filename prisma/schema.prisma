@@ -191,13 +191,18 @@ model Recipe {
   // Allergen safety fields. Values are drawn from the canonical vocabulary in
   // src/lib/allergens.ts (FDA top-9 + EU-14 union). `allergens` is CONFIRMED
   // contains; `mayContain` is a weaker cross-contamination/ambiguous signal.
-  // Both are written only after dual-model agreement (see
-  // scripts/lib/allergen-verify.ts) — never a single-model guess, and never
-  // "free from X" (three-state honesty: contains / may contain / absent).
-  allergens          String[]  @default([]) @map("allergens")
-  mayContain         String[]  @default([]) @map("may_contain")
-  allergenNotes      String?   @map("allergen_notes")
-  allergenVerifiedAt DateTime? @map("allergen_verified_at")
+  // Never "free from X" — three-state honesty: contains / may contain / absent.
+  //
+  // These are a SINGLE paid-frontier-model annotation (2026-08-05; previously a
+  // dual-model Azure + Opus agreement gate). They are NOT verified, and the
+  // allergen disclaimer must render anywhere they are shown.
+  allergens           String[]  @default([]) @map("allergens")
+  mayContain          String[]  @default([]) @map("may_contain")
+  allergenNotes       String?   @map("allergen_notes")
+  // Renamed from allergenVerifiedAt when the dual-model gate was removed — it
+  // records when annotation ran, NOT that anything was verified. The DB column
+  // keeps its original name so no SQL migration is required.
+  allergenAnnotatedAt DateTime? @map("allergen_verified_at")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -373,8 +378,9 @@ model PantryItem {
 // Public ingredient reference corpus (allergen profile, substitutions, storage
 // tips). Populated via scripts/seed-ingredient-ai.ts. Allergen-bearing fields
 // (allergenProfile, hiddenSources, crossContamination, substitutions) are
-// written only via scripts/lib/allergen-verify.ts's dual-model agreement gate —
-// see the Recipe model comment above for the same rule.
+// written only via scripts/lib/allergen-verify.ts, on a paid frontier model and
+// never a free lane. They are a single model's annotation, NOT verified — see
+// the Recipe model comment above for the same rule.
 model Ingredient {
   id          String  @id @default(cuid())
   slug        String  @unique
