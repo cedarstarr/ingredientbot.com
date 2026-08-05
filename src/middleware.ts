@@ -58,8 +58,9 @@ export default auth(async function middleware(request: NextAuthRequest) {
     return response
   }
 
-  // Allow public paths without auth
-  const isPublic = PUBLIC_PATHS.some(p => pathname.startsWith(p))
+  // Allow public paths without auth. The landing page is exact-matched:
+  // PUBLIC_PATHS is prefix-matched, so listing '/' there would make every route public.
+  const isPublic = pathname === '/' || PUBLIC_PATHS.some(p => pathname.startsWith(p))
   if (!isPublic && !request.auth) {
     // API routes return 401 instead of redirecting
     if (pathname.startsWith('/api/')) {
