@@ -30,6 +30,7 @@ export default async function RecipePrintPage({ params }: { params: Promise<{ id
       id: true, title: true, description: true, cuisine: true, difficulty: true,
       servings: true, prepTimeMin: true, cookTimeMin: true, tags: true,
       recipeData: true, nutrition: true, sourceIngredients: true,
+      allergens: true, mayContain: true, allergenNotes: true,
       isPublic: true, publicSlug: true, createdAt: true, updatedAt: true,
     },
   })

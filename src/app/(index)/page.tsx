@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ChefHat, Camera, Sparkles, Sliders, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { safeJsonLdString } from '@/lib/utils'
+import { AllergyAwarenessNotice } from '@/components/allergy-awareness-notice'
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ingredientbot.com'
 
@@ -48,6 +49,9 @@ export default function LandingPage() {
             <span className="font-bold text-lg text-foreground">IngredientBot</span>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="ghost" asChild className="hidden sm:inline-flex">
+              <Link href="/recipes">Recipes</Link>
+            </Button>
             <Button variant="ghost" asChild>
               <Link href="/login">Sign In</Link>
             </Button>
@@ -168,12 +172,15 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
+        <AllergyAwarenessNotice className="mb-6 px-4" />
         <div className="flex items-center justify-center gap-2 mb-2">
           <ChefHat className="h-4 w-4 text-primary" />
           <span className="font-semibold text-foreground">IngredientBot</span>
         </div>
         <p>AI-powered recipe assistant. Cook smarter, eat better.</p>
         <div className="flex items-center justify-center gap-4 mt-3">
+          <Link href="/recipes" className="hover:text-foreground transition-colors">Recipes</Link>
+          <Link href="/ingredients" className="hover:text-foreground transition-colors">Ingredients</Link>
           <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
           <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
         </div>
