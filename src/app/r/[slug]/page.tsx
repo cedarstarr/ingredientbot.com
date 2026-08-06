@@ -7,6 +7,9 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Clock, Users, ChefHat, ArrowRight, Utensils } from 'lucide-react'
 import { safeJsonLdString } from '@/lib/utils'
+import { AllergenDisclaimer } from '@/components/allergen-disclaimer'
+import { AllergyAwarenessNotice } from '@/components/allergy-awareness-notice'
+import { allergenLabel } from '@/lib/allergens'
 
 export const revalidate = 3600
 
@@ -57,6 +60,27 @@ export default async function PublicRecipePage({ params }: Props) {
 
   if (!recipe) notFound()
 
+  // One query — related public recipes for the cross-link strip (same cuisine
+  // when known, newest otherwise). Gives share pages internal links to /recipes.
+  const related = await prisma.recipe.findMany({
+    where: {
+      isPublic: true,
+      publicSlug: { not: null },
+      id: { not: recipe.id },
+      ...(recipe.cuisine ? { cuisine: recipe.cuisine } : {}),
+    },
+    select: {
+      publicSlug: true,
+      title: true,
+      cuisine: true,
+      difficulty: true,
+      prepTimeMin: true,
+      cookTimeMin: true,
+    },
+    orderBy: { updatedAt: 'desc' },
+    take: 4,
+  })
+
   // recipeData is typed as Json in Prisma — cast to known shape
   const data = recipe.recipeData as {
     title: string
@@ -73,6 +97,9 @@ export default async function PublicRecipePage({ params }: Props) {
   }
 
   const totalMin = (recipe.prepTimeMin ?? 0) + (recipe.cookTimeMin ?? 0)
+
+  const hasAllergenInfo =
+    recipe.allergens.length > 0 || recipe.mayContain.length > 0 || recipe.allergenNotes != null
 
   const difficultyColor: Record<string, string> = {
     easy: 'bg-[hsl(var(--color-success-muted))] text-[hsl(var(--color-success-fg))]',
@@ -187,10 +214,55 @@ export default async function PublicRecipePage({ params }: Props) {
               ))}
             </ul>
 
+            {/* Allergens — rendered only alongside the safety disclaimer; the
+                data is dual-model verified but absence of a flag is still never
+                an allergen-free guarantee (three-state: contains / may contain / absent). */}
+            {hasAllergenInfo && (
+              <div className="mt-6 rounded-lg border border-border bg-muted/30 p-4" data-testid="recipe-allergen-info">
+                <h3 className="text-sm font-semibold text-foreground mb-2">Allergen information</h3>
+                {recipe.allergens.length > 0 && (
+                  <div className="mb-2">
+                    <p className="text-xs font-medium text-muted-foreground mb-1.5">Contains</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {recipe.allergens.map((a) => (
+                        <Badge key={a} variant="secondary" className="bg-destructive/10 text-destructive hover:bg-destructive/10">
+                          {allergenLabel(a)}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {recipe.mayContain.length > 0 && (
+                  <div className="mb-2">
+                    <p className="text-xs font-medium text-muted-foreground mb-1.5">May contain</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {recipe.mayContain.map((a) => (
+                        <Badge key={a} variant="secondary">
+                          {allergenLabel(a)}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {recipe.allergenNotes && (
+                  <p className="text-xs text-muted-foreground mb-2">{recipe.allergenNotes}</p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Only the allergens listed above were checked. An allergen not being listed is{' '}
+                  <span className="font-medium text-foreground">not</span> a guarantee that it is absent.
+                </p>
+              </div>
+            )}
+
+            {/* Unconditional safety notice — recipes with NO allergen fields are
+                exactly the ones where the dual-model gate disagreed (or never
+                ran), so absence of data must never mean absence of warning. */}
+            <AllergenDisclaimer compact className={hasAllergenInfo ? 'mt-3' : 'mt-6'} />
+
             {/* Nutrition */}
             {data.nutrition && (
               <div className="mt-6 rounded-lg border border-border bg-muted/30 p-4">
-                <h3 className="text-sm font-semibold text-foreground mb-2">Per serving</h3>
+                <h3 className="text-sm font-semibold text-foreground mb-2">Per serving (estimated)</h3>
                 <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
                   <span>{data.nutrition.calories} kcal</span>
                   <span>{data.nutrition.protein}g protein</span>
@@ -224,6 +296,47 @@ export default async function PublicRecipePage({ params }: Props) {
           </section>
         </div>
 
+        {/* Related recipes — internal cross-links between public recipe pages */}
+        {related.length > 0 && (
+          <section className="mt-12" data-testid="recipe-related-strip">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-foreground">
+                More {recipe.cuisine ? `${recipe.cuisine} ` : ''}recipes
+              </h2>
+              <Link
+                href="/recipes"
+                className="text-sm text-primary hover:underline underline-offset-4 inline-flex items-center gap-1"
+              >
+                Browse all
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {related.map((r) => (
+                <Link
+                  key={r.publicSlug}
+                  href={`/r/${r.publicSlug}`}
+                  className="group rounded-lg border border-border bg-card p-4 hover:border-primary/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  data-testid="recipe-related-card"
+                >
+                  <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 text-balance">
+                    {r.title}
+                  </h3>
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    {r.cuisine && <Badge variant="secondary" className="text-xs">{r.cuisine}</Badge>}
+                    {(r.prepTimeMin ?? 0) + (r.cookTimeMin ?? 0) > 0 && (
+                      <span className="inline-flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {(r.prepTimeMin ?? 0) + (r.cookTimeMin ?? 0)} min
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* CTA */}
         <div className="mt-12 rounded-2xl border border-primary/20 bg-primary/5 p-6 text-center">
           <ChefHat className="h-8 w-8 text-primary mx-auto mb-3" />
@@ -241,8 +354,11 @@ export default async function PublicRecipePage({ params }: Props) {
       </main>
 
       <footer className="border-t border-border py-6 text-center text-sm text-muted-foreground">
+        <AllergyAwarenessNotice className="mb-5 px-4" />
         <div className="flex items-center justify-center gap-4">
           <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
+          <Link href="/recipes" className="hover:text-foreground transition-colors">Recipes</Link>
+          <Link href="/ingredients" className="hover:text-foreground transition-colors">Ingredients</Link>
           <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
           <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
         </div>

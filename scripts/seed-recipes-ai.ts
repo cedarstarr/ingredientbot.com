@@ -10,10 +10,10 @@
  * Requires CEREBRAS_API_KEY (and GROQ_API_KEY for fallback) in /home/cedar/Projects/.env.
  * Loads from portfolio .env via dotenv.
  */
-import { config } from 'dotenv'
-import { resolve } from 'node:path'
-config({ path: resolve(__dirname, '../../.env') })
-config({ path: resolve(__dirname, '../.env') })
+// MUST stay first — import hoisting evaluates ./_prisma (which captures
+// DATABASE_URL at module scope) before any inline config() call would run.
+// See scripts/lib/load-env.ts.
+import './lib/load-env'
 
 import { prisma } from './_prisma'
 import { z } from 'zod'

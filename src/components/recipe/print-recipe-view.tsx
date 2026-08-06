@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { Clock, Users, ChefHat } from 'lucide-react'
 import { AllergenDisclaimer } from '@/components/allergen-disclaimer'
+import { allergenLabel } from '@/lib/allergens'
 
 // design-system-exempt: print-only grayscale ink values are intentional —
 // print stylesheets need hardcoded gray-N rather than HSL tokens.
@@ -45,6 +46,9 @@ interface Recipe {
   difficulty?: string | null
   recipeData: unknown
   nutrition?: unknown
+  allergens?: string[]
+  mayContain?: string[]
+  allergenNotes?: string | null
   createdAt: string | Date
 }
 
@@ -139,6 +143,37 @@ export function PrintRecipeView({ recipe }: { recipe: Recipe }) {
                 </li>
               ))}
             </ul>
+
+            {/* Allergen info travels with the printed copy — a paper recipe handed to
+                someone else is the highest-risk surface for a missed allergen. */}
+            {((recipe.allergens?.length ?? 0) > 0 ||
+              (recipe.mayContain?.length ?? 0) > 0 ||
+              recipe.allergenNotes != null) && (
+              <div className="mt-6 rounded-lg border border-border print:border-gray-800 p-4 break-inside-avoid" data-testid="print-allergen-info">
+                <h3 className="font-bold text-sm uppercase tracking-wide mb-2 text-foreground print:text-black">
+                  Allergen information
+                </h3>
+                {(recipe.allergens?.length ?? 0) > 0 && (
+                  <p className="text-sm text-foreground print:text-black mb-1">
+                    <span className="font-semibold">Contains:</span>{' '}
+                    {recipe.allergens!.map(allergenLabel).join(', ')}
+                  </p>
+                )}
+                {(recipe.mayContain?.length ?? 0) > 0 && (
+                  <p className="text-sm text-foreground print:text-black mb-1">
+                    <span className="font-semibold">May contain:</span>{' '}
+                    {recipe.mayContain!.map(allergenLabel).join(', ')}
+                  </p>
+                )}
+                {recipe.allergenNotes && (
+                  <p className="text-xs text-muted-foreground print:text-gray-600 mb-1">{recipe.allergenNotes}</p>
+                )}
+                <p className="text-xs text-muted-foreground print:text-gray-600">
+                  Only the allergens listed above were checked. An allergen not being listed is not a
+                  guarantee that it is absent.
+                </p>
+              </div>
+            )}
 
             {/* Same recipe, on paper — the printed copy leaves the app entirely, so it
                 needs the allergen notice more than the screen version, not less. */}

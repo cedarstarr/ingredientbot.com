@@ -1,8 +1,11 @@
 /**
  * Portfolio-shared AI batch client for dev-time seed generation.
  *
- * Cerebras primary (Llama 3.3 70B, ~2000 t/s, free 1M tok/day),
- * Groq fallback (Llama 3.3 70B versatile, ~300 t/s, ~14k req/day).
+ * Azure (GPT-5 / GPT-5-mini) primary when configured — paid frontier, used for
+ * batch jobs that need production-grade accuracy (e.g. allergen-adjacent content,
+ * see scripts/lib/allergen-verify.ts). Falls back to Cerebras (Llama 3.3 70B,
+ * ~2000 t/s, free 1M tok/day), then Groq (Llama 3.3 70B versatile, ~300 t/s,
+ * ~14k req/day) when Azure isn't configured or a caller opts out of it.
  *
  * Designed for dev-time batch jobs (seed scripts, content generation).
  * NOT for production traffic — uses your personal API keys.
@@ -10,9 +13,13 @@
  * Required env in /home/cedar/Projects/.env:
  *   CEREBRAS_API_KEY=...
  *   GROQ_API_KEY=...
+ *   AZURE_OPENAI_RESOURCE=...            (optional — enables the azure provider)
+ *   AZURE_OPENAI_API_KEY=...             (optional — enables the azure provider)
+ *   AZURE_OPENAI_DEPLOYMENT_QUALITY=...  (optional, defaults to 'gpt-5')
+ *   AZURE_OPENAI_DEPLOYMENT_BULK=...     (optional, defaults to 'gpt-5-mini')
  *
  * Required deps per consuming site (npm install -D):
- *   ai @ai-sdk/cerebras @ai-sdk/groq zod
+ *   ai @ai-sdk/cerebras @ai-sdk/groq @ai-sdk/azure zod
  *
  * Usage from a site's scripts/seed-*.ts:
  *   import { batchText, batchObject, batchMap } from '../../ai-batch';
@@ -30,12 +37,18 @@
 import { generateText, generateObject } from 'ai';
 import { cerebras } from '@ai-sdk/cerebras';
 import { groq } from '@ai-sdk/groq';
+import { createAzure } from '@ai-sdk/azure';
 import type { ZodSchema } from 'zod';
 
 const CEREBRAS_MODEL = 'gpt-oss-120b';
 const GROQ_MODEL = 'openai/gpt-oss-120b';
+const AZURE_QUALITY = process.env.AZURE_OPENAI_DEPLOYMENT_QUALITY ?? 'gpt-5';
+const AZURE_BULK = process.env.AZURE_OPENAI_DEPLOYMENT_BULK ?? 'gpt-5-mini';
+const azure = process.env.AZURE_OPENAI_RESOURCE && process.env.AZURE_OPENAI_API_KEY
+  ? createAzure({ resourceName: process.env.AZURE_OPENAI_RESOURCE, apiKey: process.env.AZURE_OPENAI_API_KEY })
+  : null;
 
-type Provider = 'cerebras' | 'groq';
+type Provider = 'azure' | 'cerebras' | 'groq';
 
 export interface BatchOptions {
   maxRetries?: number;
@@ -43,6 +56,10 @@ export interface BatchOptions {
   rpmLimit?: number;
   system?: string;
   temperature?: number;
+  /** Azure only: 'quality' selects AZURE_QUALITY (gpt-5), 'bulk' selects AZURE_BULK (gpt-5-mini). Defaults to 'quality'. */
+  tier?: 'quality' | 'bulk';
+  /** Explicit provider order. Defaults to ['azure', 'cerebras', 'groq'] when azure is configured, else ['cerebras', 'groq']. */
+  providers?: Provider[];
 }
 
 class RateLimiter {
@@ -67,10 +84,12 @@ const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
 const limiter = new RateLimiter(25);
 
 interface ProviderStats {
+  azure: { ok: number; failed: number };
   cerebras: { ok: number; failed: number };
   groq: { ok: number; failed: number };
 }
 const stats: ProviderStats = {
+  azure: { ok: 0, failed: 0 },
   cerebras: { ok: 0, failed: 0 },
   groq: { ok: 0, failed: 0 },
 };
@@ -80,7 +99,10 @@ async function withFallback<T>(
   call: (provider: Provider) => Promise<T>,
   opts: BatchOptions,
 ): Promise<{ result: T; provider: Provider }> {
-  const providers: Provider[] = ['cerebras', 'groq'];
+  const providers: Provider[] = opts.providers ?? (azure ? ['azure', 'cerebras', 'groq'] : ['cerebras', 'groq']);
+  if (providers.includes('azure') && !azure) {
+    throw new Error('[ai-batch] azure requested but AZURE_OPENAI_RESOURCE / AZURE_OPENAI_API_KEY not set');
+  }
   const maxRetries = opts.maxRetries ?? 3;
   const initialBackoff = opts.initialBackoffMs ?? 1000;
   let lastError: unknown;
@@ -132,11 +154,18 @@ function describe(err: unknown): string {
   return String(err);
 }
 
+const modelFor = (provider: Provider, opts: BatchOptions) =>
+  provider === 'azure'
+    ? azure!(opts.tier === 'bulk' ? AZURE_BULK : AZURE_QUALITY)
+    : provider === 'cerebras'
+      ? cerebras(CEREBRAS_MODEL)
+      : groq(GROQ_MODEL);
+
 export async function batchText(prompt: string, opts: BatchOptions = {}): Promise<string> {
   const { result } = await withFallback(
     (provider) =>
       generateText({
-        model: provider === 'cerebras' ? cerebras(CEREBRAS_MODEL) : groq(GROQ_MODEL),
+        model: modelFor(provider, opts),
         prompt,
         system: opts.system,
         temperature: opts.temperature,
@@ -154,7 +183,7 @@ export async function batchObject<T>(
   const { result } = await withFallback(
     (provider) =>
       generateObject({
-        model: provider === 'cerebras' ? cerebras(CEREBRAS_MODEL) : groq(GROQ_MODEL),
+        model: modelFor(provider, opts),
         schema,
         prompt,
         system: opts.system,

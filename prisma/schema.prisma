@@ -188,6 +188,17 @@ model Recipe {
   isPublic   Boolean @default(false) @map("is_public")
   publicSlug String? @unique @map("public_slug")
 
+  // Allergen safety fields. Values are drawn from the canonical vocabulary in
+  // src/lib/allergens.ts (FDA top-9 + EU-14 union). `allergens` is CONFIRMED
+  // contains; `mayContain` is a weaker cross-contamination/ambiguous signal.
+  // Both are written only after dual-model agreement (see
+  // scripts/lib/allergen-verify.ts) — never a single-model guess, and never
+  // "free from X" (three-state honesty: contains / may contain / absent).
+  allergens          String[]  @default([]) @map("allergens")
+  mayContain         String[]  @default([]) @map("may_contain")
+  allergenNotes      String?   @map("allergen_notes")
+  allergenVerifiedAt DateTime? @map("allergen_verified_at")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -357,4 +368,40 @@ model PantryItem {
   @@unique([userId, ingredient]) // prevent duplicate entries per user
   @@index([userId])
   @@map("pantry_items")
+}
+
+// Public ingredient reference corpus (allergen profile, substitutions, storage
+// tips). Populated via scripts/seed-ingredient-ai.ts. Allergen-bearing fields
+// (allergenProfile, hiddenSources, crossContamination, substitutions) are
+// written only via scripts/lib/allergen-verify.ts's dual-model agreement gate —
+// see the Recipe model comment above for the same rule.
+model Ingredient {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  name        String
+  category    String
+  description String? @db.Text
+
+  // Confirmed-contains allergens, from src/lib/allergens.ts vocabulary.
+  allergenProfile String[] @default([]) @map("allergen_profile")
+
+  // List of { product, why } — products that commonly and non-obviously
+  // contain this ingredient (e.g. "Worcestershire sauce" -> fish, anchovies).
+  hiddenSources Json? @map("hidden_sources")
+
+  // Free-text note on shared-equipment / cross-contamination risk.
+  crossContamination String? @map("cross_contamination") @db.Text
+
+  // List of { reason, substitute, ratio, notes } — reason values like
+  // "peanut-free", "dairy-free".
+  substitutions Json?
+
+  storage     String?
+  seasonality String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@map("ingredients")
 }

@@ -1,5 +1,6 @@
 import { ChefHat } from 'lucide-react'
 import Link from 'next/link'
+import { AllergyAwarenessNotice } from '@/components/allergy-awareness-notice'
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -15,6 +16,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <div className="w-full max-w-sm">
         {children}
       </div>
+
+      <AllergyAwarenessNotice className="mt-10 w-full" />
     </main>
   )
 }

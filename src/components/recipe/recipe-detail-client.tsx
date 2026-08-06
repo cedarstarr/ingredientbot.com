@@ -14,6 +14,7 @@ import { RecipeTags } from './recipe-tags'
 import { CollectionPicker } from './collection-picker'
 import { RecipeRating } from './recipe-rating'
 import { AllergenDisclaimer } from '@/components/allergen-disclaimer'
+import { allergenLabel } from '@/lib/allergens'
 import { Clock, Users, ChevronLeft, Loader2, HelpCircle, Printer, Sparkles, UtensilsCrossed, Lightbulb, Save } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -67,6 +68,10 @@ interface Recipe {
   collectionId?: string | null
   collection?: Collection | null
   rating?: number | null
+  // Dual-model-verified allergen fields — see prisma/schema.prisma Recipe comment
+  allergens?: string[]
+  mayContain?: string[]
+  allergenNotes?: string | null
 }
 
 interface Props {
@@ -484,6 +489,47 @@ export function RecipeDetailClient({ recipe, collections = [] }: Props) {
                   Reset all substitutions
                 </button>
                 {saveError && <p className="text-xs text-destructive w-full">{saveError}</p>}
+              </div>
+            )}
+            {/* Allergen info — the backfilled data mostly lives on private
+                recipes, so this card is where the owner actually sees it.
+                Three-state honesty: contains / may contain / absent ≠ free-from. */}
+            {((recipe.allergens?.length ?? 0) > 0 ||
+              (recipe.mayContain?.length ?? 0) > 0 ||
+              recipe.allergenNotes != null) && (
+              <div className="mt-4 rounded-xl border border-border bg-muted/30 p-4" data-testid="recipe-allergen-info">
+                <h3 className="text-sm font-semibold text-foreground mb-2">Allergen information</h3>
+                {(recipe.allergens?.length ?? 0) > 0 && (
+                  <div className="mb-2">
+                    <p className="text-xs font-medium text-muted-foreground mb-1.5">Contains</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {recipe.allergens!.map((a) => (
+                        <Badge key={a} variant="secondary" className="bg-destructive/10 text-destructive hover:bg-destructive/10">
+                          {allergenLabel(a)}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {(recipe.mayContain?.length ?? 0) > 0 && (
+                  <div className="mb-2">
+                    <p className="text-xs font-medium text-muted-foreground mb-1.5">May contain</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {recipe.mayContain!.map((a) => (
+                        <Badge key={a} variant="secondary">
+                          {allergenLabel(a)}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {recipe.allergenNotes && (
+                  <p className="text-xs text-muted-foreground mb-2">{recipe.allergenNotes}</p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Only the allergens listed above were checked. An allergen not being listed is{' '}
+                  <span className="font-medium text-foreground">not</span> a guarantee that it is absent.
+                </p>
               </div>
             )}
             <AllergenDisclaimer compact className="mt-4" />
