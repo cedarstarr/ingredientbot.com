@@ -255,8 +255,8 @@ export default async function PublicRecipePage({ params }: Props) {
             )}
 
             {/* Unconditional safety notice — recipes with NO allergen fields are
-                exactly the ones where the dual-model gate disagreed (or never
-                ran), so absence of data must never mean absence of warning. */}
+                exactly the ones where annotation never ran, so absence of data
+                must never mean absence of warning. */}
             <AllergenDisclaimer compact className={hasAllergenInfo ? 'mt-3' : 'mt-6'} />
 
             {/* Nutrition */}

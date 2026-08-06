@@ -34,6 +34,8 @@
  *   );
  */
 
+import { appendFileSync } from 'node:fs';
+import { basename } from 'node:path';
 import { generateText, generateObject } from 'ai';
 import { cerebras } from '@ai-sdk/cerebras';
 import { groq } from '@ai-sdk/groq';
@@ -95,6 +97,101 @@ const stats: ProviderStats = {
 };
 export const getStats = () => structuredClone(stats);
 
+// ─── Token accounting ────────────────────────────────────────────────────────
+// Azure bills against a fixed prepaid credit, so a batch run that cannot report
+// what it spent is a run you can only audit after the fact. Every successful
+// call records its usage here and appends one line to a portfolio-wide ledger.
+// Cerebras/Groq are free tiers priced at 0, but still recorded — a run that
+// silently fell back off Azure should be visible, not invisible.
+//
+// Prices are USD per 1M tokens, Azure list pricing, keyed by DEPLOYMENT name
+// (not base model) because that is what the caller actually selects.
+const PRICING: Record<string, { in: number; out: number }> = {
+  'gpt-5-4': { in: 2.5, out: 15 },
+  'gpt-5-4-mini': { in: 0.75, out: 4.5 },
+  'gpt-5': { in: 2.5, out: 15 },
+  'gpt-5-mini': { in: 0.75, out: 4.5 },
+};
+
+const SPEND_LEDGER = process.env.AI_SPEND_LEDGER ?? '/home/cedar/Projects/.ai-spend.jsonl';
+const SITE = basename(process.cwd());
+const SCRIPT = basename(process.argv[1] ?? 'unknown');
+
+interface Spend { calls: number; inputTokens: number; outputTokens: number; costUsd: number }
+const spend: Record<Provider, Spend> = {
+  azure: { calls: 0, inputTokens: 0, outputTokens: 0, costUsd: 0 },
+  cerebras: { calls: 0, inputTokens: 0, outputTokens: 0, costUsd: 0 },
+  groq: { calls: 0, inputTokens: 0, outputTokens: 0, costUsd: 0 },
+};
+const unpricedWarned = new Set<string>();
+
+const deploymentFor = (provider: Provider, opts: BatchOptions) =>
+  provider === 'azure'
+    ? (opts.tier === 'bulk' ? AZURE_BULK : AZURE_QUALITY)
+    : provider === 'cerebras'
+      ? CEREBRAS_MODEL
+      : GROQ_MODEL;
+
+function recordUsage(provider: Provider, opts: BatchOptions, result: unknown): void {
+  const usage = (result as { usage?: Record<string, number | undefined> } | null)?.usage;
+  // AI SDK v5+ reports inputTokens/outputTokens; v4 used promptTokens/completionTokens.
+  const inputTokens = usage?.inputTokens ?? usage?.promptTokens ?? 0;
+  const outputTokens = usage?.outputTokens ?? usage?.completionTokens ?? 0;
+
+  const model = deploymentFor(provider, opts);
+  const price = provider === 'azure' ? PRICING[model] : { in: 0, out: 0 };
+  if (provider === 'azure' && !price && !unpricedWarned.has(model)) {
+    unpricedWarned.add(model);
+    console.warn(`[ai-batch] no price on file for Azure deployment "${model}" — its spend is counted as $0. Add it to PRICING.`);
+  }
+  const costUsd = ((inputTokens * (price?.in ?? 0)) + (outputTokens * (price?.out ?? 0))) / 1_000_000;
+
+  const s = spend[provider];
+  s.calls += 1;
+  s.inputTokens += inputTokens;
+  s.outputTokens += outputTokens;
+  s.costUsd += costUsd;
+
+  // Best-effort: accounting must never take down a seed run.
+  try {
+    appendFileSync(
+      SPEND_LEDGER,
+      JSON.stringify({
+        ts: new Date().toISOString(),
+        site: SITE,
+        script: SCRIPT,
+        provider,
+        model,
+        inputTokens,
+        outputTokens,
+        costUsd: Number(costUsd.toFixed(6)),
+      }) + '\n',
+      'utf8',
+    );
+  } catch { /* ignore */ }
+}
+
+export const getSpend = () => structuredClone(spend);
+
+export function formatSpend(): string {
+  const rows = (Object.entries(spend) as [Provider, Spend][]).filter(([, s]) => s.calls > 0);
+  if (!rows.length) return '';
+  const total = rows.reduce((a, [, s]) => a + s.costUsd, 0);
+  const lines = rows.map(([p, s]) =>
+    `  ${p.padEnd(9)} ${String(s.calls).padStart(5)} calls  ` +
+    `${s.inputTokens.toLocaleString().padStart(10)} in  ` +
+    `${s.outputTokens.toLocaleString().padStart(10)} out  ` +
+    `$${s.costUsd.toFixed(4)}`,
+  );
+  return [`\nToken spend (${SITE}/${SCRIPT}):`, ...lines, `  ${'TOTAL'.padEnd(9)} $${total.toFixed(4)}`].join('\n');
+}
+
+// Printed automatically so every seeder reports spend without needing an edit.
+process.on('exit', () => {
+  const out = formatSpend();
+  if (out) console.log(out);
+});
+
 async function withFallback<T>(
   call: (provider: Provider) => Promise<T>,
   opts: BatchOptions,
@@ -113,6 +210,7 @@ async function withFallback<T>(
         await limiter.wait();
         const result = await call(provider);
         stats[provider].ok += 1;
+        recordUsage(provider, opts, result);
         return { result, provider };
       } catch (err) {
         lastError = err;
