@@ -1,5 +1,5 @@
 /**
- * @description AI-generated ingredient encyclopedia seeder. Prose fields (description, storage, seasonality) via ai-batch defaults; allergen-bearing fields (allergenProfile, hiddenSources, crossContamination, substitutions) ONLY via the dual-model gate in scripts/lib/allergen-verify.ts (Azure GPT-5 + independent claude-opus-5 agreement — disagreements go to scripts/allergen-review.jsonl, never the DB). Idempotent on slug.
+ * @description AI-generated ingredient encyclopedia seeder. Prose fields (description, storage, seasonality) via ai-batch defaults; allergen-bearing fields (allergenProfile, hiddenSources, crossContamination, substitutions) via scripts/lib/allergen-verify.ts on the same paid Azure model (single-model as of 2026-08-05 — NOT verified; the allergen disclaimer must render wherever they are shown). Idempotent on slug.
  * @tables ingredients
  *
  * Usage:
@@ -13,7 +13,6 @@
  *
  * Requires in /home/cedar/Projects/.env:
  *   AZURE_OPENAI_RESOURCE + AZURE_OPENAI_API_KEY   (generation — no free-lane fallback for allergen fields)
- *   ANTHROPIC_API_KEY                              (independent claude-opus-5 cross-check)
  */
 import './lib/load-env' // MUST stay first — see scripts/lib/load-env.ts (import hoisting)
 import { z } from 'zod'
@@ -157,7 +156,7 @@ async function main() {
     console.log('\nFirst 5:')
     for (const i of inputs.slice(0, 5)) console.log(`  ${i.slug} (${i.category})`)
     console.log(
-      '\nReal run requires AZURE_OPENAI_RESOURCE + AZURE_OPENAI_API_KEY (generation) and ANTHROPIC_API_KEY (cross-check).',
+      '\nReal run requires AZURE_OPENAI_RESOURCE + AZURE_OPENAI_API_KEY (generation, incl. allergen fields).',
     )
     console.log('Prose fields use ai-batch defaults; allergen fields go through scripts/lib/allergen-verify.ts.')
     return
@@ -167,15 +166,14 @@ async function main() {
   const { prisma } = await import('./_prisma')
   prismaRef = prisma
   const { batchObject } = await import('./lib/ai-batch')
-  const { verifyIngredientAllergens, requireVerifierEnv, REVIEW_FILE } = await import('./lib/allergen-verify')
+  const { verifyIngredientAllergens, requireVerifierEnv, UNVERIFIED_NOTICE } = await import('./lib/allergen-verify')
 
   requireVerifierEnv() // fail closed before any generation
 
   console.log(`Seeding ${inputs.length} ingredients...`)
   let inserted = 0
   let skipped = 0
-  let verified = 0
-  let flagged = 0
+  let annotated = 0
 
   try {
     for (const [i, input] of inputs.entries()) {
@@ -192,8 +190,7 @@ async function main() {
       )
 
       const allergen = await verifyIngredientAllergens(input)
-      if (allergen.verified) verified++
-      else flagged++
+      annotated++
 
       await prisma.ingredient.create({
         data: {
@@ -203,24 +200,20 @@ async function main() {
           description: prose.description,
           storage: prose.storage,
           seasonality: prose.seasonality,
-          // Disagreements write NOTHING allergen-related — row exists with prose only.
-          ...(allergen.verified
-            ? {
-                allergenProfile: allergen.allergenProfile,
-                hiddenSources: allergen.hiddenSources,
-                crossContamination: allergen.crossContamination,
-                substitutions: allergen.substitutions,
-              }
-            : {}),
+          allergenProfile: allergen.allergenProfile,
+          hiddenSources: allergen.hiddenSources,
+          crossContamination: allergen.crossContamination,
+          substitutions: allergen.substitutions,
         },
       })
       inserted++
-      console.log(`  [${i + 1}/${inputs.length}] ${allergen.verified ? '✓' : '⚠ (allergens unverified)'} ${input.slug}`)
+      console.log(`  [${i + 1}/${inputs.length}] ${input.slug}`)
     }
   } finally {
     console.log(
-      `\nDone — inserted ${inserted}, skipped ${skipped} (existing). Allergens: ${verified} verified, ${flagged} sent to review (${REVIEW_FILE}).`,
+      `\nDone — inserted ${inserted}, skipped ${skipped} (existing), ${annotated} allergen-annotated.`,
     )
+    console.log(UNVERIFIED_NOTICE)
   }
 }
 

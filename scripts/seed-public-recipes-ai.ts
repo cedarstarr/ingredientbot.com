@@ -1,5 +1,5 @@
 /**
- * @description AI-generated PUBLIC recipe library seeder. Creates a house library user (library@ingredientbot.com, no password login) and seeds ~400 public recipes (isPublic + publicSlug) across ~40 cuisines. Recipe body, tags (5-8), and nutrition macros (calories/protein/carbs/fat only — no allergen claims) come from one ai-batch generation; allergens/mayContain ONLY via the dual-model gate in scripts/lib/allergen-verify.ts (disagreements go to scripts/allergen-review.jsonl, never the DB). Idempotent on publicSlug.
+ * @description AI-generated PUBLIC recipe library seeder. Creates a house library user (library@ingredientbot.com, no password login) and seeds ~400 public recipes (isPublic + publicSlug) across ~40 cuisines. Recipe body, tags (5-8), and nutrition macros (calories/protein/carbs/fat only — no allergen claims) come from one ai-batch generation; allergens/mayContain come from scripts/lib/allergen-verify.ts on the same paid Azure model (single-model as of 2026-08-05 — NOT verified; the allergen disclaimer must render wherever they are shown). Idempotent on publicSlug.
  * @tables users, recipes
  *
  * Usage:
@@ -12,7 +12,6 @@
  *
  * Requires in /home/cedar/Projects/.env:
  *   AZURE_OPENAI_RESOURCE + AZURE_OPENAI_API_KEY   (allergen generation — no free-lane fallback)
- *   ANTHROPIC_API_KEY                              (independent claude-opus-5 cross-check)
  */
 import './lib/load-env' // MUST stay first — see scripts/lib/load-env.ts (import hoisting)
 import { z } from 'zod'
@@ -265,7 +264,7 @@ async function main() {
     console.log('\nFirst 5:')
     for (const d of dishes.slice(0, 5)) console.log(`  /r/${d.publicSlug}  (${d.cuisine})`)
     console.log(
-      '\nReal run requires AZURE_OPENAI_RESOURCE + AZURE_OPENAI_API_KEY and ANTHROPIC_API_KEY (allergen gate).',
+      '\nReal run requires AZURE_OPENAI_RESOURCE + AZURE_OPENAI_API_KEY (generation, incl. allergen fields).',
     )
     return
   }
@@ -273,7 +272,7 @@ async function main() {
   const { prisma } = await import('./_prisma')
   prismaRef = prisma
   const { batchObject } = await import('./lib/ai-batch')
-  const { verifyRecipeAllergens, requireVerifierEnv, REVIEW_FILE } = await import('./lib/allergen-verify')
+  const { verifyRecipeAllergens, requireVerifierEnv, UNVERIFIED_NOTICE } = await import('./lib/allergen-verify')
   const { buildRecipeRecord } = await import('./seed-recipes')
 
   requireVerifierEnv() // fail closed before any generation
@@ -289,8 +288,7 @@ async function main() {
   console.log(`Seeding ${dishes.length} public recipes as ${LIBRARY_EMAIL}...`)
   let inserted = 0
   let skipped = 0
-  let verified = 0
-  let flagged = 0
+  let annotated = 0
 
   try {
     for (const [i, { cuisine, dish, publicSlug }] of dishes.entries()) {
@@ -310,8 +308,7 @@ async function main() {
         subject: r.title,
         ingredients: r.ingredients.map((ing) => `${ing.amount} ${ing.unit} ${ing.name}`.trim()),
       })
-      if (allergen.verified) verified++
-      else flagged++
+      annotated++
 
       await prisma.recipe.create({
         data: {
@@ -320,24 +317,20 @@ async function main() {
           tags: r.tags.slice(0, 8),
           isPublic: true,
           publicSlug,
-          // Disagreements write NOTHING allergen-related for this row.
-          ...(allergen.verified
-            ? {
-                allergens: allergen.allergens,
-                mayContain: allergen.mayContain,
-                allergenNotes: allergen.allergenNotes,
-                allergenVerifiedAt: allergen.allergenVerifiedAt,
-              }
-            : {}),
+          allergens: allergen.allergens,
+          mayContain: allergen.mayContain,
+          allergenNotes: allergen.allergenNotes,
+          allergenAnnotatedAt: new Date(),
         },
       })
       inserted++
-      console.log(`  [${i + 1}/${dishes.length}] ${allergen.verified ? '✓' : '⚠ (allergens unverified)'} /r/${publicSlug}`)
+      console.log(`  [${i + 1}/${dishes.length}] /r/${publicSlug}`)
     }
   } finally {
     console.log(
-      `\nDone — inserted ${inserted}, skipped ${skipped} (existing). Allergens: ${verified} verified, ${flagged} sent to review (${REVIEW_FILE}).`,
+      `\nDone — inserted ${inserted}, skipped ${skipped} (existing), ${annotated} allergen-annotated.`,
     )
+    console.log(UNVERIFIED_NOTICE)
   }
 }
 
