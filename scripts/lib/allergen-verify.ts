@@ -112,11 +112,23 @@ const normalizeSet = (values: string[]): Allergen[] =>
 
 const VOCAB_LINE = `Allowed allergen values (use these exact snake_case tokens, nothing else): ${ALLERGEN_VOCABULARY.join(', ')}.`
 
+// The plant-milk rule exists because the 2026-08-05 pilot tagged a *vegan*
+// coconut-milk curry as containing "milk". Coconut milk appears across Thai,
+// Indian, Malaysian, Indonesian and Caribbean recipes, so one wrong inference
+// there mislabels a large share of the corpus.
 const RULES_LINE = [
   'Rules: "allergens" = confirmed present in the listed ingredients.',
   '"mayContain" = plausible cross-contamination or ambiguous ingredients only.',
   'Never treat absence as proof an allergen is not present.',
   'wheat implies also flagging gluten_cereals; barley/rye/spelt/oats flag gluten_cereals.',
+  '"milk" means DAIRY from an animal only. Plant milks are never "milk":',
+  'coconut milk/cream, almond milk, oat milk, rice milk, cashew milk and soy milk',
+  'must NOT be flagged as milk. Flag their actual source instead —',
+  'soy milk/tofu/tempeh/miso/edamame -> soybeans;',
+  'almond or cashew milk -> tree_nuts;',
+  'oat milk -> gluten_cereals.',
+  'Coconut: never milk. US FDA labels coconut as a tree nut while most tree-nut-allergic',
+  'people tolerate it, so put tree_nuts in mayContain for coconut, never in allergens.',
 ].join(' ')
 
 /**
