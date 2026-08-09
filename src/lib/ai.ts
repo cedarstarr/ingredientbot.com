@@ -101,10 +101,6 @@ export function brokerModel(ctx: AiContext) {
   })
 }
 
-// Legacy export name kept so existing callers compile unchanged; untagged calls
-// land in the ledger as `unspecified`, which is the signal to tag them.
-export const geminiFlashLite = brokerModel({ feature: 'unspecified' })
-
 // Accept legacy 'google' for backward compat; the free text lane is the broker.
 type Provider = 'cerebras' | 'groq' | 'google' | 'anthropic' | 'ai-broker'
 type ModelCtx = { feature: string; userId?: string | null; priority?: AiPriority }

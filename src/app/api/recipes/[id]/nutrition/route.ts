@@ -44,21 +44,28 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     .map(i => `${i.amount} ${i.unit} ${i.name}`.trim())
     .join(', ')
 
-  const { text } = await generateText({
-    model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'nutrition-estimate', userId: session.user.id }),
-    maxOutputTokens: 256,
-    system: `You are a registered dietitian. Estimate the nutritional content of a recipe per serving.
+  let text: string
+  try {
+    const response = await generateText({
+      model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'nutrition-estimate', userId: session.user.id }),
+      maxOutputTokens: 256,
+      system: `You are a registered dietitian. Estimate the nutritional content of a recipe per serving.
 Return ONLY valid JSON with no markdown, no code blocks, no extra text:
 {"calories": number, "protein": number, "fat": number, "carbs": number, "fiber": number}
 Values are per serving. Calories in kcal, macros in grams. Round to nearest whole number.`,
-    messages: [{
-      role: 'user',
-      content: `Recipe: "${recipe.title}" (${recipe.servings} servings)
+      messages: [{
+        role: 'user',
+        content: `Recipe: "${recipe.title}" (${recipe.servings} servings)
 Ingredients: ${ingredientList}
 
 Estimate nutrition per serving.`,
-    }],
-  })
+      }],
+    })
+    text = response.text
+  } catch (err) {
+    console.error('nutrition-estimate generateText failed:', err)
+    return NextResponse.json({ error: 'AI service unavailable' }, { status: 503 })
+  }
 
   let nutrition: { calories: number; protein: number; fat: number; carbs: number; fiber: number }
   try {
