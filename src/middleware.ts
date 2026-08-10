@@ -49,13 +49,11 @@ export default auth(async function middleware(request: NextAuthRequest) {
   // has none in middleware (out of scope here). Leaving the login endpoint
   // with no limit of its own was the defect (FOU-334).
   if (pathname === '/api/auth/callback/credentials' && request.method === 'POST') {
-    if (authRatelimit) {
-      const { success } = await authRatelimit.limit(clientIp(request))
-      if (!success) {
-        const res = NextResponse.json({ error: 'Too Many Requests' }, { status: 429 })
-        res.headers.set('x-request-id', requestId)
-        return res
-      }
+    const { success } = await authRatelimit.check(clientIp(request))
+    if (!success) {
+      const res = NextResponse.json({ error: 'Too Many Requests' }, { status: 429 })
+      res.headers.set('x-request-id', requestId)
+      return res
     }
   }
 

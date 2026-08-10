@@ -8,14 +8,20 @@ const redis =
     : null
 
 // Middleware-facing limiter for the credentials login (see src/middleware.ts).
-export const authRatelimit = redis
+// Routed through makeLimiter (FOU-352) so RATE_LIMIT_REQUIRED actually gates it —
+// this was previously exported raw and consumed behind an `if (authRatelimit)`
+// null guard in middleware.ts, which silently skipped the check (and FAIL_CLOSED)
+// whenever Redis was absent.
+const _authRatelimitMw = redis
   ? new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(5, '1 m'),
       prefix: 'rl:auth',
-      analytics: true,
+      analytics: false,
     })
   : null
+
+export const authRatelimit = makeLimiter(_authRatelimitMw)
 
 // Vercel-aware client-IP extraction. Only the LEFTMOST x-forwarded-for entry is
 // the real client — Vercel appends to any XFF the caller supplied, so using the
@@ -66,7 +72,9 @@ const _authRatelimit = redis
       redis,
       limiter: Ratelimit.slidingWindow(5, '1 m'),
       prefix: 'rl:route:auth',
-      analytics: true,
+      // Upstash analytics writes an extra Redis command per request to a
+      // dashboard nobody looks at — disabled to conserve free-tier headroom.
+      analytics: false,
     })
   : null
 
@@ -75,7 +83,7 @@ const _aiRatelimit = redis
       redis,
       limiter: Ratelimit.slidingWindow(10, '1 m'),
       prefix: 'rl:route:ai',
-      analytics: true,
+      analytics: false,
     })
   : null
 
@@ -84,7 +92,7 @@ const _formRatelimit = redis
       redis,
       limiter: Ratelimit.slidingWindow(20, '1 m'),
       prefix: 'rl:route:form',
-      analytics: true,
+      analytics: false,
     })
   : null
 
@@ -93,7 +101,7 @@ const _apiRatelimit = redis
       redis,
       limiter: Ratelimit.slidingWindow(30, '1 m'),
       prefix: 'rl:route:api',
-      analytics: true,
+      analytics: false,
     })
   : null
 
