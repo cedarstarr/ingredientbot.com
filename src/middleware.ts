@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import NextAuth from 'next-auth'
 import { authConfig } from '@/lib/auth.config'
 import type { NextAuthRequest } from 'next-auth'
+import { authRatelimit, clientIp } from '@/lib/rate-limit'
 
 const { auth } = NextAuth(authConfig)
 
@@ -41,6 +42,22 @@ const PUBLIC_PATHS = [
 export default auth(async function middleware(request: NextAuthRequest) {
   const requestId = request.headers.get('x-request-id') ?? crypto.randomUUID()
   const pathname = request.nextUrl.pathname
+
+  // Brute-force protection on the credentials login. This must run BEFORE the
+  // PUBLIC_PATHS short-circuit below, which treats all of /api/auth as public,
+  // and it is deliberately NOT folded into a general /api limiter — this site
+  // has none in middleware (out of scope here). Leaving the login endpoint
+  // with no limit of its own was the defect (FOU-334).
+  if (pathname === '/api/auth/callback/credentials' && request.method === 'POST') {
+    if (authRatelimit) {
+      const { success } = await authRatelimit.limit(clientIp(request))
+      if (!success) {
+        const res = NextResponse.json({ error: 'Too Many Requests' }, { status: 429 })
+        res.headers.set('x-request-id', requestId)
+        return res
+      }
+    }
+  }
 
   const host = request.headers.get('host') ?? ''
   if (host.startsWith('staging.')) {
