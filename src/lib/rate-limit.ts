@@ -27,6 +27,22 @@ const _authRatelimitMw = redis
 
 export const authRatelimit = makeLimiter(_authRatelimitMw)
 
+// Middleware-facing global /api floor (FOU-355). Separate from the route-scoped
+// limiters further down: those are per-endpoint budgets a caller is expected to
+// spend, this is the ceiling on the whole surface. 20/10s rather than the
+// route-scoped 30/1m because a single kitchen session legitimately fires many
+// short bursts of API calls — a per-minute cap that low would 429 real users.
+const _apiRatelimitMw = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(20, '10 s'),
+      prefix: 'rl:api',
+      analytics: false,
+    })
+  : null
+
+export const apiRatelimit = makeLimiter(_apiRatelimitMw)
+
 // Vercel-aware client-IP extraction. Only the LEFTMOST x-forwarded-for entry is
 // the real client — Vercel appends to any XFF the caller supplied, so using the
 // whole header as a rate-limit key lets an attacker mint a fresh bucket per
@@ -100,19 +116,12 @@ const _formRatelimit = redis
     })
   : null
 
-const _apiRatelimit = redis
-  ? new Ratelimit({
-      redis,
-      limiter: Ratelimit.slidingWindow(30, '1 m'),
-      prefix: 'rl:route:api',
-      analytics: false,
-    })
-  : null
-
 export const authLimiter = makeLimiter(_authRatelimit)
 export const aiLimiter = makeLimiter(_aiRatelimit)
 export const formLimiter = makeLimiter(_formRatelimit)
-export const apiLimiter = makeLimiter(_apiRatelimit)
+// `apiLimiter` (30/1m, prefix rl:route:api) lived here with zero callers. Removed
+// rather than left dead — two exports named api* with one inert is how the gap
+// this fixes went unnoticed. The middleware floor is `apiRatelimit`, above.
 
 export function rateLimitResponse() {
   return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 })
