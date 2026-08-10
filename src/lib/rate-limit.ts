@@ -2,10 +2,14 @@ import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
 import { NextResponse } from 'next/server'
 
-const redis =
-  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
-    ? Redis.fromEnv()
-    : null
+// The Vercel Marketplace Upstash integration provisions KV_REST_API_URL /
+// KV_REST_API_TOKEN; a database created directly at upstash.com gives the
+// UPSTASH_REDIS_REST_* pair. Accept either so the credentials work whichever
+// way the database was provisioned. Redis.fromEnv() only knows the latter.
+const redisUrl = process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL
+const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN
+
+const redis = redisUrl && redisToken ? new Redis({ url: redisUrl, token: redisToken }) : null
 
 // Middleware-facing limiter for the credentials login (see src/middleware.ts).
 // Routed through makeLimiter (FOU-352) so RATE_LIMIT_REQUIRED actually gates it —
@@ -44,7 +48,7 @@ if (!redis && process.env.NODE_ENV === 'production') {
   // Loud, once per cold start. The prior behaviour degraded silently, which is
   // why the portfolio ran unprotected without anyone noticing.
   console.error(
-    '[rate-limit] UPSTASH_REDIS_REST_URL/TOKEN are not set in production — ' +
+    '[rate-limit] no Redis credentials in production (UPSTASH_REDIS_REST_* or KV_REST_API_*) — ' +
       `rate limiting is ${FAIL_CLOSED ? 'DENYING all limited requests' : 'DISABLED'}. See FOU-323.`
   )
 }
