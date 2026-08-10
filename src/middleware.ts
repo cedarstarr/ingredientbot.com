@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import NextAuth from 'next-auth'
 import { authConfig } from '@/lib/auth.config'
 import type { NextAuthRequest } from 'next-auth'
-import { authRatelimit, clientIp } from '@/lib/rate-limit'
+import { apiRatelimit, authRatelimit, clientIp } from '@/lib/rate-limit'
 
 const { auth } = NextAuth(authConfig)
 
@@ -45,11 +45,31 @@ export default auth(async function middleware(request: NextAuthRequest) {
 
   // Brute-force protection on the credentials login. This must run BEFORE the
   // PUBLIC_PATHS short-circuit below, which treats all of /api/auth as public,
-  // and it is deliberately NOT folded into a general /api limiter — this site
-  // has none in middleware (out of scope here). Leaving the login endpoint
-  // with no limit of its own was the defect (FOU-334).
+  // and it stays separate from the general /api limiter that follows — that one
+  // exempts /api/auth wholesale, because NextAuth session polling would eat the
+  // budget. Leaving the login endpoint with no limit of its own was the defect
+  // (FOU-334).
   if (pathname === '/api/auth/callback/credentials' && request.method === 'POST') {
     const { success } = await authRatelimit.check(clientIp(request))
+    if (!success) {
+      const res = NextResponse.json({ error: 'Too Many Requests' }, { status: 429 })
+      res.headers.set('x-request-id', requestId)
+      return res
+    }
+  }
+
+  // Global per-IP floor for /api/* (FOU-355). Ahead of the PUBLIC_PATHS
+  // short-circuit below so unauthenticated routes are covered rather than
+  // skipped. Exempt: /api/auth (session polling, limited above), /api/health
+  // (uptime monitors are meant to hammer it), /api/cron (Vercel's scheduler,
+  // not a client).
+  if (
+    pathname.startsWith('/api/') &&
+    !pathname.startsWith('/api/auth') &&
+    !pathname.startsWith('/api/health') &&
+    !pathname.startsWith('/api/cron')
+  ) {
+    const { success } = await apiRatelimit.check(clientIp(request))
     if (!success) {
       const res = NextResponse.json({ error: 'Too Many Requests' }, { status: 429 })
       res.headers.set('x-request-id', requestId)
