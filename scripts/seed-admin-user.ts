@@ -32,7 +32,10 @@ export async function buildAdminUserPayload(password: string) {
 export function buildAdminUpsertArgs(createPayload: Awaited<ReturnType<typeof buildAdminUserPayload>>) {
   return {
     where: { email: ADMIN_EMAIL },
-    update: { name: ADMIN_NAME, password: createPayload.password, emailVerified: createPayload.emailVerified, isAdmin: true as const },
+    // Update only flips isAdmin — re-running this script must never reset an
+    // already-existing admin's name/password/emailVerified (that clobbered the
+    // rotated admin password on reseed; see project_admin_credentials.md).
+    update: { isAdmin: true as const },
     create: createPayload,
   }
 }
