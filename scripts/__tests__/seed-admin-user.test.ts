@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 // Mock the shared Prisma client before importing the module under test
 vi.mock('../_prisma', () => ({
   prisma: {
-    user: { upsert: vi.fn() },
+    user: { findUnique: vi.fn(), update: vi.fn(), create: vi.fn() },
     $disconnect: vi.fn(),
   },
 }))
@@ -16,13 +16,22 @@ vi.mock('bcryptjs', () => ({
   hash: vi.fn().mockResolvedValue('hashed-password'),
 }))
 
+import { prisma } from '../_prisma'
 import {
   ADMIN_EMAIL,
   ADMIN_NAME,
-  adminSeedPassword,
-  buildAdminUserPayload,
-  buildAdminUpsertArgs,
+  buildAdminUpdatePayload,
+  buildAdminCreatePayload,
+  run,
 } from '../seed-admin-user'
+
+const mockPrisma = prisma as unknown as {
+  user: {
+    findUnique: ReturnType<typeof vi.fn>
+    update: ReturnType<typeof vi.fn>
+    create: ReturnType<typeof vi.fn>
+  }
+}
 
 describe('seed-admin-user constants', () => {
   it('exports the correct admin email', () => {
@@ -32,96 +41,108 @@ describe('seed-admin-user constants', () => {
   it('exports the correct admin name', () => {
     expect(ADMIN_NAME).toBe('Cedar Barrett')
   })
+})
 
-  it('adminSeedPassword reads ADMIN_SEED_PASSWORD from env', () => {
-    const prev = process.env.ADMIN_SEED_PASSWORD
-    try {
-      process.env.ADMIN_SEED_PASSWORD = 'env-password'
-      expect(adminSeedPassword()).toBe('env-password')
-    } finally {
-      if (prev === undefined) delete process.env.ADMIN_SEED_PASSWORD
-      else process.env.ADMIN_SEED_PASSWORD = prev
-    }
+describe('buildAdminUpdatePayload', () => {
+  it('omits password when no hash is provided', () => {
+    const payload = buildAdminUpdatePayload()
+    expect(payload).toEqual({ isAdmin: true, name: ADMIN_NAME })
+    expect(payload).not.toHaveProperty('password')
   })
 
-  it('adminSeedPassword throws when ADMIN_SEED_PASSWORD is unset', () => {
-    const prev = process.env.ADMIN_SEED_PASSWORD
-    try {
-      delete process.env.ADMIN_SEED_PASSWORD
-      expect(() => adminSeedPassword()).toThrow(/ADMIN_SEED_PASSWORD not set/)
-    } finally {
-      if (prev !== undefined) process.env.ADMIN_SEED_PASSWORD = prev
-    }
+  it('includes password only when a hash is provided', () => {
+    const payload = buildAdminUpdatePayload('some-hash')
+    expect(payload.password).toBe('some-hash')
+  })
+
+  it('never includes emailVerified', () => {
+    const payload = buildAdminUpdatePayload('some-hash')
+    expect(payload).not.toHaveProperty('emailVerified')
   })
 })
 
-describe('buildAdminUserPayload', () => {
+describe('buildAdminCreatePayload', () => {
   it('returns an object with the admin email and name', async () => {
-    const payload = await buildAdminUserPayload('anypassword')
+    const payload = await buildAdminCreatePayload('anypassword')
     expect(payload.email).toBe(ADMIN_EMAIL)
     expect(payload.name).toBe(ADMIN_NAME)
   })
 
   it('sets isAdmin to true', async () => {
-    const payload = await buildAdminUserPayload('anypassword')
+    const payload = await buildAdminCreatePayload('anypassword')
     expect(payload.isAdmin).toBe(true)
   })
 
   it('includes a hashed password (not the plaintext)', async () => {
-    const payload = await buildAdminUserPayload('anypassword')
+    const payload = await buildAdminCreatePayload('anypassword')
     expect(payload.password).toBe('hashed-password')
     expect(payload.password).not.toBe('anypassword')
   })
 
   it('includes a valid emailVerified Date', async () => {
     const before = new Date()
-    const payload = await buildAdminUserPayload('anypassword')
+    const payload = await buildAdminCreatePayload('anypassword')
     const after = new Date()
     expect(payload.emailVerified).toBeInstanceOf(Date)
     expect(payload.emailVerified.getTime()).toBeGreaterThanOrEqual(before.getTime())
     expect(payload.emailVerified.getTime()).toBeLessThanOrEqual(after.getTime())
   })
-
-  it('shape has all required fields', async () => {
-    const payload = await buildAdminUserPayload('anypassword')
-    expect(payload).toMatchObject({
-      email: expect.any(String),
-      name: expect.any(String),
-      password: expect.any(String),
-      isAdmin: expect.any(Boolean),
-      emailVerified: expect.any(Date),
-    })
-  })
 })
 
-describe('buildAdminUpsertArgs', () => {
-  const mockPayload = {
-    email: ADMIN_EMAIL,
-    name: ADMIN_NAME,
-    password: 'hashed-password',
-    isAdmin: true as const,
-    emailVerified: new Date(),
-  }
-
-  it('sets where clause to admin email', () => {
-    const args = buildAdminUpsertArgs(mockPayload)
-    expect(args.where).toEqual({ email: ADMIN_EMAIL })
+describe('run()', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    delete process.env.ADMIN_SEED_PASSWORD
   })
 
-  it('sets update to only flip isAdmin true (no other changes)', () => {
-    const args = buildAdminUpsertArgs(mockPayload)
-    expect(args.update).toEqual({ isAdmin: true })
+  afterEach(() => {
+    delete process.env.ADMIN_SEED_PASSWORD
   })
 
-  it('passes the full payload as the create data', () => {
-    const args = buildAdminUpsertArgs(mockPayload)
-    expect(args.create).toEqual(mockPayload)
+  it('leaves an existing admin password untouched when ADMIN_SEED_PASSWORD is unset', async () => {
+    mockPrisma.user.findUnique.mockResolvedValue({ id: 'admin-1', email: ADMIN_EMAIL })
+    mockPrisma.user.update.mockResolvedValue({ id: 'admin-1', email: ADMIN_EMAIL })
+
+    const result = await run()
+
+    expect(mockPrisma.user.update).toHaveBeenCalledWith({
+      where: { email: ADMIN_EMAIL },
+      data: { isAdmin: true, name: ADMIN_NAME },
+    })
+    expect(mockPrisma.user.create).not.toHaveBeenCalled()
+    expect(result).toEqual({ inserted: 0, updated: 1, deleted: 0 })
   })
 
-  it('does not include extra fields in update', () => {
-    const args = buildAdminUpsertArgs(mockPayload)
-    const updateKeys = Object.keys(args.update)
-    expect(updateKeys).toHaveLength(1)
-    expect(updateKeys[0]).toBe('isAdmin')
+  it('rotates the password when ADMIN_SEED_PASSWORD is set and the admin already exists', async () => {
+    process.env.ADMIN_SEED_PASSWORD = 'a-valid-password-123'
+    mockPrisma.user.findUnique.mockResolvedValue({ id: 'admin-1', email: ADMIN_EMAIL })
+    mockPrisma.user.update.mockResolvedValue({ id: 'admin-1', email: ADMIN_EMAIL })
+
+    await run()
+
+    const call = mockPrisma.user.update.mock.calls[0][0]
+    expect(call.data.password).toBe('hashed-password')
+    expect(call.data.isAdmin).toBe(true)
+    expect(call.data).not.toHaveProperty('emailVerified')
+  })
+
+  it('creates a new admin with a random password when none is provided', async () => {
+    mockPrisma.user.findUnique.mockResolvedValue(null)
+    mockPrisma.user.create.mockResolvedValue({ id: 'new-admin', email: ADMIN_EMAIL })
+
+    const result = await run()
+
+    expect(mockPrisma.user.create).toHaveBeenCalled()
+    const createData = mockPrisma.user.create.mock.calls[0][0].data
+    expect(createData.password).toBe('hashed-password')
+    expect(createData.isAdmin).toBe(true)
+    expect(result).toEqual({ inserted: 1, updated: 0, deleted: 0 })
+  })
+
+  it('throws when ADMIN_SEED_PASSWORD is provided but shorter than 12 characters', async () => {
+    process.env.ADMIN_SEED_PASSWORD = 'short'
+
+    await expect(run()).rejects.toThrow(/at least 12 characters/)
+    expect(mockPrisma.user.findUnique).not.toHaveBeenCalled()
   })
 })
