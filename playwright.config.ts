@@ -47,7 +47,7 @@ export default defineConfig({
     ? {}
     : {
         webServer: {
-          command: 'PATH=$HOME/.nvm/versions/node/v20.20.0/bin:$PATH npm run start',
+          command: 'npm run start',
           port: PORT,
           reuseExistingServer: !process.env.CI,
           timeout: 90000,
