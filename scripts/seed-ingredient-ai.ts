@@ -186,7 +186,10 @@ async function main() {
       const prose = await batchObject(
         `Write the encyclopedia entry for the ingredient: ${input.name} (category: ${input.category}).`,
         ProseSchema,
-        { system: PROSE_SYSTEM, temperature: 0.5 },
+        // tier is explicit on purpose: visitor-facing encyclopedia prose belongs on the
+        // quality lane. It was previously implicit via the lib default, which reads as
+        // "nobody chose" rather than "quality was chosen" when auditing spend.
+        { system: PROSE_SYSTEM, temperature: 0.5, tier: 'quality' },
       )
 
       const allergen = await verifyIngredientAllergens(input)

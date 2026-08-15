@@ -150,7 +150,11 @@ async function main() {
       object(
         `Generate a recipe for: ${dish}. Pick reasonable serving size, cook time, and difficulty for the dish.`,
         RecipeSchema,
-        { system: SYSTEM_PROMPT, temperature: 0.7 },
+        // Pinned to the free lane: these are staging demo fixtures, not visitor-facing
+        // content, so they must never spend Azure credit. Without this pin the shared
+        // ai-batch lib defaults to azure-first at the `quality` tier whenever
+        // AZURE_OPENAI_* is set in the portfolio .env — which it is.
+        { system: SYSTEM_PROMPT, temperature: 0.7, providers: ['cerebras', 'groq'] },
       ),
     {
       onProgress: (done, total, item) =>
