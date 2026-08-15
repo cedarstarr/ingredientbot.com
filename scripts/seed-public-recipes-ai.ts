@@ -301,7 +301,9 @@ async function main() {
       const r = await batchObject(
         `Generate a recipe for: ${dish} (${cuisine} cuisine). Pick reasonable serving size, cook time, and difficulty.`,
         PublicRecipeSchema,
-        { system: SYSTEM_PROMPT, temperature: 0.7 },
+        // tier is explicit on purpose: this is the public recipe library, so quality
+        // lane. Contrast seed-recipes-ai.ts, which is demo-only and pinned to free.
+        { system: SYSTEM_PROMPT, temperature: 0.7, tier: 'quality' },
       )
 
       const allergen = await verifyRecipeAllergens({
