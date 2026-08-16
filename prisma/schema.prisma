@@ -411,3 +411,71 @@ model Ingredient {
   @@index([category])
   @@map("ingredients")
 }
+
+// Public allergen reference — one row per canonical allergen token. `slug`
+// values MUST match src/lib/allergens.ts ALLERGEN_VOCABULARY exactly; that
+// file (not this table) is the single source of truth for the vocabulary,
+// since Ingredient.allergenProfile / Recipe.allergens / Recipe.mayContain
+// already link against it. This table adds encyclopedia-style content about
+// each allergen itself (regulatory status, alternate label names, hidden
+// sources, cross-reactivity, dining-out guidance) — it never redefines the
+// vocabulary.
+//
+// HIGHEST-LIABILITY TABLE ON THE SITE (Phase 3 build, 2026-08-15). Rules that
+// bind every value ever written here:
+//   - Three-state language only — contains / may contain / absent. NEVER
+//     "free from" in any field, anywhere this data is rendered.
+//   - No medical thresholds (doses, trace amounts, ppm figures) and no
+//     reaction-severity or likelihood claims. Severity is a medical question,
+//     not a labeling one.
+//   - Generated ONLY via scripts/lib/allergen-verify.ts's
+//     verifyAllergenReference(), forced onto the paid Azure frontier model
+//     (tier: 'quality', providers: ['azure']). That file's
+//     requireVerifierEnv() throws when Azure creds are absent rather than
+//     falling back to a free lane — there is no fallback path for this table,
+//     by design.
+//   - Output is a single model's guess and is NOT verified by a human or a
+//     second model. `disclaimerVersion` records which disclaimer copy was in
+//     force when the row was written, so a future wording change can be
+//     audited against what a given row was published under.
+//   - `published` defaults false on create (unlike Ingredient, which has no
+//     publish gate) — given the liability here, seeding alone must never
+//     make a row visible; an editor flips it after review.
+model Allergen {
+  id   String @id @default(cuid())
+  slug String @unique
+  name String
+
+  // { fda9: boolean, eu14: boolean, notes: string } — regulatory list
+  // membership only. This is a factual "is this token on that list" flag,
+  // not a presence/absence claim about any food.
+  regulatoryStatus Json @map("regulatory_status")
+
+  // Other names this allergen appears under on ingredient labels, e.g.
+  // ["casein", "whey", "sodium caseinate"] for milk.
+  alternateNames String[] @default([]) @map("alternate_names")
+
+  // List of { product, why } — products that commonly and non-obviously
+  // contain this allergen. Same shape as Ingredient.hiddenSources.
+  hiddenSources Json? @map("hidden_sources")
+
+  // Other foods/allergens commonly reported as cross-reactive with this one.
+  // Framed as "commonly reported", never a guarantee or a diagnosis.
+  crossReactivity String? @map("cross_reactivity") @db.Text
+
+  // Practical menu-reading guidance for eating out. Never medical advice,
+  // never a severity or threshold claim.
+  diningOutGuidance String? @map("dining_out_guidance") @db.Text
+
+  // Disclaimer copy version in force when this row was generated/last
+  // written — see the model comment above.
+  disclaimerVersion String @default("v1-2026-08-15") @map("disclaimer_version")
+
+  published Boolean @default(false)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([published])
+  @@map("allergens")
+}
