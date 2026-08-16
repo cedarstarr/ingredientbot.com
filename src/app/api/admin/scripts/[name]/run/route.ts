@@ -29,6 +29,24 @@ export async function POST(
     return NextResponse.json({ error: 'Script not found' }, { status: 404 })
   }
 
+  // Opt-in gate (FOU-399). A script runs from the admin panel ONLY if it
+  // explicitly exports `adminRunnable = true`. Default-deny, because the failure
+  // mode is silent and expensive: this route inherits the full process env and a
+  // seeder's own dotenv.config() picks up live provider keys, so one click on an
+  // unannotated script can bill a real AI run — on this site, against the paid
+  // frontier allergen lane. The old opt-out shape (block only `= false`) made
+  // that the default for every script nobody had thought about yet.
+  const scriptContent = fs.readFileSync(scriptPath, 'utf-8')
+  if (!/export\s+const\s+adminRunnable\s*=\s*true/.test(scriptContent)) {
+    return NextResponse.json(
+      {
+        error:
+          'This script is not runnable from the admin panel. Add `export const adminRunnable = true` to it if it is genuinely safe to run on a single click.',
+      },
+      { status: 403 }
+    )
+  }
+
   const userId = session.user.id as string
   const startTime = Date.now()
 
