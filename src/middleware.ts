@@ -98,6 +98,8 @@ const PUBLIC_PATHS = [
   // Public browse + ingredient glossary — server-rendered, no client API calls
   '/recipes',
   '/ingredients',
+  // Allergen reference glossary — server-rendered, published rows only (FOU Phase 3)
+  '/allergens',
 ]
 
 export default auth(async function middleware(request: NextAuthRequest) {

@@ -44,6 +44,7 @@
 - ✅ F41 Recipe completion tracking ("cooked this") [Core]
 - ✅ F81 Public recipe browse by cuisine at `/recipes` [Core]
 - ✅ F82 Ingredient glossary at `/ingredients` [Core]
+- ✅ F85 Allergen reference glossary at `/allergens` [Core]
 
 ## 🛠 Planned / In Progress
 
@@ -232,6 +233,8 @@ F49. **Family profile (multi-eater)** [Sticky] — Multiple dietary profiles in 
 ✅ F83. **Site-wide "not allergy-aware yet" notice** [Core] — `AllergyAwarenessNotice` renders at the bottom of every page (all public pages, the auth shell, and inside the `(app)` scroll container) stating plainly that IngredientBot is not allergy-aware, that dietary filters are not a safety feature, and that full allergy awareness is planned. Distinct from the existing contextual `AllergenDisclaimer`, which qualifies a specific recipe or filter — this one is the standing product-level position, so a user who never opens a recipe still sees it. Removed when F84 ships. (Feasibility: built)
 
 🛠 F84. **Allergy awareness** [Core] — Make allergen handling a real, verified capability rather than a best-effort AI filter: authoritative per-ingredient allergen data (with hidden sources and cross-contamination flags) as the source of truth, a hard post-generation check that rejects any recipe containing a flagged allergen instead of relying on the prompt, allergen surfacing on every recipe surface, and an explicit confidence/provenance statement per claim. Only when that chain holds end to end does F83's notice come down. Until then the honest position is that the site is not allergy-aware. (Feasibility: High — the constraint is data provenance and verification, not model capability)
+
+✅ F85. **Allergen reference glossary** [Core] — `/allergens` index plus `/allergens/[slug]` detail pages for the 15 canonical FDA-9/EU-14 allergens (src/lib/allergens.ts vocabulary): regulatory status, alternate label names, commonly hidden sources, cross-reactivity, and practical dining-out guidance, cross-linked into `/ingredients/[slug]` via `Ingredient.allergenProfile`. Highest-liability content on the site — three-state language only (never "free from"), no medical thresholds or severity claims, full `AllergenDisclaimer` renders on both the index and every detail page, and rows land `published: false` on create so nothing is public until an editor reviews it (Ingredient has no such gate; this table deliberately does). Generated exclusively via `scripts/seed-allergens-ai.ts` + `verifyAllergenReference()` in `scripts/lib/allergen-verify.ts`, forced onto the paid Azure frontier model with no free-lane fallback — `requireVerifierEnv()` throws rather than degrading silently. Feeds toward F84 but does not complete it: this is the reference-content half, not the post-generation allergen-rejection check. Seeder is `--dry-run`-verified only; no AI has been run against it yet. (Feasibility: built)
 
 F52. **Referral program** [Sticky] — Share a link; both user and referee get bonus recipe credits. Standard referral loop. DishGen lets users earn credits via social shares; we do it via direct referral. Portfolio referral system pattern already established. (Feasibility: Medium — referral model already in portfolio pattern)
 

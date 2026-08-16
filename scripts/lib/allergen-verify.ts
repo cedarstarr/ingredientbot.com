@@ -70,6 +70,37 @@ const IngredientBundleSchema = z.object({
     .describe('Allergy-driven substitutions only (reasons like "peanut-free"); empty if none apply'),
 })
 
+const RegulatoryStatusSchema = z.object({
+  fda9: z.boolean().describe('Is this allergen one of the FDA "Big 9" major food allergens?'),
+  eu14: z.boolean().describe('Is this allergen one of the EU 14 legally declarable allergens?'),
+  notes: z
+    .string()
+    .describe('One short factual sentence on regulatory nuance (e.g. list membership changes); empty string if none'),
+})
+
+const AllergenReferenceSchema = z.object({
+  alternateNames: z
+    .array(z.string())
+    .describe('Other names this allergen appears under on ingredient labels, e.g. "casein", "whey" for milk'),
+  regulatoryStatus: RegulatoryStatusSchema,
+  hiddenSources: z
+    .array(HiddenSourceSchema)
+    .describe('Products that commonly and non-obviously contain this allergen'),
+  crossReactivity: z
+    .string()
+    .describe(
+      'Other foods/allergens commonly REPORTED as cross-reactive, framed as "commonly reported" never a guarantee; empty string if none well-established',
+    ),
+  diningOutGuidance: z
+    .string()
+    .describe(
+      'Practical menu-reading guidance for eating out — never medical advice, never a severity or threshold claim',
+    ),
+})
+
+export type RegulatoryStatus = z.infer<typeof RegulatoryStatusSchema>
+export type AllergenReferenceResult = z.infer<typeof AllergenReferenceSchema>
+
 export type HiddenSource = z.infer<typeof HiddenSourceSchema>
 export type Substitution = z.infer<typeof SubstitutionSchema>
 
@@ -158,6 +189,57 @@ export async function verifyRecipeAllergens(input: {
     allergens: normalizeSet(raw.allergens),
     mayContain: normalizeSet(raw.mayContain),
     allergenNotes: raw.notes.trim() || null,
+  }
+}
+
+// Rules specific to the standalone Allergen reference table (the encyclopedia
+// page about the allergen itself, not a specific food or recipe). Layered on
+// top of RULES_LINE's plant-milk correction, which still applies wherever
+// hiddenSources mentions milk-adjacent products.
+const ALLERGEN_REFERENCE_RULES = [
+  'This is public reference content about the allergen itself, not a specific food or recipe.',
+  'NEVER use the phrase "free from" anywhere in any field.',
+  'NEVER state a medical threshold — no dose, trace amount, or parts-per-million figure that would or would not trigger a reaction.',
+  'NEVER make a reaction-severity or likelihood claim (e.g. "usually causes anaphylaxis", "mild in most people") — severity varies per person and is a medical question, not a labeling one.',
+  'diningOutGuidance is practical menu-reading advice only (what to ask staff, what to watch for on a menu) — never medical advice, never a substitute for talking to a doctor or allergist, and say so is out of scope rather than implying safety.',
+  'crossReactivity may name other foods/allergens with a commonly reported cross-reactive relationship, framed as "commonly reported" — never as a guarantee or a diagnosis. Leave it an empty string if nothing is well-established.',
+  'regulatoryStatus.fda9/eu14 are factual list-membership flags only, not a presence/absence claim about any product.',
+].join(' ')
+
+/**
+ * Allergen-reference-level: the standalone Allergen table's encyclopedia
+ * content (regulatory status, alternate label names, hidden sources, cross
+ * reactivity, dining-out guidance) for one canonical allergen token. Output is
+ * unverified — see file header. Same paid-Azure-only contract as the two
+ * functions above: requireVerifierEnv() throws before any call is made.
+ */
+export async function verifyAllergenReference(input: {
+  slug: string
+  name: string
+}): Promise<AllergenReferenceResult> {
+  requireVerifierEnv()
+
+  const raw = await batchObject(
+    `Produce public reference content for a food allergen encyclopedia page.\n` +
+      `Allergen: ${input.name} (canonical token: ${input.slug})\n\n` +
+      ALLERGEN_REFERENCE_RULES,
+    AllergenReferenceSchema,
+    {
+      providers: ['azure'],
+      tier: 'quality',
+      system:
+        'You are a food-allergen reference-content writer for a public encyclopedia page. ' +
+        'You write descriptive, non-medical reference content only. ' +
+        VOCAB_LINE,
+    },
+  )
+
+  return {
+    alternateNames: [...new Set(raw.alternateNames.map((n) => n.trim()).filter(Boolean))],
+    regulatoryStatus: raw.regulatoryStatus,
+    hiddenSources: raw.hiddenSources,
+    crossReactivity: raw.crossReactivity.trim(),
+    diningOutGuidance: raw.diningOutGuidance.trim(),
   }
 }
 

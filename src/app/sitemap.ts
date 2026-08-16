@@ -25,6 +25,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     take: 1000,
   })
 
+  // Allergen reference pages — published only; there are at most 15 rows
+  // (one per ALLERGEN_VOCABULARY token) so no take cap is needed.
+  const allergens = await prisma.allergen.findMany({
+    where: { published: true },
+    select: { slug: true, updatedAt: true },
+    orderBy: { updatedAt: 'desc' },
+  })
+
   const recipeEntries: MetadataRoute.Sitemap = publicRecipes
     .filter((r): r is typeof r & { publicSlug: string } => r.publicSlug !== null)
     .map((r) => ({
@@ -37,6 +45,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const ingredientEntries: MetadataRoute.Sitemap = ingredients.map((i) => ({
     url: `${baseUrl}/ingredients/${i.slug}`,
     lastModified: i.updatedAt,
+    changeFrequency: 'monthly' as const,
+    priority: 0.5,
+  }))
+
+  const allergenEntries: MetadataRoute.Sitemap = allergens.map((a) => ({
+    url: `${baseUrl}/allergens/${a.slug}`,
+    lastModified: a.updatedAt,
     changeFrequency: 'monthly' as const,
     priority: 0.5,
   }))
@@ -57,6 +72,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${baseUrl}/ingredients`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/allergens`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.6,
@@ -87,5 +108,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     ...recipeEntries,
     ...ingredientEntries,
+    ...allergenEntries,
   ]
 }
