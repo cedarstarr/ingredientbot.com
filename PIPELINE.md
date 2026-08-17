@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-08-13 (/qa-e2e run)
+**Last Updated**: 2026-08-17 (/qa-e2e run)
 
 ---
 
@@ -35,7 +35,7 @@
 | 20 | Performance Audit | /qa-perf | STALE | 3 | 2026-07-02 | [view](reports/2026-07-02-site-perf.md) |
 | 21 | SEO Audit | /qa-seo | STALE | 2 | 2026-07-13 | [view](reports/2026-04-19-site-seo.md) |
 | 22 | Accessibility Audit | /qa-a11y | STALE | 2 | 2026-07-15 | [view](reports/2026-07-15-qa-a11y.md) |
-| 23 | E2E Gate | /qa-e2e | DONE | 12 | 2026-08-13 | [view](reports/2026-08-13-qa-e2e.md) |
+| 23 | E2E Gate | /qa-e2e | DONE | 13 | 2026-08-17 | [view](reports/2026-08-17-qa-e2e.md) |
 | 24 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
 | 25 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
 | 26 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
@@ -44,7 +44,7 @@
 
 **Progress: 22/28 stages complete (1 skipped)**
 
-**Last Updated**: 2026-08-13 (/qa-e2e run)
+**Last Updated**: 2026-08-17 (/qa-e2e run)
 
 ---
 
@@ -145,3 +145,4 @@
 | 2026-08-01 | /qa-resilience | 1m | SUCCESS | clean — no findings across all resilience checks [view](reports/2026-08-02-site-resilience.md) |
 | 2026-08-09 | /qa-ai-completion | 12m | SUCCESS | 2 findings, both resolved: 1 no-try-catch, 1 orphan-export; allergen lane untouched — |
 | 2026-08-13 | /qa-e2e | 45m | PARTIAL | 106/107 pass, 1 fail (FOU-388, newly-surfaced strict-mode dup). Added ingredients-recipes.spec.ts covering 3 routes. [view](reports/2026-08-13-qa-e2e.md) |
+| 2026-08-17 | /qa-e2e | 1m | SUCCESS | Clean run, no changes. [view](reports/2026-08-17-qa-e2e.md) |
