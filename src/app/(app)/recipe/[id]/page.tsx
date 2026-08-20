@@ -9,8 +9,9 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
 
   const { id } = await params
 
-  // Fetch recipe and collections in parallel — both are needed before render
-  const [recipe, collections] = await Promise.all([
+  // Fetch recipe, collections, and the most recent AI cook-feedback tip in
+  // parallel — all three are needed before render, none depend on each other.
+  const [recipe, collections, latestTippedCompletion] = await Promise.all([
     prisma.recipe.findFirst({
       where: { id, userId: session.user.id },
       include: {
@@ -22,6 +23,12 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
       select: { id: true, name: true, color: true },
       orderBy: { createdAt: 'asc' },
     }),
+    // F88: pin the most recent non-null AI tip for this recipe on the detail view.
+    prisma.recipeCompletion.findFirst({
+      where: { recipeId: id, userId: session.user.id, aiTip: { not: null } },
+      orderBy: { cookedAt: 'desc' },
+      select: { aiTip: true },
+    }),
   ])
 
   if (!recipe) notFound()
@@ -30,6 +37,7 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
     <RecipeDetailClient
       recipe={JSON.parse(JSON.stringify(recipe))}
       collections={JSON.parse(JSON.stringify(collections))}
+      initialAiTip={latestTippedCompletion?.aiTip ?? null}
     />
   )
 }

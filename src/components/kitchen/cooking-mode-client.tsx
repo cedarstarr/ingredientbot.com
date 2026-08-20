@@ -21,6 +21,7 @@ import {
   FastForward,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { SousChef } from './sous-chef'
 
 interface Ingredient {
   name: string
@@ -428,6 +429,11 @@ export function CookingModeClient({ recipe }: Props) {
           </>
         )}
       </div>
+
+      {/* F89: Voice sous-chef — hidden once the recipe is done, there's no "current step" to ask about */}
+      {!isDone && (
+        <SousChef recipeId={recipe.id} currentStepIndex={currentStep} totalSteps={steps.length} />
+      )}
     </div>
   )
 }

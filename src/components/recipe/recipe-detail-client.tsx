@@ -77,6 +77,9 @@ interface Recipe {
 interface Props {
   recipe: Recipe
   collections?: Collection[]
+  // F88: most recent post-cook AI tip for this recipe (from RecipeCompletion.aiTip),
+  // pre-fetched server-side so the pinned tip card renders on first paint.
+  initialAiTip?: string | null
 }
 
 // F33: parse a numeric quantity from an amount string like "1/2", "1.5", "2"
@@ -111,9 +114,12 @@ function formatQuantity(value: number): string {
   return whole > 0 ? `${whole} ${best[1]}` : best[1]
 }
 
-export function RecipeDetailClient({ recipe, collections = [] }: Props) {
+export function RecipeDetailClient({ recipe, collections = [], initialAiTip = null }: Props) {
   const router = useRouter()
   const recipeData = recipe.recipeData as RecipeData
+  // F88: updated in place the moment a fresh tip comes back from cook-feedback,
+  // so the pinned card doesn't need a page refresh to show it.
+  const [aiTip, setAiTip] = useState<string | null>(initialAiTip)
   const [nutrition, setNutrition] = useState<RecipeData['nutrition'] | null>(
     recipe.nutrition as RecipeData['nutrition'] | null
   )
@@ -329,6 +335,7 @@ export function RecipeDetailClient({ recipe, collections = [] }: Props) {
           recipeId={recipe.id}
           initialCookedCount={recipe.cookedCount ?? 0}
           initialLastCookedAt={recipe.lastCookedAt}
+          onTipReceived={setAiTip}
         />
         {/* F39: Collection picker */}
         <CollectionPicker
@@ -643,6 +650,21 @@ export function RecipeDetailClient({ recipe, collections = [] }: Props) {
                 Heads up
               </div>
               <p className="text-[13px] leading-[1.55]">{recipeData.notes}</p>
+            </div>
+          )}
+
+          {/* F88: AI "next time..." tip from the most recent cook's outcome/note.
+              Clearly attributed as an AI suggestion, not a recipe author note. */}
+          {aiTip && (
+            <div
+              data-testid="recipe-ai-tip"
+              className="rounded-xl border border-[hsl(var(--color-success))]/25 bg-[hsl(var(--color-success))]/5 p-4"
+            >
+              <div className="flex items-center gap-1.5 text-[13px] font-semibold text-[hsl(var(--color-success))] mb-2">
+                <Sparkles className="h-3.5 w-3.5" />
+                AI tip for next time
+              </div>
+              <p className="text-[13px] leading-[1.55] text-foreground">{aiTip}</p>
             </div>
           )}
 

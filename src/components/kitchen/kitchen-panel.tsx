@@ -11,7 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { Slider } from '@/components/ui/slider'
 import {
-  X, ChefHat, Camera, Loader2, Sparkles, RefreshCw, Package, Timer,
+  ChefHat, Camera, Loader2, Sparkles, RefreshCw, Timer, Package,
   Mic, MicOff, Lock, BookOpen, DollarSign, UtensilsCrossed, Flame, Heart,
   Bed, Dumbbell, Utensils, ArrowRight, ChevronDown, Zap,
 } from 'lucide-react'
@@ -68,29 +68,11 @@ type CookingMethod = (typeof COOKING_METHODS)[number]
 // F78: Spice level labels — index = value (0..3)
 const SPICE_LABELS = ['Mild', 'Medium', 'Hot', 'Fire'] as const
 
-interface PantryItem {
-  id: string
-  ingredient: string
-  expiresAt: string | null
-  addedAt?: string | null
-}
-
-// F26: days until expiry (positive = future, negative = expired)
-function daysUntilExpiry(expiresAt: string): number {
-  const now = new Date()
-  now.setHours(0, 0, 0, 0)
-  const exp = new Date(expiresAt)
-  exp.setHours(0, 0, 0, 0)
-  return Math.round((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-}
-
-function isExpiringSoon(item: PantryItem): boolean {
-  if (!item.expiresAt) return false
-  return daysUntilExpiry(item.expiresAt) <= 7
-}
-
-export function KitchenPanel() {
+export function KitchenPanel({ tonightMode = false }: { tonightMode?: boolean }) {
   const router = useRouter()
+  // F86: dashboard "Tonight" card lands here with ?tonight=1 — no auto AI call,
+  // just an obvious entry point (options stay collapsed, textarea focused).
+  const isTonightMode = tonightMode
   const [ingredients, setIngredients] = useState<string[]>([])
   const [inputValue, setInputValue] = useState('')
   const [suggestions, setSuggestions] = useState<RecipeSuggestion[]>([])
@@ -106,11 +88,6 @@ export function KitchenPanel() {
   const [usageRefreshKey, setUsageRefreshKey] = useState(0)
   // F30: whether user hit the monthly limit
   const [limitReached, setLimitReached] = useState(false)
-  // F44: pantry items — loaded once, toggled per-session
-  const [pantryItems, setPantryItems] = useState<PantryItem[]>([])
-  const [activePantryIds, setActivePantryIds] = useState<Set<string>>(new Set())
-  // F26: expiry-first mode — elevate expiring items and tell AI to prioritize them
-  const [expiryFirstMode, setExpiryFirstMode] = useState(false)
   // F28: leftover optimizer mode
   const [leftoverMode, setLeftoverMode] = useState(false)
   const [leftoverText, setLeftoverText] = useState('')
@@ -147,17 +124,14 @@ export function KitchenPanel() {
   const recognitionRef = useRef<any>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  // F44: Load pantry items on mount
+  // F86: land ready to generate — focus the composer so typing (then hitting
+  // Find recipes) is the very next action. Options panel is already collapsed
+  // by default (showAdvanced starts false), so nothing else to do here.
   useEffect(() => {
-    fetch('/api/user/pantry')
-      .then(r => r.ok ? r.json() : [])
-      .then((items: PantryItem[]) => {
-        setPantryItems(items)
-        // Default: all pantry items active
-        setActivePantryIds(new Set(items.map((i: PantryItem) => i.id)))
-      })
-      .catch(() => {})
+    if (isTonightMode) textareaRef.current?.focus()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // F53 + F70 + F74 + F78: Load persisted kitchen preferences on mount
@@ -251,43 +225,8 @@ export function KitchenPanel() {
     }
   }
 
-  // F44: Toggle a pantry item on/off for this session
-  const togglePantryItem = (id: string) => {
-    setActivePantryIds(prev => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }
-
-  // F44: Merge typed ingredients with active pantry items, deduplicated
-  // F26: when expiry-first mode is on, expiring items bubble to the top
-  const allIngredients = useCallback(() => {
-    const activePantry = pantryItems.filter(p => activePantryIds.has(p.id))
-
-    // F26: sort — expiring items first when mode is enabled
-    const sorted = expiryFirstMode
-      ? [...activePantry].sort((a, b) => {
-          const aExpiring = isExpiringSoon(a) ? 0 : 1
-          const bExpiring = isExpiringSoon(b) ? 0 : 1
-          return aExpiring - bExpiring
-        })
-      : activePantry
-
-    const merged = [...ingredients]
-    for (const p of sorted) {
-      if (!merged.includes(p.ingredient)) merged.push(p.ingredient)
-    }
-    return merged
-  }, [ingredients, pantryItems, activePantryIds, expiryFirstMode])
-
-  // F26: list of expiring ingredient names for AI context
-  const expiringIngredients = useCallback(() => {
-    return pantryItems
-      .filter(p => activePantryIds.has(p.id) && isExpiringSoon(p))
-      .map(p => p.ingredient)
-  }, [pantryItems, activePantryIds])
+  // Typed ingredients only — pantry merge (F44) removed with the pantry closure.
+  const allIngredients = useCallback(() => ingredients, [ingredients])
 
   const generateRecipes = useCallback(async () => {
     const combined = allIngredients()
@@ -297,9 +236,6 @@ export function KitchenPanel() {
     setError(null)
 
     try {
-      // F26: pass expiring ingredients so the AI can prioritize them
-      const expiring = expiryFirstMode ? expiringIngredients() : []
-
       const res = await fetch('/api/recipes/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -309,7 +245,6 @@ export function KitchenPanel() {
           dietary: dietary === 'any' ? [] : [dietary],
           // F35: difficulty filter
           difficulty: difficulty === 'any' ? undefined : difficulty,
-          expiringIngredients: expiring.length > 0 ? expiring : undefined,
           // F28: leftover mode
           leftovers: leftoverMode && leftoverText.trim() ? leftoverText.trim() : undefined,
           // F61: strictness mode
@@ -382,7 +317,7 @@ export function KitchenPanel() {
     } finally {
       setIsGenerating(false)
     }
-  }, [allIngredients, expiringIngredients, expiryFirstMode, cuisine, dietary, isGenerating, leftoverMode, leftoverText, strictMode, teachMode, prepTimeLimit, budgetMode, chefPersonality, dateNightMode, cookingMethod, exhaustedMode, proteinMax, restaurantStyle, spiceLevel, difficulty])
+  }, [allIngredients, cuisine, dietary, isGenerating, leftoverMode, leftoverText, strictMode, teachMode, prepTimeLimit, budgetMode, chefPersonality, dateNightMode, cookingMethod, exhaustedMode, proteinMax, restaurantStyle, spiceLevel, difficulty])
 
   // F54: "Impress Me" — bypass ingredient validation, AI chooses ingredients
   const handleImpressMe = useCallback(async () => {
@@ -450,7 +385,7 @@ export function KitchenPanel() {
     }
   }, [isGenerating, impressMeLoading, chefPersonality, budgetMode, prepTimeLimit, cookingMethod, exhaustedMode, proteinMax, restaurantStyle, spiceLevel])
 
-  // Auto-generate after 600ms debounce when ≥2 ingredients (typed or pantry)
+  // Auto-generate after 600ms debounce when ≥2 ingredients typed
   useEffect(() => {
     if (allIngredients().length < 2) return
     if (debounceRef.current) clearTimeout(debounceRef.current)
@@ -501,7 +436,6 @@ export function KitchenPanel() {
       const res = await fetch('/api/recipes/cook', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // F44: pass merged ingredient list (typed + active pantry) to cook route
         // F28/F61/F64: pass active mode flags so cook route injects them into the full recipe generation prompt
         body: JSON.stringify({
           suggestion,
@@ -591,6 +525,9 @@ export function KitchenPanel() {
   }
 
   // Count how many advanced options are active
+  // F86: the count badge on the single Options disclosure trigger — includes
+  // the quick-toggle pills now that they live inside it too, so the badge
+  // still reflects everything hidden, not just the original "advanced" subset.
   const advancedActiveCount = [
     cuisine !== 'any',
     dietary !== 'any',
@@ -600,6 +537,10 @@ export function KitchenPanel() {
     leftoverMode,
     dateNightMode,
     prepTimeLimit !== null,
+    strictMode,
+    exhaustedMode,
+    proteinMax,
+    teachMode,
   ].filter(Boolean).length
 
   return (
@@ -608,13 +549,21 @@ export function KitchenPanel() {
 
         {/* Header */}
         <div>
+          {isTonightMode && (
+            <Badge variant="secondary" className="mb-2 gap-1 text-[11px] font-medium">
+              <ChefHat className="h-3 w-3" />
+              Picking tonight&apos;s dinner
+            </Badge>
+          )}
           <h1 className="text-[30px] font-bold tracking-tight leading-[1.1] mb-1.5">What&apos;s in your fridge today?</h1>
           <p className="text-muted-foreground text-[15px]">Type, snap, or paste a list. I&apos;ll cook up 4 ideas in about 8 seconds.</p>
         </div>
 
-        {/* Composer card */}
+        {/* Composer card — one obvious action: type ingredients, hit Find recipes.
+            F86: every mode toggle now lives behind the single Options disclosure below. */}
         <div className="rounded-xl bg-card ring-1 ring-foreground/10 p-5 space-y-3">
           <Textarea
+            ref={textareaRef}
             value={inputValue}
             onChange={(e) => {
               const text = e.target.value
@@ -626,95 +575,32 @@ export function KitchenPanel() {
             placeholder="2 chicken thighs, broccoli, garlic, sesame oil, gochujang..."
             className="min-h-[80px] resize-none border-input focus-visible:ring-ring text-sm"
           />
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            {/* 4 primary mode toggles as pills */}
-            <div className="flex gap-2 flex-wrap">
-              {/* Strict mode */}
-              <button
-                type="button"
-                onClick={() => setStrictMode(v => !v)}
-                aria-pressed={strictMode}
-                className={cn(
-                  'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  strictMode
-                    ? 'bg-primary/10 border-primary/30 text-primary'
-                    : 'bg-background border-input text-foreground hover:bg-muted/60',
-                )}
-              >
-                <Lock className="h-3.5 w-3.5" />
-                Strict ingredients only
-              </button>
-              {/* Exhausted mode */}
-              <button
-                type="button"
-                onClick={() => setExhaustedMode(v => !v)}
-                className={cn(
-                  'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  exhaustedMode
-                    ? 'bg-primary/10 border-primary/30 text-primary'
-                    : 'bg-background border-input text-foreground hover:bg-muted/60',
-                )}
-                aria-pressed={exhaustedMode}
-              >
-                <Bed className="h-3.5 w-3.5" />
-                I&apos;m exhausted
-              </button>
-              {/* Protein-max */}
-              <button
-                type="button"
-                onClick={() => setProteinMax(v => !v)}
-                className={cn(
-                  'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  proteinMax
-                    ? 'bg-primary/10 border-primary/30 text-primary'
-                    : 'bg-background border-input text-foreground hover:bg-muted/60',
-                )}
-                aria-pressed={proteinMax}
-              >
-                <Dumbbell className="h-3.5 w-3.5" />
-                Protein-Max
-              </button>
-              {/* Teach me mode */}
-              <button
-                type="button"
-                onClick={() => setTeachMode(v => !v)}
-                className={cn(
-                  'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  teachMode
-                    ? 'bg-primary/10 border-primary/30 text-primary'
-                    : 'bg-background border-input text-foreground hover:bg-muted/60',
-                )}
-                aria-pressed={teachMode}
-              >
-                <BookOpen className="h-3.5 w-3.5" />
-                Teach me mode
-              </button>
-            </div>
-            {/* Action buttons */}
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isAnalyzingPhoto}>
-                {isAnalyzingPhoto ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Camera className="h-4 w-4 mr-1.5" />}
-                Snap fridge
-              </Button>
-              <Button size="sm" onClick={generateRecipes} disabled={allIngredients().length < 2 || isGenerating || impressMeLoading}>
-                {isGenerating ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : null}
-                Find recipes
-                {!isGenerating && <ArrowRight className="h-4 w-4 ml-1.5" />}
-              </Button>
-            </div>
+          <div className="flex items-center justify-end gap-2">
+            <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isAnalyzingPhoto}>
+              {isAnalyzingPhoto ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Camera className="h-4 w-4 mr-1.5" />}
+              Snap fridge
+            </Button>
+            <Button size="sm" onClick={generateRecipes} disabled={allIngredients().length < 2 || isGenerating || impressMeLoading}>
+              {isGenerating ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : null}
+              Find recipes
+              {!isGenerating && <ArrowRight className="h-4 w-4 ml-1.5" />}
+            </Button>
           </div>
         </div>
 
-        {/* Advanced options (collapsible) */}
+        {/* Options (collapsible) — F86: single disclosure hides every mode toggle,
+            filter, and generation mode so the panel opens as one obvious action
+            instead of a form. Hidden by default (showAdvanced starts false). */}
         <div>
           <button
             type="button"
             onClick={() => setShowAdvanced(v => !v)}
             aria-expanded={showAdvanced}
+            data-testid="kitchen-options-toggle"
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
           >
             <ChevronDown className={cn('h-4 w-4 transition-transform', showAdvanced && 'rotate-180')} />
-            Advanced options
+            Options
             {advancedActiveCount > 0 && (
               <span className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold px-1">
                 {advancedActiveCount}
@@ -723,6 +609,71 @@ export function KitchenPanel() {
           </button>
           {showAdvanced && (
             <div className="mt-3 rounded-xl border border-border bg-card/50 p-4 space-y-4">
+              {/* F86: quick-toggle pills, moved out of the composer card so it
+                  reads as one obvious action instead of a form. */}
+              <div className="flex gap-2 flex-wrap">
+                {/* Strict mode */}
+                <button
+                  type="button"
+                  onClick={() => setStrictMode(v => !v)}
+                  aria-pressed={strictMode}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    strictMode
+                      ? 'bg-primary/10 border-primary/30 text-primary'
+                      : 'bg-background border-input text-foreground hover:bg-muted/60',
+                  )}
+                >
+                  <Lock className="h-3.5 w-3.5" />
+                  Strict ingredients only
+                </button>
+                {/* Exhausted mode */}
+                <button
+                  type="button"
+                  onClick={() => setExhaustedMode(v => !v)}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    exhaustedMode
+                      ? 'bg-primary/10 border-primary/30 text-primary'
+                      : 'bg-background border-input text-foreground hover:bg-muted/60',
+                  )}
+                  aria-pressed={exhaustedMode}
+                >
+                  <Bed className="h-3.5 w-3.5" />
+                  I&apos;m exhausted
+                </button>
+                {/* Protein-max */}
+                <button
+                  type="button"
+                  onClick={() => setProteinMax(v => !v)}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    proteinMax
+                      ? 'bg-primary/10 border-primary/30 text-primary'
+                      : 'bg-background border-input text-foreground hover:bg-muted/60',
+                  )}
+                  aria-pressed={proteinMax}
+                >
+                  <Dumbbell className="h-3.5 w-3.5" />
+                  Protein-Max
+                </button>
+                {/* Teach me mode */}
+                <button
+                  type="button"
+                  onClick={() => setTeachMode(v => !v)}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    teachMode
+                      ? 'bg-primary/10 border-primary/30 text-primary'
+                      : 'bg-background border-input text-foreground hover:bg-muted/60',
+                  )}
+                  aria-pressed={teachMode}
+                >
+                  <BookOpen className="h-3.5 w-3.5" />
+                  Teach me mode
+                </button>
+              </div>
+
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {/* F34: Cuisine selector */}
                 <div className="space-y-1">
@@ -946,29 +897,6 @@ export function KitchenPanel() {
                       </Badge>
                     )}
                   </button>
-
-                  {/* F26: Expiry-first mode — only when expiring items exist */}
-                  {pantryItems.some(isExpiringSoon) && (
-                    <button
-                      type="button"
-                      onClick={() => setExpiryFirstMode(v => !v)}
-                      title="Prioritize expiring ingredients in recipe generation"
-                      className={cn(
-                        'flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                        expiryFirstMode
-                          ? 'bg-[hsl(var(--color-warning-muted))] border-[hsl(var(--color-warning)/0.6)] text-[hsl(var(--color-warning-fg))] font-medium'
-                          : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:border-[hsl(var(--color-warning)/0.4)]',
-                      )}
-                    >
-                      <Timer className="h-3 w-3 shrink-0" />
-                      <span className="flex-1 text-left">Expiry-first mode</span>
-                      {expiryFirstMode && (
-                        <span className="rounded-full bg-[hsl(var(--color-warning)/0.2)] px-1.5 py-0.5 text-[10px] text-[hsl(var(--color-warning-fg))]">
-                          ON
-                        </span>
-                      )}
-                    </button>
-                  )}
                 </div>
 
                 {/* F28: Leftover text input — only when mode active */}
@@ -1013,59 +941,6 @@ export function KitchenPanel() {
                   </p>
                 )}
               </div>
-
-              {/* F44: Pantry section */}
-              {pantryItems.length > 0 && (
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                      <Package className="h-3 w-3" />
-                      Pantry
-                    </span>
-                    <Link
-                      href="/pantry"
-                      className="text-xs text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
-                    >
-                      Manage
-                    </Link>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {pantryItems.map(item => {
-                      const active = activePantryIds.has(item.id)
-                      const expiringSoon = isExpiringSoon(item)
-                      const critical = item.expiresAt && daysUntilExpiry(item.expiresAt) <= 3
-                      return (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => togglePantryItem(item.id)}
-                          title={active ? 'Click to exclude from this session' : 'Click to include'}
-                          className={cn(
-                            'inline-flex items-center gap-1 rounded-full text-xs px-2 py-0.5 border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                            active
-                              ? cn(
-                                  'bg-primary/15 text-primary border-primary/30',
-                                  critical && 'bg-destructive/10 border-destructive/50 text-destructive',
-                                  !critical && expiringSoon && 'bg-[hsl(var(--color-warning-muted))] border-[hsl(var(--color-warning)/0.5)] text-[hsl(var(--color-warning-fg))]',
-                                )
-                              : 'bg-muted/40 text-muted-foreground border-border line-through'
-                          )}
-                        >
-                          {critical && active && <span aria-hidden className="text-[10px]">🔴</span>}
-                          {!critical && expiringSoon && active && <span aria-hidden className="text-[10px]">🟡</span>}
-                          {item.ingredient}
-                          {active && (
-                            <X
-                              className="h-2.5 w-2.5 opacity-60"
-                              aria-label={`Exclude ${item.ingredient}`}
-                            />
-                          )}
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
 
               {/* F54: Impress Me */}
               <div className="pt-1">
@@ -1192,59 +1067,6 @@ export function KitchenPanel() {
                 />
               ))}
             </div>
-          </div>
-        )}
-
-        {/* Pantry quick view — expiring soon items */}
-        {pantryItems.length > 0 && pantryItems.some(i => i.expiresAt && daysUntilExpiry(i.expiresAt) <= 7) && (
-          <div className="rounded-xl bg-card ring-1 ring-foreground/10 p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[18px] font-semibold tracking-tight">Pantry · expiring soon</h2>
-              <Link href="/pantry" className="text-[13px] text-primary hover:underline">
-                View all {pantryItems.length} items →
-              </Link>
-            </div>
-            {pantryItems
-              .filter(i => i.expiresAt && daysUntilExpiry(i.expiresAt) <= 7)
-              .slice(0, 5)
-              .map(item => {
-                const days = item.expiresAt ? daysUntilExpiry(item.expiresAt) : null
-                const urgency = days !== null && days <= 1 ? 'danger' : days !== null && days <= 3 ? 'warning' : 'fresh'
-                return (
-                  <div key={item.id} className="grid grid-cols-[24px_1fr_auto_auto] gap-3 items-center py-2.5 border-b border-dashed border-border last:border-0">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/8 text-primary">
-                      <Package className="h-3.5 w-3.5" />
-                    </span>
-                    <div>
-                      <div className="text-sm font-medium capitalize">{item.ingredient}</div>
-                      {item.addedAt && (
-                        <div className="text-[11px] text-muted-foreground">
-                          added {Math.round((Date.now() - new Date(item.addedAt).getTime()) / (1000 * 60 * 60 * 24))}d ago
-                        </div>
-                      )}
-                    </div>
-                    <span className={cn(
-                      'text-[11px] px-2 py-0.5 rounded-full font-medium',
-                      urgency === 'danger' ? 'bg-destructive/10 text-destructive' :
-                      urgency === 'warning' ? 'bg-[hsl(var(--color-warning-muted))] text-[hsl(var(--color-warning-fg))]' :
-                      'bg-[hsl(var(--color-success-muted))] text-[hsl(var(--color-success-fg))]',
-                    )}>
-                      {days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days} days`}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-xs"
-                      onClick={() => {
-                        setInputValue(prev => prev ? `${prev}, ${item.ingredient}` : item.ingredient)
-                        setIngredients(prev => prev.includes(item.ingredient) ? prev : [...prev, item.ingredient])
-                      }}
-                    >
-                      Use it
-                    </Button>
-                  </div>
-                )
-              })}
           </div>
         )}
 

@@ -17,7 +17,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
 
   try {
     // Run both writes in parallel — chosen over a transaction because both are low-stakes inserts
-    const [updated] = await Promise.all([
+    const [updated, completion] = await Promise.all([
       prisma.recipe.update({
         where: { id },
         data: {
@@ -30,7 +30,9 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
         data: { userId: session.user.id, recipeId: id },
       }),
     ])
-    return NextResponse.json(updated)
+    // F88: completionId lets the client follow up with a cook-feedback POST
+    // (outcome/note/AI tip) against the exact completion row it caused.
+    return NextResponse.json({ ...updated, completionId: completion.id })
   } catch {
     return NextResponse.json({ error: 'Failed to record cook' }, { status: 500 })
   }

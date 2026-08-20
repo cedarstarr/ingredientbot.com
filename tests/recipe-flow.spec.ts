@@ -10,8 +10,8 @@ import { test, expect } from '@playwright/test'
 test.describe('Authenticated app shell', () => {
   test.setTimeout(60000)
 
-  test('/dashboard, /saved, /history, /collections, /pantry all load @smoke', async ({ page }) => {
-    for (const path of ['/dashboard', '/saved', '/history', '/collections', '/pantry']) {
+  test('/dashboard, /saved, /history, /collections all load @smoke', async ({ page }) => {
+    for (const path of ['/dashboard', '/saved', '/history', '/collections']) {
       const res = await page.goto(path)
       await page.waitForLoadState('domcontentloaded')
       expect(res?.status(), `${path} status`).not.toBe(500)

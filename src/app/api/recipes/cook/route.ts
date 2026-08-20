@@ -7,6 +7,7 @@ import { aiLimiter } from '@/lib/rate-limit'
 import { buildCookingMethodContext, buildSpiceContext } from '@/lib/recipe-prompt-utils'
 import { Difficulty } from '@/generated/prisma/client'
 import { startOfCurrentMonth } from '@/lib/date-utils'
+import { getPalateProfile } from '@/lib/palate'
 
 export const maxDuration = 60
 
@@ -39,8 +40,9 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'Invalid suggestion' }, { status: 400 })
   }
 
-  // F30 + F31: Fetch user gate data and dietary profile in parallel — both needed before AI call
-  const [user, dietaryProfile] = await Promise.all([
+  // F30 + F31 + F87: Fetch user gate data, dietary profile, and palate profile in
+  // parallel — all needed before the AI call, none depend on each other.
+  const [user, dietaryProfile, palateProfile] = await Promise.all([
     prisma.user.findUnique({
       where: { id: session.user.id },
       select: { isPro: true, recipeCount: true, monthlyResetDate: true },
@@ -56,6 +58,7 @@ export async function POST(req: NextRequest) {
         diabetesFriendly: true,
       },
     }),
+    getPalateProfile(session.user.id),
   ])
 
   if (!user) return Response.json({ error: 'User not found' }, { status: 404 })
@@ -92,6 +95,22 @@ export async function POST(req: NextRequest) {
     profileLines.push(`Diabetes-friendly: keep carbs moderate per serving, prefer low-glycemic ingredients, flag any recipe component that spikes blood sugar.`)
   }
   const profileContext = profileLines.length ? `\n\nUser profile:\n${profileLines.join('\n')}` : ''
+
+  // F87: derived palate profile — mirrors /generate. Soft preferences only;
+  // dietary restrictions above always outrank them.
+  const palateLines: string[] = []
+  if (palateProfile?.topCuisines?.length) {
+    palateLines.push(`Cuisines this user tends to enjoy: ${palateProfile.topCuisines.join(', ')}.`)
+  }
+  if (palateProfile?.lovedFlavors?.length) {
+    palateLines.push(`Flavors/styles this user has responded well to: ${palateProfile.lovedFlavors.join(', ')}.`)
+  }
+  if (palateProfile?.avoidedIngredients?.length) {
+    palateLines.push(`This user tends to avoid or dislike: ${palateProfile.avoidedIngredients.join(', ')}. Prefer alternatives when reasonable.`)
+  }
+  const palateContext = palateLines.length
+    ? `\n\nLearned taste preferences (soft preferences only — the dietary restrictions above always take priority over these):\n${palateLines.join('\n')}`
+    : ''
 
   // F61: strict mode — only use explicitly listed ingredients
   const strictContext = strictMode
@@ -168,7 +187,7 @@ Schema:
   "steps": [string],
   "notes": string,
   "nutrition": {"calories": number, "protein": number, "fat": number, "carbs": number, "fiber": number}
-}${personalityContext}${profileContext}${strictContext}${teachContext}${leftoverContext}${budgetContext}${dateNightContext}${cookingMethodContext}${exhaustedContext}${proteinMaxContext}${restaurantContext}${spiceContext}`,
+}${personalityContext}${profileContext}${palateContext}${strictContext}${teachContext}${leftoverContext}${budgetContext}${dateNightContext}${cookingMethodContext}${exhaustedContext}${proteinMaxContext}${restaurantContext}${spiceContext}`,
     messages: [{
       role: 'user',
       content: `Generate a full recipe for "${suggestion.title}". Description: ${suggestion.description}. Main ingredients available: ${ingredients.join(', ')}. Target servings: ${suggestion.servings || 4}.`,
