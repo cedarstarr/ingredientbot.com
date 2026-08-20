@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ChefHat, BookOpen, ArrowRight, Clock, Flame } from 'lucide-react'
+import { ChefHat, BookOpen, ArrowRight, Clock, Flame, UtensilsCrossed } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { formatDate } from '@/lib/utils'
 import { CookingHeatmap } from '@/components/recipe/cooking-heatmap'
@@ -105,6 +105,42 @@ export default async function DashboardPage() {
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
+      {/* F86: "Tonight" hero card — the hook. An answer, not a form: one question,
+          one button. Sits above the welcome copy so it's the first thing seen. */}
+      <div
+        data-testid="tonight-card"
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary/70 dark:from-primary/80 dark:to-primary/40 p-8 sm:p-10 text-primary-foreground shadow-lg shadow-primary/20"
+      >
+        <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-white/10 blur-2xl" aria-hidden="true" />
+        <div className="pointer-events-none absolute -bottom-12 -left-12 h-36 w-36 rounded-full bg-white/10 blur-2xl" aria-hidden="true" />
+        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+          <div className="flex items-start gap-4">
+            <div className="hidden sm:flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white/15">
+              <UtensilsCrossed className="h-7 w-7" />
+            </div>
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-balance">
+                What&apos;s for dinner tonight?
+              </h2>
+              <p className="mt-1.5 text-primary-foreground/85 text-sm sm:text-base max-w-md">
+                Tell us what&apos;s in the fridge — we&apos;ll hand you dinner in under a minute.
+              </p>
+            </div>
+          </div>
+          <Button
+            asChild
+            size="lg"
+            data-testid="tonight-generate"
+            className="w-full sm:w-auto shrink-0 bg-white text-primary hover:bg-white/90 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+          >
+            <Link href="/kitchen?tonight=1">
+              Pick tonight&apos;s dinner
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Link>
+          </Button>
+        </div>
+      </div>
+
       {/* Welcome */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">
