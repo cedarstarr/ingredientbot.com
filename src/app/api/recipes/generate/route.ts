@@ -6,6 +6,7 @@ import { dietaryModel } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { canonicalize, getCached, setCached, sha256 } from '@/lib/recipe-cache'
 import { buildCookingMethodContext, buildSpiceContext } from '@/lib/recipe-prompt-utils'
+import { getPalateProfile } from '@/lib/palate'
 
 export const maxDuration = 60
 
@@ -88,6 +89,25 @@ export async function POST(req: NextRequest) {
   }
   const profileContext = profileLines.length ? `\n\nUser profile:\n${profileLines.join('\n')}` : ''
 
+  // F87: derived palate profile — lazily recomputed (no cron) when missing/>24h stale.
+  // Preferences only, never a constraint: dietary restrictions above always outrank it,
+  // and the prompt says so explicitly so the model doesn't let a loved flavor override
+  // an allergy the profile above already ruled out.
+  const palateProfile = await getPalateProfile(session.user.id)
+  const palateLines: string[] = []
+  if (palateProfile?.topCuisines?.length) {
+    palateLines.push(`Cuisines this user tends to enjoy: ${palateProfile.topCuisines.join(', ')}.`)
+  }
+  if (palateProfile?.lovedFlavors?.length) {
+    palateLines.push(`Flavors/styles this user has responded well to: ${palateProfile.lovedFlavors.join(', ')}.`)
+  }
+  if (palateProfile?.avoidedIngredients?.length) {
+    palateLines.push(`This user tends to avoid or dislike: ${palateProfile.avoidedIngredients.join(', ')}. Prefer alternatives when reasonable.`)
+  }
+  const palateContext = palateLines.length
+    ? `\n\nLearned taste preferences (soft preferences only — the dietary restrictions above always take priority over these):\n${palateLines.join('\n')}`
+    : ''
+
   // F26: expiry-first mode — tell AI to prioritize using expiring items
   const expiryContext = expiringIngredients?.length
     ? `\n\nIMPORTANT: These ingredients are expiring soon and must be prioritized in the recipes: ${(expiringIngredients as string[]).join(', ')}. Each recipe should use at least one of these expiring ingredients.`
@@ -161,6 +181,9 @@ export async function POST(req: NextRequest) {
   // Cache key: every input that affects the AI output, including the loaded
   // dietary profile so a profile change invalidates the cache. Pantry array is
   // sorted to be order-insensitive.
+  // F87: palate must be part of the key too, or a cached response generated for
+  // one user's learned preferences would be served to a different user (or a
+  // stale palate) hitting the same ingredients/modifiers.
   const sortedIngredients = Array.isArray(ingredients) ? [...ingredients].sort() : ingredients
   const cacheKey = canonicalize({
     ingredients: sortedIngredients, cuisine, dietary,
@@ -168,6 +191,13 @@ export async function POST(req: NextRequest) {
     impressMe, prepTimeLimit, budgetMode, chefPersonality, dateNightMode, personalityPrompt,
     cookingMethod, exhaustedMode, proteinMax, restaurantStyle, spiceLevel,
     profile: dietaryProfile,
+    palate: palateProfile
+      ? {
+          lovedFlavors: palateProfile.lovedFlavors,
+          avoidedIngredients: palateProfile.avoidedIngredients,
+          topCuisines: palateProfile.topCuisines,
+        }
+      : null,
   })
   const inputHash = sha256(cacheKey)
   const cached = await getCached<{ body: string }>('suggestions', inputHash)
@@ -199,7 +229,7 @@ CRITICAL: Respond with ONLY newline-delimited JSON objects, one recipe per line,
 Each line must be a complete valid JSON object with these exact keys:
 {"title":"Recipe Name","description":"One sentence description","prepMin":15,"cookMin":25,"servings":4,"cuisine":"Italian","difficulty":"easy"}
 
-difficulty must be exactly: "easy", "medium", or "hard"${personalityContext}${profileContext}${expiryContext}${leftoverContext}${strictContext}${teachContext}${prepTimeContext}${budgetContext}${dateNightContext}${impressMeContext}${cookingMethodContext}${exhaustedContext}${proteinMaxContext}${restaurantContext}${spiceContext}`,
+difficulty must be exactly: "easy", "medium", or "hard"${personalityContext}${profileContext}${palateContext}${expiryContext}${leftoverContext}${strictContext}${teachContext}${prepTimeContext}${budgetContext}${dateNightContext}${impressMeContext}${cookingMethodContext}${exhaustedContext}${proteinMaxContext}${restaurantContext}${spiceContext}`,
       messages: [{
         role: 'user',
         content: impressMe
