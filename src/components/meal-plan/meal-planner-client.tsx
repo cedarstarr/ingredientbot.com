@@ -11,7 +11,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
-import { Plus, X, ShoppingCart, Check, Copy, Search } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Plus, X, ShoppingCart, Check, Copy, Search, Clock, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/components/ui/toaster'
 
@@ -40,6 +41,14 @@ interface PlanData {
 
 interface GroceryItemState {
   checked: boolean
+}
+
+// F90: meal timing orchestrator — one interleaved step across 2-3 recipes cooked together.
+interface TimelineStep {
+  minuteOffset: number
+  recipeId: string
+  recipeTitle: string
+  instruction: string
 }
 
 interface MealPlannerClientProps {
@@ -78,8 +87,87 @@ export function MealPlannerClient({
 
   const [loading, setLoading] = useState<string | null>(null) // `${day}-${meal}` or slot id
 
+  // F90: meal timing orchestrator state — timeline is client-cached only, never persisted.
+  const [orchestrateDay, setOrchestrateDay] = useState<number | null>(null)
+  const [orchestrateSelectedIds, setOrchestrateSelectedIds] = useState<Set<string>>(new Set())
+  const [orchestrating, setOrchestrating] = useState(false)
+  const [orchestrateError, setOrchestrateError] = useState<string | null>(null)
+  const [timeline, setTimeline] = useState<TimelineStep[] | null>(null)
+  const [checkedSteps, setCheckedSteps] = useState<Set<number>>(new Set())
+
   const getSlot = (day: number, meal: string) =>
     slots.find(s => s.dayOfWeek === day && s.mealType === meal)
+
+  // F90: unique recipes assigned to each day, across all three meals — the
+  // candidate pool for "cook together". Recompute only when slots change.
+  const dayRecipes = useMemo(() => {
+    const map = new Map<number, SlimRecipe[]>()
+    for (const day of [0, 1, 2, 3, 4, 5, 6]) {
+      const seen = new Set<string>()
+      const list: SlimRecipe[] = []
+      for (const meal of MEALS) {
+        const slot = getSlot(day, meal)
+        if (slot && !seen.has(slot.recipeId)) {
+          seen.add(slot.recipeId)
+          list.push(slot.recipe)
+        }
+      }
+      if (list.length >= 2) map.set(day, list)
+    }
+    return map
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slots])
+
+  const selectOrchestrateDay = (day: number) => {
+    setOrchestrateDay(day)
+    setOrchestrateSelectedIds(new Set())
+    setTimeline(null)
+    setCheckedSteps(new Set())
+    setOrchestrateError(null)
+  }
+
+  const toggleOrchestrateRecipe = (id: string, include: boolean) => {
+    setOrchestrateSelectedIds(prev => {
+      const next = new Set(prev)
+      if (include) next.add(id)
+      else next.delete(id)
+      return next
+    })
+  }
+
+  const runOrchestrate = async () => {
+    if (orchestrateSelectedIds.size < 2 || orchestrating) return
+    setOrchestrating(true)
+    setOrchestrateError(null)
+    setTimeline(null)
+    setCheckedSteps(new Set())
+    try {
+      const res = await fetch('/api/meal-plan/orchestrate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recipeIds: [...orchestrateSelectedIds] }),
+      })
+      const data = await res.json().catch(() => null)
+      if (!res.ok || !Array.isArray(data?.steps)) {
+        setOrchestrateError(typeof data?.error === 'string' ? data.error : "couldn't build a timeline just now")
+        return
+      }
+      setTimeline(data.steps as TimelineStep[])
+    } catch {
+      setOrchestrateError("couldn't build a timeline just now")
+    } finally {
+      setOrchestrating(false)
+    }
+  }
+
+  const toggleStepChecked = (index: number) => {
+    setCheckedSteps(prev => {
+      const next = new Set(prev)
+      if (next.has(index)) next.delete(index)
+      else next.add(index)
+      return next
+    })
+  }
 
   const openPicker = (day: number, meal: string) => {
     setPickerDay(day)
@@ -300,6 +388,133 @@ export function MealPlannerClient({
             </div>
           ))}
         </div>
+      </div>
+
+      {/* F90: meal timing orchestrator — combine 2-3 of a day's recipes into one interleaved timeline */}
+      <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <Clock className="h-5 w-5 text-primary" />
+            Cook Together
+          </h2>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Pick 2–3 recipes from the same day and get one interleaved timeline so everything&apos;s ready at once.
+          </p>
+        </div>
+
+        {dayRecipes.size === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            Assign at least 2 recipes to the same day above to try this.
+          </p>
+        ) : (
+          <>
+            <div className="flex flex-wrap gap-1.5">
+              {[...dayRecipes.keys()].map(day => (
+                <button
+                  key={day}
+                  type="button"
+                  onClick={() => selectOrchestrateDay(day)}
+                  aria-pressed={orchestrateDay === day}
+                  className={cn(
+                    'rounded-full px-3 py-1 text-xs font-medium border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    orchestrateDay === day
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'bg-background text-muted-foreground border-border hover:border-primary/40 hover:text-foreground',
+                  )}
+                >
+                  {DAYS[day]}
+                </button>
+              ))}
+            </div>
+
+            {orchestrateDay !== null && (
+              <div className="space-y-3">
+                <ul className="space-y-1">
+                  {(dayRecipes.get(orchestrateDay) ?? []).map(recipe => {
+                    const checked = orchestrateSelectedIds.has(recipe.id)
+                    const disabled = !checked && orchestrateSelectedIds.size >= 3
+                    return (
+                      <li key={recipe.id}>
+                        <label
+                          className={cn(
+                            'flex items-center gap-2.5 rounded-md px-2 py-1.5 cursor-pointer hover:bg-muted/40 transition-colors',
+                            disabled && 'opacity-50 cursor-not-allowed hover:bg-transparent',
+                          )}
+                        >
+                          <Checkbox
+                            checked={checked}
+                            disabled={disabled}
+                            onCheckedChange={(v) => toggleOrchestrateRecipe(recipe.id, Boolean(v))}
+                            aria-label={`Include ${recipe.title} in the timeline`}
+                          />
+                          <span className="text-sm text-foreground">{recipe.title}</span>
+                        </label>
+                      </li>
+                    )
+                  })}
+                </ul>
+
+                <Button
+                  size="sm"
+                  onClick={runOrchestrate}
+                  disabled={orchestrateSelectedIds.size < 2 || orchestrating}
+                  data-testid="orchestrate-button"
+                  className="gap-1.5"
+                >
+                  {orchestrating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Clock className="h-3.5 w-3.5" />}
+                  Build timeline
+                </Button>
+
+                {orchestrateError && (
+                  <p role="alert" className="text-sm text-destructive">{orchestrateError}</p>
+                )}
+
+                {timeline && timeline.length > 0 && (
+                  <ol
+                    data-testid="orchestrate-timeline"
+                    className="mt-2 space-y-1.5 border-l-2 border-border pl-4"
+                  >
+                    {timeline.map((step, i) => {
+                      const stepChecked = checkedSteps.has(i)
+                      return (
+                        <li key={i} className="relative">
+                          <span
+                            className="absolute -left-5.25 top-2.5 h-2.5 w-2.5 rounded-full bg-primary"
+                            aria-hidden="true"
+                          />
+                          <label
+                            className={cn(
+                              'flex items-start gap-2.5 rounded-md px-2 py-1.5 -ml-2 cursor-pointer hover:bg-muted/40 transition-colors',
+                              stepChecked && 'opacity-60',
+                            )}
+                          >
+                            <Checkbox
+                              checked={stepChecked}
+                              onCheckedChange={() => toggleStepChecked(i)}
+                              aria-label={`Mark step ${i + 1} done`}
+                              className="mt-0.5"
+                            />
+                            <span className="flex-1 min-w-0">
+                              <span className="flex items-center gap-2 flex-wrap">
+                                <span className="text-xs font-mono text-muted-foreground">+{step.minuteOffset}m</span>
+                                <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                                  {step.recipeTitle}
+                                </Badge>
+                              </span>
+                              <span className={cn('block text-sm text-foreground mt-0.5', stepChecked && 'line-through')}>
+                                {step.instruction}
+                              </span>
+                            </span>
+                          </label>
+                        </li>
+                      )
+                    })}
+                  </ol>
+                )}
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* Recipe picker dialog */}

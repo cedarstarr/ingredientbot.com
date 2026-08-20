@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -70,6 +70,10 @@ const SPICE_LABELS = ['Mild', 'Medium', 'Hot', 'Fire'] as const
 
 export function KitchenPanel() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  // F86: dashboard "Tonight" card lands here with ?tonight=1 — no auto AI call,
+  // just an obvious entry point (options stay collapsed, textarea focused).
+  const isTonightMode = searchParams.get('tonight') === '1'
   const [ingredients, setIngredients] = useState<string[]>([])
   const [inputValue, setInputValue] = useState('')
   const [suggestions, setSuggestions] = useState<RecipeSuggestion[]>([])
@@ -121,6 +125,15 @@ export function KitchenPanel() {
   const recognitionRef = useRef<any>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // F86: land ready to generate — focus the composer so typing (then hitting
+  // Find recipes) is the very next action. Options panel is already collapsed
+  // by default (showAdvanced starts false), so nothing else to do here.
+  useEffect(() => {
+    if (isTonightMode) textareaRef.current?.focus()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // F53 + F70 + F74 + F78: Load persisted kitchen preferences on mount
   useEffect(() => {
@@ -513,6 +526,9 @@ export function KitchenPanel() {
   }
 
   // Count how many advanced options are active
+  // F86: the count badge on the single Options disclosure trigger — includes
+  // the quick-toggle pills now that they live inside it too, so the badge
+  // still reflects everything hidden, not just the original "advanced" subset.
   const advancedActiveCount = [
     cuisine !== 'any',
     dietary !== 'any',
@@ -522,6 +538,10 @@ export function KitchenPanel() {
     leftoverMode,
     dateNightMode,
     prepTimeLimit !== null,
+    strictMode,
+    exhaustedMode,
+    proteinMax,
+    teachMode,
   ].filter(Boolean).length
 
   return (
@@ -530,13 +550,21 @@ export function KitchenPanel() {
 
         {/* Header */}
         <div>
+          {isTonightMode && (
+            <Badge variant="secondary" className="mb-2 gap-1 text-[11px] font-medium">
+              <ChefHat className="h-3 w-3" />
+              Picking tonight&apos;s dinner
+            </Badge>
+          )}
           <h1 className="text-[30px] font-bold tracking-tight leading-[1.1] mb-1.5">What&apos;s in your fridge today?</h1>
           <p className="text-muted-foreground text-[15px]">Type, snap, or paste a list. I&apos;ll cook up 4 ideas in about 8 seconds.</p>
         </div>
 
-        {/* Composer card */}
+        {/* Composer card — one obvious action: type ingredients, hit Find recipes.
+            F86: every mode toggle now lives behind the single Options disclosure below. */}
         <div className="rounded-xl bg-card ring-1 ring-foreground/10 p-5 space-y-3">
           <Textarea
+            ref={textareaRef}
             value={inputValue}
             onChange={(e) => {
               const text = e.target.value
@@ -548,95 +576,32 @@ export function KitchenPanel() {
             placeholder="2 chicken thighs, broccoli, garlic, sesame oil, gochujang..."
             className="min-h-[80px] resize-none border-input focus-visible:ring-ring text-sm"
           />
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            {/* 4 primary mode toggles as pills */}
-            <div className="flex gap-2 flex-wrap">
-              {/* Strict mode */}
-              <button
-                type="button"
-                onClick={() => setStrictMode(v => !v)}
-                aria-pressed={strictMode}
-                className={cn(
-                  'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  strictMode
-                    ? 'bg-primary/10 border-primary/30 text-primary'
-                    : 'bg-background border-input text-foreground hover:bg-muted/60',
-                )}
-              >
-                <Lock className="h-3.5 w-3.5" />
-                Strict ingredients only
-              </button>
-              {/* Exhausted mode */}
-              <button
-                type="button"
-                onClick={() => setExhaustedMode(v => !v)}
-                className={cn(
-                  'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  exhaustedMode
-                    ? 'bg-primary/10 border-primary/30 text-primary'
-                    : 'bg-background border-input text-foreground hover:bg-muted/60',
-                )}
-                aria-pressed={exhaustedMode}
-              >
-                <Bed className="h-3.5 w-3.5" />
-                I&apos;m exhausted
-              </button>
-              {/* Protein-max */}
-              <button
-                type="button"
-                onClick={() => setProteinMax(v => !v)}
-                className={cn(
-                  'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  proteinMax
-                    ? 'bg-primary/10 border-primary/30 text-primary'
-                    : 'bg-background border-input text-foreground hover:bg-muted/60',
-                )}
-                aria-pressed={proteinMax}
-              >
-                <Dumbbell className="h-3.5 w-3.5" />
-                Protein-Max
-              </button>
-              {/* Teach me mode */}
-              <button
-                type="button"
-                onClick={() => setTeachMode(v => !v)}
-                className={cn(
-                  'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  teachMode
-                    ? 'bg-primary/10 border-primary/30 text-primary'
-                    : 'bg-background border-input text-foreground hover:bg-muted/60',
-                )}
-                aria-pressed={teachMode}
-              >
-                <BookOpen className="h-3.5 w-3.5" />
-                Teach me mode
-              </button>
-            </div>
-            {/* Action buttons */}
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isAnalyzingPhoto}>
-                {isAnalyzingPhoto ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Camera className="h-4 w-4 mr-1.5" />}
-                Snap fridge
-              </Button>
-              <Button size="sm" onClick={generateRecipes} disabled={allIngredients().length < 2 || isGenerating || impressMeLoading}>
-                {isGenerating ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : null}
-                Find recipes
-                {!isGenerating && <ArrowRight className="h-4 w-4 ml-1.5" />}
-              </Button>
-            </div>
+          <div className="flex items-center justify-end gap-2">
+            <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isAnalyzingPhoto}>
+              {isAnalyzingPhoto ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Camera className="h-4 w-4 mr-1.5" />}
+              Snap fridge
+            </Button>
+            <Button size="sm" onClick={generateRecipes} disabled={allIngredients().length < 2 || isGenerating || impressMeLoading}>
+              {isGenerating ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : null}
+              Find recipes
+              {!isGenerating && <ArrowRight className="h-4 w-4 ml-1.5" />}
+            </Button>
           </div>
         </div>
 
-        {/* Advanced options (collapsible) */}
+        {/* Options (collapsible) — F86: single disclosure hides every mode toggle,
+            filter, and generation mode so the panel opens as one obvious action
+            instead of a form. Hidden by default (showAdvanced starts false). */}
         <div>
           <button
             type="button"
             onClick={() => setShowAdvanced(v => !v)}
             aria-expanded={showAdvanced}
+            data-testid="kitchen-options-toggle"
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
           >
             <ChevronDown className={cn('h-4 w-4 transition-transform', showAdvanced && 'rotate-180')} />
-            Advanced options
+            Options
             {advancedActiveCount > 0 && (
               <span className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold px-1">
                 {advancedActiveCount}
@@ -645,6 +610,71 @@ export function KitchenPanel() {
           </button>
           {showAdvanced && (
             <div className="mt-3 rounded-xl border border-border bg-card/50 p-4 space-y-4">
+              {/* F86: quick-toggle pills, moved out of the composer card so it
+                  reads as one obvious action instead of a form. */}
+              <div className="flex gap-2 flex-wrap">
+                {/* Strict mode */}
+                <button
+                  type="button"
+                  onClick={() => setStrictMode(v => !v)}
+                  aria-pressed={strictMode}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    strictMode
+                      ? 'bg-primary/10 border-primary/30 text-primary'
+                      : 'bg-background border-input text-foreground hover:bg-muted/60',
+                  )}
+                >
+                  <Lock className="h-3.5 w-3.5" />
+                  Strict ingredients only
+                </button>
+                {/* Exhausted mode */}
+                <button
+                  type="button"
+                  onClick={() => setExhaustedMode(v => !v)}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    exhaustedMode
+                      ? 'bg-primary/10 border-primary/30 text-primary'
+                      : 'bg-background border-input text-foreground hover:bg-muted/60',
+                  )}
+                  aria-pressed={exhaustedMode}
+                >
+                  <Bed className="h-3.5 w-3.5" />
+                  I&apos;m exhausted
+                </button>
+                {/* Protein-max */}
+                <button
+                  type="button"
+                  onClick={() => setProteinMax(v => !v)}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    proteinMax
+                      ? 'bg-primary/10 border-primary/30 text-primary'
+                      : 'bg-background border-input text-foreground hover:bg-muted/60',
+                  )}
+                  aria-pressed={proteinMax}
+                >
+                  <Dumbbell className="h-3.5 w-3.5" />
+                  Protein-Max
+                </button>
+                {/* Teach me mode */}
+                <button
+                  type="button"
+                  onClick={() => setTeachMode(v => !v)}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[13px] font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    teachMode
+                      ? 'bg-primary/10 border-primary/30 text-primary'
+                      : 'bg-background border-input text-foreground hover:bg-muted/60',
+                  )}
+                  aria-pressed={teachMode}
+                >
+                  <BookOpen className="h-3.5 w-3.5" />
+                  Teach me mode
+                </button>
+              </div>
+
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {/* F34: Cuisine selector */}
                 <div className="space-y-1">
