@@ -117,6 +117,7 @@ model User {
   mealPlans         MealPlan[]
   collections       RecipeCollection[]
   dietaryProfile    DietaryProfile?
+  palateProfile     PalateProfile?
   pantryItems       PantryItem[]
   recipeCompletions RecipeCompletion[]
 
@@ -220,8 +221,15 @@ model RecipeCompletion {
   userId   String   @map("user_id")
   recipeId String   @map("recipe_id")
   cookedAt DateTime @default(now()) @map("cooked_at")
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  recipe   Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  // F88: post-cook feedback loop. Nullable — every pre-F88 row has no outcome,
+  // and logging a cook without answering the prompt stays valid.
+  outcome String? // "great" | "okay" | "failed"
+  note    String? @db.Text
+  aiTip   String? @map("ai_tip") @db.Text
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@index([userId, cookedAt(sort: Desc)])
   @@index([recipeId])
@@ -322,6 +330,24 @@ model DietaryProfile {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("dietary_profiles")
+}
+
+// F87: derived taste profile — computed from ratings/completions/modifications,
+// not user-entered. Recomputed lazily on generate when >24h stale (no cron).
+model PalateProfile {
+  id     String @id @default(cuid())
+  userId String @unique @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  lovedFlavors       String[] @default([]) @map("loved_flavors")
+  avoidedIngredients String[] @default([]) @map("avoided_ingredients")
+  topCuisines        String[] @default([]) @map("top_cuisines")
+
+  computedAt DateTime @default(now()) @map("computed_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("palate_profiles")
 }
 
 model AICallLog {

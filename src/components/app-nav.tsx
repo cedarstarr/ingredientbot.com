@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { cn } from '@/lib/utils'
 import {
   ChefHat, BookOpen, Settings, Shield,
-  LogOut, Menu, X, CalendarDays, Link2, History, FolderOpen, Package, Sparkles,
+  LogOut, Menu, X, CalendarDays, Link2, History, FolderOpen, Sparkles,
   BarChart3,
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -15,19 +15,8 @@ import { ThemeToggle } from '@/components/theme-toggle'
 // Nav grouped by content type/feature (Option B): Kitchen (active cooking ops) | Recipes (saved/imported content) | Insights (usage stats) | Account
 // Decision (2026-05-09): /dashboard moved out of Account — usage stats aren't settings; /import moved under Recipes — import *creates* a recipe.
 
-// F26: expiry urgency check (mirrors pantry-client logic)
-function hasExpiringSoon(expiresAt: string): boolean {
-  const now = new Date()
-  now.setHours(0, 0, 0, 0)
-  const exp = new Date(expiresAt)
-  exp.setHours(0, 0, 0, 0)
-  const days = Math.round((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-  return days <= 7
-}
-
 const KITCHEN_LINKS = [
   { href: '/kitchen',    label: 'Cook',      icon: ChefHat },
-  { href: '/pantry',     label: 'Pantry',    icon: Package },
   { href: '/meal-plan',  label: 'Meal Plan', icon: CalendarDays },
 ]
 
@@ -56,14 +45,13 @@ function NavSection({ label }: { label: string }) {
 }
 
 function NavLink({
-  href, label, icon: Icon, active, onClick, badge,
+  href, label, icon: Icon, active, onClick,
 }: {
   href: string
   label: string
   icon: React.ElementType
   active: boolean
   onClick?: () => void
-  badge?: number
 }) {
   return (
     <Link
@@ -78,11 +66,6 @@ function NavLink({
     >
       <Icon className="h-4 w-4 shrink-0" />
       <span className="flex-1">{label}</span>
-      {badge != null && badge > 0 && (
-        <span className="ml-auto flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-accent text-accent-foreground px-1 text-[10px] font-bold">
-          {badge}
-        </span>
-      )}
     </Link>
   )
 }
@@ -101,19 +84,6 @@ function UserAvatar({ name }: { name?: string | null }) {
 function SidebarContent({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname()
   const { data: session } = useSession()
-  // F26: count expiring pantry items for nav badge
-  const [expiringCount, setExpiringCount] = useState(0)
-
-  useEffect(() => {
-    if (!session?.user) return
-    fetch('/api/user/pantry')
-      .then(r => r.ok ? r.json() : [])
-      .then((items: Array<{ expiresAt: string | null }>) => {
-        const count = items.filter(i => i.expiresAt && hasExpiringSoon(i.expiresAt)).length
-        setExpiringCount(count)
-      })
-      .catch(() => {})
-  }, [session?.user])
 
   const isActive = (href: string) =>
     pathname === href || (href !== '/dashboard' && pathname.startsWith(href + '/'))
@@ -153,7 +123,6 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
             icon={icon}
             active={isActive(href)}
             onClick={onClose}
-            badge={href === '/pantry' ? expiringCount : undefined}
           />
         ))}
 
