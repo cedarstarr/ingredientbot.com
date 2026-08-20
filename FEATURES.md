@@ -48,7 +48,7 @@
 
 ## 🛠 Planned / In Progress
 
-- ✅ F26 Expiry-first mode [Hook]
+- 💤 F26 Expiry-first mode [Hook]
 - ✅ F27 Recipe sharing with public permalink [Hook]
 - ✅ F28 Leftover optimizer mode [Hook]
 - ✅ F31 Dietary profile (persistent preferences across all generations) [Core]
@@ -58,13 +58,13 @@
 - ✅ F35 Difficulty selector [Core]
 - ✅ F42 Dark mode [Core]
 - ✅ F43 PWA / offline saved recipes [Core]
-- ✅ F44 Pantry inventory (persistent, tracked between sessions) [Sticky]
+- 💤 F44 Pantry inventory (persistent, tracked between sessions) [Sticky]
 - ✅ F45 Weekly meal plan email digest [Sticky]
-- 🛠 F46 Expiration date tracking [Sticky]
+- 💤 F46 Expiration date tracking [Sticky]
 - ✅ F47 Recipe completion history + streak [Sticky]
 - 🛠 F48 Nutritional summary over time (weekly/monthly) [Sticky]
 - 🛠 F49 Family profile (multi-eater with different restrictions) [Sticky]
-- 🛠 F50 Smart grocery list (missing items vs pantry state only) [Sticky]
+- 💤 F50 Smart grocery list (missing items vs pantry state only) [Sticky]
 - ✅ F51 Recipe rating (personal 1–5 stars) [Sticky]
 - 🛠 F52 Referral program (extra credits) [Sticky]
 - ✅ F53 Budget mode (prefer cheaper ingredient combos) [Sticky]
@@ -180,7 +180,7 @@ F37. **Recipe history** [Core] — Full paginated archive of every recipe a user
 
 ## Differentiators
 
-F26. ✅ **Expiry-first mode** [Hook] — Flag ingredients expiring soon and tell Claude to prioritize using them. "Spinach expires tomorrow — generate a recipe that uses it up." Emotionally resonant; reduces household food waste guilt. Built: `expiresAt DateTime?` on PantryItem, PATCH /api/user/pantry/[id] to set expiry, expiry badges (🔴 ≤3d, 🟡 ≤7d) on pantry page + kitchen panel, expiry-first toggle button in kitchen panel elevates expiring items and injects context into the AI system prompt, amber nav badge on Pantry link when items are expiring within 7 days.
+F26. 💤 **Expiry-first mode** [Hook] — Flag ingredients expiring soon and tell Claude to prioritize using them. "Spinach expires tomorrow — generate a recipe that uses it up." Emotionally resonant; reduces household food waste guilt. Built: `expiresAt DateTime?` on PantryItem, PATCH /api/user/pantry/[id] to set expiry, expiry badges (🔴 ≤3d, 🟡 ≤7d) on pantry page + kitchen panel, expiry-first toggle button in kitchen panel elevates expiring items and injects context into the AI system prompt, amber nav badge on Pantry link when items are expiring within 7 days. — postponed 2026-08-20: pantry UI shelved
 
 F27. ✅ **Recipe sharing (public permalink)** [Hook] — Every saved recipe gets a public URL. Share to Twitter/Instagram/iMessage. Virality mechanism: each shared recipe is an ad for ingredientbot. No other ingredient-first AI app has a shareable recipe URL that doesn't require signup to view. Built: `isPublic` + `publicSlug` on Recipe model, POST/DELETE `/api/recipes/[id]/share`, public `/r/[slug]` page (no auth, OG metadata), `ShareRecipeButton` component on saved recipe cards.
 
@@ -192,7 +192,7 @@ F42. ✅ **Dark mode** [Core] — System-aware dark/light mode via next-themes. 
 
 F43. ✅ **PWA / offline saved recipes** [Core] — Manual service worker (public/sw.js) with three caching strategies: cache-first for /api/user/pantry and /api/recipes/* (enables offline viewing), network-first for navigation with fallback to /offline page, stale-while-revalidate for static assets. manifest.json at /public/manifest.json (name, icons, theme_color, display: standalone, start_url: /kitchen). SwRegister client component auto-registers the SW. PwaInstallPrompt component listens for `beforeinstallprompt` and shows a bottom-sheet banner. Root layout gets manifest link, theme-color meta tag, and apple-touch-icon via Next.js metadata API.
 
-F44. **Pantry inventory (persistent)** [Sticky] — A managed list of what's in your kitchen that persists between sessions. The kitchen page pre-fills from your pantry; you add/remove items as you shop and cook. This shifts ingredientbot from a "one-off session" tool to a "daily cooking OS." Built: PantryItem model (userId, ingredient, addedAt), GET/POST /api/user/pantry, DELETE /api/user/pantry/[id], /pantry management page, pantry panel in kitchen with per-session toggle (include/exclude each item), pantry items merged with typed ingredients for AI generation.
+F44. 💤 **Pantry inventory (persistent)** [Sticky] — A managed list of what's in your kitchen that persists between sessions. The kitchen page pre-fills from your pantry; you add/remove items as you shop and cook. This shifts ingredientbot from a "one-off session" tool to a "daily cooking OS." Built: PantryItem model (userId, ingredient, addedAt), GET/POST /api/user/pantry, DELETE /api/user/pantry/[id], /pantry management page, pantry panel in kitchen with per-session toggle (include/exclude each item), pantry items merged with typed ingredients for AI generation. — postponed 2026-08-20: pantry UI shelved
 
 F55. ✅ **Voice input for ingredients** [Vibe] — Web Speech API: tap a mic button, speak your ingredients naturally. "chicken, garlic, some leftover rice, and I think I have coconut milk." Hands-free pantry scanning is especially valuable on mobile when your hands are full. Crumb built this on mobile; we bring it to the web. Built: mic button next to ingredient input, `SpeechRecognition`/`webkitSpeechRecognition` with transcript appended to input, pulsing red recording indicator, graceful hidden fallback when browser unsupported.
 
