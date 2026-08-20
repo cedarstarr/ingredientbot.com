@@ -45,6 +45,11 @@
 - ✅ F81 Public recipe browse by cuisine at `/recipes` [Core]
 - ✅ F82 Ingredient glossary at `/ingredients` [Core]
 - ✅ F85 Allergen reference glossary at `/allergens` [Core]
+- ✅ F86 "What's for dinner tonight?" card + single Options disclosure [Hook]
+- ✅ F87 Derived palate profile injected into generation [Sticky]
+- ✅ F88 Post-cook outcome loop with AI next-time tip [Sticky]
+- ✅ F89 Voice sous-chef in cooking mode [Hook]
+- ✅ F90 Meal timing orchestrator [Vibe]
 
 ## 🛠 Planned / In Progress
 
@@ -176,6 +181,8 @@ F36. **Nutrition estimate per recipe** [Core] — Calories, protein, carbs, fat,
 
 F37. **Recipe history** [Core] — Full paginated archive of every recipe a user has generated, with timestamp, ingredients used, and search. Without history the app feels disposable — users need to recover the recipe they generated 3 days ago. (Feasibility: Low — already stored in DB, needs history page UI)
 
+F86. ✅ **"What's for dinner tonight?"** [Hook] — Hero card at the top of the dashboard whose single button drops the user straight into `/kitchen?tonight=1`, pre-armed and ready to generate. Paired with a structural simplification of the kitchen panel: every mode toggle now lives behind one collapsed "Options" disclosure, so the panel opens as one obvious action instead of a wall of switches. The app's answer to "I don't want to configure anything, just tell me what to cook." Built: `tonight-card`/`tonight-generate` on the dashboard, `kitchen-options-toggle` disclosure in `kitchen-panel.tsx` (F86 collapsed the previously always-visible Strict / Exhausted / Protein-Max / Teach-me pills into it), `?tonight=1` focuses the composer without firing an AI call.
+
 ---
 
 ## Differentiators
@@ -209,6 +216,14 @@ F76. ✅ **Protein-Max mode** [Hook] — Toggle that forces each serving to cont
 F77. ✅ **Restaurant recreation** [Hook] — Free-text field: "Recreate like Chipotle, Olive Garden…". Claude reproduces a restaurant's signature flavor profile using pantry ingredients. High emotional resonance — users frequently crave specific restaurant dishes and can't afford/access them. Session-only (different restaurant each time). Injected into generate and cook prompts. Built: `<Input>` below Cuisine selector with 120-char limit, server re-trims input and slices to 120 chars, RESTAURANT RECREATION system prompt block.
 
 F79. ✅ **Medical dietary flags** [Core] — Three bool fields on the dietary profile: low-sodium, low-FODMAP, diabetes-friendly. Rendered as a "Medical" subsection in the dietary profile page with a clear disclaimer: "general AI-generated guidelines — not medical advice. Consult your doctor for serious conditions." Injected into generate and cook prompts as always-on constraints when enabled. Expands the dietary-restricted audience beyond basic allergens to users managing chronic conditions. Built: `lowSodium`/`lowFodmap`/`diabetesFriendly` booleans on DietaryProfile (migration `20260422000000_add_medical_dietary_fields`), three shadcn `<Checkbox>` inputs in DietaryProfileSection, disclaimer copy, GET/PATCH /api/user/dietary accepts/returns the three fields, system-prompt profile block appends each enabled guideline.
+
+F87. ✅ **Palate profile** [Sticky] — A taste profile the app *derives* rather than asks for: loved flavours, avoided ingredients, and top cuisines computed from ratings (≥4 positive, ≤2 negative), repeat-cook frequency, recipe modifications (an ingredient removed is a dislike signal), and F88 cook outcomes. Recomputed lazily on generation when older than 24h — deliberately no cron. Injected into the generate and cook prompts *below* dietary restrictions, because an allergy is not a taste, and folded into the generation cache key so one user never receives another's cached recipe. The longer you cook, the more the app sounds like it knows you. Built: `PalateProfile` model (migration `20260820000000_sprint_palate_profile_and_cook_feedback`), pure `computePalate()` in `src/lib/palate.ts` with unit tests, `GET`/`DELETE /api/user/palate`, read-only `palate-profile-card` with reset in Settings.
+
+F88. ✅ **Post-cook loop** [Sticky] — After logging "cooked this", a one-tap outcome prompt (great / okay / failed) with an optional note. The outcome persists before any AI call, then a single broker call returns a short, concrete "next time…" tip pinned to the recipe. On AI failure the outcome is still saved and the UI says so — never a fabricated tip. Closes the loop that turns a generator into a cooking companion, and feeds F87. Built: `outcome`/`note`/`aiTip` on `RecipeCompletion`, `POST /api/recipes/[id]/cook-feedback` (ownership derived from the session and the URL, never the body), `cook-outcome-*` buttons, `recipe-ai-tip` card.
+
+F89. ✅ **Voice sous-chef** [Hook] — Hands-free Q&A inside cooking mode: a mic button (with a text input fallback wherever `SpeechRecognition` is missing) sends the question plus the recipe and the *current step index* to a streaming broker route; the answer streams into a bottom sheet and `speechSynthesis` reads it aloud, toggleable and on by default. Five exchanges kept client-side, nothing persisted. Failure copy is deliberately honest — the model is told to say it doesn't know rather than guess, because a confidently wrong answer here means someone undercooks chicken. Built: `POST /api/recipes/[id]/sous-chef` (SSE, ownership-checked, `priority: 'interactive'`), `src/components/kitchen/sous-chef.tsx`, `sous-chef-mic`/`sous-chef-input`/`sous-chef-answer`.
+
+F90. ✅ **Meal timing orchestrator** [Vibe] — Select 2–3 recipes from one day of the meal plan and get a single interleaved timeline: every step from every dish, ordered, with minute offsets and tickable checkboxes. Solves the actual hard part of cooking a multi-dish meal, which is sequencing, not recipes. Client-cached only — no schema change, nothing persisted. Built: `POST /api/meal-plan/orchestrate` (one ownership-scoped `findMany`, structured output via a required array rather than `z.record()`, which breaks structured output on this model), `orchestrate-button`/`orchestrate-timeline` in the meal planner.
 
 ---
 

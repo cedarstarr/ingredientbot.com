@@ -14,8 +14,8 @@ test.describe('Kitchen advanced options panel', () => {
     await page.waitForLoadState('domcontentloaded')
   })
 
-  test('Advanced options section is present and can be opened @smoke', async ({ page }) => {
-    const toggle = page.getByRole('button', { name: /advanced options/i })
+  test('Options section is present and can be opened @smoke', async ({ page }) => {
+    const toggle = page.getByTestId('kitchen-options-toggle')
     await expect(toggle).toBeVisible()
     await toggle.click()
     // Panel expands — cuisine selector should now be visible
@@ -23,24 +23,24 @@ test.describe('Kitchen advanced options panel', () => {
   })
 
   test('F34: cuisine selector is visible in advanced options', async ({ page }) => {
-    await page.getByRole('button', { name: /advanced options/i }).click()
+    await page.getByTestId('kitchen-options-toggle').click()
     // Cuisine label
     await expect(page.getByRole('main').getByText(/cuisine/i).first()).toBeVisible()
   })
 
   test('F35: difficulty selector is visible in advanced options', async ({ page }) => {
-    await page.getByRole('button', { name: /advanced options/i }).click()
+    await page.getByTestId('kitchen-options-toggle').click()
     await expect(page.getByRole('main').getByText(/difficulty/i).first()).toBeVisible()
   })
 
   test('F32: prep time limit buttons are visible in advanced options', async ({ page }) => {
-    await page.getByRole('button', { name: /advanced options/i }).click()
+    await page.getByTestId('kitchen-options-toggle').click()
     await expect(page.getByRole('button', { name: /15 min/i })).toBeVisible()
     await expect(page.getByRole('button', { name: /30 min/i })).toBeVisible()
   })
 
   test('F32: selecting a prep time marks it as active', async ({ page }) => {
-    await page.getByRole('button', { name: /advanced options/i }).click()
+    await page.getByTestId('kitchen-options-toggle').click()
     const btn15 = page.getByRole('button', { name: /15 min/i })
     await btn15.click()
     await expect(btn15).toHaveAttribute('aria-pressed', 'true')
@@ -50,6 +50,7 @@ test.describe('Kitchen advanced options panel', () => {
   })
 
   test('F61: Strict ingredients toggle is visible and toggleable', async ({ page }) => {
+    await page.getByTestId('kitchen-options-toggle').click()
     const strictBtn = page.getByRole('button', { name: /strict ingredients only/i })
     await expect(strictBtn).toBeVisible()
     await strictBtn.click()
@@ -58,6 +59,7 @@ test.describe('Kitchen advanced options panel', () => {
   })
 
   test('F75: I\'m exhausted toggle is visible and toggleable', async ({ page }) => {
+    await page.getByTestId('kitchen-options-toggle').click()
     const btn = page.getByRole('button', { name: /i'm exhausted/i })
     await expect(btn).toBeVisible()
     await btn.click()
@@ -67,6 +69,7 @@ test.describe('Kitchen advanced options panel', () => {
   })
 
   test('F76: Protein-Max toggle is visible and toggleable', async ({ page }) => {
+    await page.getByTestId('kitchen-options-toggle').click()
     const btn = page.getByRole('button', { name: /protein-max/i })
     await expect(btn).toBeVisible()
     await btn.click()
@@ -74,6 +77,7 @@ test.describe('Kitchen advanced options panel', () => {
   })
 
   test('F64: Teach me mode toggle is visible and toggleable', async ({ page }) => {
+    await page.getByTestId('kitchen-options-toggle').click()
     const btn = page.getByRole('button', { name: /teach me mode/i })
     await expect(btn).toBeVisible()
     await btn.click()
@@ -81,22 +85,22 @@ test.describe('Kitchen advanced options panel', () => {
   })
 
   test('F53: Budget mode toggle is visible in advanced panel', async ({ page }) => {
-    await page.getByRole('button', { name: /advanced options/i }).click()
+    await page.getByTestId('kitchen-options-toggle').click()
     await expect(page.getByRole('button', { name: /budget mode/i })).toBeVisible()
   })
 
   test('F71: Date night mode toggle is visible in advanced panel', async ({ page }) => {
-    await page.getByRole('button', { name: /advanced options/i }).click()
+    await page.getByTestId('kitchen-options-toggle').click()
     await expect(page.getByRole('button', { name: /date night/i })).toBeVisible()
   })
 
   test('F28: Leftover optimizer toggle is visible in advanced panel', async ({ page }) => {
-    await page.getByRole('button', { name: /advanced options/i }).click()
+    await page.getByTestId('kitchen-options-toggle').click()
     await expect(page.getByRole('button', { name: /leftover optimizer/i })).toBeVisible()
   })
 
   test('F28: enabling leftover optimizer reveals leftover text input', async ({ page }) => {
-    await page.getByRole('button', { name: /advanced options/i }).click()
+    await page.getByTestId('kitchen-options-toggle').click()
     const leftoverBtn = page.getByRole('button', { name: /leftover optimizer/i })
     await leftoverBtn.click()
     // Leftover textarea should appear
@@ -104,19 +108,19 @@ test.describe('Kitchen advanced options panel', () => {
   })
 
   test('F54: Impress Me button is visible in advanced panel', async ({ page }) => {
-    await page.getByRole('button', { name: /advanced options/i }).click()
+    await page.getByTestId('kitchen-options-toggle').click()
     await expect(page.getByRole('button', { name: /impress me/i })).toBeVisible()
   })
 
   test('F70: Chef style buttons are visible in advanced panel (Home Cook, French Chef, Street Food)', async ({ page }) => {
-    await page.getByRole('button', { name: /advanced options/i }).click()
+    await page.getByTestId('kitchen-options-toggle').click()
     await expect(page.getByRole('button', { name: /home cook/i })).toBeVisible()
     await expect(page.getByRole('button', { name: /french chef/i })).toBeVisible()
     await expect(page.getByRole('button', { name: /street food/i })).toBeVisible()
   })
 
   test('F70: selecting a chef style marks it as active', async ({ page }) => {
-    await page.getByRole('button', { name: /advanced options/i }).click()
+    await page.getByTestId('kitchen-options-toggle').click()
     const frenchBtn = page.getByRole('button', { name: /french chef/i })
     await frenchBtn.click()
     await expect(frenchBtn).toHaveAttribute('aria-pressed', 'true')
@@ -125,24 +129,24 @@ test.describe('Kitchen advanced options panel', () => {
   })
 
   test('F74: Cooking method selector is visible in advanced panel', async ({ page }) => {
-    await page.getByRole('button', { name: /advanced options/i }).click()
+    await page.getByTestId('kitchen-options-toggle').click()
     await expect(page.getByRole('main').getByText(/cooking method/i)).toBeVisible()
   })
 
   test('F77: Restaurant recreation input is visible in advanced panel', async ({ page }) => {
-    await page.getByRole('button', { name: /advanced options/i }).click()
+    await page.getByTestId('kitchen-options-toggle').click()
     await expect(
       page.getByRole('textbox', { name: /recreate the flavor profile of a restaurant/i }),
     ).toBeVisible()
   })
 
   test('F78: Spice level slider is visible in advanced panel', async ({ page }) => {
-    await page.getByRole('button', { name: /advanced options/i }).click()
+    await page.getByTestId('kitchen-options-toggle').click()
     await expect(page.getByTestId('spice-level-slider')).toBeVisible()
   })
 
   test('F55: voice input button is present (or hidden on unsupported browsers)', async ({ page }) => {
-    await page.getByRole('button', { name: /advanced options/i }).click()
+    await page.getByTestId('kitchen-options-toggle').click()
     // Voice input is conditionally rendered; on Chromium it may or may not be present
     // We verify it doesn't crash the page — the panel itself must still be stable
     const voiceBtn = page.getByRole('button', { name: /speak ingredients|start voice input/i })
