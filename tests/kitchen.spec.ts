@@ -69,8 +69,15 @@ test.describe('Kitchen — ingredient input journey', () => {
       })
     })
 
+    const btn = page.getByRole('button', { name: /find recipes/i })
+    // Wait for hydration before typing: fill() on a not-yet-hydrated controlled
+    // textarea sets the DOM value without React seeing it, so the CTA never
+    // ungates. Asserting the disabled CTA first proves the client is live.
+    await expect(btn).toBeDisabled()
+
     await page.getByPlaceholder(KITCHEN_PLACEHOLDER).fill('chicken, rice')
-    await page.getByRole('button', { name: /find recipes/i }).click()
+    await expect(btn).toBeEnabled()
+    await btn.click()
     await page.waitForTimeout(500)
     expect(page.url()).toContain('/kitchen')
   })

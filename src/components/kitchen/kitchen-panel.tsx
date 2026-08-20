@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -68,12 +68,11 @@ type CookingMethod = (typeof COOKING_METHODS)[number]
 // F78: Spice level labels — index = value (0..3)
 const SPICE_LABELS = ['Mild', 'Medium', 'Hot', 'Fire'] as const
 
-export function KitchenPanel() {
+export function KitchenPanel({ tonightMode = false }: { tonightMode?: boolean }) {
   const router = useRouter()
-  const searchParams = useSearchParams()
   // F86: dashboard "Tonight" card lands here with ?tonight=1 — no auto AI call,
   // just an obvious entry point (options stay collapsed, textarea focused).
-  const isTonightMode = searchParams.get('tonight') === '1'
+  const isTonightMode = tonightMode
   const [ingredients, setIngredients] = useState<string[]>([])
   const [inputValue, setInputValue] = useState('')
   const [suggestions, setSuggestions] = useState<RecipeSuggestion[]>([])

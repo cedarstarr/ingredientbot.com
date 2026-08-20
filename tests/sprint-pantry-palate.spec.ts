@@ -34,6 +34,11 @@ test.describe('Palate profile (F87)', () => {
     await page.waitForLoadState('domcontentloaded')
 
     const card = page.getByRole('main').getByTestId('palate-profile-card')
+    // The card testid appears only once the client fetch resolves (the skeleton
+    // carries palate-profile-loading), so await it before branching — a bare
+    // isVisible() check races the fetch and silently takes the wrong branch.
+    await expect(card).toBeVisible()
+
     // The staging test user has no seeded ratings/completions/cooks, so the
     // honest empty state should render rather than fabricated data.
     const empty = card.getByTestId('palate-empty-state')
@@ -55,8 +60,13 @@ test.describe('Palate profile (F87)', () => {
 
     const resetBtn = page.getByRole('main').getByTestId('palate-reset')
     await expect(resetBtn).toBeVisible()
-    await resetBtn.focus()
-    await expect(resetBtn).toBeFocused()
+
+    // Reset is correctly disabled when there is no profile to clear, and a
+    // disabled button cannot take focus — only assert focusability when enabled.
+    if (await resetBtn.isEnabled()) {
+      await resetBtn.focus()
+      await expect(resetBtn).toBeFocused()
+    }
   })
 
   test('Reset clears the profile and returns to the empty state, if it was populated', async ({ page }) => {

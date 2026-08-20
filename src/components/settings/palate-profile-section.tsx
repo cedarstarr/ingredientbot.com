@@ -53,7 +53,7 @@ export function PalateProfileSection() {
 
   if (loading) {
     return (
-      <div className="rounded-lg border border-border bg-card p-5" data-testid="palate-profile-card">
+      <div className="rounded-lg border border-border bg-card p-5" data-testid="palate-profile-loading">
         <div className="flex items-center gap-2 text-muted-foreground text-sm">
           <Loader2 className="h-4 w-4 animate-spin" />
           Loading palate profile…

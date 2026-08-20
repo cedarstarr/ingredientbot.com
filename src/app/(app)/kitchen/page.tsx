@@ -1,15 +1,16 @@
-import { Suspense } from 'react'
 import { KitchenPanel } from '@/components/kitchen/kitchen-panel'
 
 export const metadata = { title: 'Kitchen — IngredientBot' }
 
-export default function KitchenPage() {
-  // F86: KitchenPanel reads ?tonight=1 via useSearchParams — requires a Suspense
-  // boundary (same pattern as the (auth) pages) or Next.js opts the whole route
-  // out of static rendering.
-  return (
-    <Suspense>
-      <KitchenPanel />
-    </Suspense>
-  )
+// F86: ?tonight=1 is read here on the server and passed down as a prop. Reading it
+// with useSearchParams inside the client panel needs a Suspense boundary, and that
+// boundary bails out to a client render during hydration — remounting KitchenPanel
+// and wiping anything the user had already typed into the composer.
+export default async function KitchenPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tonight?: string }>
+}) {
+  const { tonight } = await searchParams
+  return <KitchenPanel tonightMode={tonight === '1'} />
 }

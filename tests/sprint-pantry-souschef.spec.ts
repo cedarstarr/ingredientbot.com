@@ -77,7 +77,7 @@ test.describe('Kitchen — voice sous-chef (F89)', () => {
   })
 
   test('sous-chef trigger opens the sheet with a text-fallback input', async ({ page }) => {
-    const trigger = page.getByTestId('sous-chef-trigger')
+    const trigger = page.getByRole('main').getByTestId('sous-chef-trigger')
     await expect(trigger).toBeVisible()
     await trigger.click()
 
@@ -89,7 +89,7 @@ test.describe('Kitchen — voice sous-chef (F89)', () => {
   })
 
   test('text-fallback question streams an answer into the bottom sheet @smoke', async ({ page }) => {
-    await page.getByTestId('sous-chef-trigger').click()
+    await page.getByRole('main').getByTestId('sous-chef-trigger').click()
 
     const input = page.getByTestId('sous-chef-input')
     await input.fill('How do I know when the chicken is done?')
@@ -113,7 +113,7 @@ test.describe('Kitchen — voice sous-chef (F89)', () => {
       })
     })
 
-    await page.getByTestId('sous-chef-trigger').click()
+    await page.getByRole('main').getByTestId('sous-chef-trigger').click()
     await page.getByTestId('sous-chef-input').fill('Can I substitute the chicken for tofu?')
     await page.getByTestId('sous-chef-submit').click()
 
