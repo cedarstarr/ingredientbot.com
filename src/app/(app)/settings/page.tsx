@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { SettingsClient } from '@/components/settings/settings-client'
 import { DietaryProfileSection } from '@/components/settings/dietary-profile-section'
+import { PalateProfileSection } from '@/components/settings/palate-profile-section'
 
 export const metadata = { title: 'Settings — IngredientBot' }
 
@@ -32,6 +33,9 @@ export default async function SettingsPage() {
 
       {/* F31: Dietary profile — persistent preferences applied to all AI generations */}
       <DietaryProfileSection />
+
+      {/* F87: Palate profile — derived taste signals, read-only + Reset */}
+      <PalateProfileSection />
 
       <SettingsClient />
     </div>
