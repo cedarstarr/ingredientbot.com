@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-08-17 (/qa-e2e run)
+**Last Updated**: 2026-08-20 (/qa-e2e run)
 
 ---
 
@@ -35,7 +35,7 @@
 | 20 | Performance Audit | /qa-perf | STALE | 3 | 2026-07-02 | [view](reports/2026-07-02-site-perf.md) |
 | 21 | SEO Audit | /qa-seo | STALE | 2 | 2026-07-13 | [view](reports/2026-04-19-site-seo.md) |
 | 22 | Accessibility Audit | /qa-a11y | STALE | 2 | 2026-07-15 | [view](reports/2026-07-15-qa-a11y.md) |
-| 23 | E2E Gate | /qa-e2e | DONE | 15 | 2026-08-17 | [view](reports/2026-08-17-qa-e2e.md) |
+| 23 | E2E Gate | /qa-e2e | DONE | 16 | 2026-08-20 | [view](reports/2026-08-17-qa-e2e.md) |
 | 24 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
 | 25 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
 | 26 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
@@ -44,7 +44,7 @@
 
 **Progress: 22/28 stages complete (1 skipped)**
 
-**Last Updated**: 2026-08-17 (/qa-e2e run)
+**Last Updated**: 2026-08-20 (/qa-e2e run)
 
 ---
 
@@ -148,3 +148,4 @@
 | 2026-08-17 | /qa-e2e | 1m | SUCCESS | Clean run, no changes. [view](reports/2026-08-17-qa-e2e.md) |
 | 2026-08-17 | /qa-e2e | 7m | SUCCESS | iPhone/WebKit @smoke tier: all tests pass, 0 failures [view](reports/2026-08-17-qa-e2e.md) |
 | 2026-08-17 | /qa-e2e | 1m | SUCCESS | 23/23 pass, 0 fail (android) [view](reports/2026-08-17-qa-e2e.md) |
+| 2026-08-20 | /qa-e2e | 95m | SUCCESS | Sprint: pantry closed (F26/F44/F46/F50 to 💤 — model, data and /api/user/pantry routes kept) + F86-F90 shipped. 183/192 Playwright pass across chromium/iphone/android; the 2 iPhone kitchen failures are pre-existing on main (3/3 there) and filed as FOU-413. Merged to staging. [view](reports/2026-08-17-qa-e2e.md) |
