@@ -28,22 +28,41 @@ export default async function globalSetup() {
   const context = await browser.newContext()
   const page = await context.newPage()
 
+  // Retry the login: the first attempt can lose its budget to a cold
+  // Neon/Railway connection while sibling suites start concurrently.
+  const AUTH_ATTEMPTS = 3
   try {
-    await page.goto(`${BASE_URL}/login`)
-    await page.getByLabel(/email/i).fill('test@test.com')
-    await page.getByLabel(/password/i).fill('Test1234!')
-    await page.getByRole('button', { name: /sign in|log in/i }).click()
+    for (let attempt = 1; attempt <= AUTH_ATTEMPTS; attempt++) {
+      try {
+        await page.goto(`${BASE_URL}/login`)
+        await page.getByLabel(/email/i).fill('test@test.com')
+        await page.getByLabel(/password/i).fill('Test1234!')
+        await page.getByRole('button', { name: /sign in|log in/i }).click()
 
-    // Wait for navigation to kitchen or dashboard — on cold start this can take 60+s
-    // because the Railway DB proxy (PgBouncer) needs to establish a connection
-    await page.waitForURL(/\/(kitchen|dashboard)/, { timeout: 120000, waitUntil: 'commit' })
+        // Wait for navigation to kitchen or dashboard — on cold start this can take 60+s
+        // because the Railway DB proxy (PgBouncer) needs to establish a connection
+        await page.waitForURL(/\/(kitchen|dashboard)/, { timeout: 120000, waitUntil: 'commit' })
 
-    await context.storageState({ path: AUTH_FILE })
-    console.error(`[global-setup] Auth state saved to ${AUTH_FILE}`)
-  } catch (err) {
-    console.error('[global-setup] Authentication failed:', err)
-    // Write empty storageState so project storageState config doesn't error on missing file
-    fs.writeFileSync(AUTH_FILE, JSON.stringify({ cookies: [], origins: [] }))
+        await context.storageState({ path: AUTH_FILE })
+        console.error(`[global-setup] Auth state saved to ${AUTH_FILE}`)
+        break
+      } catch (err) {
+        if (attempt === AUTH_ATTEMPTS) {
+          // Deliberately fatal. The old code wrote an empty storageState here
+          // so the config wouldn't error on a missing file — which turned one
+          // clear failure into every auth'd test failing against the login
+          // page, 3 retries each, until the suite blew its wall-clock cap and
+          // emitted no report at all (2026-08-22: shkdwn + matchmymajor).
+          throw new Error(
+            `[global-setup] authentication failed after ${AUTH_ATTEMPTS} attempts: ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          )
+        }
+        console.error(`[global-setup] auth attempt ${attempt}/${AUTH_ATTEMPTS} failed, retrying:`, err)
+        await page.waitForTimeout(attempt * 5000)
+      }
+    }
   } finally {
     await browser.close()
   }
