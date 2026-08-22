@@ -3,13 +3,23 @@ import { renderWelcomeEmail } from '@/emails/welcome'
 import { renderPasswordResetEmail } from '@/emails/password-reset'
 import { renderVerifyEmail } from '@/emails/verify-email'
 
+// FOU-415 — ZeptoMail's REST API expects the whole Authorization value to be
+// `Zoho-enczapikey <key>`, and the SDK passes `token` through verbatim. Envs
+// disagree on whether the prefix is stored with the secret, so normalize here
+// instead of depending on the shape of a value that cannot be read back.
+function zeptoToken(raw: string | undefined): string {
+  const key = (raw ?? '').trim()
+  return key.startsWith('Zoho-enczapikey ') ? key : `Zoho-enczapikey ${key}`
+}
+
+
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3010'
 const EMAIL_FROM = process.env.EMAIL_FROM || 'IngredientBot <hello@ingredientbot.com>'
 
 function getMailClient(): SendMailClient | null {
   const apiKey = process.env.ZEPTOMAIL_API_KEY
   if (!apiKey) return null
-  return new SendMailClient({ url: 'api.zeptomail.com/', token: apiKey })
+  return new SendMailClient({ url: 'api.zeptomail.com/', token: zeptoToken(apiKey) })
 }
 
 function escapeHtml(str: string): string {

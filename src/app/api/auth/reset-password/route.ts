@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
   void logAuditEvent(user.id, 'password_reset', ip)
   try {
     await sendPasswordChangedEmail(resetToken.email, user.name ?? undefined)
-  } catch { /* silent */ }
+  } catch (err) { console.error('Transactional email send failed', err) }
 
   return NextResponse.json({ message: 'Password has been reset' })
 }

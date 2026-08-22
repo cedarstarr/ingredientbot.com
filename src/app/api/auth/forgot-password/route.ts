@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
   try {
     await sendPasswordResetEmail(email, token)
-  } catch { /* silent */ }
+  } catch (err) { console.error('Transactional email send failed', err) }
 
   return NextResponse.json({ message: 'If an account exists, a reset link has been sent.' })
 }
