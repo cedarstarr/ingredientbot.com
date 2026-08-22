@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendWelcomeEmail } from '@/lib/email'
 import { authLimiter } from '@/lib/rate-limit'
+import { passwordSchema, validatePassword } from '@/lib/password-policy'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 
@@ -24,8 +25,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid email address' }, { status: 400 })
   }
 
-  if (password.length < 8) {
-    return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 })
+  const parsedPassword = passwordSchema.safeParse(password)
+  if (!parsedPassword.success) {
+    const issues = parsedPassword.error.issues.map((i) => i.message)
+    return NextResponse.json({ error: issues[0] ?? 'Invalid password', issues }, { status: 400 })
+  }
+  // passwordSchema has no side-channel for email/name, so the personal-info
+  // rule is checked separately once we have both in scope.
+  const contextIssues = validatePassword(password, { email, name })
+  if (contextIssues.length > 0) {
+    return NextResponse.json({ error: contextIssues[0], issues: contextIssues }, { status: 400 })
   }
 
   const existing = await prisma.user.findUnique({ where: { email } })
@@ -48,6 +57,7 @@ export async function POST(request: NextRequest) {
         password: hashedPassword,
         name: name || null,
         emailVerified: null,
+        passwordChangedAt: new Date(),
       },
     }),
     prisma.verificationToken.create({

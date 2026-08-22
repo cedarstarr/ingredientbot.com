@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { formatDate } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { requireAdmin } from '@/lib/admin'
+import RequirePasswordChangeButton from './require-password-change-button'
 
 export const metadata = { title: 'Users — Admin — IngredientBot' }
 
@@ -11,7 +12,10 @@ export default async function AdminUsersPage() {
   const users = await prisma.user.findMany({
     orderBy: { createdAt: 'desc' },
     take: 200,
-    select: { id: true, email: true, name: true, isAdmin: true, createdAt: true, emailVerified: true }
+    select: {
+      id: true, email: true, name: true, isAdmin: true, createdAt: true, emailVerified: true,
+      mustChangePassword: true,
+    }
   })
 
   return (
@@ -27,6 +31,7 @@ export default async function AdminUsersPage() {
               <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">Name</th>
               <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">Status</th>
               <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">Joined</th>
+              <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -41,14 +46,20 @@ export default async function AdminUsersPage() {
                       ? <Badge variant="secondary" className="text-xs">Verified</Badge>
                       : <Badge variant="outline" className="text-xs text-muted-foreground">Unverified</Badge>
                     }
+                    {user.mustChangePassword && (
+                      <Badge variant="outline" className="text-xs text-muted-foreground">Password change pending</Badge>
+                    )}
                   </div>
                 </td>
                 <td className="px-4 py-2.5 text-muted-foreground text-xs">{formatDate(user.createdAt)}</td>
+                <td className="px-4 py-2.5">
+                  <RequirePasswordChangeButton userId={user.id} initiallyRequired={user.mustChangePassword} />
+                </td>
               </tr>
             ))}
             {users.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">No users yet</td>
+                <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">No users yet</td>
               </tr>
             )}
           </tbody>

@@ -50,6 +50,7 @@
 - ✅ F88 Post-cook outcome loop with AI next-time tip [Sticky]
 - ✅ F89 Voice sous-chef in cooking mode [Hook]
 - ✅ F90 Meal timing orchestrator [Vibe]
+- ✅ F91 Password complexity policy + admin-forced password change [Core]
 
 ## 🛠 Planned / In Progress
 
@@ -274,6 +275,8 @@ F21. **Audit logging** [Core] — AuditLog model records key security events: lo
 F22. **Health check API** [Core] — GET /api/health returns DB connectivity and uptime. (Feasibility: built)
 
 F23. **Sitemap + robots.txt + OpenGraph image** [Core] — Static sitemap for public pages; custom OG image for social sharing; robots.txt. (Feasibility: built)
+
+- ✅ F91. **Password complexity policy + admin-forced password change** [Core] — Server-authoritative `passwordSchema`/`validatePassword()` (12–128 chars, mixed case, digit, symbol, deny-list, no email/name embedding, no repeated/sequential runs) enforced at signup, reset-password, and change-password; live checklist + strength meter on every password form. Admin can flag any user "Require password change" from `/admin/users`, which forces `/change-password` on next authenticated request via the `(app)`/`(admin)` layouts. (Feasibility: built)
 
 ---
 

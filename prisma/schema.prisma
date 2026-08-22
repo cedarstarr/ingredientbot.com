@@ -91,6 +91,12 @@ model User {
 
   sessionsRevokedAt DateTime? @map("sessions_revoked_at")
 
+  // Forced password change — set true by admin action or a future compromised-
+  // password flow; the (app)/(admin) layouts redirect here server-side (never
+  // in middleware, which runs on Edge and can't hit Prisma for this check).
+  mustChangePassword Boolean   @default(false) @map("must_change_password")
+  passwordChangedAt  DateTime? @map("password_changed_at")
+
   // F30: Freemium gate
   isPro            Boolean   @default(false) @map("is_pro")
   recipeCount      Int       @default(0) @map("recipe_count")
