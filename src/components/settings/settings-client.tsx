@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { signOut } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -9,9 +9,12 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
 import { useRouter } from 'next/navigation'
+import { PasswordRequirements } from '@/components/auth/password-requirements'
+import { validatePassword } from '@/lib/password-policy'
 
 export function SettingsClient() {
   const router = useRouter()
+  const { data: session } = useSession()
   const [name, setName] = useState('')
   const [nameLoading, setNameLoading] = useState(false)
   const [nameMsg, setNameMsg] = useState('')
@@ -65,6 +68,12 @@ export function SettingsClient() {
     setPasswordMsg('')
     if (newPassword !== confirmNewPassword) {
       setPasswordMsg('Passwords do not match')
+      return
+    }
+    // Client-side check is UX only — /api/user/password re-validates authoritatively.
+    const issues = validatePassword(newPassword, { email: session?.user?.email, name: session?.user?.name })
+    if (issues.length > 0) {
+      setPasswordMsg(issues[0])
       return
     }
     setPasswordLoading(true)
@@ -139,8 +148,13 @@ export function SettingsClient() {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="newPassword">New Password</Label>
-            <Input id="newPassword" type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="At least 8 characters" required />
+            <Input id="newPassword" type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="At least 12 characters" required data-testid="settings-password-new" />
           </div>
+          <PasswordRequirements
+            password={newPassword}
+            context={{ email: session?.user?.email, name: session?.user?.name }}
+            testIdPrefix="settings-password"
+          />
           <div className="space-y-1.5">
             <Label htmlFor="confirmNewPassword">Confirm New Password</Label>
             <Input id="confirmNewPassword" type="password" value={confirmNewPassword} onChange={e => setConfirmNewPassword(e.target.value)} required />

@@ -1,7 +1,21 @@
+import { redirect } from 'next/navigation'
+import { auth } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 import { AppNav } from '@/components/app-nav'
 import { AllergyAwarenessNotice } from '@/components/allergy-awareness-notice'
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  // Authoritative forced-password-change gate. Deliberately NOT in
+  // middleware.ts — middleware runs on the Edge runtime and this needs Prisma.
+  const session = await auth()
+  if (session?.user?.id) {
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { mustChangePassword: true },
+    })
+    if (user?.mustChangePassword) redirect('/change-password')
+  }
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <AppNav />
