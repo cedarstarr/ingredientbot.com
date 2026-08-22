@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { CheckCircle } from 'lucide-react'
+import { PasswordRequirements } from '@/components/auth/password-requirements'
+import { validatePassword } from '@/lib/password-policy'
 
 export function ResetPasswordForm() {
   const searchParams = useSearchParams()
@@ -25,8 +27,11 @@ export function ResetPasswordForm() {
       setError('Passwords do not match')
       return
     }
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters')
+    // Client-side check is UX only — /api/auth/reset-password re-validates
+    // authoritatively (it also knows the account email, this form doesn't).
+    const issues = validatePassword(password)
+    if (issues.length > 0) {
+      setError(issues[0])
       return
     }
 
@@ -92,10 +97,13 @@ export function ResetPasswordForm() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="At least 8 characters"
+            placeholder="At least 12 characters"
             required
+            data-testid="reset-password-new"
           />
         </div>
+
+        <PasswordRequirements password={password} testIdPrefix="reset-password" />
 
         <div className="space-y-1.5">
           <Label htmlFor="confirmPassword">Confirm Password</Label>

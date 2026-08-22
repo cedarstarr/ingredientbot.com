@@ -201,7 +201,12 @@ export default auth(async function middleware(request: NextAuthRequest) {
       path.startsWith('/verify-email') ||
       path.startsWith('/api/auth/verify-email') ||
       path.startsWith('/api/auth/resend-verification') ||
-      path.startsWith('/api/auth/')
+      path.startsWith('/api/auth/') ||
+      // A forced password change can coincide with an unverified email — the
+      // change-password flow must stay reachable rather than looping the user
+      // toward /verify-email first (mustChangePassword is only ever cleared here).
+      path.startsWith('/change-password') ||
+      path.startsWith('/api/user/password')
     if (!isVerifyEmailPath) {
       return addSecurityHeaders(NextResponse.redirect(new URL('/verify-email', request.url)), requestId, csp)
     }

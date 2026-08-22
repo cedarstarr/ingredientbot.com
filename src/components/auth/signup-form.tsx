@@ -8,6 +8,8 @@ import { ChefHat } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { PasswordRequirements } from '@/components/auth/password-requirements'
+import { validatePassword } from '@/lib/password-policy'
 
 export function SignupForm() {
   const router = useRouter()
@@ -26,8 +28,10 @@ export function SignupForm() {
       setError('Passwords do not match')
       return
     }
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters')
+    // Client-side check is UX only — /api/auth/signup re-validates authoritatively.
+    const issues = validatePassword(password, { email, name })
+    if (issues.length > 0) {
+      setError(issues[0])
       return
     }
 
@@ -113,11 +117,18 @@ export function SignupForm() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="At least 8 characters"
+            placeholder="At least 12 characters"
             required
             autoComplete="new-password"
+            data-testid="signup-password"
           />
         </div>
+
+        <PasswordRequirements
+          password={password}
+          context={{ email, name }}
+          testIdPrefix="signup"
+        />
 
         <div className="space-y-1.5">
           <Label htmlFor="confirmPassword">Confirm Password</Label>
