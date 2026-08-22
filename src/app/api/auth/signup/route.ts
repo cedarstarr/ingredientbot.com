@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
   // Send welcome/verify email
   try {
     await sendWelcomeEmail(email, name || null, verifyUrl)
-  } catch { /* silent */ }
+  } catch (err) { console.error('Transactional email send failed', err) }
 
   return NextResponse.json({ message: 'Account created. Please check your email to verify.' })
 }

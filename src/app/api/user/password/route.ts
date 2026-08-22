@@ -46,7 +46,7 @@ export async function PATCH(request: NextRequest) {
   void logAuditEvent(session.user.id, 'password_change', ip)
   try {
     await sendPasswordChangedEmail(user.email, user.name ?? undefined)
-  } catch { /* silent */ }
+  } catch (err) { console.error('Transactional email send failed', err) }
 
   return NextResponse.json({ message: 'Password updated' })
 }

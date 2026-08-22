@@ -44,7 +44,7 @@ export async function DELETE(request: NextRequest) {
 
   try {
     await sendAccountDeletedEmail(user.email, user.name ?? undefined)
-  } catch { /* silent */ }
+  } catch (err) { console.error('Transactional email send failed', err) }
 
   return NextResponse.json({ message: 'Account deleted' })
 }
