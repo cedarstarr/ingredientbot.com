@@ -85,7 +85,22 @@ function brokerMiddleware(ctx: AiContext): LanguageModelMiddleware {
  * recipe route, and an untagged user request must fail fast rather than sit in a
  * batch queue for minutes. Cron/batch callers pass `priority: 'batch'` explicitly.
  */
-export function brokerModel(ctx: AiContext) {
+/**
+ * The broker exposes a *lane* through the model id. `gpt-oss-120b` is a
+ * permanent alias for the free-text lane, which its own description scopes to
+ * "prose generation with no schema" and which is served by the shared
+ * gpt-oss-120b pool.
+ *
+ * Schema-bearing `generateObject` calls therefore belong on a structured lane,
+ * not free-text. Sending them to free-text worked only for as long as Cerebras
+ * happened to tolerate it: when it went down and the same calls rerouted to
+ * Groq, the schema never reached the model and generateObject failed
+ * validation on arrival — a completely different, well-formed JSON shape came
+ * back instead. See FOU-424.
+ */
+const STRUCTURED_LANE = 'structured-extraction'
+
+export function brokerModel(ctx: AiContext, lane: string = CANONICAL_MODEL) {
   const provider = createOpenAICompatible({
     name: 'ai-broker',
     baseURL: process.env.AI_BROKER_URL ?? '',
@@ -94,9 +109,16 @@ export function brokerModel(ctx: AiContext) {
       'x-feature': ctx.feature,
       'x-priority': ctx.priority ?? 'interactive',
     },
+    // Only the structured lanes get real json_schema requests. Without this the
+    // SDK falls back to json_object, which sends the *word* JSON but not the
+    // schema — the model then answers with well-formed JSON of entirely its own
+    // shape, and generateObject fails validation on arrival. Free-text stays
+    // false: its gpt-oss-120b pool is not schema-capable and, by design, never
+    // carries a schema.
+    supportsStructuredOutputs: lane !== CANONICAL_MODEL,
   })
   return wrapLanguageModel({
-    model: provider.chatModel(CANONICAL_MODEL),
+    model: provider.chatModel(lane),
     middleware: brokerMiddleware(ctx),
   })
 }
@@ -151,6 +173,20 @@ export function trackedModel(_provider: Provider, _modelId: string, ctx: ModelCt
   return wrapLanguageModel({
     model: brokerModel({ feature: ctx.feature, priority: ctx.priority ?? 'interactive' }),
     middleware: loggingMiddleware('ai-broker', CANONICAL_MODEL, ctx),
+  })
+}
+
+/**
+ * Structured-output sibling of `trackedModel` — same logging and attribution,
+ * routed to the broker's structured lane so a schema is actually honoured.
+ * Every `generateObject` call must use this, not `trackedModel`/`brokerModel`
+ * on the default lane; schemaless `generateText` calls stay on `trackedModel`.
+ * See FOU-424.
+ */
+export function trackedStructuredModel(ctx: ModelCtx) {
+  return wrapLanguageModel({
+    model: brokerModel({ feature: ctx.feature, priority: ctx.priority ?? 'interactive' }, STRUCTURED_LANE),
+    middleware: loggingMiddleware('ai-broker', STRUCTURED_LANE, ctx),
   })
 }
 
