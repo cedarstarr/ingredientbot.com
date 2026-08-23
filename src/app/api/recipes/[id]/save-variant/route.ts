@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateObject, NoObjectGeneratedError } from 'ai'
 import { z } from 'zod'
-import { trackedModel } from '@/lib/ai'
+import { trackedStructuredModel } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { Difficulty } from '@/generated/prisma/client'
 import { startOfCurrentMonth } from '@/lib/date-utils'
@@ -149,7 +149,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       }
       try {
         const aiResult = await generateObject({
-          model: trackedModel('google', 'gemini-2.5-flash-lite', { feature: 'recipe-save-variant', userId: session.user.id }),
+          // FOU-424: generateObject carries a schema, so this must use the broker's
+          // structured lane, not the free-text lane trackedModel routes to.
+          model: trackedStructuredModel({ feature: 'recipe-save-variant', userId: session.user.id }),
           maxOutputTokens: 4096,
           schema: structuredRecipeSchema,
           system: `You convert a modified recipe written in prose/markdown into structured JSON.

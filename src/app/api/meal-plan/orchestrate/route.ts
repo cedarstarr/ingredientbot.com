@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateObject, NoObjectGeneratedError } from 'ai'
 import { z } from 'zod'
-import { brokerModel } from '@/lib/ai'
+import { trackedStructuredModel } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 
 export const maxDuration = 60
@@ -88,7 +88,9 @@ export async function POST(req: NextRequest) {
 
     try {
       const result = await generateObject({
-        model: brokerModel({ feature: 'meal-plan-orchestrate', priority: 'interactive' }),
+        // FOU-424: generateObject carries a schema, so this must use the broker's
+        // structured lane, not the free-text lane brokerModel defaults to.
+        model: trackedStructuredModel({ feature: 'meal-plan-orchestrate', priority: 'interactive' }),
         maxOutputTokens: 2048,
         schema: timelineSchema,
         system: `You are a kitchen timing coordinator. Given ${recipes.length} recipes being cooked together for one meal, interleave their steps into ONE ordered cooking timeline so everything finishes around the same time.
