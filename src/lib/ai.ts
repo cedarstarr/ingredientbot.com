@@ -1,4 +1,4 @@
-import { cerebras } from '@ai-sdk/cerebras'
+import { groq } from '@ai-sdk/groq'
 import { google } from '@ai-sdk/google'
 import { anthropic } from '@ai-sdk/anthropic'
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible'
@@ -12,14 +12,16 @@ import { logAICall } from './ai-log'
 export const geminiFlashVision = google('gemini-2.5-flash-lite')
 
 // Portfolio AI standard (2026-08-01): the free-tier text lane goes through the
-// shared AI broker, which owns the Cerebras/Groq keys and schedules every site's
+// shared AI broker, which owns the shared provider keys and schedules every site's
 // traffic against the ONE free-tier budget they all share. Before it, each site
-// fell back Cerebras -> Groq blind to what the other ten were spending, so two
+// fell back through a provider chain blind to what the other ten were spending, so two
 // crons landing on the same minute was a silent 429 for whoever lost.
 const CANONICAL_MODEL = 'gpt-oss-120b'
 
 // Kept for the direct-to-provider fallback below, not for normal traffic.
-const DIRECT_MODEL = 'gpt-oss-120b'
+// Cerebras's free tier ended 2026-08-23 (every call now 402s), so the direct
+// fallback moved to Groq. Groq serves the same model under a different id.
+const DIRECT_MODEL = 'openai/gpt-oss-120b'
 
 export type AiPriority = 'interactive' | 'batch'
 
@@ -62,8 +64,8 @@ function brokerMiddleware(ctx: AiContext): LanguageModelMiddleware {
         return await doGenerate()
       } catch (err) {
         if (!brokerIsDown(err)) throw err
-        console.warn(`[ai] broker unreachable (${describe(err)}); direct Cerebras fallback for ${ctx.feature}`)
-        return await cerebras(DIRECT_MODEL).doGenerate(params)
+        console.warn(`[ai] broker unreachable (${describe(err)}); direct Groq fallback for ${ctx.feature}`)
+        return await groq(DIRECT_MODEL).doGenerate(params)
       }
     },
     wrapStream: async ({ doStream, params }) => {
@@ -71,8 +73,8 @@ function brokerMiddleware(ctx: AiContext): LanguageModelMiddleware {
         return await doStream()
       } catch (err) {
         if (!brokerIsDown(err)) throw err
-        console.warn(`[ai] broker unreachable (${describe(err)}); direct Cerebras stream fallback for ${ctx.feature}`)
-        return await cerebras(DIRECT_MODEL).doStream(params)
+        console.warn(`[ai] broker unreachable (${describe(err)}); direct Groq stream fallback for ${ctx.feature}`)
+        return await groq(DIRECT_MODEL).doStream(params)
       }
     },
   }
