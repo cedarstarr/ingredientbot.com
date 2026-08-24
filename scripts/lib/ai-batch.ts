@@ -40,6 +40,7 @@ import { generateText, generateObject } from 'ai';
 import { cerebras } from '@ai-sdk/cerebras';
 import { groq } from '@ai-sdk/groq';
 import { createAzure } from '@ai-sdk/azure';
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import type { ZodSchema } from 'zod';
 
 const CEREBRAS_MODEL = 'gpt-oss-120b';
@@ -50,7 +51,37 @@ const azure = process.env.AZURE_OPENAI_RESOURCE && process.env.AZURE_OPENAI_API_
   ? createAzure({ resourceName: process.env.AZURE_OPENAI_RESOURCE, apiKey: process.env.AZURE_OPENAI_API_KEY })
   : null;
 
-type Provider = 'azure' | 'cerebras' | 'groq';
+// NVIDIA NIM — OpenAI-compatible, serves the same gpt-oss-120b, supports strict
+// json_schema structured output (verified live 2026-08-23). Primary FREE lane:
+// Cerebras 402s "payment required" (FOU-427) and Groq's free tier is only 200k
+// tokens/DAY, which capped one seeding run at ~28 products.
+//
+// Resolved LAZILY on purpose. Seed scripts call dotenv config() in their own
+// body and tsx hoists this import above that call, so a module-level
+// process.env read is always undefined and the provider would silently never be
+// offered (looks identical to "not configured"). @ai-sdk/cerebras and groq read
+// their keys at call time; we must too.
+//
+// NOTE: the `azure` const above has this same module-load bug and is therefore
+// usually inert inside tsx seeders. That is currently the only thing keeping
+// seeders off the PAID lane — do NOT make it lazy without first pinning every
+// seeder's providers/tier, or every batch job starts billing Azure-first.
+const NVIDIA_MODEL = 'openai/gpt-oss-120b';
+let nvidiaProvider: ReturnType<typeof createOpenAICompatible> | null | undefined;
+function getNvidia() {
+  if (nvidiaProvider === undefined) {
+    nvidiaProvider = process.env.NVIDIA_API_KEY
+      ? createOpenAICompatible({
+          name: 'nvidia',
+          baseURL: process.env.NVIDIA_BASE_URL ?? 'https://integrate.api.nvidia.com/v1',
+          apiKey: process.env.NVIDIA_API_KEY,
+        })
+      : null;
+  }
+  return nvidiaProvider;
+}
+
+type Provider = 'azure' | 'nvidia' | 'cerebras' | 'groq';
 
 export interface BatchOptions {
   maxRetries?: number;
@@ -87,11 +118,13 @@ const limiter = new RateLimiter(25);
 
 interface ProviderStats {
   azure: { ok: number; failed: number };
+  nvidia: { ok: number; failed: number };
   cerebras: { ok: number; failed: number };
   groq: { ok: number; failed: number };
 }
 const stats: ProviderStats = {
   azure: { ok: 0, failed: 0 },
+  nvidia: { ok: 0, failed: 0 },
   cerebras: { ok: 0, failed: 0 },
   groq: { ok: 0, failed: 0 },
 };
@@ -120,6 +153,7 @@ const SCRIPT = basename(process.argv[1] ?? 'unknown');
 interface Spend { calls: number; inputTokens: number; outputTokens: number; costUsd: number }
 const spend: Record<Provider, Spend> = {
   azure: { calls: 0, inputTokens: 0, outputTokens: 0, costUsd: 0 },
+  nvidia: { calls: 0, inputTokens: 0, outputTokens: 0, costUsd: 0 },
   cerebras: { calls: 0, inputTokens: 0, outputTokens: 0, costUsd: 0 },
   groq: { calls: 0, inputTokens: 0, outputTokens: 0, costUsd: 0 },
 };
@@ -128,7 +162,9 @@ const unpricedWarned = new Set<string>();
 const deploymentFor = (provider: Provider, opts: BatchOptions) =>
   provider === 'azure'
     ? (opts.tier === 'bulk' ? AZURE_BULK : AZURE_QUALITY)
-    : provider === 'cerebras'
+    : provider === 'nvidia'
+      ? NVIDIA_MODEL
+      : provider === 'cerebras'
       ? CEREBRAS_MODEL
       : GROQ_MODEL;
 
@@ -196,9 +232,13 @@ async function withFallback<T>(
   call: (provider: Provider) => Promise<T>,
   opts: BatchOptions,
 ): Promise<{ result: T; provider: Provider }> {
-  const providers: Provider[] = opts.providers ?? (azure ? ['azure', 'cerebras', 'groq'] : ['cerebras', 'groq']);
+  const freeChain: Provider[] = getNvidia() ? ['nvidia', 'cerebras', 'groq'] : ['cerebras', 'groq'];
+  const providers: Provider[] = opts.providers ?? (azure ? ['azure', ...freeChain] : freeChain);
   if (providers.includes('azure') && !azure) {
     throw new Error('[ai-batch] azure requested but AZURE_OPENAI_RESOURCE / AZURE_OPENAI_API_KEY not set');
+  }
+  if (providers.includes('nvidia') && !getNvidia()) {
+    throw new Error('[ai-batch] nvidia requested but NVIDIA_API_KEY not set');
   }
   const maxRetries = opts.maxRetries ?? 3;
   const initialBackoff = opts.initialBackoffMs ?? 1000;
@@ -255,7 +295,9 @@ function describe(err: unknown): string {
 const modelFor = (provider: Provider, opts: BatchOptions) =>
   provider === 'azure'
     ? azure!(opts.tier === 'bulk' ? AZURE_BULK : AZURE_QUALITY)
-    : provider === 'cerebras'
+    : provider === 'nvidia'
+      ? getNvidia()!(NVIDIA_MODEL)
+      : provider === 'cerebras'
       ? cerebras(CEREBRAS_MODEL)
       : groq(GROQ_MODEL);
 
