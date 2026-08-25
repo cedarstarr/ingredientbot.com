@@ -233,7 +233,18 @@ async function withFallback<T>(
   opts: BatchOptions,
 ): Promise<{ result: T; provider: Provider }> {
   const freeChain: Provider[] = getNvidia() ? ['nvidia', 'cerebras', 'groq'] : ['cerebras', 'groq'];
-  const providers: Provider[] = opts.providers ?? (azure ? ['azure', ...freeChain] : freeChain);
+  // AZURE IS NEVER A DEFAULT (Cedar, 2026-08-24: "don't use azure for anything.
+  // We are only using it for seeding when I say so"). It is reachable ONLY by a
+  // caller passing `providers: ['azure', ...]` explicitly — e.g. ingredientbot's
+  // allergen lane, which is required to stay on a paid frontier model.
+  //
+  // Previously the default was azure-first at 'quality' tier whenever Azure creds
+  // were present, which meant any caller passing `tier: 'quality'` and no
+  // providers silently billed the paid deployment. That is the defect behind the
+  // 17x cost overrun, and it was only masked by the fact that the `azure` const
+  // below is evaluated at module load — before tsx-hoisted seeders run dotenv —
+  // so it read as unconfigured. Do not rely on that accident; this is the fix.
+  const providers: Provider[] = opts.providers ?? freeChain;
   if (providers.includes('azure') && !azure) {
     throw new Error('[ai-batch] azure requested but AZURE_OPENAI_RESOURCE / AZURE_OPENAI_API_KEY not set');
   }
@@ -244,6 +255,9 @@ async function withFallback<T>(
   const initialBackoff = opts.initialBackoffMs ?? 1000;
   let lastError: unknown;
 
+  if (providers.includes('azure')) {
+    console.warn('[ai-batch] ⚠ azure lane engaged (PAID) — explicit opt-in by this caller, not a default.');
+  }
   for (const provider of providers) {
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
