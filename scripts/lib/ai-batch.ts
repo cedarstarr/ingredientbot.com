@@ -232,7 +232,12 @@ async function withFallback<T>(
   call: (provider: Provider) => Promise<T>,
   opts: BatchOptions,
 ): Promise<{ result: T; provider: Provider }> {
-  const freeChain: Provider[] = getNvidia() ? ['nvidia', 'cerebras', 'groq'] : ['cerebras', 'groq'];
+  // CEREBRAS REMOVED 2026-08-24 (Cedar: "we dont use cerebras anymore"). It ended
+  // its automatic free tier 2026-08-17 and now 402s "payment required" on every
+  // call — a 402 is not retryable, so leaving it in the chain cost one wasted
+  // round-trip per item and nothing else. `cerebras` remains a valid Provider
+  // value for an explicit `providers: ['cerebras']` opt-in, but is never default.
+  const freeChain: Provider[] = getNvidia() ? ['nvidia', 'groq'] : ['groq'];
   // AZURE IS NEVER A DEFAULT (Cedar, 2026-08-24: "don't use azure for anything.
   // We are only using it for seeding when I say so"). It is reachable ONLY by a
   // caller passing `providers: ['azure', ...]` explicitly — e.g. ingredientbot's
