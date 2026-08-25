@@ -154,7 +154,7 @@ async function main() {
         // content, so they must never spend Azure credit. Without this pin the shared
         // ai-batch lib defaults to azure-first at the `quality` tier whenever
         // AZURE_OPENAI_* is set in the portfolio .env — which it is.
-        { system: SYSTEM_PROMPT, temperature: 0.7, providers: ['cerebras', 'groq'] },
+        { system: SYSTEM_PROMPT, temperature: 0.7, providers: ['nvidia', 'groq'] },
       ),
     {
       onProgress: (done, total, item) =>
