@@ -1,5 +1,5 @@
 /**
- * @description AI-generated PUBLIC recipe library seeder. Creates a house library user (library@ingredientbot.com, no password login) and seeds ~400 public recipes (isPublic + publicSlug) across ~40 cuisines. Recipe body, tags (5-8), and nutrition macros (calories/protein/carbs/fat only — no allergen claims) come from one ai-batch generation; allergens/mayContain come from scripts/lib/allergen-verify.ts on the same paid Azure model (single-model as of 2026-08-05 — NOT verified; the allergen disclaimer must render wherever they are shown). Idempotent on publicSlug.
+ * @description AI-generated PUBLIC recipe library seeder. Creates a house library user (library@ingredientbot.com, no password login) and seeds ~400 public recipes (isPublic + publicSlug) across ~40 cuisines. Recipe body, tags (5-8), and nutrition macros (calories/protein/carbs/fat only — no allergen claims) come from one ai-batch generation via DeepSeek V4 Flash on the Azure Foundry ds lane (AZURE_FOUNDRY_* env); allergens/mayContain come from scripts/lib/allergen-verify.ts on the same paid Azure model (single-model as of 2026-08-05 — NOT verified; the allergen disclaimer must render wherever they are shown). Idempotent on publicSlug.
  * @tables users, recipes
  *
  * Usage:
@@ -11,7 +11,8 @@
  * a side effect of a preview.
  *
  * Requires in /home/cedar/Projects/.env:
- *   AZURE_OPENAI_RESOURCE + AZURE_OPENAI_API_KEY   (allergen generation — no free-lane fallback)
+ *   AZURE_FOUNDRY_RESOURCE + AZURE_FOUNDRY_API_KEY   (recipe generation, ds lane)
+ *   AZURE_OPENAI_RESOURCE + AZURE_OPENAI_API_KEY     (allergen generation — no free-lane fallback)
  */
 import './lib/load-env' // MUST stay first — see scripts/lib/load-env.ts (import hoisting)
 import { z } from 'zod'
@@ -264,7 +265,8 @@ async function main() {
     console.log('\nFirst 5:')
     for (const d of dishes.slice(0, 5)) console.log(`  /r/${d.publicSlug}  (${d.cuisine})`)
     console.log(
-      '\nReal run requires AZURE_OPENAI_RESOURCE + AZURE_OPENAI_API_KEY (generation, incl. allergen fields).',
+      '\nReal run requires AZURE_FOUNDRY_RESOURCE + AZURE_FOUNDRY_API_KEY (recipe generation, ds lane) and ' +
+        'AZURE_OPENAI_RESOURCE + AZURE_OPENAI_API_KEY (allergen fields).',
     )
     return
   }
@@ -303,7 +305,7 @@ async function main() {
         PublicRecipeSchema,
         // tier is explicit on purpose: this is the public recipe library, so quality
         // lane. Contrast seed-recipes-ai.ts, which is demo-only and pinned to free.
-        { system: SYSTEM_PROMPT, temperature: 0.7, tier: 'quality' },
+        { system: SYSTEM_PROMPT, temperature: 0.7, tier: 'quality', providers: ['ds'] },
       )
 
       const allergen = await verifyRecipeAllergens({

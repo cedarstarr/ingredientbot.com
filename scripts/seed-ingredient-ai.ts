@@ -1,5 +1,5 @@
 /**
- * @description AI-generated ingredient encyclopedia seeder. Prose fields (description, storage, seasonality) via ai-batch defaults; allergen-bearing fields (allergenProfile, hiddenSources, crossContamination, substitutions) via scripts/lib/allergen-verify.ts on the same paid Azure model (single-model as of 2026-08-05 — NOT verified; the allergen disclaimer must render wherever they are shown). Idempotent on slug.
+ * @description AI-generated ingredient encyclopedia seeder. Prose fields (description, storage, seasonality) via DeepSeek V4 Flash on the Azure Foundry ds lane (AZURE_FOUNDRY_* env); allergen-bearing fields (allergenProfile, hiddenSources, crossContamination, substitutions) via scripts/lib/allergen-verify.ts on the same paid Azure model (single-model as of 2026-08-05 — NOT verified; the allergen disclaimer must render wherever they are shown). Idempotent on slug.
  * @tables ingredients
  *
  * Usage:
@@ -12,7 +12,8 @@
  * be generated and which env is required.
  *
  * Requires in /home/cedar/Projects/.env:
- *   AZURE_OPENAI_RESOURCE + AZURE_OPENAI_API_KEY   (generation — no free-lane fallback for allergen fields)
+ *   AZURE_FOUNDRY_RESOURCE + AZURE_FOUNDRY_API_KEY   (prose generation, ds lane)
+ *   AZURE_OPENAI_RESOURCE + AZURE_OPENAI_API_KEY     (allergen fields — no free-lane fallback)
  */
 import './lib/load-env' // MUST stay first — see scripts/lib/load-env.ts (import hoisting)
 import { z } from 'zod'
@@ -156,9 +157,10 @@ async function main() {
     console.log('\nFirst 5:')
     for (const i of inputs.slice(0, 5)) console.log(`  ${i.slug} (${i.category})`)
     console.log(
-      '\nReal run requires AZURE_OPENAI_RESOURCE + AZURE_OPENAI_API_KEY (generation, incl. allergen fields).',
+      '\nReal run requires AZURE_FOUNDRY_RESOURCE + AZURE_FOUNDRY_API_KEY (prose, ds lane) and ' +
+        'AZURE_OPENAI_RESOURCE + AZURE_OPENAI_API_KEY (allergen fields).',
     )
-    console.log('Prose fields use ai-batch defaults; allergen fields go through scripts/lib/allergen-verify.ts.')
+    console.log('Prose fields use the ds lane (DeepSeek V4 Flash); allergen fields go through scripts/lib/allergen-verify.ts.')
     return
   }
 
@@ -189,7 +191,7 @@ async function main() {
         // tier is explicit on purpose: visitor-facing encyclopedia prose belongs on the
         // quality lane. It was previously implicit via the lib default, which reads as
         // "nobody chose" rather than "quality was chosen" when auditing spend.
-        { system: PROSE_SYSTEM, temperature: 0.5, tier: 'quality' },
+        { system: PROSE_SYSTEM, temperature: 0.5, tier: 'quality', providers: ['ds'] },
       )
 
       const allergen = await verifyIngredientAllergens(input)
