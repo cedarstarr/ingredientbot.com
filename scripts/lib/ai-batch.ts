@@ -1,25 +1,29 @@
 /**
  * Portfolio-shared AI batch client for dev-time seed generation.
  *
- * Azure (GPT-5 / GPT-5-mini) primary when configured — paid frontier, used for
- * batch jobs that need production-grade accuracy (e.g. allergen-adjacent content,
- * see scripts/lib/allergen-verify.ts). Falls back to Cerebras (Llama 3.3 70B,
- * ~2000 t/s, free 1M tok/day), then Groq (Llama 3.3 70B versatile, ~300 t/s,
- * ~14k req/day) when Azure isn't configured or a caller opts out of it.
+ * Free lanes by default: NVIDIA NIM then Groq (both serving gpt-oss-120b).
+ * Paid lanes are explicit opt-in only, per the decisions of record:
+ *   'ds'    — DeepSeek V4 Flash on Azure AI Foundry: the seeding workhorse
+ *             (Notion "AI Model Routing & Seeding Plan", 2026-08-23/24).
+ *   'azure' — Azure OpenAI gpt-5-4 / gpt-5-4-mini: spot-check passes and the
+ *             lanes with a hard paid-frontier rule (ingredientbot allergens).
  *
  * Designed for dev-time batch jobs (seed scripts, content generation).
  * NOT for production traffic — uses your personal API keys.
  *
  * Required env in /home/cedar/Projects/.env:
- *   CEREBRAS_API_KEY=...
+ *   AZURE_OPENAI_RESOURCE=...             (optional — enables the azure lane)
+ *   AZURE_OPENAI_API_KEY=...              (optional — enables the azure lane)
+ *   AZURE_OPENAI_DEPLOYMENT_QUALITY=...   (optional — defaults to 'gpt-5')
+ *   AZURE_OPENAI_DEPLOYMENT_BULK=...      (optional — defaults to 'gpt-5-mini')
+ *   AZURE_FOUNDRY_RESOURCE=...            (optional — enables the ds lane)
+ *   AZURE_FOUNDRY_API_KEY=...             (optional — enables the ds lane)
+ *   AZURE_FOUNDRY_DEPLOYMENT_DS=...       (optional — defaults to 'deepseek-v4-flash')
+ *   NVIDIA_API_KEY=...
  *   GROQ_API_KEY=...
- *   AZURE_OPENAI_RESOURCE=...            (optional — enables the azure provider)
- *   AZURE_OPENAI_API_KEY=...             (optional — enables the azure provider)
- *   AZURE_OPENAI_DEPLOYMENT_QUALITY=...  (optional, defaults to 'gpt-5')
- *   AZURE_OPENAI_DEPLOYMENT_BULK=...     (optional, defaults to 'gpt-5-mini')
  *
  * Required deps per consuming site (npm install -D):
- *   ai @ai-sdk/cerebras @ai-sdk/groq @ai-sdk/azure zod
+ *   ai @ai-sdk/azure @ai-sdk/openai-compatible @ai-sdk/cerebras @ai-sdk/groq zod
  *
  * Usage from a site's scripts/seed-*.ts:
  *   import { batchText, batchObject, batchMap } from '../../ai-batch';
@@ -37,10 +41,10 @@
 import { appendFileSync } from 'node:fs';
 import { basename } from 'node:path';
 import { generateText, generateObject } from 'ai';
-import { cerebras } from '@ai-sdk/cerebras';
-import { groq } from '@ai-sdk/groq';
 import { createAzure } from '@ai-sdk/azure';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+import { cerebras } from '@ai-sdk/cerebras';
+import { groq } from '@ai-sdk/groq';
 import type { ZodSchema } from 'zod';
 
 const CEREBRAS_MODEL = 'gpt-oss-120b';
@@ -81,7 +85,34 @@ function getNvidia() {
   return nvidiaProvider;
 }
 
-type Provider = 'azure' | 'nvidia' | 'cerebras' | 'groq';
+// DeepSeek V4 Flash on the Azure AI Foundry resource (AZURE_FOUNDRY_*, a
+// DIFFERENT resource + key from AZURE_OPENAI_*). The seeding lane of record
+// since 2026-08-23/24 — 11x cheaper than gpt-5-4 on a 70/30 blend; gpt-5-4 is
+// reserved for spot-check passes. Lazy for the same tsx-hoisting reason as
+// nvidia above; lazy is SAFE here because 'ds' is never in a default chain —
+// it is reachable only via an explicit providers: ['ds'].
+// The api-key header is what the endpoint was verified with (2026-08-27);
+// createOpenAICompatible's apiKey option only sets Authorization: Bearer.
+let dsProvider: ReturnType<typeof createOpenAICompatible> | null | undefined;
+function getDs() {
+  if (dsProvider === undefined) {
+    const resource = process.env.AZURE_FOUNDRY_RESOURCE;
+    const apiKey = process.env.AZURE_FOUNDRY_API_KEY;
+    dsProvider = resource && apiKey
+      ? createOpenAICompatible({
+          name: 'azure-foundry',
+          baseURL: `https://${resource}.services.ai.azure.com/openai/v1`,
+          apiKey,
+          headers: { 'api-key': apiKey },
+          supportsStructuredOutputs: true,
+        })
+      : null;
+  }
+  return dsProvider;
+}
+const dsDeployment = () => process.env.AZURE_FOUNDRY_DEPLOYMENT_DS ?? 'deepseek-v4-flash';
+
+type Provider = 'azure' | 'ds' | 'nvidia' | 'cerebras' | 'groq';
 
 export interface BatchOptions {
   maxRetries?: number;
@@ -89,9 +120,9 @@ export interface BatchOptions {
   rpmLimit?: number;
   system?: string;
   temperature?: number;
-  /** Azure only: 'quality' selects AZURE_QUALITY (gpt-5), 'bulk' selects AZURE_BULK (gpt-5-mini). Defaults to 'quality'. */
+  /** Azure only: 'quality' selects AZURE_QUALITY (gpt-5-4), 'bulk' selects AZURE_BULK (gpt-5-4-mini). Ignored by every other provider. */
   tier?: 'quality' | 'bulk';
-  /** Explicit provider order. Defaults to ['azure', 'cerebras', 'groq'] when azure is configured, else ['cerebras', 'groq']. */
+  /** Explicit provider order. Defaults to the FREE chain (nvidia → groq). Paid lanes ('ds', 'azure') run only when named here. */
   providers?: Provider[];
 }
 
@@ -114,16 +145,20 @@ class RateLimiter {
 
 const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
 
-const limiter = new RateLimiter(25);
+// 18 rpm, not 25: the ds deployment's Azure quota is 20 RPM (GlobalStandard,
+// capacity 20, the subscription maximum for this model) — leave headroom.
+const limiter = new RateLimiter(18);
 
 interface ProviderStats {
   azure: { ok: number; failed: number };
+  ds: { ok: number; failed: number };
   nvidia: { ok: number; failed: number };
   cerebras: { ok: number; failed: number };
   groq: { ok: number; failed: number };
 }
 const stats: ProviderStats = {
   azure: { ok: 0, failed: 0 },
+  ds: { ok: 0, failed: 0 },
   nvidia: { ok: 0, failed: 0 },
   cerebras: { ok: 0, failed: 0 },
   groq: { ok: 0, failed: 0 },
@@ -134,8 +169,8 @@ export const getStats = () => structuredClone(stats);
 // Azure bills against a fixed prepaid credit, so a batch run that cannot report
 // what it spent is a run you can only audit after the fact. Every successful
 // call records its usage here and appends one line to a portfolio-wide ledger.
-// Cerebras/Groq are free tiers priced at 0, but still recorded — a run that
-// silently fell back off Azure should be visible, not invisible.
+// Free lanes are priced at 0, but still recorded — a run that silently fell
+// back off a paid lane should be visible, not invisible.
 //
 // Prices are USD per 1M tokens, Azure list pricing, keyed by DEPLOYMENT name
 // (not base model) because that is what the caller actually selects.
@@ -144,6 +179,10 @@ const PRICING: Record<string, { in: number; out: number }> = {
   'gpt-5-4-mini': { in: 0.75, out: 4.5 },
   'gpt-5': { in: 2.5, out: 15 },
   'gpt-5-mini': { in: 0.75, out: 4.5 },
+  // DeepSeek-V4-Flash 2026-04-23, GlobalStandard westus3 — retail-price API,
+  // verified 2026-08-27. Cached input is cheaper ($0.028/M) and not modeled, so
+  // ledger cost is a slight overestimate on cache-friendly prompts.
+  'deepseek-v4-flash': { in: 0.19, out: 0.51 },
 };
 
 const SPEND_LEDGER = process.env.AI_SPEND_LEDGER ?? '/home/cedar/Projects/.ai-spend.jsonl';
@@ -153,20 +192,25 @@ const SCRIPT = basename(process.argv[1] ?? 'unknown');
 interface Spend { calls: number; inputTokens: number; outputTokens: number; costUsd: number }
 const spend: Record<Provider, Spend> = {
   azure: { calls: 0, inputTokens: 0, outputTokens: 0, costUsd: 0 },
+  ds: { calls: 0, inputTokens: 0, outputTokens: 0, costUsd: 0 },
   nvidia: { calls: 0, inputTokens: 0, outputTokens: 0, costUsd: 0 },
   cerebras: { calls: 0, inputTokens: 0, outputTokens: 0, costUsd: 0 },
   groq: { calls: 0, inputTokens: 0, outputTokens: 0, costUsd: 0 },
 };
 const unpricedWarned = new Set<string>();
 
+const PAID_PROVIDERS: readonly Provider[] = ['azure', 'ds'];
+
 const deploymentFor = (provider: Provider, opts: BatchOptions) =>
   provider === 'azure'
     ? (opts.tier === 'bulk' ? AZURE_BULK : AZURE_QUALITY)
-    : provider === 'nvidia'
-      ? NVIDIA_MODEL
-      : provider === 'cerebras'
-      ? CEREBRAS_MODEL
-      : GROQ_MODEL;
+    : provider === 'ds'
+      ? dsDeployment()
+      : provider === 'nvidia'
+        ? NVIDIA_MODEL
+        : provider === 'cerebras'
+          ? CEREBRAS_MODEL
+          : GROQ_MODEL;
 
 function recordUsage(provider: Provider, opts: BatchOptions, result: unknown): void {
   const usage = (result as { usage?: Record<string, number | undefined> } | null)?.usage;
@@ -175,10 +219,11 @@ function recordUsage(provider: Provider, opts: BatchOptions, result: unknown): v
   const outputTokens = usage?.outputTokens ?? usage?.completionTokens ?? 0;
 
   const model = deploymentFor(provider, opts);
-  const price = provider === 'azure' ? PRICING[model] : { in: 0, out: 0 };
-  if (provider === 'azure' && !price && !unpricedWarned.has(model)) {
+  const isPaid = PAID_PROVIDERS.includes(provider);
+  const price = isPaid ? PRICING[model] : { in: 0, out: 0 };
+  if (isPaid && !price && !unpricedWarned.has(model)) {
     unpricedWarned.add(model);
-    console.warn(`[ai-batch] no price on file for Azure deployment "${model}" — its spend is counted as $0. Add it to PRICING.`);
+    console.warn(`[ai-batch] no price on file for paid deployment "${model}" — its spend is counted as $0. Add it to PRICING.`);
   }
   const costUsd = ((inputTokens * (price?.in ?? 0)) + (outputTokens * (price?.out ?? 0))) / 1_000_000;
 
@@ -238,10 +283,12 @@ async function withFallback<T>(
   // round-trip per item and nothing else. `cerebras` remains a valid Provider
   // value for an explicit `providers: ['cerebras']` opt-in, but is never default.
   const freeChain: Provider[] = getNvidia() ? ['nvidia', 'groq'] : ['groq'];
-  // AZURE IS NEVER A DEFAULT (Cedar, 2026-08-24: "don't use azure for anything.
-  // We are only using it for seeding when I say so"). It is reachable ONLY by a
-  // caller passing `providers: ['azure', ...]` explicitly — e.g. ingredientbot's
-  // allergen lane, which is required to stay on a paid frontier model.
+  // PAID LANES ARE NEVER A DEFAULT (Cedar, 2026-08-24: "don't use azure for
+  // anything. We are only using it for seeding when I say so"). 'azure' and 'ds'
+  // are reachable ONLY by a caller passing providers: ['azure', ...] or
+  // providers: ['ds', ...] explicitly — e.g. ingredientbot's allergen lane,
+  // which is required to stay on a paid frontier model, or an approved seeding
+  // batch on the ds lane.
   //
   // Previously the default was azure-first at 'quality' tier whenever Azure creds
   // were present, which meant any caller passing `tier: 'quality'` and no
@@ -253,6 +300,9 @@ async function withFallback<T>(
   if (providers.includes('azure') && !azure) {
     throw new Error('[ai-batch] azure requested but AZURE_OPENAI_RESOURCE / AZURE_OPENAI_API_KEY not set');
   }
+  if (providers.includes('ds') && !getDs()) {
+    throw new Error('[ai-batch] ds requested but AZURE_FOUNDRY_RESOURCE / AZURE_FOUNDRY_API_KEY not set');
+  }
   if (providers.includes('nvidia') && !getNvidia()) {
     throw new Error('[ai-batch] nvidia requested but NVIDIA_API_KEY not set');
   }
@@ -260,8 +310,9 @@ async function withFallback<T>(
   const initialBackoff = opts.initialBackoffMs ?? 1000;
   let lastError: unknown;
 
-  if (providers.includes('azure')) {
-    console.warn('[ai-batch] ⚠ azure lane engaged (PAID) — explicit opt-in by this caller, not a default.');
+  const paid = providers.filter(p => PAID_PROVIDERS.includes(p));
+  if (paid.length) {
+    console.warn(`[ai-batch] ⚠ paid lane engaged (${paid.join(', ')}) — explicit opt-in by this caller, not a default.`);
   }
   for (const provider of providers) {
     for (let attempt = 0; attempt < maxRetries; attempt++) {
@@ -312,13 +363,11 @@ function describe(err: unknown): string {
 }
 
 const modelFor = (provider: Provider, opts: BatchOptions) =>
-  provider === 'azure'
-    ? azure!(opts.tier === 'bulk' ? AZURE_BULK : AZURE_QUALITY)
-    : provider === 'nvidia'
-      ? getNvidia()!(NVIDIA_MODEL)
-      : provider === 'cerebras'
-      ? cerebras(CEREBRAS_MODEL)
-      : groq(GROQ_MODEL);
+  provider === 'azure' ? azure!(opts.tier === 'bulk' ? AZURE_BULK : AZURE_QUALITY)
+  : provider === 'ds' ? getDs()!(dsDeployment())
+  : provider === 'nvidia' ? getNvidia()!(NVIDIA_MODEL)
+  : provider === 'cerebras' ? cerebras(CEREBRAS_MODEL)
+  : groq(GROQ_MODEL);
 
 export async function batchText(prompt: string, opts: BatchOptions = {}): Promise<string> {
   const { result } = await withFallback(
