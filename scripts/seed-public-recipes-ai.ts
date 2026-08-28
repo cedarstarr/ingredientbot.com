@@ -235,7 +235,7 @@ const SYSTEM_PROMPT = [
   'Nutrition values are per-serving estimates. Tags are 5-8 short lowercase phrases.',
   'Never make allergen or "free from" claims anywhere in the text — allergen data is handled by a separate verified pipeline.',
   // FOU-439: the ds deployment's json_schema mode is generate-then-parse — a straight " in prose truncates the field.
-  'In prose, use curly quotes (\u201c \u201d) for any quoted phrase; never straight double quotes.',
+  'In prose, use curly quotes (\u201c \u201d) for any quoted phrase; never straight double quotes. The JSON delimiters themselves stay straight double quotes — the curly-quote rule applies only to text inside a field.',
   // FOU-441: Azure's content filter 400s on meat prompts that drift into butchery — it killed the
   // ingredient run on "whole chicken" (label MultiSeverity_ViolenceScore). Keeping the text in the
   // kitchen clears the filter and is what a recipe wants anyway.
@@ -324,7 +324,7 @@ async function main() {
             // lane. Contrast seed-recipes-ai.ts, which is demo-only and pinned to free.
             { system: SYSTEM_PROMPT, temperature: 0.7, tier: 'quality', providers: ['ds'] },
           )
-          if (c.description.trim().length >= 60 && c.steps.length >= 3 && c.ingredients.length >= 3) r = c
+          if (c.description.trim().length >= 60 && !/[{}]/.test(c.description) && c.steps.length >= 3 && c.ingredients.length >= 3) r = c
           else console.warn(`  ↻ ${dish}: recipe under FOU-439 floor — retry ${attempt}/3`)
         }
         if (!r) throw new Error(`${dish}: recipe failed the FOU-439 floor three times`)

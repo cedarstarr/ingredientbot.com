@@ -128,19 +128,35 @@ const PROSE_SYSTEM =
   'You write concise ingredient encyclopedia entries for a cooking app. Plain home-cook language, no filler. ' +
   'Never mention allergies or allergens — that content is handled by a separate verified pipeline. ' +
   // FOU-439: the ds deployment's json_schema mode is generate-then-parse — a straight " in prose truncates the field.
-  'In prose, use curly quotes (\u201c \u201d) for any quoted phrase; never straight double quotes. ' +
+  'In prose, use curly quotes (\u201c \u201d) for any quoted phrase; never straight double quotes. The JSON delimiters themselves stay straight double quotes — the curly-quote rule applies only to text inside a field. ' +
   // FOU-441: Azure's content filter rejected the unframed "whole chicken" prompt outright (HTTP 400,
   // finish_reason content_filter, label MultiSeverity_ViolenceScore) because the model drifted into
   // butchery. Confining the entry to the kitchen clears the filter and is what the page wants anyway —
   // verified against the exact prompt that failed.
   'Write only about the ingredient as it appears in a kitchen or grocery store — its culinary character, how cooks use it, and how to keep it. ' +
-  'Do not describe animal husbandry, slaughter, butchery or processing.'
+  'Do not describe animal husbandry, slaughter, butchery or processing. ' +
+  // The page renders description in a plain <p>, so markdown emphasis would show as literal asterisks.
+  'Write plain text only — no markdown, no asterisks for emphasis, no headings.'
 
 // FOU-439 net: a truncated-mid-phrase field is syntactically valid JSON and
 // arrives silently. Floors are set well below honest minimums — they catch
 // amputation, not brevity.
+// A field carrying a brace is envelope debris, not prose: the model closed the JSON string
+// with a curly quote and the generate-then-parse layer swallowed the delimiters into the value
+// (2 of 364 rows on the 2026-08-28 ingredient run ended "…again.”}   {").
+// The asterisks are the same class of leak: the page renders description in a plain <p>, so
+// markdown emphasis shows as literal characters (4 of 364 rows).
+const cleanProse = (v: string) => !/[{}*]/.test(v)
+
 function validProse(p: z.infer<typeof ProseSchema>): boolean {
-  return p.description.trim().length >= 60 && p.storage.trim().length >= 15 && p.seasonality.trim().length >= 4
+  return (
+    p.description.trim().length >= 60 &&
+    p.storage.trim().length >= 15 &&
+    p.seasonality.trim().length >= 4 &&
+    cleanProse(p.description) &&
+    cleanProse(p.storage) &&
+    cleanProse(p.seasonality)
+  )
 }
 
 function parseArgs() {
