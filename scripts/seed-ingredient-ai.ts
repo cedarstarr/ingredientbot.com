@@ -126,7 +126,16 @@ const ProseSchema = z.object({
 
 const PROSE_SYSTEM =
   'You write concise ingredient encyclopedia entries for a cooking app. Plain home-cook language, no filler. ' +
-  'Never mention allergies or allergens — that content is handled by a separate verified pipeline.'
+  'Never mention allergies or allergens — that content is handled by a separate verified pipeline. ' +
+  // FOU-439: the ds deployment's json_schema mode is generate-then-parse — a straight " in prose truncates the field.
+  'In prose, use curly quotes (\u201c \u201d) for any quoted phrase; never straight double quotes.'
+
+// FOU-439 net: a truncated-mid-phrase field is syntactically valid JSON and
+// arrives silently. Floors are set well below honest minimums — they catch
+// amputation, not brevity.
+function validProse(p: z.infer<typeof ProseSchema>): boolean {
+  return p.description.trim().length >= 60 && p.storage.trim().length >= 15 && p.seasonality.trim().length >= 4
+}
 
 function parseArgs() {
   const args = process.argv.slice(2)
@@ -185,14 +194,20 @@ async function main() {
         continue
       }
 
-      const prose = await batchObject(
-        `Write the encyclopedia entry for the ingredient: ${input.name} (category: ${input.category}).`,
-        ProseSchema,
-        // tier is explicit on purpose: visitor-facing encyclopedia prose belongs on the
-        // quality lane. It was previously implicit via the lib default, which reads as
-        // "nobody chose" rather than "quality was chosen" when auditing spend.
-        { system: PROSE_SYSTEM, temperature: 0.5, tier: 'quality', providers: ['ds'] },
-      )
+      let prose: z.infer<typeof ProseSchema> | null = null
+      for (let attempt = 1; attempt <= 3 && !prose; attempt++) {
+        const candidate = await batchObject(
+          `Write the encyclopedia entry for the ingredient: ${input.name} (category: ${input.category}).`,
+          ProseSchema,
+          // tier is explicit on purpose: visitor-facing encyclopedia prose belongs on the
+          // quality lane. It was previously implicit via the lib default, which reads as
+          // "nobody chose" rather than "quality was chosen" when auditing spend.
+          { system: PROSE_SYSTEM, temperature: 0.5, tier: 'quality', providers: ['ds'] },
+        )
+        if (validProse(candidate)) prose = candidate
+        else console.warn(`  ↻ ${input.name}: prose field under floor (FOU-439) — retry ${attempt}/3`)
+      }
+      if (!prose) throw new Error(`${input.name}: prose failed the FOU-439 floor three times`)
 
       const allergen = await verifyIngredientAllergens(input)
       annotated++

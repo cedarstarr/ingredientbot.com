@@ -234,6 +234,8 @@ const SYSTEM_PROMPT = [
   'Use plain home-cook language. Avoid filler ("delicious", "amazing"). Be specific about quantities and technique.',
   'Nutrition values are per-serving estimates. Tags are 5-8 short lowercase phrases.',
   'Never make allergen or "free from" claims anywhere in the text — allergen data is handled by a separate verified pipeline.',
+  // FOU-439: the ds deployment's json_schema mode is generate-then-parse — a straight " in prose truncates the field.
+  'In prose, use curly quotes (\u201c \u201d) for any quoted phrase; never straight double quotes.',
 ].join(' ')
 
 function parseArgs() {
@@ -300,13 +302,22 @@ async function main() {
         continue
       }
 
-      const r = await batchObject(
-        `Generate a recipe for: ${dish} (${cuisine} cuisine). Pick reasonable serving size, cook time, and difficulty.`,
-        PublicRecipeSchema,
-        // tier is explicit on purpose: this is the public recipe library, so quality
-        // lane. Contrast seed-recipes-ai.ts, which is demo-only and pinned to free.
-        { system: SYSTEM_PROMPT, temperature: 0.7, tier: 'quality', providers: ['ds'] },
-      )
+      // FOU-439 net: a quote-truncated field is valid JSON and arrives silently.
+      // Floors are amputation checks, not quality bars: a real recipe cannot have
+      // a 3-word description, 2 steps, or 1 ingredient.
+      let r: z.infer<typeof PublicRecipeSchema> | null = null
+      for (let attempt = 1; attempt <= 3 && !r; attempt++) {
+        const c = await batchObject(
+          `Generate a recipe for: ${dish} (${cuisine} cuisine). Pick reasonable serving size, cook time, and difficulty.`,
+          PublicRecipeSchema,
+          // tier is explicit on purpose: this is the public recipe library, so quality
+          // lane. Contrast seed-recipes-ai.ts, which is demo-only and pinned to free.
+          { system: SYSTEM_PROMPT, temperature: 0.7, tier: 'quality', providers: ['ds'] },
+        )
+        if (c.description.trim().length >= 60 && c.steps.length >= 3 && c.ingredients.length >= 3) r = c
+        else console.warn(`  ↻ ${dish}: recipe under FOU-439 floor — retry ${attempt}/3`)
+      }
+      if (!r) throw new Error(`${dish}: recipe failed the FOU-439 floor three times`)
 
       const allergen = await verifyRecipeAllergens({
         subject: r.title,
