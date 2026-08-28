@@ -423,6 +423,18 @@ export interface BatchMapHelpers {
 }
 
 export interface BatchMapOptions<I> {
+  /**
+   * Parallel workers. Default 1 = serial, so every existing caller is unchanged.
+   *
+   * Serial is a holdover from the free lanes, where Groq's 8k tokens-per-minute bound
+   * throughput long before request count did — at ~1k tokens a call that is ~8 calls/min,
+   * so a worker pool bought nothing. The paid ds lane has no tpm squeeze and a 20 rpm cap,
+   * where serial 35s calls use about 8% of it.
+   *
+   * The shared 18-rpm limiter below still caps total throughput across every provider, so
+   * raising this cannot breach quota — it only stops the process idling between calls.
+   */
+  concurrency?: number;
   onProgress?: (done: number, total: number, lastItem: I) => void;
   onError?: (err: unknown, item: I, index: number) => 'skip' | 'throw';
 }
@@ -432,18 +444,31 @@ export async function batchMap<I, O>(
   fn: (item: I, helpers: BatchMapHelpers) => Promise<O>,
   opts: BatchMapOptions<I> = {},
 ): Promise<O[]> {
-  const out: O[] = [];
   const helpers: BatchMapHelpers = { text: batchText, object: batchObject };
-  for (let i = 0; i < items.length; i++) {
-    try {
-      const result = await fn(items[i], helpers);
-      out.push(result);
-      opts.onProgress?.(i + 1, items.length, items[i]);
-    } catch (err) {
-      const decision = opts.onError?.(err, items[i], i) ?? 'throw';
-      if (decision === 'throw') throw err;
-      console.warn(`[ai-batch] skipping item ${i} after error: ${describe(err)}`);
+  const concurrency = Math.max(1, Math.floor(opts.concurrency ?? 1));
+  // Results are written by index and compacted at the end, so output order follows input
+  // order regardless of which worker finishes first — callers that zip results back against
+  // their input list stay correct.
+  const SKIP = Symbol('skip');
+  const results: (O | typeof SKIP)[] = new Array(items.length).fill(SKIP);
+  let next = 0;
+  let done = 0;
+  const worker = async () => {
+    for (;;) {
+      const i = next++;
+      if (i >= items.length) return;
+      try {
+        results[i] = await fn(items[i], helpers);
+      } catch (err) {
+        const decision = opts.onError?.(err, items[i], i) ?? 'throw';
+        // 'throw' rejects the whole batch; sibling workers' in-flight calls are abandoned, not cancelled.
+        if (decision === 'throw') throw err;
+        console.warn(`[ai-batch] skipping item ${i} after error: ${describe(err)}`);
+      }
+      done += 1;
+      opts.onProgress?.(done, items.length, items[i]);
     }
-  }
-  return out;
+  };
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) || 1 }, worker));
+  return results.filter((r): r is O => r !== SKIP);
 }

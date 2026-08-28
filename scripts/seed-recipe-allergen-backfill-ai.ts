@@ -39,9 +39,14 @@ function parseArgs() {
     return i >= 0 ? args[i + 1] : undefined
   }
   const rawCount = get('--count')
+  const rawConcurrency = get('--concurrency')
   return {
     count: rawCount ? Number(rawCount) : undefined,
     dryRun: args.includes('--dry-run'),
+    // 6 workers, not 1. Serial leaves ~92% of the ds lane's 20-rpm cap unused because the
+    // process spends every call idle; the shared 18-rpm limiter in ai-batch still caps the
+    // total, so this cannot breach quota. Pass --concurrency 1 to force the old behaviour.
+    concurrency: rawConcurrency ? Math.max(1, Number(rawConcurrency)) : 6,
   }
 }
 
@@ -49,7 +54,7 @@ function parseArgs() {
 let prismaRef: { $disconnect(): Promise<void> } | null = null
 
 async function main() {
-  const { count, dryRun } = parseArgs()
+  const { count, dryRun, concurrency } = parseArgs()
 
   if (dryRun) {
     // Fully offline by design — no AI providers or DB are contacted.
@@ -68,7 +73,7 @@ async function main() {
 
   const { prisma } = await import('./_prisma')
   prismaRef = prisma
-  const { batchObject } = await import('./lib/ai-batch')
+  const { batchObject, batchMap } = await import('./lib/ai-batch')
   const { verifyRecipeAllergens, requireVerifierEnv, UNVERIFIED_NOTICE } = await import('./lib/allergen-verify')
 
   requireVerifierEnv() // fail closed before any generation
@@ -93,63 +98,88 @@ async function main() {
   let enriched = 0
   let skippedNoIngredients = 0
 
+  const failures: { title: string; reason: string }[] = []
+  let processed = 0
+
   try {
-    for (const [i, recipe] of recipes.entries()) {
-      // Prefer the full ingredient lines from recipeData (amount + unit + name);
-      // fall back to the bare sourceIngredients names.
-      const data = recipe.recipeData as { ingredients?: { name: string; amount?: string; unit?: string }[] } | null
-      const ingredients =
-        data?.ingredients?.map((ing) => `${ing.amount ?? ''} ${ing.unit ?? ''} ${ing.name}`.trim()) ??
-        recipe.sourceIngredients
+    await batchMap(
+      recipes,
+      async (recipe) => {
+        // Prefer the full ingredient lines from recipeData (amount + unit + name);
+        // fall back to the bare sourceIngredients names.
+        const data = recipe.recipeData as { ingredients?: { name: string; amount?: string; unit?: string }[] } | null
+        const ingredients =
+          data?.ingredients?.map((ing) => `${ing.amount ?? ''} ${ing.unit ?? ''} ${ing.name}`.trim()) ??
+          recipe.sourceIngredients
 
-      if (!ingredients.length) {
-        skippedNoIngredients++
-        console.log(`  [${i + 1}/${recipes.length}] – ${recipe.title}: no stored ingredients, skipping`)
-        continue
-      }
+        if (!ingredients.length) {
+          skippedNoIngredients++
+          console.log(`  [${++processed}/${recipes.length}] – ${recipe.title}: no stored ingredients, skipping`)
+          return null
+        }
 
-      // Allergen fields: single paid Azure model, unverified.
-      const allergen = await verifyRecipeAllergens({ subject: recipe.title, ingredients })
+        // Allergen fields: single paid Azure model, unverified.
+        const allergen = await verifyRecipeAllergens({ subject: recipe.title, ingredients })
 
-      // Tags/nutrition: normal ai-batch defaults, and ONLY where currently missing.
-      const needsTags = recipe.tags.length === 0
-      const needsNutrition = recipe.nutrition == null
-      let enrichment: z.infer<typeof EnrichmentSchema> | null = null
-      if (needsTags || needsNutrition) {
-        enrichment = await batchObject(
-          `Tag and estimate per-serving macros for this recipe.\nTitle: ${recipe.title}\nIngredients:\n${ingredients
-            .map((ing) => `- ${ing}`)
-            .join('\n')}`,
-          EnrichmentSchema,
-          { system: ENRICH_SYSTEM, temperature: 0.3 },
+        // Tags/nutrition: normal ai-batch defaults, and ONLY where currently missing.
+        const needsTags = recipe.tags.length === 0
+        const needsNutrition = recipe.nutrition == null
+        let enrichment: z.infer<typeof EnrichmentSchema> | null = null
+        if (needsTags || needsNutrition) {
+          enrichment = await batchObject(
+            `Tag and estimate per-serving macros for this recipe.\nTitle: ${recipe.title}\nIngredients:\n${ingredients
+              .map((ing) => `- ${ing}`)
+              .join('\n')}`,
+            EnrichmentSchema,
+            { system: ENRICH_SYSTEM, temperature: 0.3 },
+          )
+        }
+
+        const updateData = {
+          allergens: allergen.allergens,
+          mayContain: allergen.mayContain,
+          allergenNotes: allergen.allergenNotes,
+          allergenAnnotatedAt: new Date(),
+          ...(enrichment && needsTags ? { tags: enrichment.tags.slice(0, 8) } : {}),
+          ...(enrichment && needsNutrition ? { nutrition: enrichment.nutrition } : {}),
+        }
+
+        if (Object.keys(updateData).length > 0) {
+          await prisma.recipe.update({ where: { id: recipe.id }, data: updateData })
+        }
+
+        annotated++
+        if (enrichment) enriched++
+        console.log(
+          `  [${++processed}/${recipes.length}] ${recipe.title}` +
+            (enrichment ? ` (+${[needsTags && 'tags', needsNutrition && 'nutrition'].filter(Boolean).join('/')})` : ''),
         )
-      }
-
-      const updateData = {
-        allergens: allergen.allergens,
-        mayContain: allergen.mayContain,
-        allergenNotes: allergen.allergenNotes,
-        allergenAnnotatedAt: new Date(),
-        ...(enrichment && needsTags ? { tags: enrichment.tags.slice(0, 8) } : {}),
-        ...(enrichment && needsNutrition ? { nutrition: enrichment.nutrition } : {}),
-      }
-
-      if (Object.keys(updateData).length > 0) {
-        await prisma.recipe.update({ where: { id: recipe.id }, data: updateData })
-      }
-
-      annotated++
-      if (enrichment) enriched++
-      console.log(
-        `  [${i + 1}/${recipes.length}] ${recipe.title}` +
-          (enrichment ? ` (+${[needsTags && 'tags', needsNutrition && 'nutrition'].filter(Boolean).join('/')})` : ''),
-      )
-    }
+        return null
+      },
+      {
+        concurrency,
+        // One bad row must not end the run. The allergen model rejects the occasional
+        // recipe outright ("The model produced invalid content"), and a re-run picks up
+        // only what is still unannotated, so skipping is both safe and resumable.
+        onError: (err, item) => {
+          const reason = err instanceof Error ? err.message : String(err)
+          const title = (item as { title: string }).title
+          failures.push({ title, reason })
+          console.warn(`  ✗ ${title}: ${reason}`)
+          return 'skip'
+        },
+      },
+    )
   } finally {
     console.log(
       `\nDone — ${annotated} recipes allergen-annotated, ` +
         `${enriched} rows enriched with tags/nutrition, ${skippedNoIngredients} skipped (no ingredients).`,
     )
+    if (failures.length) {
+      console.warn(`\n${failures.length} recipe(s) failed and stay unannotated:`)
+      for (const f of failures) console.warn(`  - ${f.title}: ${f.reason}`)
+      console.warn('Re-run to retry only these — annotated rows are skipped.')
+    }
     console.log(UNVERIFIED_NOTICE)
   }
 }
