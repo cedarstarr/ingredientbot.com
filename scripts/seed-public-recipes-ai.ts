@@ -236,6 +236,10 @@ const SYSTEM_PROMPT = [
   'Never make allergen or "free from" claims anywhere in the text — allergen data is handled by a separate verified pipeline.',
   // FOU-439: the ds deployment's json_schema mode is generate-then-parse — a straight " in prose truncates the field.
   'In prose, use curly quotes (\u201c \u201d) for any quoted phrase; never straight double quotes.',
+  // FOU-441: Azure's content filter 400s on meat prompts that drift into butchery — it killed the
+  // ingredient run on "whole chicken" (label MultiSeverity_ViolenceScore). Keeping the text in the
+  // kitchen clears the filter and is what a recipe wants anyway.
+  'Stay in the kitchen: write about preparing and cooking the dish, never about animal husbandry, slaughter, butchery or processing.',
 ].join(' ')
 
 function parseArgs() {
@@ -293,6 +297,7 @@ async function main() {
   let inserted = 0
   let skipped = 0
   let annotated = 0
+  const failures: { name: string; reason: string }[] = []
 
   try {
     for (const [i, { cuisine, dish, publicSlug }] of dishes.entries()) {
@@ -302,49 +307,64 @@ async function main() {
         continue
       }
 
-      // FOU-439 net: a quote-truncated field is valid JSON and arrives silently.
-      // Floors are amputation checks, not quality bars: a real recipe cannot have
-      // a 3-word description, 2 steps, or 1 ingredient.
-      let r: z.infer<typeof PublicRecipeSchema> | null = null
-      for (let attempt = 1; attempt <= 3 && !r; attempt++) {
-        const c = await batchObject(
-          `Generate a recipe for: ${dish} (${cuisine} cuisine). Pick reasonable serving size, cook time, and difficulty.`,
-          PublicRecipeSchema,
-          // tier is explicit on purpose: this is the public recipe library, so quality
-          // lane. Contrast seed-recipes-ai.ts, which is demo-only and pinned to free.
-          { system: SYSTEM_PROMPT, temperature: 0.7, tier: 'quality', providers: ['ds'] },
-        )
-        if (c.description.trim().length >= 60 && c.steps.length >= 3 && c.ingredients.length >= 3) r = c
-        else console.warn(`  ↻ ${dish}: recipe under FOU-439 floor — retry ${attempt}/3`)
+      // One row must never end the run. providers:['ds'] has no fallback by design, so a
+      // content-filter 400 on a single dish (FOU-441) would otherwise strand every later
+      // row. Record and move on; a re-run retries only the failures, since existing
+      // publicSlugs are skipped.
+      try {
+        // FOU-439 net: a quote-truncated field is valid JSON and arrives silently.
+        // Floors are amputation checks, not quality bars: a real recipe cannot have
+        // a 3-word description, 2 steps, or 1 ingredient.
+        let r: z.infer<typeof PublicRecipeSchema> | null = null
+        for (let attempt = 1; attempt <= 3 && !r; attempt++) {
+          const c = await batchObject(
+            `Generate a recipe for: ${dish} (${cuisine} cuisine). Pick reasonable serving size, cook time, and difficulty.`,
+            PublicRecipeSchema,
+            // tier is explicit on purpose: this is the public recipe library, so quality
+            // lane. Contrast seed-recipes-ai.ts, which is demo-only and pinned to free.
+            { system: SYSTEM_PROMPT, temperature: 0.7, tier: 'quality', providers: ['ds'] },
+          )
+          if (c.description.trim().length >= 60 && c.steps.length >= 3 && c.ingredients.length >= 3) r = c
+          else console.warn(`  ↻ ${dish}: recipe under FOU-439 floor — retry ${attempt}/3`)
+        }
+        if (!r) throw new Error(`${dish}: recipe failed the FOU-439 floor three times`)
+
+        const allergen = await verifyRecipeAllergens({
+          subject: r.title,
+          ingredients: r.ingredients.map((ing) => `${ing.amount} ${ing.unit} ${ing.name}`.trim()),
+        })
+        annotated++
+
+        await prisma.recipe.create({
+          data: {
+            ...buildRecipeRecord(r as unknown as RecipeInput, library.id),
+            nutrition: r.nutrition, // macros only — overrides the RecipeInput shape
+            tags: r.tags.slice(0, 8),
+            isPublic: true,
+            publicSlug,
+            allergens: allergen.allergens,
+            mayContain: allergen.mayContain,
+            allergenNotes: allergen.allergenNotes,
+            allergenAnnotatedAt: new Date(),
+          },
+        })
+        inserted++
+        console.log(`  [${i + 1}/${dishes.length}] /r/${publicSlug}`)
+      } catch (err) {
+        const reason = err instanceof Error ? err.message : String(err)
+        failures.push({ name: dish, reason })
+        console.warn(`  ✗ [${i + 1}/${dishes.length}] ${dish}: ${reason}`)
       }
-      if (!r) throw new Error(`${dish}: recipe failed the FOU-439 floor three times`)
-
-      const allergen = await verifyRecipeAllergens({
-        subject: r.title,
-        ingredients: r.ingredients.map((ing) => `${ing.amount} ${ing.unit} ${ing.name}`.trim()),
-      })
-      annotated++
-
-      await prisma.recipe.create({
-        data: {
-          ...buildRecipeRecord(r as unknown as RecipeInput, library.id),
-          nutrition: r.nutrition, // macros only — overrides the RecipeInput shape
-          tags: r.tags.slice(0, 8),
-          isPublic: true,
-          publicSlug,
-          allergens: allergen.allergens,
-          mayContain: allergen.mayContain,
-          allergenNotes: allergen.allergenNotes,
-          allergenAnnotatedAt: new Date(),
-        },
-      })
-      inserted++
-      console.log(`  [${i + 1}/${dishes.length}] /r/${publicSlug}`)
     }
   } finally {
     console.log(
       `\nDone — inserted ${inserted}, skipped ${skipped} (existing), ${annotated} allergen-annotated.`,
     )
+    if (failures.length) {
+      console.warn(`\n${failures.length} recipe(s) failed and were left unwritten:`)
+      for (const f of failures) console.warn(`  - ${f.name}: ${f.reason}`)
+      console.warn('Re-run the seeder to retry only these — existing rows are skipped.')
+    }
     console.log(UNVERIFIED_NOTICE)
   }
 }

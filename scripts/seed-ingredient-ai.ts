@@ -128,7 +128,13 @@ const PROSE_SYSTEM =
   'You write concise ingredient encyclopedia entries for a cooking app. Plain home-cook language, no filler. ' +
   'Never mention allergies or allergens — that content is handled by a separate verified pipeline. ' +
   // FOU-439: the ds deployment's json_schema mode is generate-then-parse — a straight " in prose truncates the field.
-  'In prose, use curly quotes (\u201c \u201d) for any quoted phrase; never straight double quotes.'
+  'In prose, use curly quotes (\u201c \u201d) for any quoted phrase; never straight double quotes. ' +
+  // FOU-441: Azure's content filter rejected the unframed "whole chicken" prompt outright (HTTP 400,
+  // finish_reason content_filter, label MultiSeverity_ViolenceScore) because the model drifted into
+  // butchery. Confining the entry to the kitchen clears the filter and is what the page wants anyway —
+  // verified against the exact prompt that failed.
+  'Write only about the ingredient as it appears in a kitchen or grocery store — its culinary character, how cooks use it, and how to keep it. ' +
+  'Do not describe animal husbandry, slaughter, butchery or processing.'
 
 // FOU-439 net: a truncated-mid-phrase field is syntactically valid JSON and
 // arrives silently. Floors are set well below honest minimums — they catch
@@ -185,6 +191,7 @@ async function main() {
   let inserted = 0
   let skipped = 0
   let annotated = 0
+  const failures: { name: string; reason: string }[] = []
 
   try {
     for (const [i, input] of inputs.entries()) {
@@ -194,45 +201,60 @@ async function main() {
         continue
       }
 
-      let prose: z.infer<typeof ProseSchema> | null = null
-      for (let attempt = 1; attempt <= 3 && !prose; attempt++) {
-        const candidate = await batchObject(
-          `Write the encyclopedia entry for the ingredient: ${input.name} (category: ${input.category}).`,
-          ProseSchema,
-          // tier is explicit on purpose: visitor-facing encyclopedia prose belongs on the
-          // quality lane. It was previously implicit via the lib default, which reads as
-          // "nobody chose" rather than "quality was chosen" when auditing spend.
-          { system: PROSE_SYSTEM, temperature: 0.5, tier: 'quality', providers: ['ds'] },
-        )
-        if (validProse(candidate)) prose = candidate
-        else console.warn(`  ↻ ${input.name}: prose field under floor (FOU-439) — retry ${attempt}/3`)
+      // One row must never end the run. providers:['ds'] has no fallback by design, so a
+      // content-filter 400 on a single ingredient (FOU-441) previously stranded every later
+      // row — 276 of them on 2026-08-28. Record and move on; a re-run retries only the
+      // failures, since existing slugs are skipped.
+      try {
+        let prose: z.infer<typeof ProseSchema> | null = null
+        for (let attempt = 1; attempt <= 3 && !prose; attempt++) {
+          const candidate = await batchObject(
+            `Write the encyclopedia entry for the ingredient: ${input.name} (category: ${input.category}).`,
+            ProseSchema,
+            // tier is explicit on purpose: visitor-facing encyclopedia prose belongs on the
+            // quality lane. It was previously implicit via the lib default, which reads as
+            // "nobody chose" rather than "quality was chosen" when auditing spend.
+            { system: PROSE_SYSTEM, temperature: 0.5, tier: 'quality', providers: ['ds'] },
+          )
+          if (validProse(candidate)) prose = candidate
+          else console.warn(`  ↻ ${input.name}: prose field under floor (FOU-439) — retry ${attempt}/3`)
+        }
+        if (!prose) throw new Error(`${input.name}: prose failed the FOU-439 floor three times`)
+
+        const allergen = await verifyIngredientAllergens(input)
+        annotated++
+
+        await prisma.ingredient.create({
+          data: {
+            slug: input.slug,
+            name: input.name,
+            category: input.category,
+            description: prose.description,
+            storage: prose.storage,
+            seasonality: prose.seasonality,
+            allergenProfile: allergen.allergenProfile,
+            hiddenSources: allergen.hiddenSources,
+            crossContamination: allergen.crossContamination,
+            substitutions: allergen.substitutions,
+          },
+        })
+        inserted++
+        console.log(`  [${i + 1}/${inputs.length}] ${input.slug}`)
+      } catch (err) {
+        const reason = err instanceof Error ? err.message : String(err)
+        failures.push({ name: input.name, reason })
+        console.warn(`  ✗ [${i + 1}/${inputs.length}] ${input.name}: ${reason}`)
       }
-      if (!prose) throw new Error(`${input.name}: prose failed the FOU-439 floor three times`)
-
-      const allergen = await verifyIngredientAllergens(input)
-      annotated++
-
-      await prisma.ingredient.create({
-        data: {
-          slug: input.slug,
-          name: input.name,
-          category: input.category,
-          description: prose.description,
-          storage: prose.storage,
-          seasonality: prose.seasonality,
-          allergenProfile: allergen.allergenProfile,
-          hiddenSources: allergen.hiddenSources,
-          crossContamination: allergen.crossContamination,
-          substitutions: allergen.substitutions,
-        },
-      })
-      inserted++
-      console.log(`  [${i + 1}/${inputs.length}] ${input.slug}`)
     }
   } finally {
     console.log(
       `\nDone — inserted ${inserted}, skipped ${skipped} (existing), ${annotated} allergen-annotated.`,
     )
+    if (failures.length) {
+      console.warn(`\n${failures.length} ingredient(s) failed and were left unwritten:`)
+      for (const f of failures) console.warn(`  - ${f.name}: ${f.reason}`)
+      console.warn('Re-run the seeder to retry only these — existing rows are skipped.')
+    }
     console.log(UNVERIFIED_NOTICE)
   }
 }
