@@ -43,6 +43,12 @@ function parseArgs() {
   return {
     count: rawCount ? Number(rawCount) : undefined,
     dryRun: args.includes('--dry-run'),
+    // Regenerates tags/nutrition on rows that are ALREADY annotated, to replace values
+    // written by a provider we no longer want. --since is required so this can never
+    // sweep the whole table; createdAt < since additionally excludes rows that
+    // seed-public-recipes-ai.ts created and annotated inside the same window.
+    redoEnrichment: args.includes('--redo-enrichment'),
+    since: get('--since'),
     // 6 workers, not 1. Serial leaves ~92% of the ds lane's 20-rpm cap unused because the
     // process spends every call idle; the shared 18-rpm limiter in ai-batch still caps the
     // total, so this cannot breach quota. Pass --concurrency 1 to force the old behaviour.
@@ -54,7 +60,7 @@ function parseArgs() {
 let prismaRef: { $disconnect(): Promise<void> } | null = null
 
 async function main() {
-  const { count, dryRun, concurrency } = parseArgs()
+  const { count, dryRun, concurrency, redoEnrichment, since } = parseArgs()
 
   if (dryRun) {
     // Fully offline by design — no AI providers or DB are contacted.
@@ -78,9 +84,22 @@ async function main() {
 
   requireVerifierEnv() // fail closed before any generation
 
-  // Skip anything already annotated — keeps re-runs idempotent.
+  if (redoEnrichment && !since) {
+    throw new Error('--redo-enrichment requires --since <ISO timestamp>')
+  }
+  const sinceDate = since ? new Date(since) : null
+  if (sinceDate && Number.isNaN(sinceDate.getTime())) {
+    throw new Error(`--since is not a valid timestamp: ${since}`)
+  }
+
+  // Default: skip anything already annotated — keeps re-runs idempotent.
+  // --redo-enrichment inverts that, targeting rows annotated after --since whose
+  // recipe predates it (i.e. rows this backfill touched, not freshly seeded ones).
   const recipes = await prisma.recipe.findMany({
-    where: { allergenAnnotatedAt: null },
+    where:
+      redoEnrichment && sinceDate
+        ? { allergenAnnotatedAt: { gte: sinceDate }, createdAt: { lt: sinceDate } }
+        : { allergenAnnotatedAt: null },
     select: {
       id: true,
       title: true,
@@ -93,7 +112,11 @@ async function main() {
     ...(count ? { take: count } : {}),
   })
 
-  console.log(`Backfilling ${recipes.length} recipes without allergenAnnotatedAt...`)
+  console.log(
+    redoEnrichment
+      ? `Regenerating tags/nutrition on ${recipes.length} already-annotated recipes (ds lane); allergen fields untouched...`
+      : `Backfilling ${recipes.length} recipes without allergenAnnotatedAt...`,
+  )
   let annotated = 0
   let enriched = 0
   let skippedNoIngredients = 0
@@ -118,12 +141,15 @@ async function main() {
           return null
         }
 
-        // Allergen fields: single paid Azure model, unverified.
-        const allergen = await verifyRecipeAllergens({ subject: recipe.title, ingredients })
+        // Allergen fields: single paid Azure model, unverified. Skipped entirely on
+        // --redo-enrichment — those rows already carry a valid gpt-5-4 result and
+        // regenerating it would re-bill the paid lane for identical data.
+        const allergen = redoEnrichment ? null : await verifyRecipeAllergens({ subject: recipe.title, ingredients })
 
-        // Tags/nutrition: normal ai-batch defaults, and ONLY where currently missing.
-        const needsTags = recipe.tags.length === 0
-        const needsNutrition = recipe.nutrition == null
+        // Tags/nutrition: ds lane, and ONLY where currently missing — unless
+        // --redo-enrichment, which rewrites them regardless of what is there.
+        const needsTags = redoEnrichment || recipe.tags.length === 0
+        const needsNutrition = redoEnrichment || recipe.nutrition == null
         let enrichment: z.infer<typeof EnrichmentSchema> | null = null
         if (needsTags || needsNutrition) {
           enrichment = await batchObject(
@@ -131,15 +157,19 @@ async function main() {
               .map((ing) => `- ${ing}`)
               .join('\n')}`,
             EnrichmentSchema,
-            { system: ENRICH_SYSTEM, temperature: 0.3 },
+            { system: ENRICH_SYSTEM, temperature: 0.3, tier: 'quality', providers: ['ds'] },
           )
         }
 
         const updateData = {
-          allergens: allergen.allergens,
-          mayContain: allergen.mayContain,
-          allergenNotes: allergen.allergenNotes,
-          allergenAnnotatedAt: new Date(),
+          ...(allergen
+            ? {
+                allergens: allergen.allergens,
+                mayContain: allergen.mayContain,
+                allergenNotes: allergen.allergenNotes,
+                allergenAnnotatedAt: new Date(),
+              }
+            : {}),
           ...(enrichment && needsTags ? { tags: enrichment.tags.slice(0, 8) } : {}),
           ...(enrichment && needsNutrition ? { nutrition: enrichment.nutrition } : {}),
         }
@@ -172,7 +202,7 @@ async function main() {
     )
   } finally {
     console.log(
-      `\nDone — ${annotated} recipes allergen-annotated, ` +
+      `\nDone — ${annotated} recipes ${redoEnrichment ? 'reprocessed (allergen fields untouched)' : 'allergen-annotated'}, ` +
         `${enriched} rows enriched with tags/nutrition, ${skippedNoIngredients} skipped (no ingredients).`,
     )
     if (failures.length) {
