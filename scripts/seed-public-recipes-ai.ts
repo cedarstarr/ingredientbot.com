@@ -251,6 +251,10 @@ function parseArgs() {
   return {
     count: Number(get('--count') ?? ALL_DISHES.length),
     dryRun: args.includes('--dry-run'),
+    // Serial left the ds lane at ~8% of its 20-rpm cap, idling for the whole of every
+    // ~35s call. The shared 18-rpm limiter still caps the total, so this cannot breach
+    // quota. Pass --concurrency 1 for the old behaviour.
+    concurrency: get('--concurrency') ? Math.max(1, Number(get('--concurrency'))) : 6,
   }
 }
 
@@ -258,7 +262,7 @@ function parseArgs() {
 let prismaRef: { $disconnect(): Promise<void> } | null = null
 
 async function main() {
-  const { count, dryRun } = parseArgs()
+  const { count, dryRun, concurrency } = parseArgs()
   const dishes = ALL_DISHES.slice(0, count)
 
   if (dryRun) {
@@ -279,7 +283,7 @@ async function main() {
 
   const { prisma } = await import('./_prisma')
   prismaRef = prisma
-  const { batchObject } = await import('./lib/ai-batch')
+  const { batchObject, batchMap } = await import('./lib/ai-batch')
   const { verifyRecipeAllergens, requireVerifierEnv, UNVERIFIED_NOTICE } = await import('./lib/allergen-verify')
   const { buildRecipeRecord } = await import('./seed-recipes')
 
@@ -299,19 +303,21 @@ async function main() {
   let annotated = 0
   const failures: { name: string; reason: string }[] = []
 
-  try {
-    for (const [i, { cuisine, dish, publicSlug }] of dishes.entries()) {
-      const existing = await prisma.recipe.findUnique({ where: { publicSlug }, select: { id: true } })
-      if (existing) {
-        skipped++
-        continue
-      }
+  let processed = 0
 
-      // One row must never end the run. providers:['ds'] has no fallback by design, so a
-      // content-filter 400 on a single dish (FOU-441) would otherwise strand every later
-      // row. Record and move on; a re-run retries only the failures, since existing
-      // publicSlugs are skipped.
-      try {
+  try {
+    await batchMap(
+      dishes,
+      async ({ cuisine, dish, publicSlug }) => {
+        const existing = await prisma.recipe.findUnique({ where: { publicSlug }, select: { id: true } })
+        if (existing) {
+          skipped++
+          return null
+        }
+
+        // One row must never end the run: the onError handler below records a failure and
+        // lets the remaining dishes proceed. FOU-441 is why — a content-filter 400 on a
+        // single dish used to strand every later row, since providers:['ds'] has no fallback.
         // FOU-439 net: a quote-truncated field is valid JSON and arrives silently.
         // Floors are amputation checks, not quality bars: a real recipe cannot have
         // a 3-word description, 2 steps, or 1 ingredient.
@@ -349,13 +355,23 @@ async function main() {
           },
         })
         inserted++
-        console.log(`  [${i + 1}/${dishes.length}] /r/${publicSlug}`)
-      } catch (err) {
-        const reason = err instanceof Error ? err.message : String(err)
-        failures.push({ name: dish, reason })
-        console.warn(`  ✗ [${i + 1}/${dishes.length}] ${dish}: ${reason}`)
-      }
-    }
+        console.log(`  [${++processed}/${dishes.length}] /r/${publicSlug}`)
+        return null
+      },
+      {
+        concurrency,
+        // Same contract the serial version had: one bad dish is recorded and skipped, never
+        // fatal. The allergen model rejects the occasional recipe outright, and a re-run
+        // regenerates only what is missing because existing publicSlugs are skipped above.
+        onError: (err, item) => {
+          const reason = err instanceof Error ? err.message : String(err)
+          const dish = (item as { dish: string }).dish
+          failures.push({ name: dish, reason })
+          console.warn(`  ✗ ${dish}: ${reason}`)
+          return 'skip'
+        },
+      },
+    )
   } finally {
     console.log(
       `\nDone — inserted ${inserted}, skipped ${skipped} (existing), ${annotated} allergen-annotated.`,
