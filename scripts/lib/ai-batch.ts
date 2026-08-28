@@ -445,7 +445,12 @@ export async function batchMap<I, O>(
   opts: BatchMapOptions<I> = {},
 ): Promise<O[]> {
   const helpers: BatchMapHelpers = { text: batchText, object: batchObject };
-  const concurrency = Math.max(1, Math.floor(opts.concurrency ?? 1));
+  // AI_BATCH_CONCURRENCY lets a run be parallelised without touching the seeder, which
+  // matters because every caller here is a one-off script invoked by hand. An explicit
+  // opts.concurrency still wins. Number(undefined) is NaN and NaN || 1 is 1, so an unset
+  // or unparseable variable falls back to serial.
+  const envConcurrency = Number(process.env.AI_BATCH_CONCURRENCY) || 1;
+  const concurrency = Math.max(1, Math.floor(opts.concurrency ?? envConcurrency));
   // Results are written by index and compacted at the end, so output order follows input
   // order regardless of which worker finishes first — callers that zip results back against
   // their input list stay correct.
