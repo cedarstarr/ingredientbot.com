@@ -124,7 +124,16 @@ export interface BatchOptions {
   tier?: 'quality' | 'bulk';
   /** Explicit provider order. Defaults to the FREE chain (nvidia → groq). Paid lanes ('ds', 'azure') run only when named here. */
   providers?: Provider[];
+  /**
+   * Per-request deadline. Without one a hung socket waits forever: on 2026-08-28 an
+   * ingredient seed run sat on an open TLS connection to Azure for 13 minutes with empty
+   * send and receive queues, and would have stayed there all night. 120s is far above the
+   * ~35s a long prose call takes, so it fires only on a genuinely dead request.
+   */
+  timeoutMs?: number;
 }
+
+const DEFAULT_TIMEOUT_MS = 120_000;
 
 class RateLimiter {
   private timestamps: number[] = [];
@@ -327,7 +336,11 @@ async function withFallback<T>(
         const status = extractStatus(err);
         const isRateLimit = status === 429;
         const isServerError = status >= 500 && status < 600;
-        const isRetryable = isRateLimit || isServerError;
+        // A timeout is the one client-side failure worth retrying: the request never
+        // reached a verdict, so the next attempt is not a repeat of a rejected call.
+        const isTimeout =
+          err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError');
+        const isRetryable = isRateLimit || isServerError || isTimeout;
 
         if (!isRetryable) {
           stats[provider].failed += 1;
@@ -337,7 +350,7 @@ async function withFallback<T>(
 
         const backoff = initialBackoff * Math.pow(2, attempt) + Math.random() * 500;
         console.warn(
-          `[ai-batch] ${provider} ${status} (attempt ${attempt + 1}/${maxRetries}) — backing off ${Math.round(backoff)}ms`,
+          `[ai-batch] ${provider} ${isTimeout ? 'timed out' : status} (attempt ${attempt + 1}/${maxRetries}) — backing off ${Math.round(backoff)}ms`,
         );
         await sleep(backoff);
         if (attempt === maxRetries - 1) stats[provider].failed += 1;
@@ -377,6 +390,7 @@ export async function batchText(prompt: string, opts: BatchOptions = {}): Promis
         prompt,
         system: opts.system,
         temperature: opts.temperature,
+        abortSignal: AbortSignal.timeout(opts.timeoutMs ?? DEFAULT_TIMEOUT_MS),
       }),
     opts,
   );
@@ -396,6 +410,7 @@ export async function batchObject<T>(
         prompt,
         system: opts.system,
         temperature: opts.temperature,
+        abortSignal: AbortSignal.timeout(opts.timeoutMs ?? DEFAULT_TIMEOUT_MS),
       }),
     opts,
   );
