@@ -119,7 +119,7 @@ export const DEFAULT_DISHES: Record<string, string[]> = {
     'mapo tofu', 'kung pao chicken', 'char siu pork', 'beef chow fun', 'hot and sour soup', 'dan dan noodles',
     'sweet and sour pork', 'congee with century egg', 'scallion pancakes', 'egg fried rice',
     'peking duck', 'xiaolongbao soup dumplings', 'general tso chicken', 'twice cooked pork', 'wonton soup',
-    'dry fried green beans', 'sichuan boiled fish', 'cantonese roast goose', 'zhajiangmian noodles', 'mooncakes',
+    'dry fried green beans', 'sichuan boiled fish', 'zhajiangmian noodles', 'mooncakes',
   ],
   Japanese: [
     'chicken katsu curry', 'miso ramen', 'oyakodon', 'chicken teriyaki', 'okonomiyaki', 'agedashi tofu',
@@ -161,7 +161,7 @@ export const DEFAULT_DISHES: Record<string, string[]> = {
   Peruvian: [
     'ceviche clasico', 'lomo saltado', 'aji de gallina', 'papa a la huancaina', 'arroz con pollo peruano',
     'anticuchos', 'causa rellena', 'seco de res', 'tacu tacu', 'picarones',
-    'rocoto relleno', 'chupe de camarones', 'tallarines verdes', 'cuy chactado', 'chicharron de pescado',
+    'rocoto relleno', 'chupe de camarones', 'tallarines verdes', 'chicharron de pescado',
     'escabeche de pescado', 'papa rellena', 'tamales peruanos', 'suspiro a la limena', 'pisco sour',
   ],
   Brazilian: [
