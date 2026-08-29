@@ -8,21 +8,32 @@ export const dynamic = 'force-dynamic'
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ingredientbot.com'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Fetch public recipe slugs for dynamic recipe pages
-  // NOTE: both take: 1000 caps below need raising (or splitting into sitemap
-  // index files) as the recipe/ingredient libraries grow past them.
+  // Fetch public recipe slugs for dynamic recipe pages.
+  // Raised from 1000 on 2026-08-29: the library had reached 998 of that cap, so
+  // the next content batch would have silently dropped recipes from the sitemap.
+  // A single sitemap file is valid to 50,000 URLs — split into a sitemap index
+  // only past that, not at this cap.
   const publicRecipes = await prisma.recipe.findMany({
     where: { isPublic: true, publicSlug: { not: null } },
     select: { publicSlug: true, updatedAt: true },
     orderBy: { updatedAt: 'desc' },
-    take: 1000,
+    take: 10000,
   })
 
   // Ingredient glossary pages — mirrors the public-recipe pattern above
   const ingredients = await prisma.ingredient.findMany({
     select: { slug: true, updatedAt: true },
     orderBy: { updatedAt: 'desc' },
-    take: 1000,
+    take: 10000,
+  })
+
+  // Cuisine listing pages. Each /recipes?cuisine=X view canonicalizes to itself
+  // and is independently indexable, but nothing pointed crawlers at them beyond
+  // in-page links. Derived from the data so a new cuisine needs no code change.
+  const cuisineGroups = await prisma.recipe.groupBy({
+    by: ['cuisine'],
+    where: { isPublic: true, publicSlug: { not: null } },
+    _max: { updatedAt: true },
   })
 
   // Allergen reference pages — published only; there are at most 15 rows
@@ -41,6 +52,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly' as const,
       priority: 0.7,
     }))
+
+  // 'Other' is the label /recipes uses for the null-cuisine bucket, so the URL
+  // must match what the page reads back out of the query string.
+  const cuisineEntries: MetadataRoute.Sitemap = cuisineGroups.map((g) => ({
+    url: `${baseUrl}/recipes?cuisine=${encodeURIComponent(g.cuisine ?? 'Other')}`,
+    lastModified: g._max.updatedAt ?? new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: 0.6,
+  }))
 
   const ingredientEntries: MetadataRoute.Sitemap = ingredients.map((i) => ({
     url: `${baseUrl}/ingredients/${i.slug}`,
@@ -106,6 +126,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'yearly',
       priority: 0.3,
     },
+    ...cuisineEntries,
     ...recipeEntries,
     ...ingredientEntries,
     ...allergenEntries,

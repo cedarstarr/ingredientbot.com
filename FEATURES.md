@@ -102,6 +102,7 @@
 - ✅ F79 Medical dietary flags (low-sodium / low-FODMAP / diabetes-friendly) [Core]
 - ✅ F83 Site-wide "not allergy-aware yet" notice [Core]
 - 🛠 F84 Allergy awareness (verified allergen data end to end) [Core]
+- 🛠 F92 Public recipe browse by diet and meal type at `/recipes` [Core]
 
 ---
 
@@ -253,6 +254,8 @@ F49. **Family profile (multi-eater)** [Sticky] — Multiple dietary profiles in 
 ✅ F85. **Allergen reference glossary** [Core] — `/allergens` index plus `/allergens/[slug]` detail pages for the 15 canonical FDA-9/EU-14 allergens (src/lib/allergens.ts vocabulary): regulatory status, alternate label names, commonly hidden sources, cross-reactivity, and practical dining-out guidance, cross-linked into `/ingredients/[slug]` via `Ingredient.allergenProfile`. Highest-liability content on the site — three-state language only (never "free from"), no medical thresholds or severity claims, full `AllergenDisclaimer` renders on both the index and every detail page, and rows land `published: false` on create so nothing is public until an editor reviews it (Ingredient has no such gate; this table deliberately does). Generated exclusively via `scripts/seed-allergens-ai.ts` + `verifyAllergenReference()` in `scripts/lib/allergen-verify.ts`, forced onto the paid Azure frontier model with no free-lane fallback — `requireVerifierEnv()` throws rather than degrading silently. Feeds toward F84 but does not complete it: this is the reference-content half, not the post-generation allergen-rejection check. Seeder is `--dry-run`-verified only; no AI has been run against it yet. (Feasibility: built)
 
 F52. **Referral program** [Sticky] — Share a link; both user and referee get bonus recipe credits. Standard referral loop. DishGen lets users earn credits via social shares; we do it via direct referral. Portfolio referral system pattern already established. (Feasibility: Medium — referral model already in portfolio pattern)
+
+🛠 F92. **Public recipe browse by diet and meal type** [Core] — Cuisine is currently the only axis into a 998-recipe public library, which leaves the highest-intent searches ("vegan dinner recipes", "gluten-free desserts") with no landing page. The tag data to support it already exists on every recipe: gluten-free 157, vegetarian 140, vegan 71, dairy-free 43, appetizer 89, soup 69, side dish 65, dessert 61, breakfast 54. Adds `?tag=` filtering alongside `?cuisine=` on `/recipes`, restricted to a curated ~12-tag allowlist, plus tag sections on the overview and sitemap entries per tag. Two prerequisites: normalize the 1,763-tag long tail against a controlled vocabulary at seed time (same stamp-don't-trust fix the cuisine label just got), and **no allergen-absence tags** — "nut-free" would contradict the three-state allergen rule, since the underlying data is a single unverified model annotation. (Feasibility: Low — mirrors the existing F81 cuisine pattern; the tag vocabulary is the real work)
 
 ✅ F53. **Budget mode** [Sticky] — Prefer ingredient combinations that are cheaper at typical grocery prices. "I want to keep this meal under $8." Cost-of-living anxiety is real; this positioning resonates with budget-conscious users who cook at home to save money. (Feasibility: Low — Claude prompt modifier, no live pricing data needed for rough guidance)
 

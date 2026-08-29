@@ -522,6 +522,12 @@ async function main() {
           data: {
             ...buildRecipeRecord(r as unknown as RecipeInput, library.id),
             nutrition: r.nutrition, // macros only — overrides the RecipeInput shape
+            // The DEFAULT_DISHES key wins over the model's own `cuisine` string.
+            // /recipes groups by exact match, so a returned "ethiopian" or
+            // "Southern United States" splits a section in two. 24 of the first
+            // 998 rows drifted this way (2026-08-29 audit) — the label is ours to
+            // assign, not the model's, since we prompted with it.
+            cuisine,
             tags: r.tags.slice(0, 8),
             isPublic: true,
             publicSlug,
@@ -562,9 +568,15 @@ async function main() {
   }
 }
 
-main()
-  .catch((e) => {
-    console.error(e)
-    process.exit(1)
-  })
-  .finally(() => prismaRef?.$disconnect().catch(() => undefined))
+// Entrypoint guard. DEFAULT_DISHES / ALL_DISHES are exported for other scripts to
+// read, and a bare `main()` at module scope ran the whole seeder on any import —
+// the 2026-08-29 audit tripped it by importing the dish list. Idempotence meant
+// nothing was written and no AI call was made, but only by luck of ordering.
+if (require.main === module) {
+  main()
+    .catch((e) => {
+      console.error(e)
+      process.exit(1)
+    })
+    .finally(() => prismaRef?.$disconnect().catch(() => undefined))
+}

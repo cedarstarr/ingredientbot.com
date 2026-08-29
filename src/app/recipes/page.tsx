@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ChefHat, ArrowRight, ArrowLeft, Clock, UtensilsCrossed } from 'lucide-react'
 import { AllergyAwarenessNotice } from '@/components/allergy-awareness-notice'
+import { formatDuration } from '@/lib/recipe-format'
 
 export const revalidate = 3600
 
@@ -63,7 +64,7 @@ function RecipeCard({ recipe }: { recipe: RecipeCardData }) {
         {totalMin > 0 && (
           <span className="inline-flex items-center gap-1">
             <Clock className="h-3 w-3" />
-            {totalMin} min
+            {formatDuration(totalMin)}
           </span>
         )}
       </div>
