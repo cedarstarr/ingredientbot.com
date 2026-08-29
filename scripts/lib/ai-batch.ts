@@ -435,15 +435,59 @@ export interface BatchMapOptions<I> {
    * raising this cannot breach quota — it only stops the process idling between calls.
    */
   concurrency?: number;
+  /**
+   * Preserve index alignment with `items` instead of compacting away skips.
+   *
+   * Default false keeps every existing caller byte-identical in behaviour. With
+   * `keepHoles: true` a skipped item yields `null` at its original index, so
+   * `results[i]` always corresponds to `items[i]`. Prefer the tuple pattern in the
+   * mapper (see batchMap's doc comment) — this option exists for callers that
+   * genuinely need a positional array, e.g. writing back into a fixed-width table.
+   */
+  keepHoles?: boolean;
   onProgress?: (done: number, total: number, lastItem: I) => void;
   onError?: (err: unknown, item: I, index: number) => 'skip' | 'throw';
 }
 
+/**
+ * Map `items` through `fn`, one AI call per item, under the shared rate limiter.
+ *
+ * ⚠️ OUTPUT IS COMPACTED AFTER SKIPS — **never zip results against inputs by index.**
+ * When `onError` returns 'skip' the failed item is REMOVED from the output array, not
+ * left as a hole, so `results[i]` stops corresponding to `items[i]` from the first skip
+ * onwards. Nothing throws and the counts look plausible; the pairing is just wrong.
+ * On 2026-08-29 this shipped 12 padhr ComplianceDeadline rows each carrying the NEXT
+ * item's description (FOU-443) — caught only by a human reading every row.
+ *
+ * Return the pairing from the mapper so it travels with the result and compaction
+ * cannot shear it:
+ *
+ * ```ts
+ * const pairs = await batchMap(seeds, async (seed, ai) => {
+ *   const generated = await ai.object({ ... });
+ *   return { seed, generated };            // ✅ association survives a skip
+ * }, { onError: () => 'skip' });
+ * for (const { seed, generated } of pairs) { ... }
+ * ```
+ *
+ * Pass `keepHoles: true` if you genuinely need a positionally-aligned array; skipped
+ * items then come back as `null` at their original index.
+ */
+export async function batchMap<I, O>(
+  items: I[],
+  fn: (item: I, helpers: BatchMapHelpers) => Promise<O>,
+  opts: BatchMapOptions<I> & { keepHoles: true },
+): Promise<(O | null)[]>;
+export async function batchMap<I, O>(
+  items: I[],
+  fn: (item: I, helpers: BatchMapHelpers) => Promise<O>,
+  opts?: BatchMapOptions<I>,
+): Promise<O[]>;
 export async function batchMap<I, O>(
   items: I[],
   fn: (item: I, helpers: BatchMapHelpers) => Promise<O>,
   opts: BatchMapOptions<I> = {},
-): Promise<O[]> {
+): Promise<(O | null)[]> {
   const helpers: BatchMapHelpers = { text: batchText, object: batchObject };
   // AI_BATCH_CONCURRENCY lets a run be parallelised without touching the seeder, which
   // matters because every caller here is a one-off script invoked by hand. An explicit
@@ -451,9 +495,10 @@ export async function batchMap<I, O>(
   // or unparseable variable falls back to serial.
   const envConcurrency = Number(process.env.AI_BATCH_CONCURRENCY) || 1;
   const concurrency = Math.max(1, Math.floor(opts.concurrency ?? envConcurrency));
-  // Results are written by index and compacted at the end, so output order follows input
-  // order regardless of which worker finishes first — callers that zip results back against
-  // their input list stay correct.
+  // Results are written by index, so output ORDER follows input order regardless of which
+  // worker finishes first. Order is not alignment: unless keepHoles is set, the array is
+  // compacted at the end and skipped items vanish, shifting every later result up. See the
+  // doc comment above — return tuples from the mapper rather than zipping by index.
   const SKIP = Symbol('skip');
   const results: (O | typeof SKIP)[] = new Array(items.length).fill(SKIP);
   let next = 0;
@@ -475,5 +520,6 @@ export async function batchMap<I, O>(
     }
   };
   await Promise.all(Array.from({ length: Math.min(concurrency, items.length) || 1 }, worker));
+  if (opts.keepHoles) return results.map((r) => (r === SKIP ? null : (r as O)));
   return results.filter((r): r is O => r !== SKIP);
 }
