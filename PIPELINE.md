@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-08-22 (/qa-e2e run)
+**Last Updated**: 2026-08-29 (/qa-security run)
 
 ---
 
@@ -25,9 +25,9 @@
 | 10 | QA / Bug Check | /qa-bugs | DONE | 6 | 2026-07-19 | [view](reports/2026-07-19-site-bugs.md) |
 | 11 | Button Audit | /qa-button-fix | DONE | 1 | 2026-07-18 | [view](reports/2026-07-19-qa-buttons.md) |
 | 12 | Re-verify Tests | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
-| 13 | Security Hardening | /qa-security | DONE | 7 | 2026-08-01 | [view](reports/2026-08-02-site-security.md) |
-| 14 | Resilience Audit | /qa-resilience | DONE | 4 | 2026-08-01 | [view](reports/2026-08-02-site-resilience.md) |
-| 15 | AI Completion Audit | /qa-ai-completion | DONE | 1 | 2026-08-09 | — |
+| 13 | Security Hardening | /qa-security | DONE | 8 | 2026-08-29 | [view](reports/2026-08-29-site-security.md) |
+| 14 | Resilience Audit | /qa-resilience | STALE | 4 | 2026-08-01 | [view](reports/2026-08-02-site-resilience.md) |
+| 15 | AI Completion Audit | /qa-ai-completion | STALE | 1 | 2026-08-09 | — |
 | 16 | Design System Install | /design-implement | STALE | 2 | 2026-06-25 | [view](reports/2026-04-18-site-design.md) |
 | 17 | Token Hygiene | /qa-tokens | STALE | 6 | 2026-06-24 | [view](reports/2026-06-24-qa-tokens.md) |
 | 18 | Copy Audit | /qa-copy | STALE | 3 | 2026-06-26 | [view](reports/2026-06-26-ingredientbot-copy.md) |
@@ -44,7 +44,7 @@
 
 **Progress: 22/28 stages complete (1 skipped)**
 
-**Last Updated**: 2026-08-22 (/qa-e2e run)
+**Last Updated**: 2026-08-29 (/qa-security run)
 
 ---
 
@@ -150,3 +150,4 @@
 | 2026-08-17 | /qa-e2e | 1m | SUCCESS | 23/23 pass, 0 fail (android) [view](reports/2026-08-17-qa-e2e.md) |
 | 2026-08-20 | /qa-e2e | 95m | SUCCESS | Sprint: pantry closed (F26/F44/F46/F50 to 💤 — model, data and /api/user/pantry routes kept) + F86-F90 shipped. 183/192 Playwright pass across chromium/iphone/android; the 2 iPhone kitchen failures are pre-existing on main (3/3 there) and filed as FOU-413. Merged to staging. [view](reports/2026-08-17-qa-e2e.md) |
 | 2026-08-22 | /qa-e2e | 32m | SUCCESS | chromium suite green, 0 failures [view](reports/2026-08-22-qa-e2e.md) |
+| 2026-08-29 | /qa-security | 20m | SUCCESS | 2 issues found (1 HIGH fixed, 1 HIGH deferred FOU-453); vision/SSRF/allergen lanes verified clean [view](reports/2026-08-29-site-security.md) |
