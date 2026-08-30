@@ -10,6 +10,7 @@ import { safeJsonLdString } from '@/lib/utils'
 import { AllergenDisclaimer } from '@/components/allergen-disclaimer'
 import { AllergyAwarenessNotice } from '@/components/allergy-awareness-notice'
 import { allergenLabel } from '@/lib/allergens'
+import { formatDuration, isIngredientHeading } from '@/lib/recipe-format'
 
 export const revalidate = 3600
 
@@ -113,9 +114,11 @@ export default async function PublicRecipePage({ params }: Props) {
     '@type': 'Recipe',
     name: data.title,
     description: data.description ?? undefined,
-    recipeIngredient: data.ingredients?.map(
-      (ing) => `${ing.amount} ${ing.unit} ${ing.name}`.trim()
-    ),
+    // Section labels are dropped — Google would otherwise index "For the broth
+    // and tare" as an ingredient of the dish.
+    recipeIngredient: data.ingredients
+      ?.filter((ing) => !isIngredientHeading(ing))
+      .map((ing) => `${ing.amount} ${ing.unit} ${ing.name}`.trim()),
     recipeInstructions: data.steps?.map((step, i) => ({
       '@type': 'HowToStep',
       position: i + 1,
@@ -184,7 +187,7 @@ export default async function PublicRecipePage({ params }: Props) {
             {totalMin > 0 && (
               <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
                 <Clock className="h-4 w-4" />
-                {totalMin} min
+                {formatDuration(totalMin)}
               </span>
             )}
             {recipe.servings && (
@@ -204,14 +207,25 @@ export default async function PublicRecipePage({ params }: Props) {
               Ingredients
             </h2>
             <ul className="space-y-2">
-              {data.ingredients?.map((ing, i) => (
-                <li key={i} className="flex items-baseline gap-2 text-sm">
-                  <span className="font-medium text-foreground whitespace-nowrap">
-                    {ing.amount} {ing.unit}
-                  </span>
-                  <span className="text-muted-foreground">{ing.name}</span>
-                </li>
-              ))}
+              {data.ingredients?.map((ing, i) =>
+                isIngredientHeading(ing) ? (
+                  // Multi-component dishes ship "For the broth"-style labels in the
+                  // ingredient array; as a plain bullet they read as a broken row.
+                  <li
+                    key={i}
+                    className="pt-3 first:pt-0 text-xs font-semibold uppercase tracking-wide text-foreground"
+                  >
+                    {ing.name.replace(/^for\s+(the\s+)?/i, '')}
+                  </li>
+                ) : (
+                  <li key={i} className="flex items-baseline gap-2 text-sm">
+                    <span className="font-medium text-foreground whitespace-nowrap">
+                      {ing.amount} {ing.unit}
+                    </span>
+                    <span className="text-muted-foreground">{ing.name}</span>
+                  </li>
+                ),
+              )}
             </ul>
 
             {/* Allergens — rendered only alongside the safety disclaimer; the
