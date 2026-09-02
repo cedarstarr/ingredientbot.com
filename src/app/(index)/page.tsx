@@ -50,6 +50,9 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" asChild className="hidden sm:inline-flex">
+              <Link href="/what-can-i-make">What can I make?</Link>
+            </Button>
+            <Button variant="ghost" asChild className="hidden sm:inline-flex">
               <Link href="/recipes">Recipes</Link>
             </Button>
             <Button variant="ghost" asChild>
@@ -179,6 +182,7 @@ export default function LandingPage() {
         </div>
         <p>AI-powered recipe assistant. Cook smarter, eat better.</p>
         <div className="flex items-center justify-center gap-4 mt-3">
+          <Link href="/what-can-i-make" className="hover:text-foreground transition-colors">What can I make?</Link>
           <Link href="/recipes" className="hover:text-foreground transition-colors">Recipes</Link>
           <Link href="/ingredients" className="hover:text-foreground transition-colors">Ingredients</Link>
           <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>

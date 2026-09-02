@@ -89,6 +89,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     // /kitchen is auth-gated — excluded to avoid crawl budget waste on redirect
     {
+      url: `${baseUrl}/what-can-i-make`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
       url: `${baseUrl}/recipes`,
       lastModified: new Date(),
       changeFrequency: 'daily',
