@@ -22,7 +22,7 @@ export function ModificationToolbar({ recipeId, servings, onModified }: Props) {
         <Sparkles className="h-3.5 w-3.5 text-primary" />
         Customize this recipe
       </h3>
-      <div className="flex flex-wrap gap-2 items-end">
+      <div className="flex flex-wrap gap-2 items-end" data-testid="modification-toolbar">
         {/* Lower calories */}
         <Button
           variant="outline"

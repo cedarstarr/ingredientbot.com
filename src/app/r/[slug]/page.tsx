@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Clock, Users, ChefHat, ArrowRight, Utensils } from 'lucide-react'
 import { safeJsonLdString } from '@/lib/utils'
 import { AllergenDisclaimer } from '@/components/allergen-disclaimer'
+import { CookThisButton } from '@/components/recipe/cook-this-button'
 import { AllergyAwarenessNotice } from '@/components/allergy-awareness-notice'
 import { allergenLabel } from '@/lib/allergens'
 import { formatDuration, isIngredientHeading } from '@/lib/recipe-format'
@@ -354,16 +355,14 @@ export default async function PublicRecipePage({ params }: Props) {
         {/* CTA */}
         <div className="mt-12 rounded-2xl border border-primary/20 bg-primary/5 p-6 text-center">
           <ChefHat className="h-8 w-8 text-primary mx-auto mb-3" />
-          <h2 className="text-xl font-bold text-foreground mb-2">Cook smarter with IngredientBot</h2>
+          <h2 className="text-xl font-bold text-foreground mb-2">Make it yours</h2>
           <p className="text-muted-foreground text-sm mb-4 max-w-sm mx-auto">
-            Enter the ingredients you have and get AI-generated recipes instantly — free to try.
+            Add this to your recipes and you can make it vegetarian, scale the servings, or swap
+            an ingredient you do not have.
           </p>
-          <Button asChild size="lg">
-            <Link href="/kitchen">
-              Try IngredientBot Free
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Link>
-          </Button>
+          {/* Adds the recipe to the visitor's own collection — the AI modifiers are
+              owner-scoped, so they cannot run against the house library account. */}
+          <CookThisButton recipeId={recipe.id} slug={slug} />
         </div>
       </main>
 

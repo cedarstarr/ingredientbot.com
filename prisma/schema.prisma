@@ -219,6 +219,18 @@ model Recipe {
   // Reverse ingredient search ("What can I make?").
   ingredients RecipeIngredient[]
 
+  /// Set when this recipe was copied out of the public library so its owner can
+  /// run the AI modifiers on it — those are owner-scoped, and a library recipe
+  /// belongs to the house account.
+  ///
+  /// Exists for idempotency as much as provenance: forking is metered against
+  /// the 5-a-month free cap, so without a way to recognise "this user already
+  /// forked that recipe", pressing Cook this twice would silently spend two of
+  /// their five on one dish.
+  forkedFromId String?  @map("forked_from_id")
+  forkedFrom   Recipe?  @relation("RecipeFork", fields: [forkedFromId], references: [id], onDelete: SetNull)
+  forks        Recipe[] @relation("RecipeFork")
+
   // Denormalized count of DISTINCT non-staple ingredients on this recipe,
   // maintained by scripts/backfill-recipe-ingredients.ts. Search ranks by
   // "fewest extra ingredients", where extras = this count minus however many
@@ -235,6 +247,8 @@ model Recipe {
   @@index([collectionId])
   // Reverse search scans public recipes and orders by the extras proxy.
   @@index([isPublic, nonStapleIngredientCount])
+  // "Has this user already forked this library recipe?" on every Cook this click.
+  @@index([userId, forkedFromId])
   @@map("recipes")
 }
 
