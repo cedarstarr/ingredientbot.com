@@ -21,7 +21,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   })
 
   // Ingredient glossary pages — mirrors the public-recipe pattern above
+  // Only rows with encyclopedia prose are real pages — see the published gate
+  // in src/app/ingredients/[slug]/page.tsx. Search-only rows created by the
+  // reverse-search backfill 404, so listing them here would advertise dead URLs.
   const ingredients = await prisma.ingredient.findMany({
+    where: { description: { not: null } },
     select: { slug: true, updatedAt: true },
     orderBy: { updatedAt: 'desc' },
     take: 10000,

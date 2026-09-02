@@ -23,6 +23,10 @@ export default async function IngredientsIndexPage() {
   // One query — the whole corpus is a few hundred rows, small enough to ship
   // to the client for instant search filtering without a search API.
   const ingredients = await prisma.ingredient.findMany({
+    // Same published gate as the detail page: rows the reverse-search backfill
+    // created as match targets have no prose yet and would render as empty
+    // entries here and 404 when clicked.
+    where: { description: { not: null } },
     select: { slug: true, name: true, category: true, allergenProfile: true },
     orderBy: [{ category: 'asc' }, { name: 'asc' }],
   })

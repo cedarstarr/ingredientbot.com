@@ -16,8 +16,16 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
-// cache() deduplicates the DB call between generateMetadata and the page render
-const getIngredient = cache((slug: string) => prisma.ingredient.findUnique({ where: { slug } }))
+// cache() deduplicates the DB call between generateMetadata and the page render.
+//
+// `description: { not: null }` is a PUBLISHED gate, not a display detail. The
+// reverse-search backfill creates canonical rows purely as match targets for
+// recipe ingredients, with no encyclopedia prose until
+// scripts/seed-ingredient-ai.ts writes one. Serving those as glossary pages
+// would publish a few dozen empty, thin-content URLs.
+const getIngredient = cache((slug: string) =>
+  prisma.ingredient.findFirst({ where: { slug, description: { not: null } } }),
+)
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ingredientbot.com'
 

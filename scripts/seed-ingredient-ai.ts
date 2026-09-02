@@ -19,7 +19,9 @@ import './lib/load-env' // MUST stay first — see scripts/lib/load-env.ts (impo
 import { z } from 'zod'
 
 // ~360 common ingredients grouped by category. Slugs are derived from names.
-const DEFAULT_INPUTS: Record<string, string[]> = {
+// Exported so the reverse-search alias vocabulary can be tested against the
+// real corpus rather than a hand-copied list that drifts out of date.
+export const DEFAULT_INPUTS: Record<string, string[]> = {
   produce: [
     'apple', 'banana', 'orange', 'lemon', 'lime', 'grapefruit', 'strawberry', 'blueberry', 'raspberry',
     'blackberry', 'grape', 'watermelon', 'cantaloupe', 'pineapple', 'mango', 'papaya', 'kiwi', 'peach',

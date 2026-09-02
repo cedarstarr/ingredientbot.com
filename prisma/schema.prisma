@@ -216,9 +216,59 @@ model Recipe {
 
   mealPlanSlots MealPlanSlot[]
 
+  // Reverse ingredient search ("What can I make?").
+  ingredients RecipeIngredient[]
+
+  // Denormalized count of DISTINCT non-staple ingredients on this recipe,
+  // maintained by scripts/backfill-recipe-ingredients.ts. Search ranks by
+  // "fewest extra ingredients", where extras = this count minus however many
+  // of the cook's ingredients matched — a per-row subtraction the database can
+  // do without a GROUP BY over the join for every candidate recipe.
+  //
+  // It counts UNMATCHED ingredients too. A recipe needing guanciale, which the
+  // canonical corpus has no row for, must not rank as though guanciale were
+  // free; counting only resolved rows would advertise recipes as ready to cook
+  // when they are not.
+  nonStapleIngredientCount Int @default(0) @map("non_staple_ingredient_count")
+
   @@index([userId])
   @@index([collectionId])
+  // Reverse search scans public recipes and orders by the extras proxy.
+  @@index([isPublic, nonStapleIngredientCount])
   @@map("recipes")
+}
+
+/// Join between a recipe and the canonical ingredient corpus, so reverse
+/// search can match on IDs instead of on prose. Written only by
+/// scripts/backfill-recipe-ingredients.ts.
+model RecipeIngredient {
+  id       String @id @default(cuid())
+  recipeId String @map("recipe_id")
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  /// Null when the raw string matched nothing in the corpus. The row is kept
+  /// anyway: it is still an ingredient the cook has to buy, so it has to count
+  /// toward "extras" even though we cannot name it. ~7% of library rows.
+  ingredientId String?     @map("ingredient_id")
+  ingredient   Ingredient? @relation(fields: [ingredientId], references: [id], onDelete: SetNull)
+
+  /// The recipe's own wording, e.g. "garlic cloves, minced". Kept for display
+  /// and for auditing what the matcher did.
+  rawName String @map("raw_name")
+
+  /// Denormalized from Ingredient.isStaple at backfill time so the ranking
+  /// query never has to join Ingredient just to exclude salt and water.
+  isStaple Boolean @default(false) @map("is_staple")
+
+  /// Unique on the RAW name, not on ingredientId: ingredientId is nullable
+  /// (Postgres treats NULLs as distinct, so it cannot dedupe unmatched rows)
+  /// and two different strings in one recipe can legitimately resolve to the
+  /// same ingredient. rawName is always present, which makes re-running the
+  /// backfill idempotent.
+  @@unique([recipeId, rawName])
+  @@index([ingredientId])
+  @@index([recipeId])
+  @@map("recipe_ingredients")
 }
 
 // F47: per-day cooking log for streak and heatmap (separate from cookedCount on Recipe)
@@ -437,10 +487,28 @@ model Ingredient {
   storage     String?
   seasonality String?
 
+  /// Other names this ingredient is written under, for autocomplete lookup —
+  /// "EVOO" and "extra-virgin olive oil" both find `extra-virgin-olive-oil`.
+  ///
+  /// The authoritative alias vocabulary lives in
+  /// src/lib/ingredient-normalize.ts, because it is matching LOGIC that has to
+  /// be diffable and testable; the backfill mirrors it here so the public
+  /// autocomplete endpoint can query it in SQL. Do not hand-edit — a manual
+  /// value is silently overwritten on the next backfill run.
+  aliases String[] @default([])
+
+  /// Pantry staples never count as "extra ingredients" in search ranking, on
+  /// the principle that everyone already has salt. Mirrored from STAPLE_SLUGS
+  /// in src/lib/ingredient-normalize.ts.
+  isStaple Boolean @default(false) @map("is_staple")
+
+  recipeLinks RecipeIngredient[]
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([category])
+  @@index([isStaple])
   @@map("ingredients")
 }
 
