@@ -100,6 +100,11 @@ const PUBLIC_PATHS = [
   '/ingredients',
   // Allergen reference glossary — server-rendered, published rows only (FOU Phase 3)
   '/allergens',
+  // Reverse ingredient search ("What can I make?"). Read-only, rate-limited by
+  // searchLimiter on top of the global /api floor above. Public on purpose: a
+  // visitor has to be able to try it before signing up, which is the entire
+  // funnel this feature exists to feed.
+  '/api/search',
 ]
 
 export default auth(async function middleware(request: NextAuthRequest) {

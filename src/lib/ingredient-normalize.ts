@@ -856,9 +856,44 @@ export const NON_VEGETARIAN_SLUGS: ReadonlySet<string> = new Set([
   'fish-sauce', 'oyster-sauce', 'worcestershire-sauce', 'anchovy-paste', 'dashi-stock',
   'chicken-broth', 'beef-broth', 'lard', 'duck-fat', 'gelatin',
 ])
-/** Non-vegan on top of the above: dairy, egg, honey. */
+/** Non-vegan on top of the above: dairy, egg, honey. Not yet exposed as a filter. */
 export const NON_VEGAN_CATEGORIES: ReadonlySet<string> = new Set(['dairy'])
 export const NON_VEGAN_SLUGS: ReadonlySet<string> = new Set(['egg', 'honey'])
+
+/**
+ * Word stems that mark a RAW ingredient string as meat or fish. Applied to
+ * EVERY ingredient row in the vegetarian filter, matched and unmatched alike.
+ *
+ * Two reasons it cannot be limited to unmatched rows. An unmatched "guanciale"
+ * is invisible to an id-based check at all. And for a row like "vegetable or
+ * chicken broth" the matcher picks one option — whichever the author happened
+ * to write first — so an id-only filter would call that recipe vegetarian
+ * while "chicken or vegetable broth", the same dish, reads as not. Word order
+ * in someone's prose must not decide a dietary result.
+ *
+ * Consequence, accepted deliberately: a recipe that offers a vegetarian
+ * alternative is excluded from vegetarian results. That is a missed result,
+ * which is the safe direction — the opposite error puts meat stock in front of
+ * someone avoiding it.
+ *
+ * This is a filter, never a claim: it can only remove recipes from a
+ * vegetarian view. Nothing here may ever be rendered as "free from" anything.
+ *
+ * Matched with a word-boundary regex, not a substring test, so "ham" does not
+ * fire on "graham" and "crab" does not fire on "crab apple". Prefix stems like
+ * "anchov" are intentional — they must still catch anchovy and anchovies.
+ */
+export const NON_VEGETARIAN_RAW_PATTERNS: readonly string[] = [
+  'beef', 'pork', 'chicken', 'turkey', 'duck', 'lamb', 'mutton', 'veal', 'venison', 'bison',
+  'rabbit', 'goat', 'quail', 'goose', 'bacon', 'ham', 'prosciutto', 'pancetta', 'guanciale',
+  'sausage', 'chorizo', 'salami', 'pepperoni', 'andouille', 'kielbasa', 'meat', 'oxtail',
+  'tripe', 'liver', 'gizzard', 'marrow', 'foie', 'lard', 'tallow', 'suet', 'gelatin',
+  'fish', 'anchov', 'sardine', 'tuna', 'salmon', 'halibut', 'tilapia', 'trout', 'mackerel',
+  'snapper', 'catfish', 'swordfish', 'shrimp', 'prawn', 'crab', 'lobster', 'crawfish',
+  'scallop', 'mussel', 'clam', 'oyster', 'squid', 'octopus', 'calamari', 'caviar', 'roe',
+  'dashi', 'bonito', 'katsuobushi', 'shellfish', 'seafood', 'escargot', 'snail',
+  'worcestershire', 'belacan', 'nam pla',
+]
 
 /** A row whose name is really a section label, e.g. "For the köfte". */
 const HEADING_RE = /^for\s+(the\s+)?\S/i
@@ -951,10 +986,10 @@ export function candidateForms(raw: string): string[] {
     // short options against the last option's head noun, and keep them in
     // written order so the author's first choice wins.
     //
-    // This decides dietary derivation for "chicken or vegetable broth": the
-    // recipe resolves to chicken-broth and reads as non-vegetarian. That is
-    // the conservative direction — it can only exclude a recipe from a
-    // vegetarian filter, never wrongly offer a meat stock to someone avoiding it.
+    // Which option wins is a display and extras-counting decision only. It
+    // deliberately does NOT decide dietary filtering, because the author's word
+    // order is arbitrary — the vegetarian filter scans every raw string instead
+    // (see NON_VEGETARIAN_RAW_PATTERNS).
     const head = parts.at(-1)!.split(' ')
     const headNoun = head.length > 1 ? head.at(-1)! : null
     if (!headNoun) return parts

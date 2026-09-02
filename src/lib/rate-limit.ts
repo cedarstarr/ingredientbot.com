@@ -116,9 +116,23 @@ const _formRatelimit = redis
     })
   : null
 
+// Public reverse ingredient search. Unauthenticated and DB-heavy, so it gets a
+// budget of its own beneath the middleware's 20/10s floor. 40/1m rather than
+// the form limiter's 20: a cook adds and removes chips several times while
+// composing a search, and each edit is a legitimate query.
+const _searchRatelimit = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(40, '1 m'),
+      prefix: 'rl:route:search',
+      analytics: false,
+    })
+  : null
+
 export const authLimiter = makeLimiter(_authRatelimit)
 export const aiLimiter = makeLimiter(_aiRatelimit)
 export const formLimiter = makeLimiter(_formRatelimit)
+export const searchLimiter = makeLimiter(_searchRatelimit)
 // `apiLimiter` (30/1m, prefix rl:route:api) lived here with zero callers. Removed
 // rather than left dead — two exports named api* with one inert is how the gap
 // this fixes went unnoticed. The middleware floor is `apiRatelimit`, above.
