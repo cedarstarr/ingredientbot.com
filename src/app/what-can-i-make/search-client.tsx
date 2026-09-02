@@ -344,16 +344,22 @@ export function ReverseSearchClient() {
           </div>
         )}
 
-        {!loading && tiers.map(([extras, group]) => (
+        {!loading && tiers.map(([extras, group], i) => (
           <section key={extras} className="mb-8" data-testid="result-tier">
             <h2
               className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground"
               data-testid="result-tier-heading"
             >
               {tierLabel(extras)}
-              <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-normal text-muted-foreground">
-                {group.length}
-              </span>
+              {/* Results are ordered by extras, so every tier except the last is
+                  fully loaded and its count is a real total. The last one is
+                  still being paginated, and printing a partial count there would
+                  read as a total and quietly change on "Show more". */}
+              {(i < tiers.length - 1 || !shown?.hasMore) && (
+                <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-normal text-muted-foreground">
+                  {group.length}
+                </span>
+              )}
             </h2>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {group.map((r) => (
