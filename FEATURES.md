@@ -2,7 +2,7 @@
 
 **Vision**: The definitive AI-native kitchen — enter what you have, stream a recipe instantly, then shape it to your exact taste.
 
-**Last Updated**: 2026-04-09
+**Last Updated**: 2026-09-02
 
 ---
 
@@ -18,6 +18,8 @@
 - ✅ F07 Meal planner with weekly slots [Sticky]
 - ✅ F08 Grocery list sheet (generated from recipes) [Sticky]
 - ✅ F09 Recipe search and filtering [Core]
+- ✅ F93 Reverse ingredient search — "What can I make?" at `/what-can-i-make` [Hook]
+- ✅ F94 Cook this — fork a library recipe so the AI modifiers can run on it [Sticky]
 - ✅ F10 Dashboard [Core]
 - ✅ F11 Settings page [Core]
 - ✅ F12 Admin panel (users, audit logs, scripts, AI debug) [Core]
@@ -102,7 +104,7 @@
 - ✅ F79 Medical dietary flags (low-sodium / low-FODMAP / diabetes-friendly) [Core]
 - ✅ F83 Site-wide "not allergy-aware yet" notice [Core]
 - 🛠 F84 Allergy awareness (verified allergen data end to end) [Core]
-- 🛠 F92 Public recipe browse by diet and meal type at `/recipes` [Core]
+- 🛠 F92 Public recipe browse by diet and meal type at `/recipes` [Core] — scope reduced by F93
 
 ---
 
@@ -160,6 +162,10 @@ F03. **Recipe detail pages** [Core] — Structured recipe view: ingredients list
 F04. **Photo-based recipe analysis** [Hook] — POST /api/recipes/analyze-photo — Claude vision identifies ingredients from a fridge/counter photo and generates matching recipes. No pantry manual entry required. (Feasibility: built)
 
 F05. **Recipe modification system** [Sticky] — POST /api/recipes/[id]/modify + one-click toolbar: make it vegan, double servings, simplify for beginners, spice it up, make it faster. Modifications stored as JSON array on Recipe model. (Feasibility: built)
+
+F93. **Reverse ingredient search** [Hook] — `/what-can-i-make`: type what is in your kitchen, get every recipe containing ALL of it, ranked by how few extra ingredients it still needs. Tier 0 is cookable right now. Pantry staples never count as extras. Deterministic SQL over a `RecipeIngredient` join, no AI at query time — AI is reserved for modifiers after a recipe is chosen. Public and usable before signup, which is the funnel. Backed by `src/lib/ingredient-normalize.ts`, which lifts raw-string matching against the canonical corpus from 24.9% to 93.0%. (Feasibility: built)
+
+F94. **Cook this — fork a library recipe** [Sticky] — `POST /api/recipes/[id]/fork` copies a public library recipe into the visitor's own collection, because F05's modifiers are owner-scoped and the 998 library recipes belong to the house account. Without it, "make this vegetarian" on a search result is a 404. Plain copy, no AI; idempotent via `Recipe.forkedFromId` so a second click cannot spend another of the 5 free monthly recipes. (Feasibility: built)
 
 F06. **Saved recipes collection** [Sticky] — /saved page listing every recipe the user has generated and kept, with search and filter. The personal cookbook. (Feasibility: built)
 
@@ -255,7 +261,7 @@ F49. **Family profile (multi-eater)** [Sticky] — Multiple dietary profiles in 
 
 F52. **Referral program** [Sticky] — Share a link; both user and referee get bonus recipe credits. Standard referral loop. DishGen lets users earn credits via social shares; we do it via direct referral. Portfolio referral system pattern already established. (Feasibility: Medium — referral model already in portfolio pattern)
 
-🛠 F92. **Public recipe browse by diet and meal type** [Core] — Cuisine is currently the only axis into a 998-recipe public library, which leaves the highest-intent searches ("vegan dinner recipes", "gluten-free desserts") with no landing page. The tag data to support it already exists on every recipe: gluten-free 157, vegetarian 140, vegan 71, dairy-free 43, appetizer 89, soup 69, side dish 65, dessert 61, breakfast 54. Adds `?tag=` filtering alongside `?cuisine=` on `/recipes`, restricted to a curated ~12-tag allowlist, plus tag sections on the overview and sitemap entries per tag. Two prerequisites: normalize the 1,763-tag long tail against a controlled vocabulary at seed time (same stamp-don't-trust fix the cuisine label just got), and **no allergen-absence tags** — "nut-free" would contradict the three-state allergen rule, since the underlying data is a single unverified model annotation. (Feasibility: Low — mirrors the existing F81 cuisine pattern; the tag vocabulary is the real work)
+🛠 F92. **Public recipe browse by diet and meal type** [Core] — **Scope reduced by F93 (2026-09-02), not superseded.** F93 now derives vegetarian filtering from the ingredient join, which solves the tag-vocabulary problem this entry called its real work — but only for interactive search. F92's remaining and still-unmet purpose is the INDEXABLE landing pages (`/recipes?tag=vegan`), which F93's client-driven route deliberately cannot provide. Build it for the SEO surface, and take the diet filter from the ingredient join rather than the tags. Original note follows. — Cuisine is currently the only axis into a 998-recipe public library, which leaves the highest-intent searches ("vegan dinner recipes", "gluten-free desserts") with no landing page. The tag data to support it already exists on every recipe: gluten-free 157, vegetarian 140, vegan 71, dairy-free 43, appetizer 89, soup 69, side dish 65, dessert 61, breakfast 54. Adds `?tag=` filtering alongside `?cuisine=` on `/recipes`, restricted to a curated ~12-tag allowlist, plus tag sections on the overview and sitemap entries per tag. Two prerequisites: normalize the 1,763-tag long tail against a controlled vocabulary at seed time (same stamp-don't-trust fix the cuisine label just got), and **no allergen-absence tags** — "nut-free" would contradict the three-state allergen rule, since the underlying data is a single unverified model annotation. (Feasibility: Low — mirrors the existing F81 cuisine pattern; the tag vocabulary is the real work)
 
 ✅ F53. **Budget mode** [Sticky] — Prefer ingredient combinations that are cheaper at typical grocery prices. "I want to keep this meal under $8." Cost-of-living anxiety is real; this positioning resonates with budget-conscious users who cook at home to save money. (Feasibility: Low — Claude prompt modifier, no live pricing data needed for rough guidance)
 
