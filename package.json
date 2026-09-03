@@ -72,7 +72,7 @@
     ]
   },
   "devDependencies": {
-    "@ai-sdk/azure": "^3.0.95",
+    "@ai-sdk/azure": "^4.0.53",
     "@ai-sdk/groq": "^4.0.27",
     "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
