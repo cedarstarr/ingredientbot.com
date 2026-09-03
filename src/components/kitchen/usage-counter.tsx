@@ -1,8 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import { Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface UsageData {
@@ -12,6 +10,12 @@ interface UsageData {
   limit: number | null
   remaining: number | null
 }
+
+/**
+ * Only surface the counter inside this many recipes of the ceiling. Above it,
+ * the cap is irrelevant to the person cooking.
+ */
+const SHOW_WHEN_REMAINING_AT_MOST = 10
 
 interface Props {
   /** Called after a recipe is generated so we can refresh the count */
@@ -30,10 +34,16 @@ export function UsageCounter({ refreshKey }: Props) {
 
   // Nothing to show without a cap: "3 recipes used" with no ceiling is a
   // meaningless progress bar, and "2 left" would be a lie.
-  if (!usage || usage.isPro || usage.limit === null) return null
+  if (!usage || usage.isPro || usage.limit === null || usage.remaining === null) return null
+
+  // The cap is an abuse ceiling, not a paywall (see src/lib/limits.ts), so it
+  // stays out of sight until it is nearly relevant. Showing "50 recipes left"
+  // and a progress bar from the first cook makes a free product feel rationed
+  // and invites people to count something they will never reach.
+  if (usage.remaining > SHOW_WHEN_REMAINING_AT_MOST) return null
 
   const pct = Math.min(100, (usage.used / usage.limit) * 100)
-  const isNearLimit = usage.remaining !== null && usage.remaining <= 1
+  const isNearLimit = usage.remaining <= 3
   const isAtLimit = usage.remaining === 0
 
   return (
@@ -68,13 +78,14 @@ export function UsageCounter({ refreshKey }: Props) {
         />
       </div>
 
-      <Link
-        href="/upgrade"
-        className="flex items-center gap-1 text-primary hover:underline font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
-      >
-        <Sparkles className="h-3 w-3" />
-        {isAtLimit ? 'Upgrade for unlimited' : 'Upgrade to Pro'}
-      </Link>
+      {/* No checkout exists yet (FOU-460), so "Upgrade to Pro" would send people
+          to a page that cannot help them. Point at contact instead until there
+          is something to buy. */}
+      <p className="text-muted-foreground">
+        {isAtLimit
+          ? 'This resets at the start of next month. Get in touch if you need more.'
+          : 'A generous monthly ceiling, not a paywall — it resets each month.'}
+      </p>
     </div>
   )
 }

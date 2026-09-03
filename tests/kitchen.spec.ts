@@ -18,15 +18,15 @@ test.describe('Kitchen — ingredient input journey', () => {
   })
 
   test('ingredient textarea is visible and accepts input @smoke', async ({ page }) => {
-    const input = page.getByPlaceholder(KITCHEN_PLACEHOLDER)
+    const input = page.getByRole('main').getByPlaceholder(KITCHEN_PLACEHOLDER)
     await expect(input).toBeVisible()
     await input.fill('chicken, rice')
     await expect(input).toHaveValue('chicken, rice')
   })
 
   test('Find recipes button is gated until 2+ ingredients are entered @smoke', async ({ page }) => {
-    const input = page.getByPlaceholder(KITCHEN_PLACEHOLDER)
-    const btn = page.getByRole('button', { name: /find recipes/i })
+    const input = page.getByRole('main').getByPlaceholder(KITCHEN_PLACEHOLDER)
+    const btn = page.getByRole('main').getByRole('button', { name: /find recipes/i })
 
     // Empty textarea — disabled
     await expect(btn).toBeDisabled()
@@ -69,13 +69,13 @@ test.describe('Kitchen — ingredient input journey', () => {
       })
     })
 
-    const btn = page.getByRole('button', { name: /find recipes/i })
+    const btn = page.getByRole('main').getByRole('button', { name: /find recipes/i })
     // Wait for hydration before typing: fill() on a not-yet-hydrated controlled
     // textarea sets the DOM value without React seeing it, so the CTA never
     // ungates. Asserting the disabled CTA first proves the client is live.
     await expect(btn).toBeDisabled()
 
-    await page.getByPlaceholder(KITCHEN_PLACEHOLDER).fill('chicken, rice')
+    await page.getByRole('main').getByPlaceholder(KITCHEN_PLACEHOLDER).fill('chicken, rice')
     await expect(btn).toBeEnabled()
     await btn.click()
     await page.waitForTimeout(500)

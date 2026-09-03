@@ -2,13 +2,15 @@ import { describe, it, expect } from 'vitest'
 import { isOverFreeLimit, FREE_TIER_MONTHLY_RECIPES } from '../limits'
 
 describe('free-tier metering', () => {
-  it('is currently disabled — nobody is capped', () => {
-    // Deliberate: the cap was enforced with a 402 while no checkout existed
-    // (FOU-460). If this ever fails, someone re-enabled metering; make sure a
-    // checkout exists first.
-    expect(FREE_TIER_MONTHLY_RECIPES).toBeNull()
+  it('is an abuse ceiling, high enough that real cooking never meets it', () => {
+    // The number matters: too low and it becomes a paywall with no checkout
+    // behind it (FOU-460), too high or absent and one account can drain the
+    // shared broker budget all eleven sites draw on. If this fails because
+    // someone lowered it toward a monetisation number, build a checkout first.
+    expect(FREE_TIER_MONTHLY_RECIPES).toBe(50)
     expect(isOverFreeLimit(false, 0)).toBe(false)
-    expect(isOverFreeLimit(false, 9_999)).toBe(false)
+    expect(isOverFreeLimit(false, 49)).toBe(false)
+    expect(isOverFreeLimit(false, 50)).toBe(true)
   })
 
   it('never caps a Pro account', () => {

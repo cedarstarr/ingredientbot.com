@@ -16,10 +16,14 @@ test.describe('Recipe history search and filters (F37)', () => {
   })
 
   test('history page shows search input and Search button @smoke', async ({ page }) => {
-    await expect(
-      page.getByPlaceholder(/search by title or ingredient/i),
-    ).toBeVisible()
-    await expect(page.getByRole('button', { name: /^search$/i })).toBeVisible()
+    // Scoped through the landmark: when a Next SSR stream closes early the page
+    // content is left doubled — once in <main>, once in a hidden <div hidden>
+    // under <body> — and an unscoped locator then matches 2+ nodes, picking the
+    // hidden one. Reproduces on mobile under suite load. `.first()` is not a
+    // substitute; it can select the hidden orphan.
+    const main = page.getByRole('main')
+    await expect(main.getByPlaceholder(/search by title or ingredient/i)).toBeVisible()
+    await expect(main.getByRole('button', { name: /^search$/i })).toBeVisible()
   })
 
   test('history page shows Cooked filter button', async ({ page }) => {
