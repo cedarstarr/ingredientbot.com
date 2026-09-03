@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { formLimiter } from '@/lib/rate-limit'
 import { startOfCurrentMonth } from '@/lib/date-utils'
+import { isOverFreeLimit, FREE_TIER_MONTHLY_RECIPES } from '@/lib/limits'
 
 /**
  * Copy a PUBLIC library recipe into the signed-in user's own collection, so the
@@ -17,11 +18,11 @@ import { startOfCurrentMonth } from '@/lib/date-utils'
  * recipe. Spending a model call to reproduce text we already have would be
  * slower, less reliable, and would burn shared broker budget for nothing.
  *
- * FREE_TIER_LIMIT mirrors /cook and /save-variant — a fork creates a Recipe row
- * exactly like they do, so leaving it unmetered would be an open bypass of the
- * monthly cap.
+ * Metering mirrors /cook and /save-variant via isOverFreeLimit() — a fork
+ * creates a Recipe row exactly like they do, so leaving it unmetered would be an
+ * open bypass of whatever cap is in force. (There is none right now; see
+ * src/lib/limits.ts.)
  */
-const FREE_TIER_LIMIT = 5
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -71,8 +72,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const needsReset = !user.monthlyResetDate || user.monthlyResetDate < monthStart
     if (!user.isPro) {
       const currentCount = needsReset ? 0 : user.recipeCount
-      if (currentCount >= FREE_TIER_LIMIT) {
-        return NextResponse.json({ error: 'limit_reached', limit: FREE_TIER_LIMIT }, { status: 402 })
+      if (isOverFreeLimit(user.isPro, currentCount)) {
+        return NextResponse.json({ error: 'limit_reached', limit: FREE_TIER_MONTHLY_RECIPES }, { status: 402 })
       }
     }
 

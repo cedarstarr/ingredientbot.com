@@ -7,10 +7,10 @@ import { aiLimiter } from '@/lib/rate-limit'
 import { Difficulty } from '@/generated/prisma/client'
 import { startOfCurrentMonth } from '@/lib/date-utils'
 import { isValidUrl } from '@/lib/ssrf'
+import { isOverFreeLimit, FREE_TIER_MONTHLY_RECIPES } from '@/lib/limits'
 
 export const maxDuration = 60
 
-const FREE_TIER_LIMIT = 5
 
 export async function POST(req: NextRequest) {
   try {
@@ -67,8 +67,8 @@ export async function POST(req: NextRequest) {
       const monthStart = startOfCurrentMonth()
       const needsReset = !user.monthlyResetDate || user.monthlyResetDate < monthStart
       const currentCount = needsReset ? 0 : user.recipeCount
-      if (currentCount >= FREE_TIER_LIMIT) {
-        return Response.json({ error: 'limit_reached', limit: FREE_TIER_LIMIT }, { status: 402 })
+      if (isOverFreeLimit(user.isPro, currentCount)) {
+        return Response.json({ error: 'limit_reached', limit: FREE_TIER_MONTHLY_RECIPES }, { status: 402 })
       }
     }
 

@@ -8,10 +8,10 @@ import { buildCookingMethodContext, buildSpiceContext } from '@/lib/recipe-promp
 import { Difficulty } from '@/generated/prisma/client'
 import { startOfCurrentMonth } from '@/lib/date-utils'
 import { getPalateProfile } from '@/lib/palate'
+import { isOverFreeLimit, FREE_TIER_MONTHLY_RECIPES } from '@/lib/limits'
 
 export const maxDuration = 60
 
-const FREE_TIER_LIMIT = 5
 
 export async function POST(req: NextRequest) {
   try {
@@ -68,9 +68,9 @@ export async function POST(req: NextRequest) {
     const needsReset = !user.monthlyResetDate || user.monthlyResetDate < monthStart
     const currentCount = needsReset ? 0 : user.recipeCount
 
-    if (currentCount >= FREE_TIER_LIMIT) {
+    if (isOverFreeLimit(user.isPro, currentCount)) {
       return Response.json(
-        { error: 'limit_reached', limit: FREE_TIER_LIMIT },
+        { error: 'limit_reached', limit: FREE_TIER_MONTHLY_RECIPES },
         { status: 402 }
       )
     }

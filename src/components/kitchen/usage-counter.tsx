@@ -8,7 +8,8 @@ import { cn } from '@/lib/utils'
 interface UsageData {
   isPro: boolean
   used: number
-  limit: number
+  /** null when no cap is in force — see src/lib/limits.ts. */
+  limit: number | null
   remaining: number | null
 }
 
@@ -27,7 +28,9 @@ export function UsageCounter({ refreshKey }: Props) {
       .catch(() => null)
   }, [refreshKey])
 
-  if (!usage || usage.isPro) return null
+  // Nothing to show without a cap: "3 recipes used" with no ceiling is a
+  // meaningless progress bar, and "2 left" would be a lie.
+  if (!usage || usage.isPro || usage.limit === null) return null
 
   const pct = Math.min(100, (usage.used / usage.limit) * 100)
   const isNearLimit = usage.remaining !== null && usage.remaining <= 1

@@ -7,10 +7,10 @@ import { trackedStructuredModel } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 import { Difficulty } from '@/generated/prisma/client'
 import { startOfCurrentMonth } from '@/lib/date-utils'
+import { isOverFreeLimit, FREE_TIER_MONTHLY_RECIPES } from '@/lib/limits'
 
 export const maxDuration = 60
 
-const FREE_TIER_LIMIT = 5
 
 interface RecipeIngredient {
   name: string
@@ -107,8 +107,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const needsReset = !user.monthlyResetDate || user.monthlyResetDate < monthStart
   if (!user.isPro) {
     const currentCount = needsReset ? 0 : user.recipeCount
-    if (currentCount >= FREE_TIER_LIMIT) {
-      return Response.json({ error: 'limit_reached', limit: FREE_TIER_LIMIT }, { status: 402 })
+    if (isOverFreeLimit(user.isPro, currentCount)) {
+      return Response.json({ error: 'limit_reached', limit: FREE_TIER_MONTHLY_RECIPES }, { status: 402 })
     }
   }
 
