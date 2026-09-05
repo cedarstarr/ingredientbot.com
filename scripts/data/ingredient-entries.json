@@ -1,0 +1,1374 @@
+{
+  "writtenBy": "Claude Fable 5.1, in-session",
+  "writtenOn": "2026-09-05",
+  "notes": "Entries for the ingredient rows that backfill-recipe-ingredients.ts created as stubs (no description) on 2026-09-02 — 56 read on staging 2026-09-05. Prose (description, storage, seasonality) and the allergen bundle (allergens, mayContain, hiddenSources, crossContamination, substitutions) both come from this file; validated by scripts/seed-ingredient-ai.ts --from-file against ProseSchema + the FOU-439 floor and IngredientBundleSchema. Plant milks are never milk; wheat always flags gluten_cereals; substitutions are allergy-driven only. Written in batches of about 15, each dry-run and applied before the next.",
+  "entries": [
+    {
+      "slug": "rose-water",
+      "description": "Rose water is the fragrant liquid left after distilling rose petals in water, with a delicate floral perfume and a faintly sweet, slightly bitter edge. A few drops scent Middle Eastern, Persian and South Asian desserts, syrups, rice puddings and drinks like lassi and falooda; too much tastes soapy, so it is added by the teaspoon.",
+      "storage": "Keep the bottle tightly capped in a cool, dark cupboard, where it holds its aroma for a year or more.",
+      "seasonality": "Year-round pantry item.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Turkish delight and nougat-style sweets",
+          "why": "Rose water is the classic flavouring."
+        },
+        {
+          "product": "Baklava and kunafa syrups",
+          "why": "The sugar syrup is often scented with rose water."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "sweet-potato-starch",
+      "description": "Sweet potato starch is a fine, chalky white powder extracted from sweet potatoes, prized in Korean and Chinese cooking for the glassy, chewy texture it gives to noodles and coatings. It thickens sauces to a clear, slightly elastic gloss and makes an exceptionally crisp crust on fried chicken and pork.",
+      "storage": "Store in a sealed container in a dry cupboard, away from steam and humidity, where it keeps indefinitely.",
+      "seasonality": "Year-round pantry staple.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Korean glass noodles (dangmyeon)",
+          "why": "Made almost entirely from sweet potato starch."
+        },
+        {
+          "product": "Korean fried chicken batter",
+          "why": "Sweet potato starch is the usual base of the crisp coating."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "apricot-jam",
+      "description": "Apricot jam is a golden preserve made by cooking apricots with sugar until thick and spreadable, with a bright, tangy sweetness that keeps it from being cloying. Beyond toast, it is the classic glaze for tarts and fruit pastries, a filling for sandwich cookies and layered cakes, and a quick base for glazes on roast pork and chicken.",
+      "storage": "Unopened jars keep in the cupboard for a year or more; once opened, refrigerate and use within a few months.",
+      "seasonality": "Year-round pantry item; apricots themselves peak in early summer.",
+      "allergens": [],
+      "mayContain": [
+        "sulphites"
+      ],
+      "hiddenSources": [
+        {
+          "product": "Glazed fruit tarts and Danish pastries",
+          "why": "Warmed apricot jam is brushed on as the shiny glaze."
+        },
+        {
+          "product": "Sachertorte and layered sponge cakes",
+          "why": "Apricot jam is the traditional filling under the chocolate glaze."
+        }
+      ],
+      "crossContamination": "Some jams are made with sulphite-preserved fruit pulp; check the label.",
+      "substitutions": []
+    },
+    {
+      "slug": "bouillon-powder",
+      "description": "Bouillon powder is a concentrated, granulated seasoning made from dried stock solids, salt, vegetables, herbs and flavour enhancers, dissolving instantly into hot water to make a quick broth. It is the fast route to a savoury base for soups, rice, gravies and braises, and a pinch seasons stir-fries and stews the way salt alone cannot.",
+      "storage": "Keep in an airtight container in a dry cupboard; it keeps for a year or more but clumps if it takes on moisture.",
+      "seasonality": "Year-round pantry staple.",
+      "allergens": [],
+      "mayContain": [
+        "celery",
+        "wheat",
+        "gluten_cereals",
+        "milk",
+        "soybeans",
+        "eggs"
+      ],
+      "hiddenSources": [
+        {
+          "product": "Instant soups, rice mixes and seasoning packets",
+          "why": "Bouillon powder is the flavour base."
+        },
+        {
+          "product": "Restaurant gravies, sauces and rice",
+          "why": "Many kitchens season with bouillon powder rather than house stock."
+        }
+      ],
+      "crossContamination": "Formulations vary widely by brand and flavour: celery is a standard stock vegetable, wheat flour or starch is a common carrier, and milk, soy or egg proteins appear in some chicken and beef versions. Read the specific label.",
+      "substitutions": [
+        {
+          "reason": "celery-free",
+          "substitute": "homemade stock made without celery, reduced and salted",
+          "ratio": "1 cup stock per 1 tsp powder dissolved in 1 cup water",
+          "notes": "Most commercial bouillon lists celery or celery extract; a homemade stock is the only way to be sure of the vegetables in it."
+        },
+        {
+          "reason": "gluten-free",
+          "substitute": "a bouillon powder labelled gluten-free, or homemade stock",
+          "ratio": "1:1",
+          "notes": "Wheat starch is a common carrier in standard bouillon; the labelled versions use rice or corn starch instead."
+        }
+      ]
+    },
+    {
+      "slug": "curry-paste",
+      "description": "Curry paste is a pounded blend of fresh aromatics and dried spices that forms the flavour base of Southeast Asian curries. Thai red, green, yellow, massaman and panang pastes combine chiles, lemongrass, galangal, garlic, shallots, kaffir lime and spices; a spoonful fried in coconut cream or oil becomes a curry in minutes and also seasons soups, marinades and fried rice.",
+      "storage": "Refrigerate after opening, pressed flat with a film of oil on top, and use within a couple of months, or freeze in tablespoon portions.",
+      "seasonality": "Year-round pantry item.",
+      "allergens": [],
+      "mayContain": [
+        "crustacean_shellfish",
+        "fish",
+        "peanuts",
+        "soybeans",
+        "tree_nuts"
+      ],
+      "hiddenSources": [
+        {
+          "product": "Thai curries, tom kha and tom yum soups",
+          "why": "The paste is the flavour base whether or not it is named on the menu."
+        },
+        {
+          "product": "Curry-flavoured noodle dishes, fried rice and marinades",
+          "why": "A spoonful of paste seasons the whole dish."
+        }
+      ],
+      "crossContamination": "Most Thai curry pastes contain shrimp paste, and some list fish sauce; massaman and panang pastes commonly include peanuts, and some contain soy or nut oils. Shellfish content varies by brand, so treat every paste as a shellfish question until the label says otherwise.",
+      "substitutions": [
+        {
+          "reason": "shellfish-free",
+          "substitute": "a curry paste labelled vegan or vegetarian",
+          "ratio": "1:1",
+          "notes": "Vegan versions omit shrimp paste and fish sauce; add a pinch of salt or a splash of soy sauce to replace the savoury depth."
+        },
+        {
+          "reason": "peanut-free",
+          "substitute": "red curry paste in place of massaman or panang",
+          "ratio": "1:1",
+          "notes": "Massaman and panang are the pastes most likely to contain peanuts; red paste rarely does, but check the label."
+        }
+      ]
+    },
+    {
+      "slug": "doubanjiang",
+      "description": "Doubanjiang is the salty, deeply savoury fermented broad bean and chile paste at the heart of Sichuan cooking, aged for months until it turns brick red and complex. Fried in oil at the start of mapo tofu, twice-cooked pork, fish-fragrant eggplant and hot pot broths, it releases a rust-coloured, fragrant oil that colours and seasons the whole dish.",
+      "storage": "Refrigerate after opening in a tightly closed jar; it keeps for a year or longer because of its high salt content.",
+      "seasonality": "Year-round pantry item.",
+      "allergens": [
+        "wheat",
+        "gluten_cereals"
+      ],
+      "mayContain": [
+        "soybeans"
+      ],
+      "hiddenSources": [
+        {
+          "product": "Mapo tofu and other Sichuan restaurant dishes",
+          "why": "Doubanjiang is the defining seasoning even though it is rarely listed on the menu."
+        },
+        {
+          "product": "Sichuan hot pot broth and chile oil condiments",
+          "why": "The paste is fried into the base."
+        }
+      ],
+      "crossContamination": "Traditional Pixian-style doubanjiang is made from broad beans, chiles, salt and wheat flour; many brands add soybeans and some are made mostly from soybeans, so soy content depends on the label.",
+      "substitutions": [
+        {
+          "reason": "gluten-free",
+          "substitute": "a doubanjiang labelled gluten-free, or gochujang plus a pinch of salt",
+          "ratio": "1:1",
+          "notes": "Wheat flour is part of the traditional ferment; gochujang has a sweeter, less funky profile but many brands are wheat-free."
+        }
+      ]
+    },
+    {
+      "slug": "dry-red-wine",
+      "description": "Dry red wine brings acidity, tannin and depth to slow braises, pan sauces, stews and marinades, from beef bourguignon and coq au vin to a simple deglaze for steak. Any drinkable, unsweetened red works; cooking drives off most of the alcohol and concentrates the fruit and savoury notes into the sauce.",
+      "storage": "Recork an opened bottle and refrigerate; it stays good for cooking for about a week, or freeze it in ice cube trays for deglazing.",
+      "seasonality": "Year-round.",
+      "allergens": [
+        "sulphites"
+      ],
+      "mayContain": [
+        "milk",
+        "eggs",
+        "fish"
+      ],
+      "hiddenSources": [
+        {
+          "product": "Braises, ragus and pan sauces",
+          "why": "Red wine is the base liquid even when the menu does not mention it."
+        },
+        {
+          "product": "Red wine vinegar and some salad dressings",
+          "why": "Made from red wine."
+        }
+      ],
+      "crossContamination": "Nearly all wine contains added or naturally occurring sulphites and is labelled accordingly. Some wines are clarified with milk casein, egg white or fish isinglass; the finished wine may carry traces and the label does not always say.",
+      "substitutions": [
+        {
+          "reason": "sulphite-free",
+          "substitute": "unsalted beef or mushroom stock with a splash of red wine vinegar labelled sulphite-free, or pomegranate juice",
+          "ratio": "1:1",
+          "notes": "Stock replaces the body, the vinegar or juice replaces the acidity; reduce a little longer for depth."
+        }
+      ]
+    },
+    {
+      "slug": "dry-white-wine",
+      "description": "Dry white wine adds brightness and a clean acidity to risottos, seafood dishes, cream sauces, steamed mussels and chicken braises. A crisp, unoaked white works best; a splash to deglaze the pan lifts the browned bits into the sauce and cooks off most of its alcohol in a minute or two.",
+      "storage": "Recork an opened bottle and refrigerate; it stays good for cooking for about a week, or freeze it in ice cube trays.",
+      "seasonality": "Year-round.",
+      "allergens": [
+        "sulphites"
+      ],
+      "mayContain": [
+        "milk",
+        "eggs",
+        "fish"
+      ],
+      "hiddenSources": [
+        {
+          "product": "Risotto, beurre blanc, moules and many seafood sauces",
+          "why": "White wine is the standard deglazing and poaching liquid."
+        },
+        {
+          "product": "White wine vinegar and some vinaigrettes",
+          "why": "Made from white wine."
+        }
+      ],
+      "crossContamination": "Nearly all wine contains sulphites and is labelled accordingly. Some wines are clarified with milk casein, egg white or fish isinglass; the finished wine may carry traces and the label does not always say.",
+      "substitutions": [
+        {
+          "reason": "sulphite-free",
+          "substitute": "unsalted chicken or vegetable stock with a squeeze of lemon juice",
+          "ratio": "1:1",
+          "notes": "Stock replaces the body and the lemon replaces the acidity; use fresh lemon rather than bottled juice, which is often preserved with sulphites."
+        }
+      ]
+    },
+    {
+      "slug": "green-tea",
+      "description": "Green tea is made from tea leaves that are heated soon after picking to stop oxidation, keeping their grassy, vegetal, gently astringent character. Beyond the cup, brewed green tea poaches fish and rice (as in Japanese ochazuke), flavours custards, ice creams and cakes, and its powdered form, matcha, colours and seasons sweets and lattes.",
+      "storage": "Keep loose leaves or bags in an airtight, opaque container away from light, heat and strong smells; use within six months to a year for the freshest flavour.",
+      "seasonality": "Year-round; first-flush spring harvests are the most prized.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Matcha lattes, ice creams and pastries",
+          "why": "Powdered green tea is the flavouring and colouring."
+        },
+        {
+          "product": "Genmaicha and other blended teas",
+          "why": "Green tea is the base leaf."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "kecap-manis",
+      "description": "Kecap manis is Indonesia's thick, syrupy sweet soy sauce, made by simmering soy sauce with palm sugar until it is glossy and molasses-dark, often with star anise and garlic. It glazes satay and grilled chicken, sweetens nasi goreng and mie goreng, and works as a dipping sauce or a marinade base anywhere a sweet-salty note is wanted.",
+      "storage": "Keep the bottle capped in a cool cupboard or the refrigerator; it lasts for many months thanks to its sugar and salt.",
+      "seasonality": "Year-round pantry item.",
+      "allergens": [
+        "soybeans",
+        "wheat",
+        "gluten_cereals"
+      ],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Nasi goreng, mie goreng and Indonesian satay glazes",
+          "why": "Kecap manis is the defining sweet-salty seasoning."
+        },
+        {
+          "product": "Some barbecue glazes and stir-fry sauces",
+          "why": "Used as a shortcut to a sticky, dark glaze."
+        }
+      ],
+      "crossContamination": "Made from soy sauce, which is usually brewed with wheat; some brands are labelled wheat-free, so check the label.",
+      "substitutions": [
+        {
+          "reason": "gluten-free",
+          "substitute": "tamari simmered with an equal weight of palm or dark brown sugar until syrupy",
+          "ratio": "1:1 by volume once reduced",
+          "notes": "Tamari is wheat-free soy sauce; add a pinch of ground star anise to match the aroma."
+        },
+        {
+          "reason": "soy-free",
+          "substitute": "coconut aminos reduced with dark brown sugar",
+          "ratio": "1:1 by volume once reduced",
+          "notes": "Coconut aminos are less salty than soy sauce, so add a pinch of salt to taste."
+        }
+      ]
+    },
+    {
+      "slug": "sake",
+      "description": "Sake is Japanese rice wine, brewed from polished rice, water, yeast and koji, with a clean, gently sweet, umami-rich flavour that reads as savoury rather than fruity. In the kitchen it tenderises and deodorises fish and meat in marinades, deglazes pans for teriyaki and nimono simmered dishes, and pairs with mirin and soy sauce in most Japanese sauces.",
+      "storage": "Keep an opened bottle capped in the refrigerator and use within a few weeks for cooking; unopened, store in a cool, dark place.",
+      "seasonality": "Year-round.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Teriyaki and most Japanese simmering sauces",
+          "why": "Sake is one of the three standard liquids with mirin and soy sauce."
+        },
+        {
+          "product": "Sake kasu (lees) pickles and marinades",
+          "why": "The leftover rice solids from sake brewing are used as a marinade."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "shrimp-paste",
+      "description": "Shrimp paste is a dense, intensely pungent block or paste of salted, fermented shrimp, sold as belacan in Malaysia, terasi in Indonesia, kapi in Thailand and bagoong in the Philippines. Toasted or fried before use, a small amount gives sambals, curry pastes, stir-fried greens and dipping sauces a deep savoury backbone that no other ingredient replaces.",
+      "storage": "Wrap tightly and refrigerate; it keeps for a year or more, and freezing it stops the smell from spreading through the fridge.",
+      "seasonality": "Year-round pantry item.",
+      "allergens": [
+        "crustacean_shellfish"
+      ],
+      "mayContain": [
+        "fish"
+      ],
+      "hiddenSources": [
+        {
+          "product": "Thai curry pastes and nam prik dipping sauces",
+          "why": "Shrimp paste is a standard base ingredient."
+        },
+        {
+          "product": "Sambal belacan, kangkung belacan and Malaysian laksa",
+          "why": "Named after or built on the paste."
+        },
+        {
+          "product": "Filipino kare-kare and some Southeast Asian fried rice",
+          "why": "Served with or seasoned with shrimp paste."
+        }
+      ],
+      "crossContamination": "Made entirely from crustacean shellfish. Some regional versions blend in small fish, and production lines are commonly shared with fish sauce.",
+      "substitutions": [
+        {
+          "reason": "shellfish-free",
+          "substitute": "white miso paste with a pinch of salt, or a vegan fermented soybean paste sold as vegetarian shrimp paste",
+          "ratio": "1:1",
+          "notes": "Gives the salty fermented depth without the shrimp; the flavour is milder, so taste and add a little more."
+        }
+      ]
+    },
+    {
+      "slug": "tamarind-concentrate",
+      "description": "Tamarind concentrate is a thick, dark, ready-to-use extract of tamarind pulp with the fibres and seeds removed, delivering the fruit's sharp, sweet-sour tang without any soaking or straining. A spoonful sours pad thai, sambar, rasam and chutneys, balances sweet glazes and barbecue sauces, and brightens drinks and marinades.",
+      "storage": "Refrigerate after opening in a tightly closed jar; it keeps for a year or more.",
+      "seasonality": "Year-round pantry item.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Pad thai sauce and many Thai dipping sauces",
+          "why": "Tamarind supplies the sour note."
+        },
+        {
+          "product": "Worcestershire sauce and some barbecue sauces and chutneys",
+          "why": "Tamarind is a traditional souring ingredient."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "tamarind-paste",
+      "description": "Tamarind paste is the sticky, fibrous pulp of the tamarind pod, sold in compressed blocks or as a smoother jarred paste, with a fruity sourness somewhere between lime and dried apricot. Block paste is soaked in hot water and strained; the resulting liquid sours curries, sambar, pad thai, chutneys and agua fresca and tenderises meat in marinades.",
+      "storage": "Keep an unopened block in the cupboard; once opened, wrap tightly and refrigerate, where it keeps for many months.",
+      "seasonality": "Year-round pantry item.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Indian chutneys, sambar and rasam",
+          "why": "Tamarind is the standard souring agent."
+        },
+        {
+          "product": "Pad thai and Filipino sinigang",
+          "why": "Tamarind gives these dishes their sour base."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "water",
+      "description": "Water is the most basic ingredient in the kitchen, the medium for boiling, steaming, poaching, brining and hydrating doughs, grains and dried beans. Its temperature and mineral content matter more than cooks expect: cold water makes flakier pastry, warm water wakes yeast, and very hard water can toughen beans and dull the flavour of tea and stock.",
+      "storage": "Tap water needs no storage; keep bottled or filtered water covered in the refrigerator if you prefer it cold.",
+      "seasonality": "Year-round.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "white-vinegar",
+      "description": "White vinegar, also called distilled vinegar, is a clear, sharp vinegar made by fermenting diluted grain alcohol, with a clean, one-note acidity and no flavour of its own. It is the workhorse for pickling and brining, balancing sweet sauces, poaching eggs, keeping cut fruit bright and cutting through rich dishes, and it doubles as a kitchen cleaner.",
+      "storage": "Keep tightly capped in a cupboard; it does not spoil and holds its strength indefinitely.",
+      "seasonality": "Year-round pantry staple.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Pickles, relishes, ketchup and mustard",
+          "why": "Distilled vinegar is the standard acid in commercial condiments."
+        },
+        {
+          "product": "Some salad dressings and barbecue sauces",
+          "why": "Used as the base acid."
+        }
+      ],
+      "crossContamination": "Distilled vinegar is made from grain alcohol that may start from wheat or corn; distillation removes the grain proteins, and it is generally treated as suitable for wheat-avoiders, but anyone with a strict wheat concern should check the source with the producer.",
+      "substitutions": []
+    },
+    {
+      "slug": "monterey-jack-cheese",
+      "description": "Monterey Jack is a mild, buttery, semi-soft cow's milk cheese from California with a smooth, pale interior and an exceptional melt. It is the standard cheese for quesadillas, nachos, enchiladas and grilled sandwiches, and its neutral flavour makes it a base for pepper Jack and other flavoured versions.",
+      "storage": "Keep wrapped in parchment or wax paper inside a loosely closed bag in the refrigerator, and use within two to three weeks of opening.",
+      "seasonality": "Year-round.",
+      "allergens": [
+        "milk"
+      ],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Quesadillas, nachos and Tex-Mex cheese blends",
+          "why": "Jack is the usual melting cheese, often unnamed on the menu."
+        },
+        {
+          "product": "Pepper Jack and other flavoured Jack cheeses",
+          "why": "Monterey Jack is the base cheese."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": [
+        {
+          "reason": "dairy-free",
+          "substitute": "a plant-based shredded cheese labelled for melting, or a cashew-based queso",
+          "ratio": "1:1",
+          "notes": "Plant-based shreds melt best with a little added heat and moisture; cashew queso carries tree nuts."
+        }
+      ]
+    },
+    {
+      "slug": "queso-fresco",
+      "description": "Queso fresco is a fresh, crumbly, mildly salty Mexican cow's or goat's milk cheese that softens with heat but does not melt into strings. Crumbled over tacos, enchiladas, beans, elote and salads, it adds a cool, milky contrast to chiles and spice, and cubes of it can be pan-fried or added to soups.",
+      "storage": "Keep tightly wrapped in the refrigerator and use within a week of opening; it is a fresh cheese and does not keep like aged ones.",
+      "seasonality": "Year-round.",
+      "allergens": [
+        "milk"
+      ],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Tacos, tostadas, elote and enchiladas",
+          "why": "Queso fresco is the standard crumbled topping."
+        },
+        {
+          "product": "Refried beans and Mexican soups",
+          "why": "Often crumbled in or over the top before serving."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": [
+        {
+          "reason": "dairy-free",
+          "substitute": "crumbled firm tofu tossed with salt and a squeeze of lime",
+          "ratio": "1:1",
+          "notes": "Gives the same cool, crumbly contrast; tofu carries soybeans."
+        }
+      ]
+    },
+    {
+      "slug": "crusty-bread",
+      "description": "Crusty bread covers the family of lean, hearth-baked loaves with a crackling, deeply browned crust and an open, chewy crumb: baguettes, ciabatta, boules, batards and sourdough country loaves. It is torn for soups and stews, sliced for bruschetta and sandwiches, cubed for croutons and panzanella, and served plain with olive oil or butter.",
+      "storage": "Keep at room temperature cut side down or in a paper bag and eat within a day or two; freeze whole or sliced for longer, and refresh in a hot oven.",
+      "seasonality": "Year-round.",
+      "allergens": [
+        "wheat",
+        "gluten_cereals"
+      ],
+      "mayContain": [
+        "sesame",
+        "milk",
+        "eggs",
+        "soybeans",
+        "tree_nuts"
+      ],
+      "hiddenSources": [
+        {
+          "product": "Croutons, breadcrumbs and panzanella",
+          "why": "Made from stale crusty bread."
+        },
+        {
+          "product": "Bruschetta, crostini and soup accompaniments",
+          "why": "Sliced crusty bread is the base or side."
+        },
+        {
+          "product": "Stuffings and bread puddings",
+          "why": "Torn or cubed bread is the bulk of the dish."
+        }
+      ],
+      "crossContamination": "Bakeries handle seeded, enriched and nut-studded loaves on the same benches, trays and slicers, so a plain loaf can carry sesame, milk, egg, soy or nut traces; some crusty loaves are enriched with milk or egg wash.",
+      "substitutions": [
+        {
+          "reason": "gluten-free",
+          "substitute": "a gluten-free artisan-style loaf or baguette",
+          "ratio": "1:1",
+          "notes": "Gluten-free loaves are best refreshed in the oven before serving; check for egg or milk in enriched versions."
+        }
+      ]
+    },
+    {
+      "slug": "elbow-macaroni",
+      "description": "Elbow macaroni is the small, curved, hollow pasta tube that defines macaroni and cheese, macaroni salad and minestrone. Made from durum wheat semolina and water, its shape traps sauce inside and out, and it cooks in under ten minutes, making it a weeknight and lunchbox staple.",
+      "storage": "Keep dried pasta in a sealed container in a dry cupboard, where it lasts for a year or more; refrigerate cooked macaroni and use within three days.",
+      "seasonality": "Year-round pantry staple.",
+      "allergens": [
+        "wheat",
+        "gluten_cereals"
+      ],
+      "mayContain": [
+        "eggs"
+      ],
+      "hiddenSources": [
+        {
+          "product": "Macaroni and cheese, boxed and homemade",
+          "why": "The pasta is the bulk of the dish."
+        },
+        {
+          "product": "Macaroni salad, minestrone and goulash",
+          "why": "Elbows are the default pasta shape."
+        }
+      ],
+      "crossContamination": "Standard dried elbows contain no egg, but some brands and fresh versions are made with egg, and pasta lines commonly run egg pasta as well.",
+      "substitutions": [
+        {
+          "reason": "gluten-free",
+          "substitute": "gluten-free elbow pasta made from rice, corn, chickpea or lentil flour",
+          "ratio": "1:1",
+          "notes": "Cook a minute short of the package time for salads and baked dishes so it does not turn soft; legume pastas carry their own bean flavour."
+        }
+      ]
+    },
+    {
+      "slug": "phyllo-dough",
+      "description": "Phyllo dough is paper-thin sheets of unleavened wheat dough, sold rolled and layered between plastic, that bake into shattering, flaky layers when brushed with butter or oil and stacked. It wraps spanakopita, baklava, borek, strudel and samosa-style parcels, and a few buttered sheets make a quick crisp lid for a pot pie.",
+      "storage": "Keep frozen and thaw overnight in the refrigerator; once opened, use within a few days, covered with a damp towel while working so the sheets do not dry out.",
+      "seasonality": "Year-round.",
+      "allergens": [
+        "wheat",
+        "gluten_cereals"
+      ],
+      "mayContain": [
+        "soybeans",
+        "eggs"
+      ],
+      "hiddenSources": [
+        {
+          "product": "Baklava, spanakopita, borek and strudel",
+          "why": "Phyllo is the pastry, usually layered with butter."
+        },
+        {
+          "product": "Some samosas, spring rolls and pot pie tops",
+          "why": "Phyllo is used as a quicker, flakier alternative to hand-made dough."
+        }
+      ],
+      "crossContamination": "Most phyllo is flour, water, a little oil and salt; some brands add soybean oil or egg, and the finished dishes are almost always brushed with butter, which the dough itself does not contain.",
+      "substitutions": [
+        {
+          "reason": "gluten-free",
+          "substitute": "gluten-free phyllo where available, or rice paper wrappers brushed with oil for parcels",
+          "ratio": "1:1 sheet for sheet",
+          "notes": "Rice paper crisps well when baked but does not give the same multi-layer flake."
+        }
+      ]
+    },
+    {
+      "slug": "rice-flour",
+      "description": "Rice flour is finely milled white or brown rice with a neutral flavour and a fine, slightly sandy texture that bakes and fries crisp. It thickens sauces without clouding them, lightens tempura and fried-chicken coatings, forms the base of rice noodles, mochi (as glutinous rice flour), dosa and many gluten-free flour blends.",
+      "storage": "Keep in an airtight container in a cool, dry cupboard; brown rice flour keeps longer in the refrigerator or freezer because its oils can turn rancid.",
+      "seasonality": "Year-round pantry staple.",
+      "allergens": [],
+      "mayContain": [
+        "gluten_cereals",
+        "wheat"
+      ],
+      "hiddenSources": [
+        {
+          "product": "Rice noodles, rice paper and mochi",
+          "why": "Rice flour is the main ingredient."
+        },
+        {
+          "product": "Gluten-free flour blends and baked goods",
+          "why": "Rice flour is the usual base of the blend."
+        },
+        {
+          "product": "Tempura and Korean fried chicken batters",
+          "why": "Rice flour is added or used alone for crispness."
+        }
+      ],
+      "crossContamination": "Rice flour is often milled on equipment shared with wheat and other cereal flours; look for a certified gluten-free label if that matters.",
+      "substitutions": []
+    },
+    {
+      "slug": "rice-vermicelli",
+      "description": "Rice vermicelli are very thin, brittle white noodles made from rice flour and water that soften in minutes in hot water and take on the flavour of whatever they are dressed with. They fill Vietnamese bun bowls and summer rolls, Singapore noodles, Thai salads and soups, and Filipino pancit bihon, and they fry into a crisp nest for garnish.",
+      "storage": "Keep the dried noodles in a sealed package in a dry cupboard, where they last for a year or more; refrigerate soaked or cooked noodles and use within two days.",
+      "seasonality": "Year-round pantry staple.",
+      "allergens": [],
+      "mayContain": [
+        "gluten_cereals",
+        "wheat",
+        "soybeans"
+      ],
+      "hiddenSources": [
+        {
+          "product": "Vietnamese bun bowls, summer rolls and pho ga",
+          "why": "Rice vermicelli are the noodle."
+        },
+        {
+          "product": "Singapore noodles, pancit bihon and Thai noodle salads",
+          "why": "Rice vermicelli are the base."
+        }
+      ],
+      "crossContamination": "Plain rice vermicelli are rice and water, but some brands add wheat or corn starch for texture and factories often run wheat noodles on the same lines; check the label.",
+      "substitutions": []
+    },
+    {
+      "slug": "refried-beans",
+      "description": "Refried beans are cooked pinto or black beans mashed and fried in fat with onion and garlic until thick, creamy and deeply savoury, despite the name usually being fried only once. They fill burritos and tostadas, spread over huevos rancheros and nachos, and serve as a side to almost any Mexican or Tex-Mex plate.",
+      "storage": "Refrigerate leftovers in a covered container and use within four days, loosening with a splash of water when reheating; they also freeze well.",
+      "seasonality": "Year-round pantry staple.",
+      "allergens": [],
+      "mayContain": [
+        "milk",
+        "soybeans"
+      ],
+      "hiddenSources": [
+        {
+          "product": "Burritos, tostadas, seven-layer dip and nachos",
+          "why": "A layer of refried beans is standard."
+        },
+        {
+          "product": "Bean and cheese quesadillas and huevos rancheros",
+          "why": "Refried beans are spread underneath."
+        }
+      ],
+      "crossContamination": "Traditional versions are fried in lard, which carries no listed allergen; restaurant and canned versions may use soybean oil, and some are finished with cheese or milk. Ask which fat and whether cheese is stirred in.",
+      "substitutions": [
+        {
+          "reason": "dairy-free",
+          "substitute": "refried beans made with oil or lard and no cheese",
+          "ratio": "1:1",
+          "notes": "Most canned vegetarian versions contain no milk; restaurant versions sometimes finish with cheese, so ask."
+        }
+      ]
+    },
+    {
+      "slug": "candlenuts",
+      "description": "Candlenuts are waxy, cream-coloured nuts from a Southeast Asian tree, ground raw into Indonesian and Malaysian spice pastes to thicken and enrich curries, rendang, laksa and sambals. They have a mild, slightly bitter flavour and a high oil content, and they are always cooked before eating, never used raw as a snack.",
+      "storage": "Keep in an airtight container in the refrigerator or freezer, because their oils turn rancid quickly at room temperature.",
+      "seasonality": "Year-round pantry item.",
+      "allergens": [
+        "tree_nuts"
+      ],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Indonesian and Malaysian curry pastes, rendang and laksa",
+          "why": "Ground candlenuts thicken and enrich the paste."
+        },
+        {
+          "product": "Some Hawaiian and Polynesian relishes",
+          "why": "Roasted candlenut (kukui) is the base of inamona relish."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": [
+        {
+          "reason": "tree-nut-free",
+          "substitute": "a small amount of sunflower seed paste, or an extra spoonful of coconut cream",
+          "ratio": "1 tbsp seed paste per 4 to 5 candlenuts",
+          "notes": "Gives the same thickening and richness without the nut; the flavour difference is minor in a spiced paste."
+        }
+      ]
+    },
+    {
+      "slug": "barberries",
+      "description": "Barberries are tiny, ruby-red dried berries with an intense, sour, cranberry-like tang, used in Persian and Afghan cooking to jewel rice dishes such as zereshk polo, to brighten stuffings and to balance rich meat stews. They are soaked briefly and fried in butter or oil with sugar before use so they plump and lose their harsh edge.",
+      "storage": "Keep in an airtight container in the refrigerator or freezer to preserve their colour; they darken and harden in a warm cupboard.",
+      "seasonality": "Year-round as a dried pantry item; harvested in autumn.",
+      "allergens": [],
+      "mayContain": [
+        "sulphites"
+      ],
+      "hiddenSources": [
+        {
+          "product": "Zereshk polo and Persian jewelled rice",
+          "why": "Barberries are the defining garnish."
+        },
+        {
+          "product": "Some Middle Eastern stuffings and grain salads",
+          "why": "Barberries are used as the sour, fruity element."
+        }
+      ],
+      "crossContamination": "Some dried barberries are treated with sulphur dioxide to preserve colour; check the label.",
+      "substitutions": []
+    },
+    {
+      "slug": "bean-sprouts",
+      "description": "Bean sprouts are the crisp, pale shoots of germinated mung beans, with a fresh, watery crunch and a faintly grassy flavour. They are stirred into pad thai and chow mein at the last moment, piled raw onto pho and banh mi, tossed into Korean namul side dishes and spring rolls, and served as a cooling counterpoint to spicy food.",
+      "storage": "Refrigerate in a perforated bag and use within two days; they wilt and sour quickly, so buy them the day you cook.",
+      "seasonality": "Year-round.",
+      "allergens": [],
+      "mayContain": [
+        "soybeans"
+      ],
+      "hiddenSources": [
+        {
+          "product": "Pad thai, chow mein and Korean bibimbap",
+          "why": "Bean sprouts are a standard component."
+        },
+        {
+          "product": "Pho and other Vietnamese noodle soups",
+          "why": "Served as a raw garnish to stir in."
+        }
+      ],
+      "crossContamination": "The common bean sprout is from mung beans, but soybean sprouts are sold under the same name in Korean and some Asian markets and look similar, only larger with a yellow head. Check which bean was sprouted.",
+      "substitutions": []
+    },
+    {
+      "slug": "cassava",
+      "description": "Cassava, also called yuca or manioc, is a starchy tropical root with bark-like brown skin and dense white flesh, eaten across Latin America, Africa and Asia. Peeled and boiled, fried, or mashed, it is milder and chewier than potato; it is also the source of tapioca and of the flours used for pao de queijo, fufu and many gluten-free baked goods, and it must always be cooked, never eaten raw.",
+      "storage": "Keep whole roots in a cool, dark place for a few days, or peel, cut and freeze them; peeled cassava browns quickly, so keep cut pieces in water.",
+      "seasonality": "Year-round in tropical markets; widely available frozen.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Tapioca pearls, tapioca starch and bubble tea",
+          "why": "All are made from cassava starch."
+        },
+        {
+          "product": "Pao de queijo, fufu and many gluten-free flours",
+          "why": "Cassava flour is the base."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "celery-root",
+      "description": "Celery root, or celeriac, is the knobbly, pale, softball-sized root of a variety of celery grown for its base rather than its stalks. Under the rough skin is dense, ivory flesh with a clean celery-and-parsley flavour and a nutty sweetness; it is grated raw into remoulade, mashed with potatoes, roasted, or simmered into velvety soups and purees.",
+      "storage": "Keep whole in the refrigerator crisper for two to three weeks; once cut, hold pieces in acidulated water to stop browning and use within a day or two.",
+      "seasonality": "Autumn through winter.",
+      "allergens": [
+        "celery"
+      ],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Celeriac remoulade and some coleslaws",
+          "why": "Grated celery root is the main ingredient."
+        },
+        {
+          "product": "Winter root vegetable soups, mashes and purees",
+          "why": "Celeriac is often blended in without being named."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": [
+        {
+          "reason": "celery-free",
+          "substitute": "parsnip or kohlrabi",
+          "ratio": "1:1 by weight",
+          "notes": "Parsnip is sweeter and roasts well; kohlrabi is the closer match raw in slaws and remoulade."
+        }
+      ]
+    },
+    {
+      "slug": "galangal",
+      "description": "Galangal is a rhizome that looks like a paler, smoother, harder ginger, with a sharp, piney, citrusy flavour and a peppery heat that is distinct from ginger's warmth. Sliced into tom yum and tom kha soups, pounded into Thai and Indonesian curry pastes and simmered in rendang, it gives Southeast Asian dishes their characteristic aromatic edge.",
+      "storage": "Wrap fresh galangal in paper and refrigerate for up to two weeks, or freeze it whole and slice from frozen; dried slices keep for a year in a sealed jar.",
+      "seasonality": "Year-round in Asian markets.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Thai curry pastes, tom yum and tom kha",
+          "why": "Galangal is a defining aromatic."
+        },
+        {
+          "product": "Indonesian rendang and Malaysian laksa pastes",
+          "why": "Galangal is pounded into the spice base."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "grape-leaves",
+      "description": "Grape leaves are the tender young leaves of the grapevine, sold fresh in season or, more often, brined in jars, with a tangy, lemony, faintly grassy flavour. They wrap dolmas and sarma around rice, herbs and sometimes meat, and they are also used to wrap fish, cheese or small birds before grilling to keep them moist and add a bright note.",
+      "storage": "Keep jarred leaves in their brine in the refrigerator after opening, where they last for months; fresh leaves keep a few days refrigerated or can be blanched and frozen.",
+      "seasonality": "Fresh in late spring and early summer; jarred year-round.",
+      "allergens": [],
+      "mayContain": [
+        "sulphites"
+      ],
+      "hiddenSources": [
+        {
+          "product": "Dolmas, dolmades, sarma and yaprak",
+          "why": "Grape leaves are the wrapper."
+        },
+        {
+          "product": "Grilled cheese or fish wrapped in leaves",
+          "why": "Used as an edible wrapper in Greek and Turkish cooking."
+        }
+      ],
+      "crossContamination": "Some jarred grape leaves are preserved with sulphites alongside the salt brine; check the label.",
+      "substitutions": []
+    },
+    {
+      "slug": "jicama",
+      "description": "Jicama is a round, brown-skinned Mexican root with crisp, juicy, snow-white flesh that tastes like a cross between a mild apple and a water chestnut. Peeled and cut into sticks or matchsticks, it is eaten raw with lime, chile and salt, tossed into slaws and salads, or briefly stir-fried where it keeps its crunch.",
+      "storage": "Keep whole, unwrapped, in a cool, dry place or the refrigerator for a couple of weeks; once cut, refrigerate in a sealed container and use within a few days.",
+      "seasonality": "Peak autumn through spring; available year-round.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Mexican fruit cups and street snacks with chile-lime seasoning",
+          "why": "Jicama sticks are a standard component."
+        },
+        {
+          "product": "Some slaws and spring roll fillings",
+          "why": "Used for crunch in place of water chestnut."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "pineapple-juice",
+      "description": "Pineapple juice is the sweet, sharply tropical juice pressed from ripe pineapple, sold canned, bottled or fresh. Beyond drinks and cocktails, it is a classic marinade base because its enzymes tenderise meat quickly, it glazes ham and pork, sweetens sweet-and-sour sauces, and brightens smoothies and sorbets.",
+      "storage": "Refrigerate after opening and use within a week; unopened cans and cartons keep in the cupboard until the date on the label.",
+      "seasonality": "Year-round.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Teriyaki and sweet-and-sour sauces",
+          "why": "Pineapple juice supplies sweetness and acidity in many recipes."
+        },
+        {
+          "product": "Ham glazes, tropical marinades and jerk marinades",
+          "why": "The juice tenderises and sweetens."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "plantains",
+      "description": "Plantains are large, starchy cooking bananas that are never eaten raw and change character as they ripen: green ones are firm and potato-like, ideal for tostones, chips and stews, while black-skinned ripe ones turn sweet and soft for maduros, fried sweet plantains and desserts. They are a staple across the Caribbean, Latin America, West Africa and South Asia.",
+      "storage": "Keep at room temperature and let them ripen to the colour the recipe wants; refrigerate only once fully ripe to hold them for a few more days.",
+      "seasonality": "Year-round.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Tostones, patacones, maduros and plantain chips",
+          "why": "All are fried plantain under regional names."
+        },
+        {
+          "product": "Mofongo, fufu and some West African stews",
+          "why": "Mashed or boiled plantain is the base."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "pomegranate-seeds",
+      "description": "Pomegranate seeds, properly called arils, are the juicy, jewel-red, sweet-tart seed sacs packed inside the fruit, each with a small crunchy seed at the centre. They are scattered over salads, grain dishes, hummus, roasted vegetables, yogurt and desserts for a burst of colour and acidity, and pressed for juice and molasses.",
+      "storage": "Refrigerate seeds in a sealed container and use within five days; they also freeze well spread on a tray first, and a whole fruit keeps for weeks in the refrigerator.",
+      "seasonality": "Autumn through early winter for fresh fruit.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Pomegranate molasses and grenadine-style syrups",
+          "why": "Made from reduced pomegranate juice."
+        },
+        {
+          "product": "Fesenjan and muhammara",
+          "why": "Pomegranate molasses is a core ingredient."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "prunes",
+      "description": "Prunes are dried plums, dark, glossy and chewy, with a deep, caramelised sweetness and a hint of acidity. They are simmered into Moroccan tagines and French braises with pork or rabbit, stuffed into pastries and cakes, blended into sticky toffee-style puddings and purees, and eaten out of hand or stewed for breakfast.",
+      "storage": "Keep in an airtight container in a cool cupboard for several months, or refrigerate to keep them soft for longer.",
+      "seasonality": "Year-round pantry item.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Moroccan lamb tagines and Middle Eastern stews",
+          "why": "Prunes are a classic sweet element."
+        },
+        {
+          "product": "Some fruit cakes, sticky puddings and baked goods",
+          "why": "Prune puree adds moisture and sweetness."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "raisins",
+      "description": "Raisins are dried grapes, sweet, chewy and concentrated, ranging from dark, sun-dried raisins to pale golden sultanas. They stud oatmeal cookies, fruit breads, granola and rice puddings, balance savoury dishes such as picadillo, biryani, couscous and braised greens, and plump up in warm water or spirits before going into a recipe.",
+      "storage": "Keep in an airtight container in a cool cupboard for six months or more; refrigerate to keep them from drying out further.",
+      "seasonality": "Year-round pantry item.",
+      "allergens": [],
+      "mayContain": [
+        "sulphites"
+      ],
+      "hiddenSources": [
+        {
+          "product": "Granola, trail mix, muesli and cereal bars",
+          "why": "Raisins are one of the most common dried fruits used."
+        },
+        {
+          "product": "Picadillo, biryani, stuffings and some curries",
+          "why": "Raisins are stirred in for sweetness."
+        }
+      ],
+      "crossContamination": "Golden raisins are usually treated with sulphur dioxide to keep their pale colour; dark raisins generally are not. Check the label.",
+      "substitutions": []
+    },
+    {
+      "slug": "sauerkraut",
+      "description": "Sauerkraut is finely shredded cabbage fermented in its own brine until sour, tangy and softly crunchy, a staple of German, Eastern European and Alsatian cooking. It is served alongside sausages and pork, layered into Reuben sandwiches, braised with apples and caraway, folded into pierogi fillings, and eaten raw as a condiment for its bright acidity.",
+      "storage": "Keep refrigerated in its brine in a sealed jar, where unpasteurised sauerkraut lasts for months and keeps fermenting slowly.",
+      "seasonality": "Year-round.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Reuben sandwiches and choucroute garnie",
+          "why": "Sauerkraut is a defining ingredient."
+        },
+        {
+          "product": "Some pierogi, bigos and Eastern European stews",
+          "why": "Sauerkraut is braised into the dish."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "tomatillos",
+      "description": "Tomatillos are small, firm green fruits wrapped in a papery husk, with a bright, citrusy, faintly herbal tartness that defines Mexican salsa verde. Husked and rinsed of their sticky coating, they are roasted, boiled or blended raw into green salsas, enchilada sauces, chile verde stews and pozole verde.",
+      "storage": "Keep in their husks in a paper bag in the refrigerator for two to three weeks; husk and rinse just before using.",
+      "seasonality": "Peak summer through autumn; available year-round.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Salsa verde and green enchilada sauce",
+          "why": "Tomatillos are the base."
+        },
+        {
+          "product": "Chile verde and pozole verde",
+          "why": "The stew is built on a tomatillo sauce."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "chicken-liver",
+      "description": "Chicken livers are small, tender and richly flavoured, with a mineral, faintly sweet taste that turns creamy when cooked quickly over high heat. They are the classic base for pate and chopped liver, sauteed with onions and sherry, skewered and grilled, dredged and fried in Southern cooking, and folded into dirty rice and some ragus for depth.",
+      "storage": "Keep refrigerated and use within a day or two of purchase, or freeze for up to three months.",
+      "seasonality": "Year-round.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Chicken liver pate, mousse and chopped liver",
+          "why": "Liver is the main ingredient."
+        },
+        {
+          "product": "Dirty rice and some Bolognese-style ragus",
+          "why": "Minced liver is added for richness without being named."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "sausage",
+      "description": "Sausage is seasoned ground meat, usually pork but also beef, chicken, lamb or a mix, bound with fat and often packed into a casing, in hundreds of regional styles from fresh breakfast links and Italian sausage to bratwurst, chorizo, merguez and kielbasa. Fresh sausage is grilled, pan-fried or crumbled into sauces, stuffings and pasta; cured and smoked sausages are sliced or simmered.",
+      "storage": "Keep fresh sausage refrigerated and use within two days, or freeze for up to two months; cured and smoked sausages last longer, so follow the label.",
+      "seasonality": "Year-round.",
+      "allergens": [],
+      "mayContain": [
+        "wheat",
+        "gluten_cereals",
+        "milk",
+        "soybeans",
+        "sulphites",
+        "celery",
+        "mustard",
+        "eggs"
+      ],
+      "hiddenSources": [
+        {
+          "product": "Stuffings, pasta sauces, jambalaya and pizza toppings",
+          "why": "Crumbled sausage is a common component."
+        },
+        {
+          "product": "Sausage rolls, toad in the hole and breakfast sandwiches",
+          "why": "Sausage meat is the filling."
+        }
+      ],
+      "crossContamination": "Sausage recipes vary enormously by maker and style: rusk, breadcrumbs or wheat flour are common fillers, milk powder, soy protein, egg, mustard or celery can appear as binders and seasonings, and sulphites are a permitted preservative in some fresh sausages in some countries. The only reliable answer is the specific label or the butcher.",
+      "substitutions": [
+        {
+          "reason": "gluten-free",
+          "substitute": "a sausage labelled gluten-free, or homemade sausage meat bound with rice flour",
+          "ratio": "1:1",
+          "notes": "Many artisan and supermarket ranges now label gluten-free explicitly; ask the butcher about rusk in fresh links."
+        }
+      ]
+    },
+    {
+      "slug": "anise-seeds",
+      "description": "Anise seeds are small, greyish, oval seeds with a sweet, warm licorice flavour, milder and rounder than star anise or fennel. Whole or ground, they flavour Italian biscotti and pizzelle, Mediterranean and Middle Eastern breads and cookies, sausages, pickles, and spirits such as ouzo, sambuca, pastis and arak.",
+      "storage": "Keep whole seeds in an airtight jar away from heat and light for up to two years; grind just before use, as ground anise fades within months.",
+      "seasonality": "Year-round pantry staple.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Biscotti, pizzelle and Italian holiday cookies",
+          "why": "Anise is the traditional flavouring."
+        },
+        {
+          "product": "Ouzo, sambuca, pastis and licorice-flavoured spirits",
+          "why": "Anise or anise oil is the main flavour."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "annatto",
+      "description": "Annatto, also called achiote, is the brick-red seed of a tropical shrub, used mostly for the vivid orange-yellow colour it gives to food, with a mild, earthy, faintly peppery flavour. The seeds are steeped in oil or lard to make coloured cooking fat, or ground into achiote paste for Yucatecan cochinita pibil, Filipino stews, Puerto Rican rice and the rind of some cheeses.",
+      "storage": "Keep whole seeds in a sealed jar in a cool, dark cupboard for a year or more; refrigerate achiote paste after opening.",
+      "seasonality": "Year-round pantry item.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Orange-coloured cheeses, butter and margarine",
+          "why": "Annatto is a common natural colouring."
+        },
+        {
+          "product": "Achiote paste, sazon seasoning and Filipino kare-kare",
+          "why": "Annatto provides the characteristic colour."
+        },
+        {
+          "product": "Some smoked fish, snack foods and rice mixes",
+          "why": "Used as a natural yellow-orange dye."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "berbere",
+      "description": "Berbere is the fiery, fragrant Ethiopian and Eritrean spice blend built on dried chiles with fenugreek, ginger, garlic, cardamom, coriander, cloves, cinnamon, allspice and other warm spices. It seasons doro wat and other wat stews, lentil and vegetable dishes, marinades for grilled meat, and spiced butter, and a pinch lifts roasted vegetables and eggs.",
+      "storage": "Keep in an airtight jar away from heat and light and use within six months for the brightest flavour.",
+      "seasonality": "Year-round pantry item.",
+      "allergens": [],
+      "mayContain": [
+        "gluten_cereals",
+        "wheat",
+        "mustard",
+        "celery"
+      ],
+      "hiddenSources": [
+        {
+          "product": "Doro wat, misir wat and Ethiopian stews",
+          "why": "Berbere is the defining seasoning."
+        },
+        {
+          "product": "Ethiopian spiced butter (niter kibbeh) and some marinades",
+          "why": "Berbere is blended in."
+        }
+      ],
+      "crossContamination": "Blends are ground and packed on shared spice lines, and some commercial versions add flour or starch as a carrier or include mustard or celery seed; check the label.",
+      "substitutions": []
+    },
+    {
+      "slug": "cajun-seasoning",
+      "description": "Cajun seasoning is the peppery Louisiana spice blend of paprika, cayenne, black and white pepper, garlic and onion powder, oregano and thyme, salty and hot with a smoky sweetness from the paprika. It seasons blackened fish and chicken, jambalaya, gumbo, shrimp boils, fries and popcorn, and works as an all-purpose rub for grilling.",
+      "storage": "Keep in an airtight jar away from heat and light and use within six months to a year.",
+      "seasonality": "Year-round pantry item.",
+      "allergens": [],
+      "mayContain": [
+        "celery",
+        "mustard",
+        "gluten_cereals",
+        "wheat"
+      ],
+      "hiddenSources": [
+        {
+          "product": "Blackened fish and chicken, jambalaya and gumbo",
+          "why": "Cajun seasoning is the base spice."
+        },
+        {
+          "product": "Seasoned fries, popcorn and snack mixes",
+          "why": "Used as a dusting seasoning."
+        }
+      ],
+      "crossContamination": "Some commercial blends include celery salt, mustard powder or a flour-based anti-caking agent, and blends are packed on shared spice lines; check the label.",
+      "substitutions": []
+    },
+    {
+      "slug": "curry-leaves",
+      "description": "Curry leaves are the small, glossy, aromatic leaves of a South Asian tree, with a savoury, citrusy, faintly nutty fragrance that is nothing like curry powder. Fried for a few seconds in hot oil or ghee at the start or end of a dish, they perfume South Indian and Sri Lankan dals, sambar, rasam, coconut chutneys, curries and tempered vegetables.",
+      "storage": "Refrigerate fresh sprigs in a paper towel inside a bag for up to two weeks, or freeze them; dried leaves keep in a jar but have far less aroma.",
+      "seasonality": "Year-round in South Asian markets.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "South Indian tempering (tadka) on dals, sambar and rasam",
+          "why": "Curry leaves are fried into the finishing oil."
+        },
+        {
+          "product": "Sri Lankan curries and coconut sambols",
+          "why": "Curry leaves are a standard aromatic."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "dried-chiles",
+      "description": "Dried chiles are whole sun- or air-dried chile peppers, from mild, raisiny ancho and guajillo to smoky chipotle, bright arbol and fiercely hot habanero, each with its own flavour beyond heat. Toasted briefly, soaked and blended, they form the base of Mexican moles, enchilada sauces, adobos and salsas; whole, they infuse oils, braises, curries and stir-fries.",
+      "storage": "Keep in an airtight container in a cool, dark cupboard for six months to a year; refrigerate or freeze to keep them pliable longer.",
+      "seasonality": "Year-round pantry staple.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Mole, enchilada sauce and adobo marinades",
+          "why": "Rehydrated dried chiles are the base."
+        },
+        {
+          "product": "Chili powder and chile pastes",
+          "why": "Ground dried chiles are the main ingredient."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "fenugreek",
+      "description": "Fenugreek is a small, hard, amber seed with a bitter, maple-and-celery aroma that softens and sweetens when toasted or fried in oil. The seeds are ground into curry powders, berbere and panch phoron, tempered into South Indian dals and pickles, and used in Ethiopian and Persian stews; the dried leaves, kasuri methi, finish butter chicken and other North Indian curries.",
+      "storage": "Keep whole seeds in an airtight jar away from light for up to two years; dried leaves keep for about a year and fade after that.",
+      "seasonality": "Year-round pantry staple; fresh leaves appear in South Asian markets in cooler months.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Curry powder, berbere, panch phoron and many spice blends",
+          "why": "Fenugreek seed is a standard component."
+        },
+        {
+          "product": "Artificial maple flavouring and some maple-flavoured products",
+          "why": "Fenugreek extract supplies the maple aroma."
+        },
+        {
+          "product": "Butter chicken and many North Indian curries",
+          "why": "Dried fenugreek leaves are crumbled in at the end."
+        }
+      ],
+      "crossContamination": "Fenugreek is a legume; it is not a listed allergen on either the US or EU lists, and it is often ground on shared spice lines.",
+      "substitutions": []
+    },
+    {
+      "slug": "gochugaru",
+      "description": "Gochugaru is Korean red chile powder, made from sun-dried chiles with the seeds removed and ground to a coarse flake or a fine powder, with a fruity, smoky, moderate heat and a vivid red colour. It is the backbone of kimchi, gochujang, tteokbokki, spicy stews and soups, and Korean marinades and dipping sauces.",
+      "storage": "Keep in an airtight container in the refrigerator or freezer to preserve its colour and flavour; at room temperature it browns within a few months.",
+      "seasonality": "Year-round pantry staple.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Kimchi and Korean pickles",
+          "why": "Gochugaru is the chile that colours and seasons the paste."
+        },
+        {
+          "product": "Tteokbokki, kimchi jjigae and Korean fried chicken sauces",
+          "why": "Gochugaru is stirred into the sauce or stew base."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "juniper-berries",
+      "description": "Juniper berries are the small, dark blue, resinous cones of the juniper shrub, with a piney, peppery, gin-like flavour. Lightly crushed, they season game, pork, duck and venison, braises such as sauerkraut and choucroute, brines and cures for gravlax and pastrami-style meats, and they are the defining botanical in gin.",
+      "storage": "Keep whole berries in an airtight jar away from heat and light for up to two years; crush just before use.",
+      "seasonality": "Year-round pantry item; harvested in autumn.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Gin and some aquavits and bitters",
+          "why": "Juniper is the principal botanical."
+        },
+        {
+          "product": "Choucroute garnie, braised red cabbage and game marinades",
+          "why": "Crushed juniper is a traditional seasoning."
+        },
+        {
+          "product": "Gravlax cures and some pastrami and bacon rubs",
+          "why": "Juniper is part of the spice cure."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "kaffir-lime-leaves",
+      "description": "Kaffir lime leaves, also sold as makrut lime leaves, are the glossy, double-lobed leaves of a Southeast Asian citrus tree, with an intensely floral, citrus perfume no other ingredient matches. Torn whole into tom yum, tom kha, curries and rice, or sliced hair-thin for salads, fish cakes and stir-fries, they are used like a bay leaf for flavour and removed unless finely shredded.",
+      "storage": "Keep fresh leaves in a sealed bag in the refrigerator for a week or two, or freeze them, which preserves their aroma far better than drying.",
+      "seasonality": "Year-round in Asian markets, fresh or frozen.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Thai curries, tom yum and tom kha",
+          "why": "The leaves are a defining aromatic."
+        },
+        {
+          "product": "Thai fish cakes and larb-style salads",
+          "why": "Finely shredded leaves are mixed in."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "lemongrass",
+      "description": "Lemongrass is a tall, fibrous tropical grass whose pale lower stalk carries a bright, lemony, slightly gingery fragrance without lemon's acidity. Bruised and simmered whole in soups, curries, broths and teas, or trimmed and minced into pastes, marinades and salads, it is essential to Thai, Vietnamese, Malaysian and Indonesian cooking.",
+      "storage": "Refrigerate fresh stalks loosely wrapped for two to three weeks, or freeze them whole or chopped; dried lemongrass keeps in a jar but is far weaker.",
+      "seasonality": "Year-round in Asian markets.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Thai curry pastes, tom yum and tom kha",
+          "why": "Lemongrass is a core aromatic."
+        },
+        {
+          "product": "Vietnamese grilled pork and chicken marinades",
+          "why": "Minced lemongrass is the main flavouring."
+        },
+        {
+          "product": "Herbal teas and some soft drinks",
+          "why": "Lemongrass is used for its citrus aroma."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "nigella-seeds",
+      "description": "Nigella seeds are small, matte black, teardrop-shaped seeds, also sold as kalonji or black cumin, with a savoury, faintly bitter flavour that hints at onion, oregano and black pepper. They are sprinkled over naan and other flatbreads, tempered into Indian dals and vegetable dishes, added to Bengali panch phoron and Middle Eastern cheeses, and scattered on salads and pastries.",
+      "storage": "Keep in an airtight jar away from heat and light for up to two years; toast briefly to wake up the flavour.",
+      "seasonality": "Year-round pantry staple.",
+      "allergens": [],
+      "mayContain": [
+        "sesame"
+      ],
+      "hiddenSources": [
+        {
+          "product": "Naan, Turkish pide and other topped flatbreads",
+          "why": "Nigella is the black seed on top."
+        },
+        {
+          "product": "Panch phoron and some string cheese and pickles",
+          "why": "Nigella is a standard component."
+        }
+      ],
+      "crossContamination": "Nigella is often sold and packed alongside sesame and other small seeds and used as a bread topping with them, so shared handling is common; check the label.",
+      "substitutions": []
+    },
+    {
+      "slug": "pandan-leaves",
+      "description": "Pandan leaves are the long, blade-like leaves of a Southeast Asian plant, with a sweet, grassy, vanilla-and-jasmine aroma that has earned pandan the nickname of Asian vanilla. Knotted and simmered in rice, coconut milk and syrups, or blended and strained for the green extract in chiffon cakes, kaya jam, kueh and drinks, they perfume both sweet and savoury dishes.",
+      "storage": "Refrigerate fresh leaves wrapped in a damp towel inside a bag for up to a week, or freeze them; pandan extract keeps in the refrigerator for months.",
+      "seasonality": "Year-round in Asian markets, fresh or frozen.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Pandan chiffon cake, kaya jam and Southeast Asian kueh",
+          "why": "Pandan is the signature flavour and green colour."
+        },
+        {
+          "product": "Coconut rice, nasi lemak and some Thai desserts",
+          "why": "Leaves are simmered into the rice or syrup."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "rose-petals",
+      "description": "Dried rose petals are the culinary petals of fragrant rose varieties, with a delicate floral perfume and a faint sweetness that reads as aroma more than taste. Ground into Persian advieh and Moroccan ras el hanout, scattered over rice, desserts, yogurt and salads, steeped for tea and syrup, and pressed into Turkish delight and shortbread, they are used for scent and decoration.",
+      "storage": "Keep in an airtight jar away from light and heat, where they hold their colour and scent for about a year.",
+      "seasonality": "Year-round as a dried pantry item; fresh in late spring and summer.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [
+        {
+          "product": "Advieh, ras el hanout and some baharat blends",
+          "why": "Ground rose petals are a traditional component."
+        },
+        {
+          "product": "Persian rice, faloodeh and rose-scented desserts",
+          "why": "Petals are used as flavouring and garnish."
+        }
+      ],
+      "crossContamination": "",
+      "substitutions": []
+    },
+    {
+      "slug": "salt",
+      "description": "Salt is the fundamental seasoning, whether fine table salt, flaky sea salt, coarse kosher salt or a mineral-flecked specialty salt, and its crystal size changes how much a spoonful delivers. It seasons every savoury dish, sharpens sweetness in desserts, draws moisture in brines and cures, strengthens gluten in bread dough, and preserves everything from pickles to cured meats.",
+      "storage": "Keep in a dry, covered container; salt does not spoil, but it clumps in humid air and iodised salt can pick up off flavours over years.",
+      "seasonality": "Year-round pantry staple.",
+      "allergens": [],
+      "mayContain": [],
+      "hiddenSources": [],
+      "crossContamination": "",
+      "substitutions": []
+    }
+  ]
+}
