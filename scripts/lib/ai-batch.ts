@@ -1,29 +1,56 @@
 /**
  * Portfolio-shared AI batch client for dev-time seed generation.
  *
- * Free lanes by default: NVIDIA NIM then Groq (both serving gpt-oss-120b).
- * Paid lanes are explicit opt-in only, per the decisions of record:
- *   'ds'    — DeepSeek V4 Flash on Azure AI Foundry: the seeding workhorse
- *             (Notion "AI Model Routing & Seeding Plan", 2026-08-23/24).
- *   'azure' — Azure OpenAI gpt-5-4 / gpt-5-4-mini: spot-check passes and the
- *             lanes with a hard paid-frontier rule (ingredientbot allergens).
+ * Free lane by default: Groq (gpt-oss-120b). NVIDIA NIM was the first hop until
+ * 2026-09-03, when NIM retired `openai/gpt-oss-120b` (410 Gone) — it is still a
+ * valid explicit opt-in, but leaving it in the default chain only bought a
+ * guaranteed-failing round-trip per item, so it is gone from the default.
+ *
+ * Paid lanes are explicit opt-in only:
+ *   'broker' — the shared AI broker's `seeding` lane: DeepSeek V4 Flash and
+ *              nothing else. THE seeding workhorse.
+ *   'ds'     — alias for 'broker', kept because eleven call sites pin it and they
+ *              still mean what they said: DeepSeek, one model, no fallback.
+ *
+ * THERE IS NO AZURE IN THIS FILE, BY DECISION (Cedar, 2026-09-05: "I don't want
+ * anything pointed to azure at all"). The Azure OpenAI ('azure', gpt-5-4) and
+ * Azure AI Foundry ('azure-foundry', the old ds deployment) providers are gone,
+ * not disabled. A caller that still names either gets an error saying so rather
+ * than a silent reroute — the seeders that did (ingredientbot allergens, gurumind
+ * public concepts) need a new paid-frontier decision, not a quiet substitute.
+ * The AZURE_* keys stay in .env per the never-delete-unused-keys rule.
+ *
+ * NO GEMINI EITHER, AS FALLBACK OR OTHERWISE, IN A SEEDING RUN. The broker's
+ * `structured-extraction` lane reroutes to gemini-flash-lite the moment DeepSeek's
+ * 20 rpm saturates; this file never names that lane, and `batchObject()` cannot
+ * be pointed at it.
+ *
+ * SCHEMA-BEARING CALLS GO THROUGH THE BROKER, ALWAYS AND ONLY (FOU-508).
+ * `batchObject()` pins itself to the `seeding` lane and REFUSES a provider chain.
+ * Two independent reasons, both learned the hard way:
+ *   - Correctness. `supportsStructuredOutputs` was set on exactly one provider in
+ *     this file (Azure Foundry). Everywhere else the AI SDK silently degraded to
+ *     `json_object`, the JSON schema never reached the model, and the response
+ *     only failed Zod on arrival — which reads as a flaky model, not a
+ *     misconfigured provider (FOU-424).
+ *   - Provenance. A seeding run uses one model or it stops (CLAUDE.md → "Seeding
+ *     runs: DeepSeek only, no fallback"). A chain mixes models inside one
+ *     permanent table with nothing in the row recording which, so the quality
+ *     difference reads as data noise forever. A halted run leaves a clean,
+ *     resumable gap instead.
  *
  * Designed for dev-time batch jobs (seed scripts, content generation).
  * NOT for production traffic — uses your personal API keys.
  *
- * Required env in /home/cedar/Projects/.env:
- *   AZURE_OPENAI_RESOURCE=...             (optional — enables the azure lane)
- *   AZURE_OPENAI_API_KEY=...              (optional — enables the azure lane)
- *   AZURE_OPENAI_DEPLOYMENT_QUALITY=...   (optional — defaults to 'gpt-5')
- *   AZURE_OPENAI_DEPLOYMENT_BULK=...      (optional — defaults to 'gpt-5-mini')
- *   AZURE_FOUNDRY_RESOURCE=...            (optional — enables the ds lane)
- *   AZURE_FOUNDRY_API_KEY=...             (optional — enables the ds lane)
- *   AZURE_FOUNDRY_DEPLOYMENT_DS=...       (optional — defaults to 'deepseek-v4-flash')
- *   NVIDIA_API_KEY=...
+ * Required env (the site .env carries the broker pair; /home/cedar/Projects/.env the rest):
+ *   AI_BROKER_URL=...                     (required — enables 'broker' / 'ds')
+ *   AI_BROKER_KEY=...                     (required — this site's broker key)
+ *   NVIDIA_API_KEY=...                    (optional — explicit 'nvidia' opt-in only)
  *   GROQ_API_KEY=...
  *
  * Required deps per consuming site (npm install -D):
- *   ai @ai-sdk/azure @ai-sdk/openai-compatible @ai-sdk/cerebras @ai-sdk/groq zod
+ *   ai @ai-sdk/openai-compatible @ai-sdk/cerebras @ai-sdk/groq zod
+ *   (@ai-sdk/azure is no longer imported here; it may still sit in package.json)
  *
  * Usage from a site's scripts/seed-*.ts:
  *   import { batchText, batchObject, batchMap } from '../../ai-batch';
@@ -41,7 +68,6 @@
 import { appendFileSync } from 'node:fs';
 import { basename } from 'node:path';
 import { generateText, generateObject } from 'ai';
-import { createAzure } from '@ai-sdk/azure';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { cerebras } from '@ai-sdk/cerebras';
 import { groq } from '@ai-sdk/groq';
@@ -49,11 +75,40 @@ import type { ZodSchema } from 'zod';
 
 const CEREBRAS_MODEL = 'gpt-oss-120b';
 const GROQ_MODEL = 'openai/gpt-oss-120b';
-const AZURE_QUALITY = process.env.AZURE_OPENAI_DEPLOYMENT_QUALITY ?? 'gpt-5';
-const AZURE_BULK = process.env.AZURE_OPENAI_DEPLOYMENT_BULK ?? 'gpt-5-mini';
-const azure = process.env.AZURE_OPENAI_RESOURCE && process.env.AZURE_OPENAI_API_KEY
-  ? createAzure({ resourceName: process.env.AZURE_OPENAI_RESOURCE, apiKey: process.env.AZURE_OPENAI_API_KEY })
-  : null;
+
+// The shared AI broker's DeepSeek-only seeding lane. `seeding`'s chain is ONE
+// model by design — see the header. Do not point this at `structured-extraction`
+// (chain: deepseek → openrouter-structured → gemini-flash-lite): that lane exists
+// for live request-time extraction, where finishing on a different model is
+// better than failing, and a seeding run wants the opposite trade.
+export const BROKER_SEEDING_LANE = 'seeding';
+// Lazy for the same tsx-hoisting reason as every other provider here: a seeder
+// calls dotenv in its own body, after this module has already been evaluated.
+let brokerProviderInstance: ReturnType<typeof createOpenAICompatible> | null | undefined;
+function getBroker() {
+  if (brokerProviderInstance === undefined) {
+    const url = process.env.AI_BROKER_URL;
+    const apiKey = process.env.AI_BROKER_KEY;
+    brokerProviderInstance = url && apiKey
+      ? createOpenAICompatible({
+          name: 'ai-broker',
+          baseURL: url,
+          apiKey,
+          // LOAD-BEARING (FOU-424). Without it the SDK downgrades to
+          // `json_object`, the schema never reaches the model, and Zod fails on
+          // arrival looking like model flakiness.
+          supportsStructuredOutputs: true,
+          headers: {
+            'x-feature': basename(process.argv[1] ?? 'ai-batch'),
+            // Seeders are batch by definition: the broker's 240s queue deadline,
+            // never the 15s interactive fail-fast.
+            'x-priority': 'batch',
+          },
+        })
+      : null;
+  }
+  return brokerProviderInstance;
+}
 
 // NVIDIA NIM — OpenAI-compatible, serves the same gpt-oss-120b, supports strict
 // json_schema structured output (verified live 2026-08-23). Primary FREE lane:
@@ -65,11 +120,6 @@ const azure = process.env.AZURE_OPENAI_RESOURCE && process.env.AZURE_OPENAI_API_
 // process.env read is always undefined and the provider would silently never be
 // offered (looks identical to "not configured"). @ai-sdk/cerebras and groq read
 // their keys at call time; we must too.
-//
-// NOTE: the `azure` const above has this same module-load bug and is therefore
-// usually inert inside tsx seeders. That is currently the only thing keeping
-// seeders off the PAID lane — do NOT make it lazy without first pinning every
-// seeder's providers/tier, or every batch job starts billing Azure-first.
 const NVIDIA_MODEL = 'openai/gpt-oss-120b';
 let nvidiaProvider: ReturnType<typeof createOpenAICompatible> | null | undefined;
 function getNvidia() {
@@ -85,34 +135,26 @@ function getNvidia() {
   return nvidiaProvider;
 }
 
-// DeepSeek V4 Flash on the Azure AI Foundry resource (AZURE_FOUNDRY_*, a
-// DIFFERENT resource + key from AZURE_OPENAI_*). The seeding lane of record
-// since 2026-08-23/24 — 11x cheaper than gpt-5-4 on a 70/30 blend; gpt-5-4 is
-// reserved for spot-check passes. Lazy for the same tsx-hoisting reason as
-// nvidia above; lazy is SAFE here because 'ds' is never in a default chain —
-// it is reachable only via an explicit providers: ['ds'].
-// The api-key header is what the endpoint was verified with (2026-08-27);
-// createOpenAICompatible's apiKey option only sets Authorization: Bearer.
-let dsProvider: ReturnType<typeof createOpenAICompatible> | null | undefined;
-function getDs() {
-  if (dsProvider === undefined) {
-    const resource = process.env.AZURE_FOUNDRY_RESOURCE;
-    const apiKey = process.env.AZURE_FOUNDRY_API_KEY;
-    dsProvider = resource && apiKey
-      ? createOpenAICompatible({
-          name: 'azure-foundry',
-          baseURL: `https://${resource}.services.ai.azure.com/openai/v1`,
-          apiKey,
-          headers: { 'api-key': apiKey },
-          supportsStructuredOutputs: true,
-        })
-      : null;
-  }
-  return dsProvider;
-}
-const dsDeployment = () => process.env.AZURE_FOUNDRY_DEPLOYMENT_DS ?? 'deepseek-v4-flash';
+// 'ds' is an ALIAS for 'broker' (FOU-508) — the DeepSeek seeding lane. It is
+// kept because eleven call sites across the portfolio pin it and they still
+// mean what they said: DeepSeek, one model, no fallback.
+type Provider = 'broker' | 'ds' | 'nvidia' | 'cerebras' | 'groq';
+/** Named by old pins; refused at runtime with a message, since tsx does not typecheck. */
+const REMOVED_PROVIDERS = new Set(['azure', 'azure-foundry']);
 
-type Provider = 'azure' | 'ds' | 'nvidia' | 'cerebras' | 'groq';
+/** Resolve the deprecated alias. Everything downstream sees only 'broker'. */
+const dsAliasWarned = { done: false };
+function canonicalProvider(p: Provider): Provider {
+  if (p !== 'ds') return p;
+  if (!dsAliasWarned.done) {
+    dsAliasWarned.done = true;
+    console.warn(
+      "[ai-batch] provider 'ds' is an alias for 'broker' (the broker's DeepSeek-only " +
+      "`seeding` lane) since FOU-508. Same model, live host. Prefer 'broker' in new code.",
+    );
+  }
+  return 'broker';
+}
 
 export interface BatchOptions {
   maxRetries?: number;
@@ -120,9 +162,19 @@ export interface BatchOptions {
   rpmLimit?: number;
   system?: string;
   temperature?: number;
-  /** Azure only: 'quality' selects AZURE_QUALITY (gpt-5-4), 'bulk' selects AZURE_BULK (gpt-5-4-mini). Ignored by every other provider. */
+  /**
+   * @deprecated Selected an Azure OpenAI deployment; Azure is gone (2026-09-05).
+   * Accepted and ignored so the call sites that still pass it keep running.
+   */
   tier?: 'quality' | 'bulk';
-  /** Explicit provider order. Defaults to the FREE chain (nvidia → groq). Paid lanes ('ds', 'azure') run only when named here. */
+  /**
+   * Explicit provider order. Defaults to the FREE chain (groq). The paid lane
+   * ('broker', alias 'ds') runs only when named here.
+   *
+   * `batchObject()` ignores any chain longer than the broker: schema-bearing
+   * calls are pinned to the DeepSeek-only `seeding` lane and throw rather than
+   * fall through. See the header.
+   */
   providers?: Provider[];
   /**
    * Per-request deadline. Without one a hung socket waits forever: on 2026-08-28 an
@@ -154,20 +206,16 @@ class RateLimiter {
 
 const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
 
-// 18 rpm, not 25: the ds deployment's Azure quota is 20 RPM (GlobalStandard,
-// capacity 20, the subscription maximum for this model) — leave headroom.
+// 18 rpm: the broker's deepseek-streamlake model allows 20 and other sites share
+// it — leave headroom rather than queue on the broker for the last two.
 const limiter = new RateLimiter(18);
 
-interface ProviderStats {
-  azure: { ok: number; failed: number };
-  ds: { ok: number; failed: number };
-  nvidia: { ok: number; failed: number };
-  cerebras: { ok: number; failed: number };
-  groq: { ok: number; failed: number };
-}
+// Keyed by CANONICAL provider — 'ds' resolves to 'broker' before it gets here,
+// so a run that pins 'ds' reports under 'broker' and the two can never be
+// double-counted as separate lanes.
+type ProviderStats = Record<Exclude<Provider, 'ds'>, { ok: number; failed: number }>;
 const stats: ProviderStats = {
-  azure: { ok: 0, failed: 0 },
-  ds: { ok: 0, failed: 0 },
+  broker: { ok: 0, failed: 0 },
   nvidia: { ok: 0, failed: 0 },
   cerebras: { ok: 0, failed: 0 },
   groq: { ok: 0, failed: 0 },
@@ -175,23 +223,19 @@ const stats: ProviderStats = {
 export const getStats = () => structuredClone(stats);
 
 // ─── Token accounting ────────────────────────────────────────────────────────
-// Azure bills against a fixed prepaid credit, so a batch run that cannot report
-// what it spent is a run you can only audit after the fact. Every successful
+// The broker lane is metered, so a batch run that cannot report what it spent
+// is a run you can only audit after the fact. Every successful
 // call records its usage here and appends one line to a portfolio-wide ledger.
 // Free lanes are priced at 0, but still recorded — a run that silently fell
 // back off a paid lane should be visible, not invisible.
 //
-// Prices are USD per 1M tokens, Azure list pricing, keyed by DEPLOYMENT name
-// (not base model) because that is what the caller actually selects.
+// Prices are USD per 1M tokens, keyed by what the caller actually selects.
 const PRICING: Record<string, { in: number; out: number }> = {
-  'gpt-5-4': { in: 2.5, out: 15 },
-  'gpt-5-4-mini': { in: 0.75, out: 4.5 },
-  'gpt-5': { in: 2.5, out: 15 },
-  'gpt-5-mini': { in: 0.75, out: 4.5 },
-  // DeepSeek-V4-Flash 2026-04-23, GlobalStandard westus3 — retail-price API,
-  // verified 2026-08-27. Cached input is cheaper ($0.028/M) and not modeled, so
-  // ledger cost is a slight overestimate on cache-friendly prompts.
-  'deepseek-v4-flash': { in: 0.19, out: 0.51 },
+  // The broker's `seeding` lane — DeepSeek V4 Flash on StreamLake via OpenRouter,
+  // priced from the broker's own model catalog (priceVerified). Keyed by LANE id
+  // because the lane is what this client selects; the broker's ledger (GET /stats)
+  // stays authoritative for actual spend.
+  seeding: { in: 0.056, out: 0.112 },
 };
 
 const SPEND_LEDGER = process.env.AI_SPEND_LEDGER ?? '/home/cedar/Projects/.ai-spend.jsonl';
@@ -199,29 +243,26 @@ const SITE = basename(process.cwd());
 const SCRIPT = basename(process.argv[1] ?? 'unknown');
 
 interface Spend { calls: number; inputTokens: number; outputTokens: number; costUsd: number }
-const spend: Record<Provider, Spend> = {
-  azure: { calls: 0, inputTokens: 0, outputTokens: 0, costUsd: 0 },
-  ds: { calls: 0, inputTokens: 0, outputTokens: 0, costUsd: 0 },
+const spend: Record<Exclude<Provider, 'ds'>, Spend> = {
+  broker: { calls: 0, inputTokens: 0, outputTokens: 0, costUsd: 0 },
   nvidia: { calls: 0, inputTokens: 0, outputTokens: 0, costUsd: 0 },
   cerebras: { calls: 0, inputTokens: 0, outputTokens: 0, costUsd: 0 },
   groq: { calls: 0, inputTokens: 0, outputTokens: 0, costUsd: 0 },
 };
 const unpricedWarned = new Set<string>();
 
-const PAID_PROVIDERS: readonly Provider[] = ['azure', 'ds'];
+const PAID_PROVIDERS: readonly Provider[] = ['broker', 'ds'];
 
-const deploymentFor = (provider: Provider, opts: BatchOptions) =>
-  provider === 'azure'
-    ? (opts.tier === 'bulk' ? AZURE_BULK : AZURE_QUALITY)
-    : provider === 'ds'
-      ? dsDeployment()
-      : provider === 'nvidia'
-        ? NVIDIA_MODEL
-        : provider === 'cerebras'
-          ? CEREBRAS_MODEL
-          : GROQ_MODEL;
+const deploymentFor = (provider: Provider, _opts: BatchOptions) =>
+  provider === 'broker'
+    ? BROKER_SEEDING_LANE
+    : provider === 'nvidia'
+      ? NVIDIA_MODEL
+      : provider === 'cerebras'
+        ? CEREBRAS_MODEL
+        : GROQ_MODEL;
 
-function recordUsage(provider: Provider, opts: BatchOptions, result: unknown): void {
+function recordUsage(provider: Exclude<Provider, 'ds'>, opts: BatchOptions, result: unknown): void {
   const usage = (result as { usage?: Record<string, number | undefined> } | null)?.usage;
   // AI SDK v5+ reports inputTokens/outputTokens; v4 used promptTokens/completionTokens.
   const inputTokens = usage?.inputTokens ?? usage?.promptTokens ?? 0;
@@ -264,7 +305,7 @@ function recordUsage(provider: Provider, opts: BatchOptions, result: unknown): v
 export const getSpend = () => structuredClone(spend);
 
 export function formatSpend(): string {
-  const rows = (Object.entries(spend) as [Provider, Spend][]).filter(([, s]) => s.calls > 0);
+  const rows = (Object.entries(spend) as [Exclude<Provider, 'ds'>, Spend][]).filter(([, s]) => s.calls > 0);
   if (!rows.length) return '';
   const total = rows.reduce((a, [, s]) => a + s.costUsd, 0);
   const lines = rows.map(([p, s]) =>
@@ -291,26 +332,29 @@ async function withFallback<T>(
   // call — a 402 is not retryable, so leaving it in the chain cost one wasted
   // round-trip per item and nothing else. `cerebras` remains a valid Provider
   // value for an explicit `providers: ['cerebras']` opt-in, but is never default.
-  const freeChain: Provider[] = getNvidia() ? ['nvidia', 'groq'] : ['groq'];
-  // PAID LANES ARE NEVER A DEFAULT (Cedar, 2026-08-24: "don't use azure for
-  // anything. We are only using it for seeding when I say so"). 'azure' and 'ds'
-  // are reachable ONLY by a caller passing providers: ['azure', ...] or
-  // providers: ['ds', ...] explicitly — e.g. ingredientbot's allergen lane,
-  // which is required to stay on a paid frontier model, or an approved seeding
-  // batch on the ds lane.
-  //
-  // Previously the default was azure-first at 'quality' tier whenever Azure creds
-  // were present, which meant any caller passing `tier: 'quality'` and no
-  // providers silently billed the paid deployment. That is the defect behind the
-  // 17x cost overrun, and it was only masked by the fact that the `azure` const
-  // below is evaluated at module load — before tsx-hoisted seeders run dotenv —
-  // so it read as unconfigured. Do not rely on that accident; this is the fix.
-  const providers: Provider[] = opts.providers ?? freeChain;
-  if (providers.includes('azure') && !azure) {
-    throw new Error('[ai-batch] azure requested but AZURE_OPENAI_RESOURCE / AZURE_OPENAI_API_KEY not set');
+  // NVIDIA left the default chain 2026-09-03: NIM retired `openai/gpt-oss-120b`
+  // with 410 Gone, so it was a guaranteed-failing first hop on every item — the
+  // same shape as the Cerebras 402 removed above. Still reachable as an explicit
+  // providers: ['nvidia'] for the day NIM carries the model again.
+  const freeChain: Provider[] = ['groq'];
+  // THE PAID LANE IS NEVER A DEFAULT (Cedar, 2026-08-24). 'broker'/'ds' is
+  // reachable ONLY by a caller passing providers: ['ds'] explicitly — an approved
+  // seeding batch. (The old default was Azure-first whenever Azure creds were
+  // present, which billed the paid deployment for any caller that passed a tier
+  // and no providers; that was the defect behind the 17x cost overrun.)
+  const named = (opts.providers ?? []) as string[];
+  const gone = named.filter((p) => REMOVED_PROVIDERS.has(p));
+  if (gone.length) {
+    throw new Error(
+      `[ai-batch] provider(s) ${gone.join(', ')} no longer exist — Azure was removed from every site ` +
+      `on 2026-09-05 (Cedar: "I don't want anything pointed to azure at all"). This caller needs a new ` +
+      `decision: if it must stay on a paid frontier model (allergens), ask Cedar which; otherwise pin ` +
+      `providers: ['ds'] for the broker's DeepSeek-only seeding lane.`,
+    );
   }
-  if (providers.includes('ds') && !getDs()) {
-    throw new Error('[ai-batch] ds requested but AZURE_FOUNDRY_RESOURCE / AZURE_FOUNDRY_API_KEY not set');
+  const providers: Provider[] = (opts.providers ?? freeChain).map(canonicalProvider);
+  if (providers.includes('broker') && !getBroker()) {
+    throw new Error('[ai-batch] broker requested but AI_BROKER_URL / AI_BROKER_KEY not set — scripts load them via `import "./_env"`');
   }
   if (providers.includes('nvidia') && !getNvidia()) {
     throw new Error('[ai-batch] nvidia requested but NVIDIA_API_KEY not set');
@@ -328,8 +372,8 @@ async function withFallback<T>(
       try {
         await limiter.wait();
         const result = await call(provider);
-        stats[provider].ok += 1;
-        recordUsage(provider, opts, result);
+        stats[provider as Exclude<Provider, 'ds'>].ok += 1;
+        recordUsage(provider as Exclude<Provider, 'ds'>, opts, result);
         return { result, provider };
       } catch (err) {
         lastError = err;
@@ -343,7 +387,7 @@ async function withFallback<T>(
         const isRetryable = isRateLimit || isServerError || isTimeout;
 
         if (!isRetryable) {
-          stats[provider].failed += 1;
+          stats[provider as Exclude<Provider, 'ds'>].failed += 1;
           console.warn(`[ai-batch] ${provider} hard failure (${status}): ${describe(err)}`);
           break;
         }
@@ -353,7 +397,7 @@ async function withFallback<T>(
           `[ai-batch] ${provider} ${isTimeout ? 'timed out' : status} (attempt ${attempt + 1}/${maxRetries}) — backing off ${Math.round(backoff)}ms`,
         );
         await sleep(backoff);
-        if (attempt === maxRetries - 1) stats[provider].failed += 1;
+        if (attempt === maxRetries - 1) stats[provider as Exclude<Provider, 'ds'>].failed += 1;
       }
     }
   }
@@ -375,9 +419,8 @@ function describe(err: unknown): string {
   return String(err);
 }
 
-const modelFor = (provider: Provider, opts: BatchOptions) =>
-  provider === 'azure' ? azure!(opts.tier === 'bulk' ? AZURE_BULK : AZURE_QUALITY)
-  : provider === 'ds' ? getDs()!(dsDeployment())
+const modelFor = (provider: Provider, _opts: BatchOptions) =>
+  provider === 'broker' ? getBroker()!.chatModel(BROKER_SEEDING_LANE)
   : provider === 'nvidia' ? getNvidia()!(NVIDIA_MODEL)
   : provider === 'cerebras' ? cerebras(CEREBRAS_MODEL)
   : groq(GROQ_MODEL);
@@ -397,11 +440,35 @@ export async function batchText(prompt: string, opts: BatchOptions = {}): Promis
   return result.text;
 }
 
+/**
+ * One schema-bearing call, PINNED to the broker's DeepSeek-only `seeding` lane.
+ *
+ * The pin is the fix for FOU-508 and it is deliberately not overridable. Two
+ * things go wrong when a schema call is allowed to pick its own provider:
+ * `supportsStructuredOutputs` is set on the broker and nowhere else, so any other
+ * hop silently degrades to `json_object` and the schema never reaches the model
+ * (FOU-424); and a chain mixes models inside one permanent table with nothing in
+ * the row recording which, which is the provenance failure the DeepSeek-only rule
+ * exists to prevent. A caller naming a different provider is told so rather than
+ * quietly rerouted — the whole class of bug here is silent substitution.
+ *
+ * `providers: ['ds']` and `providers: ['broker']` both resolve here and are fine.
+ */
 export async function batchObject<T>(
   prompt: string,
   schema: ZodSchema<T>,
   opts: BatchOptions = {},
 ): Promise<T> {
+  const named = (opts.providers ?? []).map(canonicalProvider);
+  const offLane = named.filter((p) => p !== 'broker');
+  if (offLane.length) {
+    throw new Error(
+      `[ai-batch] batchObject is pinned to the broker '${BROKER_SEEDING_LANE}' lane and cannot use ` +
+      `${offLane.join(', ')} (FOU-508). A seeding run uses one model or it stops — using any model ` +
+      `other than DeepSeek needs Cedar's permission, asked BEFORE the run. Drop the providers option, ` +
+      `or use batchText if this call carries no schema.`,
+    );
+  }
   const { result } = await withFallback(
     (provider) =>
       generateObject({
@@ -412,7 +479,7 @@ export async function batchObject<T>(
         temperature: opts.temperature,
         abortSignal: AbortSignal.timeout(opts.timeoutMs ?? DEFAULT_TIMEOUT_MS),
       }),
-    opts,
+    { ...opts, providers: ['broker'] },
   );
   return result.object;
 }
