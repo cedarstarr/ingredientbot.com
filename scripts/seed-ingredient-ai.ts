@@ -1,22 +1,40 @@
 /**
- * @description AI-generated ingredient encyclopedia seeder. Prose fields (description, storage, seasonality) via DeepSeek V4 Flash on the Azure Foundry ds lane (AZURE_FOUNDRY_* env); allergen-bearing fields (allergenProfile, hiddenSources, crossContamination, substitutions) via scripts/lib/allergen-verify.ts on the same paid Azure model (single-model as of 2026-08-05 — NOT verified; the allergen disclaimer must render wherever they are shown). Idempotent on slug.
+ * @description AI-generated ingredient encyclopedia seeder. Prose fields (description, storage, seasonality) and the allergen-bearing fields (allergenProfile, hiddenSources, crossContamination, substitutions) — the allergen fields come ONLY from a paid frontier model (single-model, NOT verified; the allergen disclaimer must render wherever they are shown). Model-driven mode creates missing DEFAULT_INPUTS rows (prose on the broker's DeepSeek seeding lane, allergens via scripts/lib/allergen-verify.ts — which has had no provider since Azure was removed on 2026-09-05). --from-file fills existing rows that have no description yet, from a JSON file written in-session by Claude Fable 5.1 and validated here against the same schemas. Idempotent on slug.
  * @tables ingredients
  *
  * Usage:
- *   npx tsx scripts/seed-ingredient-ai.ts               # all ~360 default ingredients
- *   npx tsx scripts/seed-ingredient-ai.ts --count 10    # first 10
+ *   npx tsx scripts/seed-ingredient-ai.ts --from-file scripts/data/ingredient-entries.json --dry-run   # validate the file + print the plan — NO DB connection
+ *   npx tsx scripts/seed-ingredient-ai.ts --from-file scripts/data/ingredient-entries.json             # fill rows whose description IS NULL
+ *   npx tsx scripts/seed-ingredient-ai.ts               # model-driven: all ~360 default ingredients
+ *   npx tsx scripts/seed-ingredient-ai.ts --count 10    # model-driven: first 10
  *   npx tsx scripts/seed-ingredient-ai.ts --dry-run     # print the plan — NO AI calls, NO DB connection
  *
  * --dry-run is deliberately fully offline (unlike seed-recipes-ai.ts): the
  * allergen lane must never run casually, so the dry run only prints what WOULD
  * be generated and which env is required.
  *
- * Requires in /home/cedar/Projects/.env:
- *   AZURE_FOUNDRY_RESOURCE + AZURE_FOUNDRY_API_KEY   (prose generation, ds lane)
- *   AZURE_OPENAI_RESOURCE + AZURE_OPENAI_API_KEY     (allergen fields — no free-lane fallback)
+ * --from-file is scoped to rows that exist but carry no description (the stubs
+ * backfill-recipe-ingredients.ts creates so recipe links resolve — the public
+ * glossary lists a row only once it has prose, so filling `description` is
+ * what makes it visible). A row that already has a description is skipped, so
+ * a re-run is a no-op; a slug with no row is reported and skipped. File shape:
+ *   {
+ *     "writtenBy": "<model or person>",   // provenance — required, echoed in the run log
+ *     "writtenOn": "YYYY-MM-DD",
+ *     "entries": [ { "slug", description, storage, seasonality,            // ProseSchema + the FOU-439 floor
+ *                    allergens, mayContain, hiddenSources,                 // IngredientBundleSchema
+ *                    crossContamination, substitutions } ]
+ *   }
+ * A failing entry is reported by slug and skipped — never written.
  */
 import './lib/load-env' // MUST stay first — see scripts/lib/load-env.ts (import hoisting)
+import { readFileSync } from 'node:fs'
 import { z } from 'zod'
+import {
+  IngredientBundleSchema,
+  normalizeIngredientBundle,
+  type IngredientAllergenResult,
+} from './lib/allergen-verify'
 
 // ~360 common ingredients grouped by category. Slugs are derived from names.
 // Exported so the reverse-search alias vocabulary can be tested against the
@@ -170,14 +188,134 @@ function parseArgs() {
   return {
     count: Number(get('--count') ?? ALL_INPUTS.length),
     dryRun: args.includes('--dry-run'),
+    fromFile: get('--from-file'),
   }
+}
+
+// One file entry = the prose the ds lane would have written + the allergen
+// bundle verifyIngredientAllergens() would have returned, keyed by slug.
+const FileEntrySchema = ProseSchema.extend({ slug: z.string() }).merge(IngredientBundleSchema)
+
+const FromFileSchema = z.object({
+  writtenBy: z.string().min(1),
+  writtenOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  entries: z.array(z.object({ slug: z.string() }).passthrough()),
+})
+
+type FileRow = { slug: string; prose: z.infer<typeof ProseSchema>; allergen: IngredientAllergenResult }
+
+/** Parse + validate the file. Fully offline. Rejections are reported, never written, and never stop the rest. */
+function loadFromFile(path: string) {
+  const parsed = FromFileSchema.safeParse(JSON.parse(readFileSync(path, 'utf8')))
+  if (!parsed.success) {
+    throw new Error(
+      `[--from-file] ${path} is not { writtenBy, writtenOn, entries[] } — provenance is required for allergen content:\n` +
+        parsed.error.issues.map((i) => `  ${i.path.join('.') || '(root)'}: ${i.message}`).join('\n'),
+    )
+  }
+  const { writtenBy, writtenOn, entries } = parsed.data
+
+  const valid: FileRow[] = []
+  const rejected: { slug: string; reason: string }[] = []
+  const seen = new Set<string>()
+
+  for (const entry of entries) {
+    if (seen.has(entry.slug)) {
+      rejected.push({ slug: entry.slug, reason: 'duplicate slug in file — later copy ignored' })
+      continue
+    }
+    seen.add(entry.slug)
+    const result = FileEntrySchema.safeParse(entry)
+    if (!result.success) {
+      rejected.push({
+        slug: entry.slug,
+        reason: result.error.issues.map((i) => `${i.path.join('.') || '(root)'}: ${i.message}`).join('; '),
+      })
+      continue
+    }
+    const { slug, description, storage, seasonality, ...bundle } = result.data
+    const prose = { description, storage, seasonality }
+    if (!validProse(prose)) {
+      rejected.push({ slug, reason: 'prose under the FOU-439 floor, or carries {, } or *' })
+      continue
+    }
+    valid.push({ slug, prose, allergen: normalizeIngredientBundle(bundle) })
+  }
+
+  return { writtenBy, writtenOn, valid, rejected }
+}
+
+/**
+ * --from-file run: fill existing description-less rows. Separate from the
+ * model-driven loop below because it UPDATES stubs rather than CREATING rows.
+ */
+async function fillFromFile(path: string, dryRun: boolean) {
+  const file = loadFromFile(path)
+  console.log(`--from-file ${path}: written by ${file.writtenBy} on ${file.writtenOn}`)
+  console.log(`  ${file.valid.length} valid entr${file.valid.length === 1 ? 'y' : 'ies'}, ${file.rejected.length} rejected`)
+  for (const r of file.rejected) console.log(`  ✗ ${r.slug}: ${r.reason}`)
+
+  if (dryRun) {
+    console.log('\nDry run — no AI or DB calls made. A real run would, for each valid slug:')
+    console.log('  - skip it if no ingredient row exists, or if the row already has a description;')
+    console.log('  - otherwise write description / storage / seasonality and')
+    console.log('    allergenProfile / hiddenSources / crossContamination / substitutions from the file.')
+    console.log('  Valid slugs:')
+    for (const row of file.valid) console.log(`    ${row.slug}  [${row.allergen.allergenProfile.join(', ') || '—'}]`)
+    return
+  }
+
+  const { prisma } = await import('./_prisma')
+  prismaRef = prisma
+  const { UNVERIFIED_NOTICE } = await import('./lib/allergen-verify')
+
+  let filled = 0
+  let alreadyFilled = 0
+  let noRow = 0
+  for (const [i, row] of file.valid.entries()) {
+    const existing = await prisma.ingredient.findUnique({
+      where: { slug: row.slug },
+      select: { id: true, description: true },
+    })
+    if (!existing) {
+      noRow++
+      console.warn(`  ✗ [${i + 1}/${file.valid.length}] ${row.slug}: no ingredient row — not created (--from-file only fills stubs)`)
+      continue
+    }
+    if (existing.description !== null) {
+      alreadyFilled++
+      continue
+    }
+    await prisma.ingredient.update({
+      where: { id: existing.id },
+      data: {
+        description: row.prose.description,
+        storage: row.prose.storage,
+        seasonality: row.prose.seasonality,
+        allergenProfile: row.allergen.allergenProfile,
+        hiddenSources: row.allergen.hiddenSources,
+        crossContamination: row.allergen.crossContamination,
+        substitutions: row.allergen.substitutions,
+      },
+    })
+    filled++
+    console.log(`  [${i + 1}/${file.valid.length}] ${row.slug}`)
+  }
+
+  console.log(
+    `\nDone — filled ${filled}, skipped ${alreadyFilled} (already had a description), ${noRow} with no row, ${file.rejected.length} rejected by schema.`,
+  )
+  console.log(`Written by ${file.writtenBy} on ${file.writtenOn} (${path}).`)
+  console.log(UNVERIFIED_NOTICE)
 }
 
 // Set only on real runs — dry-run never constructs a Prisma client.
 let prismaRef: { $disconnect(): Promise<void> } | null = null
 
 async function main() {
-  const { count, dryRun } = parseArgs()
+  const { count, dryRun, fromFile } = parseArgs()
+  if (fromFile) return fillFromFile(fromFile, dryRun)
+
   const inputs = ALL_INPUTS.slice(0, count)
 
   if (dryRun) {

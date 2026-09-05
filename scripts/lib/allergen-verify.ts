@@ -12,10 +12,10 @@
  * `allergenVerifiedAt` → `allergenAnnotatedAt` to match (see prisma/schema.prisma).
  *
  * What has NOT changed, and must not:
- *   - Generation stays on a PAID FRONTIER model. `providers: ['azure']` with
- *     no fallback of any kind — never the free Cerebras/Groq gpt-oss-120b
- *     lane, never Gemini. Missing Azure env fails closed with an error rather
- *     than silently downgrading.
+ *   - Generation stays on a PAID FRONTIER model with no fallback of any kind —
+ *     never the free gpt-oss-120b lane, never Gemini, never the broker's
+ *     DeepSeek seeding lane. With no such provider wired (see below) the
+ *     model path fails closed with an error rather than silently downgrading.
  *   - The visible allergen disclaimer at src/components/allergen-disclaimer.tsx
  *     (testid `allergen-disclaimer`) must render anywhere these fields are
  *     shown. It names the two failure modes a model cannot see: a misclassified
@@ -27,6 +27,14 @@
  * that way.
  *
  * Vocabulary is the canonical FDA top-9 + EU-14 union in src/lib/allergens.ts.
+ *
+ * 2026-09-05: Azure is gone from scripts/lib/ai-batch.ts (Cedar: nothing may
+ * point at Azure), and the allergen lane may not run on DeepSeek, so the three
+ * verify*() functions below have no provider and throw before any call. The
+ * live path is the seeders' `--from-file` mode: the paid frontier model
+ * (Claude Fable 5.1, in-session) writes the rows and this file's exported
+ * schemas + normalize*() helpers validate them, so a file-fed row lands in
+ * exactly the shape a model-fed one would have.
  */
 import { z } from 'zod'
 import { batchObject } from './ai-batch'
@@ -54,7 +62,7 @@ const SubstitutionSchema = z.object({
   notes: z.string(),
 })
 
-const IngredientBundleSchema = z.object({
+export const IngredientBundleSchema = z.object({
   allergens: z.array(AllergenEnum).describe('Allergens this ingredient itself CONTAINS'),
   mayContain: z
     .array(AllergenEnum)
@@ -78,7 +86,7 @@ const RegulatoryStatusSchema = z.object({
     .describe('One short factual sentence on regulatory nuance (e.g. list membership changes); empty string if none'),
 })
 
-const AllergenReferenceSchema = z.object({
+export const AllergenReferenceSchema = z.object({
   alternateNames: z
     .array(z.string())
     .describe('Other names this allergen appears under on ingredient labels, e.g. "casein", "whey" for milk'),
@@ -129,13 +137,20 @@ export type IngredientAllergenResult = {
 export const UNVERIFIED_NOTICE =
   "Allergen data is a single AI model's guess and is NOT verified — the allergen disclaimer must render wherever it is shown."
 
-/** Fail closed before spending any tokens: generation must be able to run on Azure. */
+/**
+ * Fail closed before spending any tokens. Always throws since 2026-09-05:
+ * Azure was the allergen lane's paid frontier provider and is gone from
+ * ai-batch.ts, and batchObject() can now only reach the broker's DeepSeek
+ * seeding lane, which this content may never use. Re-pointing the model
+ * path needs a paid frontier provider added to ai-batch.ts first — until
+ * then the seeders' --from-file mode is the only way allergen rows are written.
+ */
 export function requireVerifierEnv(): void {
-  if (!process.env.AZURE_OPENAI_RESOURCE || !process.env.AZURE_OPENAI_API_KEY) {
-    throw new Error(
-      '[allergen-verify] AZURE_OPENAI_RESOURCE / AZURE_OPENAI_API_KEY not set — allergen generation is Azure-only (paid frontier model), no free-lane fallback.',
-    )
-  }
+  throw new Error(
+    '[allergen-verify] no paid frontier provider is wired for allergen generation — Azure was removed on ' +
+      '2026-09-05 and the DeepSeek seeding lane may not write allergen content. Use the seeder\'s ' +
+      '--from-file mode (rows written by a paid frontier model in-session) instead.',
+  )
 }
 
 const normalizeSet = (values: string[]): Allergen[] =>
@@ -179,7 +194,8 @@ export async function verifyRecipeAllergens(input: {
       RULES_LINE,
     AllergenSetsSchema,
     {
-      providers: ['azure'],
+      // Unreachable until requireVerifierEnv() is re-pointed at a paid frontier provider.
+      // No `providers` on purpose: naming the broker here would read as consent to DeepSeek.
       tier: 'quality',
       system: 'You are a food-safety annotator for a recipe app. ' + VOCAB_LINE,
     },
@@ -225,7 +241,8 @@ export async function verifyAllergenReference(input: {
       ALLERGEN_REFERENCE_RULES,
     AllergenReferenceSchema,
     {
-      providers: ['azure'],
+      // Unreachable until requireVerifierEnv() is re-pointed at a paid frontier provider.
+      // No `providers` on purpose: naming the broker here would read as consent to DeepSeek.
       tier: 'quality',
       system:
         'You are a food-allergen reference-content writer for a public encyclopedia page. ' +
@@ -234,10 +251,15 @@ export async function verifyAllergenReference(input: {
     },
   )
 
+  return normalizeAllergenReference(raw)
+}
+
+/** Post-processing shared by the model path and `--from-file`: trim, dedupe, drop blanks. */
+export function normalizeAllergenReference(raw: z.infer<typeof AllergenReferenceSchema>): AllergenReferenceResult {
   return {
     alternateNames: [...new Set(raw.alternateNames.map((n) => n.trim()).filter(Boolean))],
-    regulatoryStatus: raw.regulatoryStatus,
-    hiddenSources: raw.hiddenSources,
+    regulatoryStatus: { ...raw.regulatoryStatus, notes: raw.regulatoryStatus.notes.trim() },
+    hiddenSources: raw.hiddenSources.map((h) => ({ product: h.product.trim(), why: h.why.trim() })),
     crossReactivity: raw.crossReactivity.trim(),
     diningOutGuidance: raw.diningOutGuidance.trim(),
   }
@@ -262,17 +284,23 @@ export async function verifyIngredientAllergens(input: {
       'substitutions are allergy-driven only — swaps that remove an allergen this ingredient carries.',
     IngredientBundleSchema,
     {
-      providers: ['azure'],
+      // Unreachable until requireVerifierEnv() is re-pointed at a paid frontier provider.
+      // No `providers` on purpose: naming the broker here would read as consent to DeepSeek.
       tier: 'quality',
       system: 'You are a food-safety annotator for an ingredient encyclopedia. ' + VOCAB_LINE,
     },
   )
 
+  return normalizeIngredientBundle(raw)
+}
+
+/** Post-processing shared by the model path and `--from-file`. */
+export function normalizeIngredientBundle(raw: z.infer<typeof IngredientBundleSchema>): IngredientAllergenResult {
   const mayContain = normalizeSet(raw.mayContain)
 
   return {
     allergenProfile: normalizeSet(raw.allergens),
-    hiddenSources: raw.hiddenSources,
+    hiddenSources: raw.hiddenSources.map((h) => ({ product: h.product.trim(), why: h.why.trim() })),
     // mayContain has no dedicated Ingredient column — surface it inside the
     // cross-contamination note so the risk is not silently dropped.
     crossContamination:

@@ -1,0 +1,611 @@
+{
+  "writtenBy": "Claude Fable 5.1, in-session",
+  "writtenOn": "2026-09-05",
+  "notes": "One entry per ALLERGEN_VOCABULARY token (src/lib/allergens.ts). Regulatory facts are stated only where well established: the US list is FALCPA's eight plus sesame under the FASTER Act (labelling from 1 January 2023); the EU list is the fourteen in Annex II of Regulation (EU) No 1169/2011. Anything less certain is marked unverified in the text. No brands, no restaurant names, no medical thresholds, no severity claims, no absence-guarantee wording. Validated by scripts/seed-allergens-ai.ts --from-file against AllergenReferenceSchema; every row lands published=false for editorial review.",
+  "entries": [
+    {
+      "slug": "milk",
+      "alternateNames": [
+        "casein",
+        "caseinate (sodium, calcium, potassium)",
+        "whey",
+        "whey protein concentrate or isolate",
+        "lactalbumin",
+        "lactoglobulin",
+        "lactose",
+        "milk solids",
+        "milk powder",
+        "butterfat",
+        "butter",
+        "ghee",
+        "cream",
+        "curd",
+        "paneer",
+        "kefir",
+        "buttermilk",
+        "hydrolysed milk protein"
+      ],
+      "regulatoryStatus": {
+        "fda9": true,
+        "eu14": true,
+        "notes": "One of the eight allergens named in the US FALCPA law of 2004 and on the EU Annex II list, where it is listed as milk including lactose. Both lists apply to milk from any mammal, not only cows."
+      },
+      "hiddenSources": [
+        { "product": "Deli meats, hot dogs and sausages", "why": "Casein or milk powder is used as a binder and filler in some processed meats." },
+        { "product": "Non-dairy creamers and whipped toppings", "why": "Many are built on sodium caseinate, a milk protein, even though the product is labelled non-dairy." },
+        { "product": "Canned tuna", "why": "Some brands pack tuna in a broth that contains hydrolysed casein." },
+        { "product": "Bread, rolls and bakery goods", "why": "Milk powder, butter or whey is common in enriched doughs and glazes." },
+        { "product": "Instant mashed potatoes and boxed potato mixes", "why": "Milk solids and butter powder are standard in the mix." },
+        { "product": "Chocolate, caramel and toffee", "why": "Milk solids are an ingredient in most milk chocolate and many dark chocolates, and caramel is usually made with butter or cream." },
+        { "product": "Protein bars, shakes and powders", "why": "Whey and casein are the most common protein sources in these products." },
+        { "product": "Breaded and battered foods", "why": "Batters and breadings often contain milk or buttermilk, and some are fried in butter." },
+        { "product": "Creamy salad dressings and dips", "why": "Buttermilk, sour cream, yogurt or cheese form the base." },
+        { "product": "Medications and supplements", "why": "Lactose is a common filler in tablets and capsules; check with a pharmacist." },
+        { "product": "Lactose-reduced milk and lactase-treated dairy", "why": "The lactose is broken down but the milk proteins remain." }
+      ],
+      "crossReactivity": "Reaction to goat's and sheep's milk is commonly reported alongside cow's milk allergy, because the proteins are closely related. A relationship with beef is reported less often. Whether any of this applies to a particular person is a question for an allergist.",
+      "diningOutGuidance": "Ask what the pan was greased with and whether the dish is finished with butter or cream; both are routine in restaurant kitchens and rarely appear on a menu. Ask whether mashed potatoes, bread, breading, risotto and soups contain milk, butter, cream or cheese. Menu words that usually mean milk: au gratin, alfredo, bechamel, buttermilk, brulee, carbonara, ghee, paneer, queso, ranch, tzatziki. Non-dairy and lactose-reduced on a label do not mean the milk proteins are absent. Questions about your own reaction or what amount matters are for a doctor or allergist, not a menu."
+    },
+    {
+      "slug": "eggs",
+      "alternateNames": [
+        "albumin",
+        "albumen",
+        "egg white",
+        "egg yolk",
+        "dried egg solids",
+        "egg white powder",
+        "ovalbumin",
+        "ovomucoid",
+        "ovomucin",
+        "lysozyme (E1105)",
+        "globulin",
+        "livetin",
+        "vitellin",
+        "egg lecithin",
+        "meringue",
+        "mayonnaise"
+      ],
+      "regulatoryStatus": {
+        "fda9": true,
+        "eu14": true,
+        "notes": "One of the eight allergens named in the US FALCPA law of 2004 and on the EU Annex II list. Both cover eggs from any bird, not only hens."
+      },
+      "hiddenSources": [
+        { "product": "Mayonnaise, aioli and remoulade", "why": "Egg yolk is the emulsifier in traditional versions." },
+        { "product": "Fresh pasta and egg noodles", "why": "The dough is made with whole eggs or yolks." },
+        { "product": "Egg wash on breads, pastries, pretzels and pies", "why": "Beaten egg is brushed on before baking for shine and colour." },
+        { "product": "Meatballs, meatloaf, burgers and crab cakes", "why": "Egg is a common binder in mixed and formed meats." },
+        { "product": "Meringue, macarons, marshmallows and nougat", "why": "Whipped egg white gives these their structure." },
+        { "product": "Cocktails with foam", "why": "Sours and fizzes are often shaken with egg white." },
+        { "product": "Hollandaise, bearnaise and Caesar dressing", "why": "Egg yolk is the base of these sauces." },
+        { "product": "Some hard cheeses", "why": "Lysozyme, an egg-white protein, is used as a preservative in some Italian-style hard cheeses." },
+        { "product": "Some wines", "why": "Egg white is a traditional fining agent used to clarify wine." },
+        { "product": "Custards, ice cream and puddings", "why": "Egg yolks thicken the base." },
+        { "product": "Fried rice and some noodle dishes", "why": "Scrambled egg is stirred through and easy to miss." },
+        { "product": "Breaded and battered foods", "why": "Egg is the usual glue between the food and the breading." }
+      ],
+      "crossReactivity": "Reaction to the eggs of other birds, such as duck and quail, is commonly reported alongside hen's egg allergy. An association with bird feathers and poultry meat is reported but less common. Whether any of this applies to a particular person is a question for an allergist.",
+      "diningOutGuidance": "Ask whether breads and pastries were brushed with egg wash, whether burgers, meatballs or crab cakes use egg as a binder, and whether the pasta is fresh egg pasta or dried. Ask about the dressing on salads and the sauce on eggs benedict, fish and steak, since hollandaise, bearnaise, Caesar and aioli are all egg based. Menu words that usually mean egg: meringue, custard, souffle, frittata, carbonara, tempura, brioche, challah, aioli. At a bar, ask whether a cocktail is shaken with egg white. Questions about your own reaction or what amount matters are for a doctor or allergist, not a menu."
+    },
+    {
+      "slug": "fish",
+      "alternateNames": [
+        "anchovy",
+        "anchovy paste",
+        "fish sauce (nam pla, nuoc mam, patis)",
+        "Worcestershire sauce",
+        "surimi",
+        "imitation crab",
+        "katsuobushi",
+        "bonito flakes",
+        "dashi",
+        "isinglass",
+        "fish gelatin",
+        "fish oil",
+        "omega-3 (fish-derived)",
+        "colatura di alici",
+        "garum",
+        "fish stock",
+        "fumet"
+      ],
+      "regulatoryStatus": {
+        "fda9": true,
+        "eu14": true,
+        "notes": "One of the eight allergens named in the US FALCPA law of 2004, which requires the species to be named (for example cod, salmon, tuna); on the EU Annex II list as fish. Annex II exempts fish gelatine used as a carrier for vitamins and fish gelatine or isinglass used to clarify beer and wine from the declaration."
+      },
+      "hiddenSources": [
+        { "product": "Worcestershire sauce", "why": "Anchovy is a traditional ingredient, and the sauce turns up in marinades, burgers, Caesar dressing and cocktails." },
+        { "product": "Caesar dressing", "why": "Anchovy is part of the classic recipe." },
+        { "product": "Thai, Vietnamese and Filipino dishes and dipping sauces", "why": "Fish sauce is a foundational seasoning, including in many dishes that contain no visible fish." },
+        { "product": "Japanese soups, broths and sauces", "why": "Dashi is usually made from bonito, a dried fish, and underlies miso soup, ramen, noodle broths and many sauces." },
+        { "product": "Surimi and imitation crab sticks", "why": "Made from minced white fish, usually pollock." },
+        { "product": "Puttanesca, tapenade and some pizza toppings", "why": "Anchovy is blended into the sauce or paste." },
+        { "product": "Kimchi", "why": "Many recipes use fish sauce or fermented anchovy." },
+        { "product": "Some beers and wines", "why": "Isinglass, made from fish swim bladders, is used to clarify them." },
+        { "product": "Gummy candies, marshmallows and softgel supplements", "why": "Some use fish gelatin instead of pork or beef gelatin." },
+        { "product": "Some salad dressings and dips", "why": "Anchovy or Worcestershire sauce adds savoury depth." }
+      ],
+      "crossReactivity": "Reaction across several species of fish is commonly reported, because many fish share a similar muscle protein. Fish and shellfish are separate allergen categories on both the US and EU lists, and a reaction to one is not treated as a reaction to the other. Whether any of this applies to a particular person is a question for an allergist.",
+      "diningOutGuidance": "Ask whether a dish contains fish sauce, anchovy, dashi or Worcestershire sauce, since all four are used as seasonings in dishes that show no fish. Ask whether fried foods share oil with fish, and whether the grill or plancha is shared. In Thai, Vietnamese, Japanese and Korean restaurants, ask specifically about fish sauce and dashi in vegetable dishes and soups. Menu words to check: Caesar, puttanesca, nicoise, dashi, bonito, surimi, nam pla, Worcestershire. Questions about your own reaction or what amount matters are for a doctor or allergist, not a menu."
+    },
+    {
+      "slug": "crustacean_shellfish",
+      "alternateNames": [
+        "shrimp",
+        "prawns",
+        "crab",
+        "lobster",
+        "crayfish",
+        "crawfish",
+        "langoustine",
+        "scampi",
+        "krill",
+        "shrimp paste (belacan, terasi, kapi, bagoong)",
+        "dried shrimp",
+        "shrimp stock",
+        "crab extract",
+        "glucosamine (shellfish-derived)"
+      ],
+      "regulatoryStatus": {
+        "fda9": true,
+        "eu14": true,
+        "notes": "One of the eight allergens named in the US FALCPA law of 2004, listed there as crustacean shellfish with the species named (for example crab, lobster, shrimp); on the EU Annex II list as crustaceans. Molluscs such as oysters, clams and squid are a separate EU entry and are not on the US list at all."
+      },
+      "hiddenSources": [
+        { "product": "Thai and Malaysian curry pastes", "why": "Shrimp paste is a standard ingredient in red, green and many other curry pastes." },
+        { "product": "Sambals and Southeast Asian chili sauces", "why": "Fermented shrimp paste (belacan or terasi) is often the base." },
+        { "product": "Kimchi", "why": "Salted fermented shrimp is a common seasoning." },
+        { "product": "XO sauce", "why": "Made from dried shrimp and dried scallop." },
+        { "product": "Instant noodle and ramen seasoning packets", "why": "Seafood-flavoured versions often contain shrimp powder." },
+        { "product": "Pork or vegetable dumplings, wontons and spring rolls", "why": "Minced shrimp is often mixed into the filling." },
+        { "product": "Fried rice and pad thai", "why": "Dried shrimp is stirred through for flavour and is easy to miss." },
+        { "product": "Seafood stocks, bisques and chowders", "why": "Shells are simmered for the base, even in dishes served without visible shellfish." },
+        { "product": "Gumbo, jambalaya, paella and bouillabaisse", "why": "Shrimp or crawfish is usually part of the base." },
+        { "product": "Glucosamine supplements", "why": "Often made from the shells of shrimp and crab." }
+      ],
+      "crossReactivity": "Reaction across several crustaceans (shrimp, crab, lobster) is commonly reported, and a relationship between crustaceans and molluscs is also commonly reported, because both groups share a muscle protein called tropomyosin. An association with dust mites and cockroaches, which carry a related protein, is reported. Whether any of this applies to a particular person is a question for an allergist.",
+      "diningOutGuidance": "Ask whether curry pastes, sambals, fried rice, dumplings and stocks contain shrimp or shrimp paste, since these are seasonings rather than visible pieces. Ask whether the wok, grill, fryer or steamer is shared with shellfish, and whether a seafood boil or platter is prepared on the same surfaces. Menu words to check: scampi, langoustine, bisque, etouffee, tom yum, nam prik, belacan, XO, surf and turf. Questions about your own reaction or what amount matters are for a doctor or allergist, not a menu."
+    },
+    {
+      "slug": "tree_nuts",
+      "alternateNames": [
+        "almond",
+        "Brazil nut",
+        "cashew",
+        "hazelnut",
+        "filbert",
+        "macadamia",
+        "pecan",
+        "pistachio",
+        "walnut",
+        "pine nut",
+        "pignoli",
+        "chestnut",
+        "marzipan",
+        "praline",
+        "nougat",
+        "frangipane",
+        "gianduja",
+        "nut butter",
+        "nut milk",
+        "nut flour or meal",
+        "nut oil (almond, walnut, hazelnut)",
+        "orgeat"
+      ],
+      "regulatoryStatus": {
+        "fda9": true,
+        "eu14": true,
+        "notes": "One of the eight allergens named in the US FALCPA law of 2004, which requires the specific nut to be named; on the EU Annex II list as nuts, which names eight: almond, hazelnut, walnut, cashew, pecan, Brazil nut, pistachio and macadamia. The two lists do not match: pine nuts, chestnuts and coconut are not on the EU nuts entry, and the FDA revised its own tree-nut list in recent guidance, so which of those the US list currently includes should be treated as unverified here and checked against the FDA's current guidance."
+      },
+      "hiddenSources": [
+        { "product": "Pesto", "why": "Traditionally made with pine nuts, and often with cashews or walnuts in place of them." },
+        { "product": "Romesco, mole and some Mexican and Spanish sauces", "why": "Ground almonds, hazelnuts or other nuts thicken and flavour the sauce." },
+        { "product": "Korma and other creamy Indian curries", "why": "Cashew or almond paste is the base of the sauce." },
+        { "product": "Marzipan, frangipane, macarons and almond pastries", "why": "Made from ground almonds or almond flour." },
+        { "product": "Baklava and Middle Eastern sweets", "why": "Layered with walnuts, pistachios or almonds." },
+        { "product": "Praline, nougat and gianduja chocolate", "why": "Hazelnuts or almonds are the defining ingredient." },
+        { "product": "Orgeat syrup and some cocktails", "why": "Orgeat is an almond syrup used in tiki and sour drinks." },
+        { "product": "Plant-based cheeses, milks, yogurts and ice creams", "why": "Many are built on cashews or almonds." },
+        { "product": "Granola, muesli and cereal bars", "why": "Nuts and nut butters are common ingredients and shared lines are common." },
+        { "product": "Nut-crusted fish, chicken and desserts", "why": "Ground nuts replace breadcrumbs in the coating." },
+        { "product": "Some salad dressings and grain salads", "why": "Walnut or hazelnut oil, or a nut garnish, is added." }
+      ],
+      "crossReactivity": "Reaction across several tree nuts is commonly reported, with cashew and pistachio, and walnut and pecan, the pairs reported most often. A relationship between tree nuts and peanuts is commonly reported even though peanuts are legumes. An association between birch pollen and hazelnut or almond is reported. Whether any of this applies to a particular person is a question for an allergist.",
+      "diningOutGuidance": "Ask whether sauces contain nut pastes, ground nuts or nut oils, since pesto, romesco, mole, korma and many dressings hide them. Ask about garnishes on salads, desserts and vegetable dishes, and about shared equipment in bakeries, ice cream shops (scoops) and dessert stations. Menu words to check: pesto, romesco, korma, satay, praline, marzipan, frangipane, macaron, gianduja, crusted, amaretti, orgeat. Questions about your own reaction or what amount matters are for a doctor or allergist, not a menu."
+    },
+    {
+      "slug": "peanuts",
+      "alternateNames": [
+        "groundnut",
+        "arachis oil",
+        "Arachis hypogaea",
+        "monkey nuts",
+        "goober peas",
+        "peanut flour",
+        "peanut butter",
+        "peanut protein",
+        "hydrolysed peanut protein",
+        "mandelonas (peanuts flavoured as almonds)",
+        "beer nuts",
+        "mixed nuts"
+      ],
+      "regulatoryStatus": {
+        "fda9": true,
+        "eu14": true,
+        "notes": "One of the eight allergens named in the US FALCPA law of 2004 and on the EU Annex II list. US law exempts highly refined oils, including highly refined peanut oil, from allergen labelling; the EU list has no equivalent exemption for peanut oil. Peanuts are legumes, listed separately from tree nuts on both lists."
+      },
+      "hiddenSources": [
+        { "product": "Satay, peanut sauces and many Thai, Vietnamese and Indonesian dishes", "why": "Ground peanuts or peanut butter form the sauce, and crushed peanuts are a standard garnish." },
+        { "product": "Mole and some chili and stew recipes", "why": "Ground peanuts thicken and flavour the sauce." },
+        { "product": "Egg rolls and spring rolls", "why": "Peanut butter is sometimes used to seal the wrapper." },
+        { "product": "West African groundnut stews", "why": "Peanut paste is the base of the dish." },
+        { "product": "Kung pao and other stir-fries", "why": "Peanuts are cooked into the dish, not only sprinkled on top." },
+        { "product": "Granola, cereal bars and trail mix", "why": "Peanuts or peanut butter are common ingredients and shared lines are common." },
+        { "product": "Baked goods, candy and ice cream", "why": "Peanut butter fillings, swirls and shared equipment are common." },
+        { "product": "Some vegetarian meat substitutes", "why": "Peanut protein or flour adds protein." },
+        { "product": "Sunflower seed butter and other seed butters", "why": "Often made on equipment shared with peanut butter." },
+        { "product": "Some salad dressings and marinades", "why": "Peanut oil or peanut butter adds body and flavour." }
+      ],
+      "crossReactivity": "A relationship between peanuts and tree nuts is commonly reported even though peanuts are legumes. Reaction to other legumes, most often lupin, and less often soy, fenugreek, lentils or chickpeas, is reported. Whether any of this applies to a particular person is a question for an allergist.",
+      "diningOutGuidance": "Ask what oil the fryer uses, since some restaurants fry in peanut oil, and whether sauces, dressings and garnishes contain peanuts or peanut butter. Ask whether woks and grills are shared with peanut dishes. In Thai, Vietnamese, Chinese, Indonesian, Mexican and West African restaurants, ask specifically about peanuts in sauces and stews that show no whole peanuts. Menu words to check: satay, kung pao, pad thai, mole, groundnut, gado-gado, bun cha. Questions about your own reaction or what amount matters are for a doctor or allergist, not a menu."
+    },
+    {
+      "slug": "wheat",
+      "alternateNames": [
+        "flour (all-purpose, bread, cake, pastry, whole wheat, graham, enriched)",
+        "durum",
+        "semolina",
+        "spelt",
+        "farro",
+        "emmer",
+        "einkorn",
+        "khorasan wheat",
+        "kamut",
+        "bulgur",
+        "couscous",
+        "seitan",
+        "wheat gluten",
+        "vital wheat gluten",
+        "wheat germ",
+        "wheat bran",
+        "wheat starch",
+        "modified food starch (when wheat-derived)",
+        "hydrolysed wheat protein",
+        "farina",
+        "matzo",
+        "triticale"
+      ],
+      "regulatoryStatus": {
+        "fda9": true,
+        "eu14": true,
+        "notes": "One of the eight allergens named in the US FALCPA law of 2004; on the EU Annex II list as part of the entry for cereals containing gluten, which names wheat together with spelt and khorasan wheat. Annex II exempts wheat-based glucose syrups, dextrose and maltodextrins from the declaration. US law covers wheat alone; barley and rye are not US-listed allergens, so a US wheat-allergen label says nothing about other gluten-containing grains."
+      },
+      "hiddenSources": [
+        { "product": "Soy sauce", "why": "Most soy sauce is brewed with roasted wheat, so it appears in marinades, dressings and many Asian dishes." },
+        { "product": "Seitan and some meat substitutes", "why": "Seitan is wheat gluten; other substitutes use wheat protein as a binder." },
+        { "product": "Imitation crab and surimi", "why": "Wheat starch is a common binder." },
+        { "product": "Soups, gravies, stews and sauces", "why": "A flour roux or wheat-based thickener is standard." },
+        { "product": "Sausages, meatballs, burgers and processed meats", "why": "Breadcrumbs or wheat flour are used as filler and binder." },
+        { "product": "Couscous, bulgur and farro", "why": "These are wheat products even though they are not called wheat." },
+        { "product": "Licorice and some candy", "why": "Wheat flour is a main ingredient in traditional licorice." },
+        { "product": "Beer and malt beverages", "why": "Wheat beers use wheat; most beers use barley, which is not the same allergen but is a gluten cereal." },
+        { "product": "Some ice creams and frozen desserts", "why": "Cookie dough, brownie, cake and malt mix-ins contain wheat." },
+        { "product": "Spice blends, seasonings and gravy mixes", "why": "Wheat flour or starch is used as a carrier or anti-caking agent." },
+        { "product": "Some salad dressings and condiments", "why": "Wheat-based thickeners or malt vinegar (barley) appear in some recipes." }
+      ],
+      "crossReactivity": "Reaction to other gluten-containing grains such as barley and rye is commonly reported alongside wheat allergy. An association with grass pollen is reported. Wheat allergy is distinct from coeliac disease and from non-coeliac gluten sensitivity; which of these applies to a particular person is a medical question outside the scope of this page.",
+      "diningOutGuidance": "Ask what thickens sauces, soups and gravies, whether meat is dredged in flour before searing, and whether marinades contain soy sauce. Ask whether the fryer is shared with breaded or battered items and whether the grill is dusted with flour. Menu words to check: tempura, dredged, en croute, roux, couscous, bulgur, seitan, farro, beer-battered, teriyaki, panko. A gluten-related label on a menu is a separate claim from a wheat-allergen statement, so ask about wheat specifically. Questions about your own reaction or what amount matters are for a doctor or allergist, not a menu."
+    },
+    {
+      "slug": "soybeans",
+      "alternateNames": [
+        "soy",
+        "soya",
+        "soja",
+        "edamame",
+        "tofu",
+        "bean curd",
+        "tempeh",
+        "miso",
+        "natto",
+        "yuba",
+        "bean curd skin",
+        "soy sauce",
+        "shoyu",
+        "tamari",
+        "soy lecithin",
+        "soy protein isolate or concentrate",
+        "textured vegetable protein (TVP)",
+        "hydrolysed soy protein",
+        "hydrolysed vegetable protein (often soy)",
+        "soy flour",
+        "soybean oil",
+        "okara",
+        "kinako"
+      ],
+      "regulatoryStatus": {
+        "fda9": true,
+        "eu14": true,
+        "notes": "One of the eight allergens named in the US FALCPA law of 2004 and on the EU Annex II list. Both exempt highly refined soybean oil from allergen labelling; Annex II also exempts natural mixed tocopherols and plant sterol and stanol esters derived from soy. Soy lecithin is not exempt under US law and must be declared."
+      },
+      "hiddenSources": [
+        { "product": "Vegetable broth, bouillon and stock cubes", "why": "Soy protein or hydrolysed soy protein is a common savoury base." },
+        { "product": "Canned tuna and chicken", "why": "Often packed in vegetable broth that contains soy." },
+        { "product": "Processed meats, veggie burgers and meat substitutes", "why": "Soy protein is the most common plant protein used as filler or main ingredient." },
+        { "product": "Bread, baked goods and chocolate", "why": "Soy flour improves texture and soy lecithin is a near-universal emulsifier in chocolate." },
+        { "product": "Asian sauces: soy sauce, tamari, hoisin, teriyaki, miso, ponzu", "why": "All are made from soybeans, and tamari is soy even though it is sold as a wheat-free soy sauce." },
+        { "product": "Vegetable oil, margarine and shortening", "why": "Generic vegetable oil in North America is often soybean oil, though highly refined oil is exempt from labelling." },
+        { "product": "Protein bars, shakes and powders", "why": "Soy protein isolate is a common protein source." },
+        { "product": "Salad dressings and mayonnaise", "why": "Soybean oil is the usual base oil." },
+        { "product": "Worcestershire sauce and some barbecue sauces", "why": "Some recipes include soy sauce or soy protein." },
+        { "product": "Some peanut butters and nut butters", "why": "Soybean oil is added as a stabiliser in some brands." }
+      ],
+      "crossReactivity": "Reaction to other legumes, including peanuts and lupin, is reported alongside soy allergy. An association between birch pollen and soy is reported. Whether any of this applies to a particular person is a question for an allergist.",
+      "diningOutGuidance": "Ask whether marinades, dressings and sauces contain soy sauce, miso or tamari, and what oil the kitchen fries in, since generic vegetable oil is often soybean oil. Ask whether tofu, edamame or tempeh is used in dishes where it is not obvious, such as dressings and desserts. Menu words to check: shoyu, tamari, teriyaki, miso, ponzu, hoisin, tempeh, yuba, plant-based protein. Questions about your own reaction or what amount matters are for a doctor or allergist, not a menu."
+    },
+    {
+      "slug": "sesame",
+      "alternateNames": [
+        "sesame seeds",
+        "sesame oil",
+        "toasted sesame oil",
+        "tahini",
+        "tahina",
+        "benne seeds",
+        "gingelly oil",
+        "til oil",
+        "halva",
+        "halvah",
+        "gomashio",
+        "goma",
+        "simsim",
+        "sesame flour",
+        "sesame paste",
+        "black sesame"
+      ],
+      "regulatoryStatus": {
+        "fda9": true,
+        "eu14": true,
+        "notes": "Added to the US list by the FASTER Act of 2021, with labelling required on foods from 1 January 2023, making nine US major allergens; on the EU Annex II list as sesame seeds. After the US rule took effect it was widely reported that some manufacturers began adding sesame to products such as bread so they could declare it rather than prevent cross-contact, so a US label listing sesame may reflect either."
+      },
+      "hiddenSources": [
+        { "product": "Hummus and baba ghanoush", "why": "Tahini, a sesame paste, is a core ingredient." },
+        { "product": "Halva", "why": "Made almost entirely from sesame paste and sugar." },
+        { "product": "Za'atar, dukkah and everything-style seasoning blends", "why": "Sesame seeds are a standard component." },
+        { "product": "Burger buns, bagels, breadsticks and crackers", "why": "Seeds on top, sesame in the dough, or shared bakery lines." },
+        { "product": "Asian dressings, marinades and stir-fry sauces", "why": "Toasted sesame oil is a common finishing ingredient." },
+        { "product": "Sushi, poke and rice bowls", "why": "Sesame seeds or furikake are sprinkled over the top." },
+        { "product": "Goddess-style and tahini-based dressings", "why": "Tahini is the base." },
+        { "product": "Vegetarian burgers and falafel", "why": "Sesame seeds or tahini add binding and flavour." },
+        { "product": "Rice crackers and some snack mixes", "why": "Sesame is a common coating or ingredient." },
+        { "product": "Sesame-crusted meats and fish", "why": "Sesame seeds replace breadcrumbs in the crust." }
+      ],
+      "crossReactivity": "Co-occurring reactions to sesame and to tree nuts or peanuts are commonly reported. Reaction to other seeds is reported less often. Whether any of this applies to a particular person is a question for an allergist.",
+      "diningOutGuidance": "Ask whether the bun or bread is seeded or baked on shared trays, whether salads and bowls are finished with sesame seeds or sesame oil, and whether dressings contain tahini. Ask about shared bakery equipment and toppings stations. Menu words to check: tahini, za'atar, dukkah, goma, gomae, furikake, halva, hummus, everything seasoning, sesame-crusted. Questions about your own reaction or what amount matters are for a doctor or allergist, not a menu."
+    },
+    {
+      "slug": "gluten_cereals",
+      "alternateNames": [
+        "wheat",
+        "barley",
+        "rye",
+        "oats (as regulated in the EU)",
+        "spelt",
+        "khorasan wheat",
+        "kamut",
+        "triticale",
+        "malt",
+        "malt extract",
+        "malt flavouring",
+        "malt vinegar",
+        "malted barley",
+        "brewer's yeast",
+        "barley grass",
+        "pearl barley",
+        "farro",
+        "bulgur",
+        "semolina",
+        "couscous",
+        "seitan",
+        "wheat starch",
+        "gluten"
+      ],
+      "regulatoryStatus": {
+        "fda9": false,
+        "eu14": true,
+        "notes": "On the EU Annex II list as cereals containing gluten, namely wheat (such as spelt and khorasan wheat), rye, barley, oats and their hybridised strains; Annex II exempts wheat-based glucose syrups and maltodextrins, barley-based glucose syrups and cereals used to make alcoholic distillates. There is no equivalent category in US allergen law: wheat is a US-listed allergen on its own, while barley, rye and oats are not, and US rules for a gluten-related claim on a label are a separate regulation from the allergen list."
+      },
+      "hiddenSources": [
+        { "product": "Beer, ale, lager and malt beverages", "why": "Made from malted barley; wheat beers add wheat." },
+        { "product": "Malt vinegar, malt extract and malt flavouring", "why": "Derived from barley, and used in cereals, candies, crackers and some drinks." },
+        { "product": "Soy sauce", "why": "Usually brewed with wheat." },
+        { "product": "Brewer's yeast", "why": "Often a by-product of barley brewing and may carry barley." },
+        { "product": "Soups, broths, bouillon and gravies", "why": "Flour, barley or malt-based flavourings are common thickeners and seasonings." },
+        { "product": "Sausages, meatballs and processed meats", "why": "Rusk, breadcrumbs or flour are used as filler." },
+        { "product": "Oats and oat products", "why": "Oats are on the EU gluten cereal list, and oats grown or milled alongside wheat commonly carry it." },
+        { "product": "Seitan and meat substitutes", "why": "Seitan is wheat gluten." },
+        { "product": "Spice blends, seasoning packets and gravy mixes", "why": "Wheat flour or starch is a common carrier." },
+        { "product": "Imitation crab, some deli meats and some cheese products", "why": "Wheat starch is used as a binder." },
+        { "product": "Some ice cream, chocolate and candy", "why": "Malt, cookie, wafer and cake mix-ins contain gluten cereals." }
+      ],
+      "crossReactivity": "Wheat, barley and rye are closely related grains and reactions across them are commonly reported. Oats are listed with them in the EU because they are frequently grown and milled with wheat. A food allergy to a gluten cereal is distinct from coeliac disease and from non-coeliac gluten sensitivity; which applies to a particular person is a medical question outside the scope of this page.",
+      "diningOutGuidance": "Ask what thickens sauces, soups and gravies, whether meat is dredged in flour, whether the fryer is shared with breaded or battered items, and whether malt vinegar, beer or soy sauce is used in the dish. Ask about croutons, barley in soups, and oats in desserts and toppings. In the EU and UK, menus and allergen matrices list cereals containing gluten as a group; in the US, only wheat is tracked as an allergen, so ask about barley, rye and oats separately. Menu words to check: beer-battered, malt, au jus, seitan, farro, bulgur, panko, tempura, dredged, croutons. Questions about your own reaction or what amount matters are for a doctor or allergist, not a menu."
+    },
+    {
+      "slug": "celery",
+      "alternateNames": [
+        "celeriac",
+        "celery root",
+        "celery seed",
+        "celery salt",
+        "celery leaf",
+        "celery powder",
+        "celery extract",
+        "celery juice (as a curing agent)",
+        "Apium graveolens"
+      ],
+      "regulatoryStatus": {
+        "fda9": false,
+        "eu14": true,
+        "notes": "On the EU Annex II list as celery and products thereof, which covers the stalk, leaf, seed and root (celeriac). Not a US-listed allergen, so US labels name it only as an ordinary ingredient. Celery powder and celery juice are widely used in the US as a natural curing agent in meats labelled uncured."
+      },
+      "hiddenSources": [
+        { "product": "Stocks, broths, bouillon cubes and stock pastes", "why": "Celery is part of the standard vegetable base for most stocks." },
+        { "product": "Soups, stews, braises, risottos and sauces", "why": "Mirepoix and soffritto, the aromatic base of countless dishes, include celery." },
+        { "product": "Uncured bacon, hot dogs, ham and deli meats", "why": "Celery powder or juice supplies the nitrite that cures the meat." },
+        { "product": "Bloody Mary mix and celery-salt rims", "why": "Celery salt and celery juice are standard." },
+        { "product": "Seafood seasoning blends and pickling spice", "why": "Celery seed is a defining ingredient in many blends." },
+        { "product": "Vegetable juices and green juices", "why": "Celery is a common base for its mild flavour and high water content." },
+        { "product": "Stuffing and dressing", "why": "Diced celery is traditional." },
+        { "product": "Potato salad, tuna salad, chicken salad and coleslaw", "why": "Celery or celery seed adds crunch and flavour." },
+        { "product": "Some spice blends and seasoned salts", "why": "Celery seed or celery salt is included." }
+      ],
+      "crossReactivity": "An association between celery and mugwort or birch pollen is commonly reported, sometimes described as celery-mugwort-spice syndrome, and reactions to related plants such as carrot, parsley, fennel, coriander and aniseed are reported. Whether any of this applies to a particular person is a question for an allergist.",
+      "diningOutGuidance": "Ask whether soups, sauces, risottos and braises are made on a house stock or a bouillon base, and whether the aromatic base includes celery. Ask about celery salt on cocktail rims and celery powder in cured meats. In the EU and UK, menus and allergen matrices track celery; in the US it is rarely tracked, so ask specifically. Menu words to check: consomme, bouillon, house stock, mirepoix, remoulade, waldorf, uncured, Bloody Mary. Questions about your own reaction or what amount matters are for a doctor or allergist, not a menu."
+    },
+    {
+      "slug": "mustard",
+      "alternateNames": [
+        "mustard seed (yellow, white, brown, black)",
+        "mustard flour",
+        "mustard powder",
+        "mustard oil",
+        "prepared mustard (Dijon, wholegrain, English, yellow)",
+        "mustard bran",
+        "Sinapis alba",
+        "Brassica juncea",
+        "Brassica nigra"
+      ],
+      "regulatoryStatus": {
+        "fda9": false,
+        "eu14": true,
+        "notes": "On the EU Annex II list as mustard and products thereof. Not a US-listed allergen, so US labels name it only as an ordinary ingredient, and it can sit inside a general term such as spices in some jurisdictions; in the EU it must be named."
+      },
+      "hiddenSources": [
+        { "product": "Mayonnaise, aioli, vinaigrettes and salad dressings", "why": "Mustard is a standard emulsifier and flavouring in dressings and sauces." },
+        { "product": "Barbecue sauces, ketchup-style sauces and glazes", "why": "Mustard powder or prepared mustard is a common component." },
+        { "product": "Sausages, burgers and processed meats", "why": "Mustard flour is used as a binder and seasoning." },
+        { "product": "Curry powders and many spice blends", "why": "Mustard seed is frequently included." },
+        { "product": "Pickles, relishes, chutneys and piccalilli", "why": "Mustard seed or powder is part of the pickling brine or sauce." },
+        { "product": "Marinades and dry rubs for meat", "why": "Mustard helps the rub stick and adds flavour." },
+        { "product": "Cheese sauces and some macaroni and cheese recipes", "why": "Mustard powder sharpens the flavour." },
+        { "product": "Deviled eggs, potato salad and egg salad", "why": "Prepared mustard is a standard ingredient." },
+        { "product": "Indian dals, pickles and Bengali dishes", "why": "Mustard seeds are tempered in oil, and mustard oil is a cooking fat." },
+        { "product": "Some breads, pretzels and crackers", "why": "Mustard seed is used as a topping or in the dough." }
+      ],
+      "crossReactivity": "Reactions to related plants in the cabbage family, such as rapeseed (canola), cabbage, broccoli and turnip, are reported alongside mustard allergy, and an association with mugwort pollen is reported. Whether any of this applies to a particular person is a question for an allergist.",
+      "diningOutGuidance": "Ask whether dressings, mayonnaise and emulsified sauces contain mustard, since it is the usual emulsifier, and whether rubs, marinades, glazes and sausages contain mustard powder. In the EU and UK, menus and allergen matrices track mustard; in the US it is rarely tracked, so ask specifically. Menu words to check: Dijon, wholegrain, honey-mustard, devilled, remoulade, piccalilli, vinaigrette, rub, glaze. Questions about your own reaction or what amount matters are for a doctor or allergist, not a menu."
+    },
+    {
+      "slug": "lupin",
+      "alternateNames": [
+        "lupine",
+        "lupini beans",
+        "lupin flour",
+        "lupin protein",
+        "lupin bran",
+        "lupin seed",
+        "Lupinus albus",
+        "Lupinus angustifolius",
+        "Lupinus luteus"
+      ],
+      "regulatoryStatus": {
+        "fda9": false,
+        "eu14": true,
+        "notes": "On the EU Annex II list as lupin and products thereof. Not a US-listed allergen, so US labels name it only as an ordinary ingredient. Lupin flour is used in some European bakery, pasta and gluten-free products, which is where it most often appears without the word lupin on the menu."
+      },
+      "hiddenSources": [
+        { "product": "Gluten-free breads, pasta, pizza bases and baked goods", "why": "Lupin flour adds protein and structure to wheat-free doughs." },
+        { "product": "High-protein and protein-enriched breads, crackers and pasta", "why": "Lupin protein or flour is added for protein content." },
+        { "product": "Croissants, pastries and waffles from European bakeries", "why": "Some recipes blend lupin flour into the dough." },
+        { "product": "Vegan and plant-based meat, dairy and egg substitutes", "why": "Lupin protein is used as a base in some products." },
+        { "product": "Plant-based protein powders and bars", "why": "Lupin protein is one of the newer plant proteins in these products." },
+        { "product": "Lupini beans as a snack or antipasto", "why": "Sold pickled or brined in Mediterranean and Latin American shops, sometimes under a local name." },
+        { "product": "Some pancake, crepe and batter mixes", "why": "Lupin flour is blended in for colour and protein." }
+      ],
+      "crossReactivity": "A relationship between lupin and peanut is commonly reported, and is the main reason lupin was added to the EU list; reactions to other legumes such as soy, chickpea and lentil are reported. Whether any of this applies to a particular person is a question for an allergist.",
+      "diningOutGuidance": "Ask whether gluten-free, high-protein or vegan bakery items, pasta and substitutes contain lupin flour or lupin protein, since those are the products most likely to use it. In the EU and UK, menus and allergen matrices track lupin; in the US it is rarely tracked, so ask specifically. Menu words to check: lupini, lupino, altramuces, tremoços, lupin flour, protein-enriched. Questions about your own reaction or what amount matters are for a doctor or allergist, not a menu."
+    },
+    {
+      "slug": "molluscs",
+      "alternateNames": [
+        "oysters",
+        "mussels",
+        "clams",
+        "scallops",
+        "cockles",
+        "whelks",
+        "periwinkles",
+        "abalone",
+        "snails",
+        "escargot",
+        "squid",
+        "calamari",
+        "octopus",
+        "cuttlefish",
+        "conch",
+        "geoduck",
+        "oyster sauce",
+        "oyster extract",
+        "clam juice",
+        "dried scallop (conpoy)",
+        "squid ink"
+      ],
+      "regulatoryStatus": {
+        "fda9": false,
+        "eu14": true,
+        "notes": "On the EU Annex II list as molluscs and products thereof. Not a US-listed allergen: US law covers crustacean shellfish only, so molluscs appear on US labels by their ordinary ingredient name and the word shellfish on a US menu or label may mean either group."
+      },
+      "hiddenSources": [
+        { "product": "Oyster sauce", "why": "Made from oyster extract and used across Cantonese and many other stir-fries and marinades." },
+        { "product": "XO sauce", "why": "Made from dried scallop and dried shrimp." },
+        { "product": "Clam juice and clam-based cocktails", "why": "Clam juice is an ingredient in some tomato-juice drinks and in chowders." },
+        { "product": "Seafood stocks, fumets and paella or risotto bases", "why": "Mussel and clam liquor is often part of the stock." },
+        { "product": "Squid ink pasta, rice and bread", "why": "The black colour comes from cuttlefish or squid ink." },
+        { "product": "Mixed seafood dishes: cioppino, frutti di mare, fisherman's stews", "why": "Clams, mussels and squid are usually included." },
+        { "product": "Some seafood seasoning powders and instant noodle packets", "why": "Oyster or scallop extract adds savoury depth." },
+        { "product": "Escargot dishes and garlic butters served with them", "why": "Snails are molluscs." },
+        { "product": "Some kimchi and fermented sauces", "why": "Some recipes include oysters or squid alongside salted shrimp." }
+      ],
+      "crossReactivity": "Reaction across several molluscs is commonly reported, and a relationship between molluscs and crustaceans is commonly reported, because both share a muscle protein called tropomyosin. An association with dust mites is reported. Whether any of this applies to a particular person is a question for an allergist.",
+      "diningOutGuidance": "Ask whether stir-fries, marinades and noodle dishes contain oyster sauce or XO sauce, whether soups and rice dishes are made on a seafood stock, and whether the fryer is shared with calamari. When a menu or server says shellfish, ask whether that means crustaceans, molluscs or both. Menu words to check: vongole, frutti di mare, calamari, escargot, XO, conpoy, nero di seppia, moules, cioppino, ceviche. Questions about your own reaction or what amount matters are for a doctor or allergist, not a menu."
+    },
+    {
+      "slug": "sulphites",
+      "alternateNames": [
+        "sulfites",
+        "sulphur dioxide (E220)",
+        "sulfur dioxide",
+        "sodium sulphite (E221)",
+        "sodium bisulphite (E222)",
+        "sodium metabisulphite (E223)",
+        "potassium metabisulphite (E224)",
+        "potassium sulphite (E225)",
+        "calcium sulphite (E226)",
+        "calcium hydrogen sulphite (E227)",
+        "potassium hydrogen sulphite (E228)",
+        "contains sulfites"
+      ],
+      "regulatoryStatus": {
+        "fda9": false,
+        "eu14": true,
+        "notes": "On the EU Annex II list as sulphur dioxide and sulphites at concentrations above 10 mg/kg or 10 mg/litre expressed as total sulphur dioxide; that figure is a labelling threshold set by the regulation, not a statement about what amount affects any person. Not one of the nine US major allergens, but separate US rules require a contains-sulfites declaration on foods and wine above a similar labelling level, and US rules have prohibited sulphite treatment of fresh fruits and vegetables served raw since the 1980s. Most references treat sulphite reactions as a sensitivity rather than a classic protein allergy; that distinction is a medical question outside the scope of this page."
+      },
+      "hiddenSources": [
+        { "product": "Wine, cider, some beers and wine-based cocktails", "why": "Sulphites are added as a preservative, and sauces deglazed or reduced with wine carry them too." },
+        { "product": "Dried fruit, especially apricots, golden raisins and dried apple", "why": "Sulphur dioxide keeps the colour bright." },
+        { "product": "Dehydrated, frozen and pre-peeled potatoes", "why": "Sulphites prevent browning in processed potato products." },
+        { "product": "Shrimp and other frozen or fishmonger seafood", "why": "Sulphites are applied to prevent black spots on shrimp shells." },
+        { "product": "Pickled foods, vinegars and condiments", "why": "Wine vinegar, pickled onions, horseradish and some relishes are preserved with sulphites." },
+        { "product": "Bottled lemon and lime juice, grape juice and some soft drinks", "why": "Sulphites extend shelf life." },
+        { "product": "Maraschino cherries, glace fruit and fruit toppings", "why": "Sulphites keep the colour and texture." },
+        { "product": "Some sausages and burgers", "why": "Sulphites are permitted as a preservative in some fresh sausage products in some countries." },
+        { "product": "Molasses, some syrups and some sugars", "why": "Sulphur dioxide is used in refining." },
+        { "product": "Some baked goods and dough mixes", "why": "Sulphites act as dough conditioners in some products." }
+      ],
+      "crossReactivity": "",
+      "diningOutGuidance": "Ask whether sauces are made or finished with wine, cider or wine vinegar, whether dried fruit is in salads, tagines, stuffings and desserts, and whether the potatoes arrive pre-peeled or frozen. Ask whether shrimp was treated with sulphites at the supplier, which the kitchen may need to check. Menu words to check: au vin, wine reduction, beurre blanc, chutney, maraschino, dried apricot, sultana, glace. Questions about your own reaction or what amount matters are for a doctor or allergist, not a menu."
+    }
+  ]
+}
