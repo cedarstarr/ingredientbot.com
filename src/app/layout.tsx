@@ -41,10 +41,21 @@ const EU_COUNTRIES = new Set([
 ])
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const country = (await headers()).get('x-vercel-ip-country') ?? ''
+  const requestHeaders = await headers()
+  const country = requestHeaders.get('x-vercel-ip-country') ?? ''
   const isEU = EU_COUNTRIES.has(country)
   const consent = (await cookies()).get('cookie-consent')?.value
   const plausibleEnabled = !isEU || consent === 'accepted'
+
+  // FOU-538. Minted once per request in src/middleware.ts and forwarded on x-nonce.
+  // Next.js stamps its own bootstrap/flight scripts from the CSP *request* header, but
+  // anything a library renders itself gets nothing unless handed the value: next-themes'
+  // pre-paint <script> was the one nonce-less inline script on every page (the
+  // "Blocked 'script' from 'inline:'" report, 12 users), and under 'strict-dynamic' the
+  // plausible.io host entry is ignored, so its preload/script tags need the nonce too.
+  // undefined (not '') in unit-test renders that bypass the middleware, so React omits
+  // the attribute rather than emitting nonce="".
+  const nonce = requestHeaders.get('x-nonce') ?? undefined
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -67,10 +78,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           src="https://plausible.io/js/script.outbound-links.js"
           scriptProps={{
             'data-domain': process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN ?? 'ingredientbot.com',
+            nonce,
           } as React.ScriptHTMLAttributes<HTMLScriptElement>}
           enabled={plausibleEnabled}
         >
-          <Providers>
+          <Providers nonce={nonce}>
             <Toaster>
               {children}
             </Toaster>

@@ -172,11 +172,19 @@ export default auth(async function middleware(request: NextAuthRequest) {
   if (process.env.COMING_SOON === 'true' && !pathname.startsWith('/api/') && pathname !== '/coming-soon' && pathname !== '/login' && !request.auth?.user?.isAdmin) {
     const url = request.nextUrl.clone()
     url.pathname = '/coming-soon'
-    // A rewrite renders a page, so it needs the nonce forwarded exactly like next().
-    const response = NextResponse.rewrite(url, withNonce)
-    response.headers.set('x-request-id', requestId)
-    response.headers.set('Content-Security-Policy-Report-Only', csp)
-    return response
+    url.search = ''
+    // REDIRECT, not rewrite (FOU-538). This used to be NextResponse.rewrite(url, withNonce),
+    // and on www.ingredientbot.com that rewrite was proxied back through the edge rather
+    // than resolved in place: the middleware ran a second time on the proxied hop
+    // (x-vercel-id pdx1:pdx1:pdx1, CSRF cookie set twice), minted a second nonce, and the
+    // page was rendered with that one while the outer hop's response header kept the
+    // first. Every <script> and preload on the page then mismatched the policy — the
+    // "www.ingredientbot.com" and "plausible.io" CSP reports, both with document-uri
+    // https://www.ingredientbot.com/. The apex resolved the same rewrite internally and
+    // was fine, and a direct request for /coming-soon is single-pass on both hosts.
+    // A redirect lands the browser on that single-pass path; nothing is rendered on
+    // this hop, so no nonce needs forwarding. Same shape as gurumind.ai's launch gate.
+    return addSecurityHeaders(NextResponse.redirect(url), requestId, csp)
   }
 
   // Allow public paths without auth. The landing page is exact-matched:
