@@ -57,8 +57,10 @@ const memberSession: Session = {
   expires: new Date(Date.now() + 86_400_000).toISOString(),
 }
 
+// A redirect, not a rewrite, since FOU-538: a rewrite carried an absolute URL that
+// Vercel proxied on www., re-running the middleware and desynchronising the CSP nonce.
 function isRewrittenToComingSoon(res: Response): boolean {
-  return (res.headers.get('x-middleware-rewrite') ?? '').includes('/coming-soon')
+  return res.status === 307 && (res.headers.get('location') ?? '').includes('/coming-soon')
 }
 
 function isPassedThrough(res: Response): boolean {
