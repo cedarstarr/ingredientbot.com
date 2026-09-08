@@ -1,16 +1,18 @@
 import { prisma } from '@/lib/prisma'
 import { formatDate } from '@/lib/utils'
 import { requireAdmin } from '@/lib/admin'
+import { actorLabel, resolveActorEmails } from '@/lib/audit'
 
 export const metadata = { title: 'Audit Logs — Admin — IngredientBot' }
 
 export default async function AdminAuditLogsPage() {
-  // Defense-in-depth (see /admin/page.tsx). Audit logs include user IDs and IPs.
+  // Defense-in-depth (see /admin/page.tsx). Audit logs include user emails and IPs.
   await requireAdmin()
   const logs = await prisma.auditLog.findMany({
     orderBy: { createdAt: 'desc' },
     take: 100
   })
+  const actors = await resolveActorEmails(logs.map(l => l.userId))
 
   return (
     <div className="space-y-4">
@@ -22,7 +24,7 @@ export default async function AdminAuditLogsPage() {
           <thead>
             <tr className="border-b border-border bg-muted/30">
               <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">Action</th>
-              <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">User ID</th>
+              <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">User</th>
               <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">IP</th>
               <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">Date</th>
             </tr>
@@ -31,7 +33,7 @@ export default async function AdminAuditLogsPage() {
             {logs.map(log => (
               <tr key={log.id} className="border-b border-border/50 last:border-0">
                 <td className="px-4 py-2.5 font-medium text-foreground">{log.action}</td>
-                <td className="px-4 py-2.5 text-muted-foreground font-mono text-xs">{log.userId?.slice(0, 12) ?? '—'}</td>
+                <td className="px-4 py-2.5 text-muted-foreground text-xs" title={log.userId ?? undefined}>{actorLabel(log.userId, actors)}</td>
                 <td className="px-4 py-2.5 text-muted-foreground text-xs">{log.ip || '—'}</td>
                 <td className="px-4 py-2.5 text-muted-foreground text-xs">{formatDate(log.createdAt)}</td>
               </tr>
