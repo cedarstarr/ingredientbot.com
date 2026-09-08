@@ -66,13 +66,12 @@ export async function POST(
       select: { restrictions: true, dislikedIngredients: true },
     })
     const restrictions = dietaryProfile?.restrictions ?? []
+    // FOU-321: isAllergenCall no longer picks a model (dietaryModel always routes to the
+    // broker) — it only flags the response so the frontend shows AllergenDisclaimer instead
+    // of implying the suggestions below are a verified-safe answer.
     const isAllergenCall = hasAllergenRestriction(restrictions)
 
-    // Guard the lane we will actually use. The old guard checked ANTHROPIC_API_KEY
-    // while the call ran on the free tier, so it never fired when it mattered.
-    const laneConfigured = isAllergenCall
-      ? Boolean(process.env.ANTHROPIC_API_KEY)
-      : Boolean(process.env.CEREBRAS_API_KEY || process.env.GROQ_API_KEY)
+    const laneConfigured = Boolean(process.env.AI_BROKER_URL || process.env.CEREBRAS_API_KEY || process.env.GROQ_API_KEY)
     if (!laneConfigured) {
       return new Response('AI service not configured', { status: 503 })
     }
@@ -135,7 +134,10 @@ Analyze what role "${missingIngredient}" plays in this specific recipe and sugge
     }
 
     try {
-      return NextResponse.json(JSON.parse(jsonMatch[0]))
+      const parsed = JSON.parse(jsonMatch[0])
+      // FOU-321: flag, don't clear — the frontend renders AllergenDisclaimer next to
+      // these suggestions rather than trusting the AI's own avoidance of the restriction.
+      return NextResponse.json({ ...parsed, allergenFlag: isAllergenCall })
     } catch {
       return NextResponse.json({ error: 'Invalid JSON from AI' }, { status: 500 })
     }

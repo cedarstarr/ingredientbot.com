@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import type { Prisma } from '@/generated/prisma/client'
 import { generateText } from 'ai'
-import { dietaryModel } from '@/lib/ai'
+import { dietaryModel, hasAllergenRestriction } from '@/lib/ai'
 import { aiLimiter } from '@/lib/rate-limit'
 
 export const maxDuration = 30
@@ -44,9 +44,15 @@ export async function POST(
     })
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
+  const laneConfigured = Boolean(process.env.AI_BROKER_URL || process.env.CEREBRAS_API_KEY || process.env.GROQ_API_KEY)
+  if (!laneConfigured) {
     return new Response('AI service not configured', { status: 503 })
   }
+
+  // FOU-321: "make this dairy-free" is an allergen claim when the target diet is
+  // allergen-bearing. This no longer escalates to a paid model — it flags the response
+  // (no frontend consumer today; grepped 2026-09-08) instead of certifying the result.
+  const isAllergenCall = hasAllergenRestriction([diet])
 
   const recipeData = recipe.recipeData as {
     title?: string
@@ -57,7 +63,6 @@ export async function POST(
   let text: string
   try {
     const response = await generateText({
-      // "Make this dairy-free" is an allergen claim when the target diet is allergen-bearing.
       model: dietaryModel([diet], { feature: 'diet-conversion', userId: session.user.id }),
       maxOutputTokens: 800,
       system: `You are a professional chef specializing in dietary adaptations. Convert recipes to fit specific dietary restrictions while maintaining flavor and texture. Respond with JSON:
@@ -113,5 +118,9 @@ Instructions: ${JSON.stringify(recipeData.instructions || [])}`,
     data: { modifications: newMods as unknown as Prisma.InputJsonValue },
   })
 
-  return NextResponse.json(conversion)
+  return NextResponse.json({
+    ...(conversion as object),
+    // FOU-321: flag, not clearance — see the note above the isAllergenCall assignment.
+    allergenFlag: isAllergenCall,
+  })
 }

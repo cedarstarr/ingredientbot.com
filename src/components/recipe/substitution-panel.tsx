@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog'
 import { Loader2, RefreshCw, Info, Zap, AlertTriangle } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { AllergenDisclaimer } from '@/components/allergen-disclaimer'
 
 interface Substitution {
   name: string
@@ -25,6 +26,10 @@ interface SubstitutionResult {
   role: string
   substitutions: Substitution[]
   tip: string
+  // FOU-321: set server-side when the user's dietary profile has an allergen-bearing
+  // restriction in play. The AI no longer certifies these suggestions are safe — this
+  // flag just tells the panel to show AllergenDisclaimer instead of staying silent.
+  allergenFlag?: boolean
 }
 
 export interface Ingredient {
@@ -155,6 +160,8 @@ export function SubstitutionPanel({ recipeId, ingredient, onClose, onSwap }: Pro
 
         {result && (
           <div className="space-y-5">
+            {result.allergenFlag && <AllergenDisclaimer compact />}
+
             {/* Role explanation */}
             <div className="rounded-lg border border-border bg-muted/40 px-4 py-3">
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
