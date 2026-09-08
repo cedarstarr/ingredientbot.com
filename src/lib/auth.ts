@@ -76,7 +76,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   events: {
     signIn: async ({ user }) => {
-      void logAuditEvent(user.id ?? null, 'login', null)
+      // Without this the IP column is always empty for logins, which is the one
+      // row where "where did this come from?" actually gets asked.
+      // headers() throws outside a request scope, and a sign-in must never fail
+      // because we could not read the caller's IP — logAuditEvent is likewise
+      // no-throw by design, so keep the whole read best-effort.
+      let ip: string | null = null
+      try {
+        ip = (await headers()).get('x-forwarded-for') ?? '127.0.0.1'
+      } catch { /* no request context — record the login without an IP */ }
+      void logAuditEvent(user.id ?? null, 'login', ip)
     },
   },
   callbacks: {
