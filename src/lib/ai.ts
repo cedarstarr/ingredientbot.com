@@ -1,6 +1,5 @@
 import { groq } from '@ai-sdk/groq'
 import { google } from '@ai-sdk/google'
-import { anthropic } from '@ai-sdk/anthropic'
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible'
 import { wrapLanguageModel, type LanguageModelMiddleware } from 'ai'
 import type { LanguageModelV4StreamPart } from '@ai-sdk/provider'
@@ -193,16 +192,26 @@ export function trackedStructuredModel(ctx: ModelCtx) {
 }
 
 // ---------------------------------------------------------------------------
-// Allergen safety path
+// Allergen flagging (FOU-321)
 //
-// A wrong allergen answer is a safety failure, not a quality failure, so these
-// calls never touch the free tier: no Cerebras, no Groq, no broker, no silent
-// downgrade. The broker schedules a shared free-tier budget and can queue or
-// shed load — acceptable for tagging a recipe, not for telling someone with a
-// nut allergy what is safe to eat. This lane stays direct to Anthropic.
+// Through 2026-08-05 this lane escalated allergen-bearing calls to a paid
+// "safety" model (safetyModel(), Anthropic claude-opus-5) as an implicit
+// clearance — the idea being that a more expensive model was trustworthy
+// enough to tell a user a recipe was safe for their allergy. It never really
+// was: a model that's right 99% of the time is a good classifier and a bad
+// allergen check, because the 1% is an anaphylaxis-grade failure, and no
+// model — cheap or expensive — closes that gap. Shipping an AI allergen
+// *clearance* creates a duty of care the product can't discharge. Decision
+// recorded 2026-08-09 (FOU-321); safetyModel() is deleted, not downgraded to
+// a cheaper model — per the portfolio-wide "no free model for allergens"
+// rule, there is no allergen model at all anymore, free or paid.
+//
+// hasAllergenRestriction() survives with a narrower job: it FLAGS risk for
+// the UI ("this recipe contains tree nuts — verify against packaging") so
+// AllergenDisclaimer (src/components/allergen-disclaimer.tsx) renders next to
+// the output. It no longer selects a model. Flagging is defensible;
+// certifying isn't.
 // ---------------------------------------------------------------------------
-
-const SAFETY_MODEL = 'claude-opus-5'
 
 // Restrictions where being wrong is a medical event rather than a preference.
 // 'keto'/'halal'/'paleo' etc. are deliberately absent — they carry no allergen risk.
@@ -219,7 +228,12 @@ const ALLERGEN_RESTRICTIONS = new Set([
   'sesame-free',
 ])
 
-/** True when any restriction is allergen-bearing (or a custom entry mentioning an allergy). */
+/**
+ * True when any restriction is allergen-bearing (or a custom entry mentioning
+ * an allergy). Callers use this to decide whether to show
+ * AllergenDisclaimer next to AI output — it is a UI flag, not a model
+ * selector. See the FOU-321 note above.
+ */
 export function hasAllergenRestriction(restrictions: readonly string[] | null | undefined): boolean {
   if (!restrictions?.length) return false
   return restrictions.some((r) => {
@@ -229,30 +243,13 @@ export function hasAllergenRestriction(restrictions: readonly string[] | null | 
 }
 
 /**
- * Paid frontier model for allergen-bearing calls. Fails closed: if the key is
- * absent we throw rather than fall through to a free lane, because a silent
- * downgrade here is exactly the failure this function exists to prevent.
- */
-export function safetyModel(ctx: ModelCtx) {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error(
-      'ANTHROPIC_API_KEY is required for allergen-bearing AI calls and is not set. ' +
-        'Refusing to downgrade to a free-tier model — see src/components/allergen-disclaimer.tsx.'
-    )
-  }
-  return wrapLanguageModel({
-    model: anthropic(SAFETY_MODEL),
-    middleware: loggingMiddleware('anthropic', SAFETY_MODEL, ctx),
-  })
-}
-
-/**
  * Model selector for any call that applies the user's dietary restrictions.
- * Escalates to the paid model only when an allergen is actually in play, so
- * cost tracks risk rather than traffic.
+ * FOU-321: this used to escalate allergen-bearing calls to a paid "safety"
+ * model; it no longer does — see the block comment above. Every
+ * dietary-restriction call now runs on the same broker lane as everything
+ * else. The `restrictions` parameter stays for callers that already have it
+ * in hand and for API stability; model choice no longer depends on it.
  */
 export function dietaryModel(restrictions: readonly string[] | null | undefined, ctx: ModelCtx) {
-  return hasAllergenRestriction(restrictions)
-    ? safetyModel(ctx)
-    : trackedModel('ai-broker', CANONICAL_MODEL, ctx)
+  return trackedModel('ai-broker', CANONICAL_MODEL, ctx)
 }

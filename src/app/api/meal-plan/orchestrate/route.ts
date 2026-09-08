@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     }
 
     const laneConfigured = Boolean(
-      process.env.AI_BROKER_URL || process.env.CEREBRAS_API_KEY || process.env.GROQ_API_KEY,
+      process.env.AI_BROKER_URL || process.env.GROQ_API_KEY,
     )
     if (!laneConfigured) {
       return NextResponse.json({ error: "couldn't build a timeline just now" }, { status: 503 })

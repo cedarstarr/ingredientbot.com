@@ -18,13 +18,27 @@ All AI goes through `@ai-sdk/*` provider packages via `src/lib/ai.ts`. Never imp
 |---|---|---|---|
 | Primary (text) | Shared AI broker (`AI_BROKER_URL`), direct Groq only if the broker is *down* | `gpt-oss-120b` (broker alias; `openai/gpt-oss-120b` on the direct Groq fallback) | everything not listed below |
 | Vision | Google | `gemini-2.5-flash-lite` | `analyze-photo` only — `gpt-oss-120b` is text-only |
-| **Allergen safety** | Anthropic | `claude-opus-5` | any call applying an allergen-bearing restriction |
 
-**Allergen calls never run on a free tier.** `dietaryModel(restrictions, ctx)` escalates
-to `safetyModel()` when `hasAllergenRestriction()` matches, and `safetyModel()` throws
-if `ANTHROPIC_API_KEY` is absent rather than falling back — a silent downgrade is the
-exact failure it exists to prevent. Any new route that applies dietary restrictions must
-use `dietaryModel()`, not `trackedModel()`.
+**No AI allergen clearance (FOU-321, decided 2026-08-09, implemented 2026-09-08).**
+There used to be an "Allergen safety" lane here (Anthropic `claude-opus-5`, escalated to
+by `dietaryModel()` whenever `hasAllergenRestriction()` matched) that let a paid model
+tell a user a recipe was safe for their allergy. It's gone — not downgraded to a cheaper
+model, removed outright, per the portfolio's "no free model for allergens" rule: there is
+no allergen *clearance* model anymore, free or paid. A model that's right 99% of the time
+is a good classifier and a bad allergen check; the 1% is an anaphylaxis-grade failure, and
+no model closes that gap. `dietaryModel(restrictions, ctx)` now always routes to the same
+broker lane as every other text call.
+
+`hasAllergenRestriction()` survives with a narrower job: it **flags** risk for the UI
+rather than certifying safety. Routes that compute it (`substitute`, `chat`, `modify`,
+`convert-diet`) pass the result back to the frontend (a JSON `allergenFlag` field, or an
+`X-Allergen-Flag` header on the two routes that stream plain text), and
+`AllergenDisclaimer` (`src/components/allergen-disclaimer.tsx`) renders next to the
+output instead of the AI's own text implying a verified-safe answer. Every recipe detail
+view already shows `AllergenDisclaimer` unconditionally regardless of this flag. Any new
+route that applies dietary restrictions must still use `dietaryModel()`, not
+`trackedModel()`, so it's flagged consistently — model choice no longer depends on it,
+but the flagging convention does.
 
 Note: `trackedModel(provider, modelId, ctx)` ignores its `provider`/`modelId` arguments
 entirely — the call always goes to the broker and is logged as `ai-broker`.

@@ -33,7 +33,10 @@ function buildCsp(nonce: string): string {
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    "frame-src 'none'",
+    // vercel.live is the Vercel preview-deployment toolbar (FOU-538's 4th, benign
+    // violation — 1 event/1 user, 19 days old at filing). Production never loads it,
+    // so this costs nothing there; gurumind.ai and foulweatherlabs.com allow the same host.
+    "frame-src https://vercel.live",
     "object-src 'none'",
     // Under 'strict-dynamic' the browser ignores host allowlists and 'unsafe-inline'
     // entirely and trusts only the nonce — an injected <script> cannot know a

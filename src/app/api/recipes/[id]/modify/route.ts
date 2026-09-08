@@ -64,14 +64,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     select: { restrictions: true, dislikedIngredients: true },
   })
   const restrictions = dietaryProfile?.restrictions ?? []
+  // FOU-321: flags the response (via the X-Allergen-Flag header below) so the frontend
+  // shows AllergenDisclaimer next to the streamed text — it no longer selects a model.
   const isAllergenCall = hasAllergenRestriction(restrictions)
 
-  // Guard the lane actually being used. Allergen calls require Anthropic; free-tier
-  // calls only need Cerebras/Groq. The old guard checked ANTHROPIC_API_KEY unconditionally
-  // while the call ran on the free tier — it never fired when it mattered.
-  const laneConfigured = isAllergenCall
-    ? Boolean(process.env.ANTHROPIC_API_KEY)
-    : Boolean(process.env.CEREBRAS_API_KEY || process.env.GROQ_API_KEY)
+  const laneConfigured = Boolean(process.env.AI_BROKER_URL || process.env.GROQ_API_KEY)
   if (!laneConfigured) {
     return new Response('AI service not configured', { status: 503 })
   }
@@ -100,9 +97,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       }],
     })
 
-    // Frontend reads raw text with getReader() — use toTextStreamResponse (not toDataStreamResponse)
+    // Frontend reads raw text with getReader() — use toTextStreamResponse (not toDataStreamResponse).
+    // The body is plain prose, so the FOU-321 allergen flag rides a header instead of being
+    // interleaved into the stream; the frontend reads it before consuming the reader.
     return result.toTextStreamResponse({
-      headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' },
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-cache',
+        'X-Allergen-Flag': String(isAllergenCall),
+      },
     })
   } catch {
     return new Response('AI service unavailable', { status: 503 })

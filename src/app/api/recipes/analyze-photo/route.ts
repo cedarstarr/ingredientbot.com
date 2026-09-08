@@ -21,7 +21,10 @@ export async function POST(req: NextRequest) {
     return Response.json({ ingredients: ['eggs', 'cheddar cheese', 'broccoli', 'leftover rice', 'butter', 'garlic'] })
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
+  // FOU-321: this route uses geminiFlashVision (Google vision, deliberately direct and
+  // outside the broker per CLAUDE.md), never Anthropic. Gate on the key it actually needs.
+  const visionConfigured = Boolean(process.env.GOOGLE_GENERATIVE_AI_API_KEY)
+  if (!visionConfigured) {
     return Response.json({ error: 'AI service not configured' }, { status: 503 })
   }
 

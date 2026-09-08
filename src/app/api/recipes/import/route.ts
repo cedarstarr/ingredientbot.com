@@ -134,7 +134,11 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'Please provide a valid URL' }, { status: 400 })
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
+  // FOU-321: this route never used Anthropic — trackedModel resolves to the broker (see
+  // src/lib/ai.ts). The stale ANTHROPIC_API_KEY guard from the old allergen escalation
+  // would have 503'd a working route the moment that unused key was cleaned up.
+  const laneConfigured = Boolean(process.env.AI_BROKER_URL || process.env.GROQ_API_KEY)
+  if (!laneConfigured) {
     return Response.json({ error: 'AI service not configured' }, { status: 503 })
   }
 

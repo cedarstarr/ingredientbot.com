@@ -62,7 +62,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ outcome, note: note || null, aiTip: mockTip })
   }
 
-  const laneConfigured = Boolean(process.env.AI_BROKER_URL || process.env.CEREBRAS_API_KEY || process.env.GROQ_API_KEY)
+  const laneConfigured = Boolean(process.env.AI_BROKER_URL || process.env.GROQ_API_KEY)
   if (!laneConfigured) {
     // No AI lane available — still a success from the user's point of view.
     return NextResponse.json({ outcome, note: note || null, aiTip: null })

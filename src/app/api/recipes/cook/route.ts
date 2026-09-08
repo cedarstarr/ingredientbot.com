@@ -27,7 +27,11 @@ export async function POST(req: NextRequest) {
     return Response.json({ id: 'test-mock-id' })
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
+  // FOU-321: this route never used Anthropic — dietaryModel always resolves to the
+  // broker (see src/lib/ai.ts). The stale ANTHROPIC_API_KEY guard from the old allergen
+  // escalation is replaced with the actual lane this call uses.
+  const laneConfigured = Boolean(process.env.AI_BROKER_URL || process.env.GROQ_API_KEY)
+  if (!laneConfigured) {
     return Response.json({ error: 'AI service not configured' }, { status: 503 })
   }
 

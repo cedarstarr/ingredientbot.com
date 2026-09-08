@@ -54,11 +54,13 @@ export async function POST(
       select: { restrictions: true, dislikedIngredients: true },
     })
     const restrictions = dietaryProfile?.restrictions ?? []
+    // FOU-321: isAllergenCall only strengthens the prompt below now — it no longer picks
+    // a model. This route has no frontend consumer yet (grepped 2026-09-08), so there is
+    // nowhere to surface an AllergenDisclaimer flag; wire one in alongside whatever UI
+    // first calls this endpoint.
     const isAllergenCall = hasAllergenRestriction(restrictions)
 
-    const laneConfigured = isAllergenCall
-      ? Boolean(process.env.ANTHROPIC_API_KEY)
-      : Boolean(process.env.CEREBRAS_API_KEY || process.env.GROQ_API_KEY)
+    const laneConfigured = Boolean(process.env.AI_BROKER_URL || process.env.GROQ_API_KEY)
     if (!laneConfigured) {
       return new Response('AI service not configured', { status: 503 })
     }

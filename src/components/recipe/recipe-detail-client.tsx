@@ -126,6 +126,9 @@ export function RecipeDetailClient({ recipe, collections = [], initialAiTip = nu
   const [isEstimatingNutrition, setIsEstimatingNutrition] = useState(false)
   const [modifiedText, setModifiedText] = useState('')
   const [isModifying, setIsModifying] = useState(false)
+  // FOU-321: set from the X-Allergen-Flag response header — AI no longer certifies the
+  // modified recipe is safe, so this drives an AllergenDisclaimer next to the output.
+  const [modifiedAllergenFlag, setModifiedAllergenFlag] = useState(false)
 
   // Saving an AI variant (modification or substitution) as its own new recipe
   const [isSavingVariant, setIsSavingVariant] = useState(false)
@@ -224,6 +227,7 @@ export function RecipeDetailClient({ recipe, collections = [], initialAiTip = nu
   const handleModified = async (action: string, options: Record<string, unknown>) => {
     setIsModifying(true)
     setModifiedText('')
+    setModifiedAllergenFlag(false)
 
     try {
       const res = await fetch(`/api/recipes/${recipe.id}/modify`, {
@@ -236,6 +240,8 @@ export function RecipeDetailClient({ recipe, collections = [], initialAiTip = nu
         setModifiedText('Failed to modify recipe.')
         return
       }
+
+      setModifiedAllergenFlag(res.headers.get('X-Allergen-Flag') === 'true')
 
       const reader = res.body!.getReader()
       const decoder = new TextDecoder()
@@ -379,6 +385,10 @@ export function RecipeDetailClient({ recipe, collections = [], initialAiTip = nu
                   {modifiedText}
                 </pre>
               </div>
+
+              {!isModifying && modifiedAllergenFlag && (
+                <AllergenDisclaimer compact className="mt-3" />
+              )}
 
               {/* Save the modified version as its own recipe — it's ephemeral until persisted */}
               {!isModifying && modifiedText && (

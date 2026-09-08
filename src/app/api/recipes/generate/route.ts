@@ -45,7 +45,11 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
+  // FOU-321: this route never used Anthropic — dietaryModel always resolves to the
+  // broker (see src/lib/ai.ts). The stale ANTHROPIC_API_KEY guard from the old allergen
+  // escalation is replaced with the actual lane this call uses.
+  const laneConfigured = Boolean(process.env.AI_BROKER_URL || process.env.GROQ_API_KEY)
+  if (!laneConfigured) {
     return new Response('AI service not configured', { status: 503 })
   }
 
@@ -216,8 +220,6 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = streamText({
-      // Escalates to the paid safety model when an allergen restriction is in play,
-      // from either the saved profile or this request's one-off selections.
       model: dietaryModel([...(dietaryProfile?.restrictions ?? []), ...(dietary ?? [])], {
         feature: 'recipe-generation',
         userId: session.user.id,
