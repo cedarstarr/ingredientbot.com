@@ -124,6 +124,10 @@ function parseArgs() {
   }
 }
 
+// One source for the user prompt, so --dry-run shows exactly what a real run sends.
+const recipePrompt = (dish: string) =>
+  `Generate a recipe for: ${dish}. Pick reasonable serving size, cook time, and difficulty for the dish.`
+
 async function main() {
   if (!process.env.CEREBRAS_API_KEY && !process.env.GROQ_API_KEY) {
     throw new Error(
@@ -141,14 +145,29 @@ async function main() {
     throw new Error('Admin user not found — run seed-admin-user.ts first')
   }
 
-  console.log(`Generating ${dishes.length} recipes${dryRun ? ' (dry run)' : ''}...`)
+  // --dry-run must cost nothing. It used to skip only the database and print
+  // "(dry run)" while the generation below ran in full (FOU-404). The free-lane pin
+  // means no money, but the free ceiling is portfolio-wide, so a dry run was still
+  // spending quota every other site shares. Return ahead of every batch* call.
+  if (dryRun) {
+    console.log(`Dry run — ${dishes.length} recipe(s) would be generated. No AI call made, no quota spent.`)
+    console.log(`  lane: providers=[nvidia, groq]`)
+    for (const item of dishes) console.log(`  ${item}`)
+    if (dishes[0]) {
+      console.log(`\n--- system ---\n${SYSTEM_PROMPT}`)
+      console.log(`\n--- sample user prompt ---\n${recipePrompt(dishes[0])}`)
+    }
+    return
+  }
+
+  console.log(`Generating ${dishes.length} recipes...`)
   const start = Date.now()
 
   const generated = await batchMap(
     dishes,
     async (dish, { object }) =>
       object(
-        `Generate a recipe for: ${dish}. Pick reasonable serving size, cook time, and difficulty for the dish.`,
+        recipePrompt(dish),
         RecipeSchema,
         // Pinned to the free lane: these are staging demo fixtures, not visitor-facing
         // content, so they must never spend Azure credit. Without this pin the shared
@@ -173,12 +192,6 @@ async function main() {
       `(cerebras ok=${s.cerebras.ok} fail=${s.cerebras.failed}, ` +
       `groq ok=${s.groq.ok} fail=${s.groq.failed})`,
   )
-
-  if (dryRun) {
-    console.log('\nDry run — first recipe preview:')
-    console.log(JSON.stringify(generated[0], null, 2))
-    return
-  }
 
   let inserted = 0
   let skipped = 0
