@@ -143,7 +143,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       // dietaryModel/trackedModel in src/lib/ai.ts) — gating on ANTHROPIC_API_KEY here checked
       // a key this path never uses, the same stale-guard trap already fixed in the sibling
       // /modify route (FOU-297).
-      const laneConfigured = Boolean(process.env.AI_BROKER_URL || process.env.CEREBRAS_API_KEY || process.env.GROQ_API_KEY)
+      const laneConfigured = Boolean(process.env.AI_BROKER_URL || process.env.GROQ_API_KEY)
       if (!laneConfigured) {
         return Response.json({ error: 'AI service not configured' }, { status: 503 })
       }

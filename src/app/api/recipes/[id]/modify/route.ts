@@ -68,7 +68,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   // shows AllergenDisclaimer next to the streamed text — it no longer selects a model.
   const isAllergenCall = hasAllergenRestriction(restrictions)
 
-  const laneConfigured = Boolean(process.env.AI_BROKER_URL || process.env.CEREBRAS_API_KEY || process.env.GROQ_API_KEY)
+  const laneConfigured = Boolean(process.env.AI_BROKER_URL || process.env.GROQ_API_KEY)
   if (!laneConfigured) {
     return new Response('AI service not configured', { status: 503 })
   }
