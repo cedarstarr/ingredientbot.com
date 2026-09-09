@@ -17,7 +17,13 @@ test.describe('Recipe Collections (unauthenticated)', () => {
 test.describe('Recipe Collections (authenticated)', () => {
   test('authenticated user sees the Collections heading', async ({ page }) => {
     await page.goto('/collections')
-    await expect(page.getByTestId('collections-heading')).toBeVisible({ timeout: 10_000 })
+    // Scoped through the <main> landmark: when a Next SSR stream closes early the page
+    // content is left doubled — once in <main>, once in a hidden <div hidden> under
+    // <body> — so an unscoped getByTestId matches 2 nodes and trips strict mode. Grep
+    // finds exactly one emitter (collections-client.tsx:104); the duplicate is the
+    // stream orphan, not a second component. `.first()` is not a substitute — it can
+    // select the hidden one.
+    await expect(page.getByRole('main').getByTestId('collections-heading')).toBeVisible({ timeout: 10_000 })
   })
 
   test('New Collection button is present and opens create dialog', async ({ page }) => {
@@ -34,7 +40,7 @@ test.describe('Recipe Collections (authenticated)', () => {
     await page.goto('/collections')
     const grid = page.locator('[data-testid="collections-empty"], .grid')
     const emptyState = page.getByTestId('collections-empty')
-    const heading = page.getByTestId('collections-heading')
+    const heading = page.getByRole('main').getByTestId('collections-heading')
     await expect(heading).toBeVisible()
     // Tolerant: passes whether user has 0 or N collections
     await expect(emptyState.or(grid).first()).toBeVisible({ timeout: 10_000 })

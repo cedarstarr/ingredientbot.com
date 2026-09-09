@@ -45,8 +45,12 @@ test.describe('Recipe history search and filters (F37)', () => {
     // Use getByRole('main') (accessibility role) not [role="main"]: <main> carries the
     // implicit ARIA role but has no literal role attribute, so the CSS attribute selector
     // matched nothing and the locator timed out.
-    const body = await page.getByRole('main').textContent()
-    expect(body).toMatch(/\d+ recipe/)
+    //
+    // Assert on the locator, not on an extracted string. beforeEach only waits for
+    // domcontentloaded, so a one-shot `textContent()` read the page mid-load and matched
+    // "Loading…" plus the allergen disclaimer. expect(locator).toContainText retries until
+    // the count renders; expect(string).toMatch cannot. Same regex, same strictness.
+    await expect(page.getByRole('main')).toContainText(/\d+ recipe/)
   })
 
   test('history page has "New Recipe" link to /kitchen', async ({ page }) => {
