@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-09-08 (/qa-e2e run)
+**Last Updated**: 2026-09-09 (/qa-e2e run)
 
 ---
 
@@ -35,7 +35,7 @@
 | 20 | Performance Audit | /qa-perf | STALE | 3 | 2026-07-02 | [view](reports/2026-07-02-site-perf.md) |
 | 21 | SEO Audit | /qa-seo | STALE | 2 | 2026-07-13 | [view](reports/2026-04-19-site-seo.md) |
 | 22 | Accessibility Audit | /qa-a11y | STALE | 2 | 2026-07-15 | [view](reports/2026-07-15-qa-a11y.md) |
-| 23 | E2E Gate | /qa-e2e | DONE | 19 | 2026-09-08 | [view](reports/2026-09-09-qa-e2e.md) |
+| 23 | E2E Gate | /qa-e2e | DONE | 20 | 2026-09-09 | [view](reports/2026-09-09-fou344-lockout.md) |
 | 24 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
 | 25 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
 | 26 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
@@ -44,7 +44,7 @@
 
 **Progress: 22/28 stages complete (1 skipped)**
 
-**Last Updated**: 2026-09-08 (/qa-e2e run)
+**Last Updated**: 2026-09-09 (/qa-e2e run)
 
 ---
 
@@ -153,3 +153,4 @@
 | 2026-08-29 | /qa-security | 20m | SUCCESS | 2 issues found (1 HIGH fixed, 1 HIGH deferred FOU-453); vision/SSRF/allergen lanes verified clean [view](reports/2026-08-29-site-security.md) |
 | 2026-09-08 | /qa-e2e | 6m | SUCCESS | 143/148 pass, 0 fail. Added change-password spec. sous-chef-answer stale-testid was a conditional-spread false positive. [view](reports/2026-09-08-qa-e2e.md) |
 | 2026-09-08 | /qa-e2e | 6m | SUCCESS | 143/148 pass, 0 fail (was 1). Fixed a one-shot textContent race exposed by the FOU-321 disclaimer, and an SSR stream-doubling strict-mode violation on collections-heading. Gate for the 8-commit promotion. [view](reports/2026-09-09-qa-e2e.md) |
+| 2026-09-09 | /qa-e2e | 4m | SUCCESS | FOU-344 per-account login lockout. E2E gate 143/148 pass, 0 fail (chromium). Migration applied staging then production. [view](reports/2026-09-09-fou344-lockout.md) |
