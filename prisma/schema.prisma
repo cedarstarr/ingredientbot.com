@@ -91,6 +91,12 @@ model User {
 
   sessionsRevokedAt DateTime? @map("sessions_revoked_at")
 
+  // FOU-344: per-account lockout backoff, independent of IP-based rate limiting
+  // (which does not stop password spraying — one attempt per account, many
+  // accounts, rotating IPs). See src/lib/login-lockout.ts.
+  failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime? @map("locked_until")
+
   // Forced password change — set true by admin action or a future compromised-
   // password flow; the (app)/(admin) layouts redirect here server-side (never
   // in middleware, which runs on Edge and can't hit Prisma for this check).

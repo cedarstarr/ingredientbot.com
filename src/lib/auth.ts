@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma"
 import { logAuditEvent } from "@/lib/audit"
 import { authConfig } from "@/lib/auth.config"
 import { authLimiter } from "@/lib/rate-limit"
+import { computeLockoutMinutes, isLockedOut } from "@/lib/login-lockout"
 
 // NextAuth's credentials handler is owned by the auth library and is not covered
 // by our per-route limiter wrappers. Rate-limit inside `authorize()` so brute-force
@@ -49,13 +50,39 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null
         }
 
+        // FOU-344: check the account lock BEFORE verifying the password, and
+        // fail the same generic way as a wrong password — an attacker must
+        // never learn from the response that this account exists or is locked.
+        if (isLockedOut(user.lockedUntil)) {
+          return null
+        }
+
         const isPasswordValid = await bcrypt.compare(
           credentials.password as string,
           user.password
         )
 
         if (!isPasswordValid) {
+          const attempts = (user.failedLoginAttempts ?? 0) + 1
+          const lockMinutes = computeLockoutMinutes(attempts)
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              failedLoginAttempts: attempts,
+              lockedUntil: lockMinutes ? new Date(Date.now() + lockMinutes * 60_000) : null,
+            },
+          })
           return null
+        }
+
+        // Successful login clears any accumulated backoff so a legitimate user
+        // who mistyped a password a few times isn't left one step closer to a
+        // lock the next time they fail.
+        if (user.failedLoginAttempts || user.lockedUntil) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { failedLoginAttempts: 0, lockedUntil: null },
+          })
         }
 
         return {
