@@ -241,13 +241,32 @@ END $$;
 --     drops them, creates the real snake_case tables. No P3006.
 --   - Staging/production: 20260802120000 already has finished_at set ->
 --     condition is FALSE -> nothing is created -> true no-op.
-DO $$ BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM "_prisma_migrations"
-    WHERE migration_name = '20260802120000_repair_prod_schema_drift'
-      AND finished_at IS NOT NULL
-      AND rolled_back_at IS NULL
-  ) THEN
+-- The gate below reads "_prisma_migrations" through to_regclass + EXECUTE rather
+-- than referencing it directly. Prisma's shadow database — the one `migrate dev`
+-- and `migrate diff` build to replay this chain — does NOT create that table
+-- before replaying, so a direct reference aborts the entire replay with 42P01.
+-- That is what kept `migrate dev` broken on this repo even after FOU-405, whose
+-- verification only ever exercised `migrate deploy` (found 2026-09-09).
+-- to_regclass stops the reference being parsed when the table is absent, and
+-- EXECUTE defers the query itself. No history table means nothing has been
+-- applied yet — exactly the fresh-replay case — so `already_applied` stays false
+-- and the block runs, which is the correct behaviour on an empty database.
+DO $$
+DECLARE
+  already_applied boolean := false;
+BEGIN
+  IF to_regclass('public."_prisma_migrations"') IS NOT NULL THEN
+    EXECUTE $gate$
+      SELECT EXISTS (
+        SELECT 1 FROM "_prisma_migrations"
+        WHERE migration_name = '20260802120000_repair_prod_schema_drift'
+          AND finished_at IS NOT NULL
+          AND rolled_back_at IS NULL
+      )
+    $gate$ INTO already_applied;
+  END IF;
+
+  IF NOT already_applied THEN
     CREATE TABLE IF NOT EXISTS "AICallLog" (
       "id" TEXT NOT NULL,
       CONSTRAINT "AICallLog_pkey" PRIMARY KEY ("id")
