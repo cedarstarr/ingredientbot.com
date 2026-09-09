@@ -7,7 +7,10 @@ const AI_CRAWLERS = [
 ]
 
 export default function robots(): MetadataRoute.Robots {
-  const noIndex = process.env.NO_INDEX === 'true'
+  // Gate-aware: the launch gate is the authority on whether this site is
+  // indexable. NO_INDEX stays as a manual override for a launched site.
+  const noIndex =
+    process.env.NO_INDEX === 'true' || process.env.COMING_SOON === 'true'
 
   if (noIndex) {
     return {

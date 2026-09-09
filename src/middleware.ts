@@ -172,7 +172,7 @@ export default auth(async function middleware(request: NextAuthRequest) {
     return response
   }
 
-  if (process.env.COMING_SOON === 'true' && !pathname.startsWith('/api/') && pathname !== '/coming-soon' && pathname !== '/login' && !request.auth?.user?.isAdmin) {
+  if (process.env.COMING_SOON === 'true' && !pathname.startsWith('/api/') && pathname !== '/coming-soon' && pathname !== '/robots.txt' && pathname !== '/sitemap.xml' && pathname !== '/login' && !request.auth?.user?.isAdmin) {
     const url = request.nextUrl.clone()
     url.pathname = '/coming-soon'
     url.search = ''
