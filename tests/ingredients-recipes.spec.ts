@@ -56,9 +56,11 @@ test.describe('Recipe browse', () => {
     await expect(cards.first().or(emptyState)).toBeVisible()
   })
 
-  test('/recipes?cuisine= filters to a single cuisine section', async ({ page }) => {
+  test('/recipes/[cuisine] filters to a single cuisine section', async ({ page }) => {
     // Discover a real cuisine from the overview page rather than hardcoding
-    // one — cuisine mix on staging is seed-dependent.
+    // one — cuisine mix on staging is seed-dependent. FOU-466: this used to
+    // follow a "View all" link to /recipes?cuisine=X; that query-string view
+    // was replaced with its own static segment, /recipes/[cuisine].
     await page.goto('/recipes')
     await page.waitForLoadState('domcontentloaded')
 
@@ -66,12 +68,30 @@ test.describe('Recipe browse', () => {
     const cardCount = await cards.count()
     test.skip(cardCount === 0, 'No public recipes seeded on this environment')
 
-    const viewAllLink = page.getByRole('link', { name: /view all/i }).first()
+    const viewAllLink = page.getByRole('main').getByTestId('recipes-cuisine-view-all').first()
     const hasViewAll = await viewAllLink.count()
     test.skip(hasViewAll === 0, 'Fewer than PER_SECTION recipes in every cuisine — no "View all" link to follow')
 
     await viewAllLink.click()
-    await page.waitForURL(/cuisine=/)
+    await page.waitForURL(/\/recipes\/[a-z0-9-]+$/)
     await expect(page.getByTestId('recipes-browse-heading')).toBeVisible()
+  })
+
+  test('/recipes/?cuisine=X redirects to /recipes/x', async ({ page }) => {
+    // Old indexed query-string URLs must land on the new segment rather than
+    // silently rendering the (now unfiltered) overview.
+    const res = await page.goto('/recipes?cuisine=Italian')
+    await page.waitForLoadState('domcontentloaded')
+    expect(res?.status()).not.toBe(500)
+    expect(page.url()).toMatch(/\/recipes\/italian$/)
+  })
+
+  test('/recipes/nonexistent-cuisine-slug returns 404 (not an empty page)', async ({ page }) => {
+    const res = await page.goto('/recipes/nonexistent-cuisine-slug-that-does-not-exist')
+    await page.waitForLoadState('domcontentloaded')
+    expect(res?.status()).not.toBe(500)
+    const body = await page.locator('body').textContent()
+    const isNotFound = res?.status() === 404 || /404|not found/i.test(body ?? '')
+    expect(isNotFound).toBe(true)
   })
 })
