@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ChefHat, Camera, Sparkles, Sliders, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { safeJsonLdString } from '@/lib/utils'
+import { JsonLd } from '@/components/json-ld'
 import { AllergyAwarenessNotice } from '@/components/allergy-awareness-notice'
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ingredientbot.com'
@@ -37,10 +37,7 @@ const webAppJsonLd = {
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLdString(webAppJsonLd) }}
-      />
+      <JsonLd data={webAppJsonLd} />
       {/* Nav */}
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">

@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Clock, Users, ChefHat, ArrowRight, Utensils } from 'lucide-react'
-import { safeJsonLdString } from '@/lib/utils'
+import { JsonLd } from '@/components/json-ld'
 import { AllergenDisclaimer } from '@/components/allergen-disclaimer'
 import { CookThisButton } from '@/components/recipe/cook-this-button'
 import { AllergyAwarenessNotice } from '@/components/allergy-awareness-notice'
@@ -151,10 +151,7 @@ export default async function PublicRecipePage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-background">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLdString(recipeJsonLd) }}
-      />
+      <JsonLd data={recipeJsonLd} />
       {/* Minimal nav — no auth required */}
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">

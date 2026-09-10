@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { ChefHat, ArrowRight, ShieldAlert } from 'lucide-react'
 import { AllergenDisclaimer } from '@/components/allergen-disclaimer'
 import { AllergyAwarenessNotice } from '@/components/allergy-awareness-notice'
-import { safeJsonLdString } from '@/lib/utils'
+import { JsonLd } from '@/components/json-ld'
 
 export const revalidate = 3600
 
@@ -51,12 +51,7 @@ export default async function AllergensIndexPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {allergens.length > 0 && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: safeJsonLdString(definedTermSetJsonLd) }}
-        />
-      )}
+      {allergens.length > 0 && <JsonLd data={definedTermSetJsonLd} />}
 
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
