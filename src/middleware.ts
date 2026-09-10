@@ -3,6 +3,7 @@ import NextAuth from 'next-auth'
 import { authConfig } from '@/lib/auth.config'
 import type { NextAuthRequest } from 'next-auth'
 import { apiRatelimit, authRatelimit, clientIp } from '@/lib/rate-limit'
+import { slugifyCuisine } from '@/lib/recipe-format'
 
 const { auth } = NextAuth(authConfig)
 
@@ -114,6 +115,22 @@ const PUBLIC_PATHS = [
 export default auth(async function middleware(request: NextAuthRequest) {
   const requestId = request.headers.get('x-request-id') ?? crypto.randomUUID()
   const pathname = request.nextUrl.pathname
+
+  // FOU-466: /recipes?cuisine=X moved to /recipes/[cuisine] so the overview
+  // page can drop searchParams and actually revalidate. Permanently redirect
+  // any previously-indexed query-string URL to the new path here, in
+  // middleware — the overview page itself must not read searchParams again,
+  // or the fix regresses. 308 (not 307) preserves the redirect across a
+  // search engine re-crawl the way a 301 would, while keeping the method.
+  if (pathname === '/recipes') {
+    const cuisineParam = request.nextUrl.searchParams.get('cuisine')
+    if (cuisineParam) {
+      const url = request.nextUrl.clone()
+      url.pathname = `/recipes/${slugifyCuisine(cuisineParam)}`
+      url.search = ''
+      return NextResponse.redirect(url, 308)
+    }
+  }
 
   // One nonce per request, forwarded on the REQUEST so Next.js stamps its own inlined
   // bootstrap and flight-data scripts: parseRequestHeaders() in app-render.js reads

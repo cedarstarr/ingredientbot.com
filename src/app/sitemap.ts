@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
 import { prisma } from '@/lib/prisma'
+import { OTHER_CUISINE_LABEL, slugifyCuisine } from '@/lib/recipe-format'
 
 // Force dynamic so sitemap is generated at request time (not build time).
 // Needed because it queries the DB for public recipe slugs.
@@ -31,9 +32,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     take: 10000,
   })
 
-  // Cuisine listing pages. Each /recipes?cuisine=X view canonicalizes to itself
+  // Cuisine listing pages. Each /recipes/[cuisine] view canonicalizes to itself
   // and is independently indexable, but nothing pointed crawlers at them beyond
   // in-page links. Derived from the data so a new cuisine needs no code change.
+  // FOU-466: URLs moved from /recipes?cuisine=X (query string, not statically
+  // generated) to /recipes/[cuisine] (own segment, prerendered via
+  // generateStaticParams).
   const cuisineGroups = await prisma.recipe.groupBy({
     by: ['cuisine'],
     where: { isPublic: true, publicSlug: { not: null } },
@@ -57,10 +61,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }))
 
-  // 'Other' is the label /recipes uses for the null-cuisine bucket, so the URL
-  // must match what the page reads back out of the query string.
+  // slugifyCuisine is the same function /recipes/[cuisine] uses to resolve a
+  // slug back to a cuisine, so these URLs are guaranteed to match real routes.
   const cuisineEntries: MetadataRoute.Sitemap = cuisineGroups.map((g) => ({
-    url: `${baseUrl}/recipes?cuisine=${encodeURIComponent(g.cuisine ?? 'Other')}`,
+    url: `${baseUrl}/recipes/${slugifyCuisine(g.cuisine ?? OTHER_CUISINE_LABEL)}`,
     lastModified: g._max.updatedAt ?? new Date(),
     changeFrequency: 'weekly' as const,
     priority: 0.6,

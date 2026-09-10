@@ -44,3 +44,29 @@ export function isIngredientHeading(ing: Pick<RecipeIngredient, 'name' | 'amount
 
   return /^for\s+\S/i.test(name)
 }
+
+/**
+ * Label used for the null-cuisine bucket on /recipes and /recipes/[cuisine] —
+ * the AI seeder leaves `cuisine` unset for a handful of recipes that don't fit
+ * a single tradition (fusion, "clean out the fridge" prompts).
+ */
+export const OTHER_CUISINE_LABEL = 'Other'
+
+/**
+ * URL slug for a cuisine label, used for both /recipes/[cuisine] route params
+ * and the sitemap. `cuisine` is free-text from the AI seeder (not an enum), so
+ * this has to tolerate punctuation ("Tex-Mex", "Sichuan (川菜)") rather than
+ * just spaces — collapse every non-alphanumeric run to one hyphen.
+ */
+export function slugifyCuisine(label: string): string {
+  return label
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+/** Slug for a recipe's cuisine value, folding null into OTHER_CUISINE_LABEL. */
+export function cuisineSlug(cuisine: string | null): string {
+  return slugifyCuisine(cuisine ?? OTHER_CUISINE_LABEL)
+}
