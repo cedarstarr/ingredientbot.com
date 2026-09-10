@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ChefHat } from 'lucide-react'
 import { AllergyAwarenessNotice } from '@/components/allergy-awareness-notice'
+import { CopyrightNotice } from '@/components/copyright-notice'
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ingredientbot.com'
 
@@ -140,6 +141,7 @@ export default function PrivacyPage() {
           <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
           <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
         </div>
+        <CopyrightNotice className="mt-3" />
       </footer>
     </div>
   )

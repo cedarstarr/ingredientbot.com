@@ -10,6 +10,7 @@ import { JsonLd } from '@/components/json-ld'
 import { AllergenDisclaimer } from '@/components/allergen-disclaimer'
 import { CookThisButton } from '@/components/recipe/cook-this-button'
 import { AllergyAwarenessNotice } from '@/components/allergy-awareness-notice'
+import { CopyrightNotice } from '@/components/copyright-notice'
 import { allergenLabel } from '@/lib/allergens'
 import { formatDuration, isIngredientHeading } from '@/lib/recipe-format'
 
@@ -372,6 +373,7 @@ export default async function PublicRecipePage({ params }: Props) {
           <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
           <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
         </div>
+        <CopyrightNotice className="mt-3" />
       </footer>
     </div>
   )

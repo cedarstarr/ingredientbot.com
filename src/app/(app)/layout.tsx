@@ -1,8 +1,10 @@
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { AppNav } from '@/components/app-nav'
 import { AllergyAwarenessNotice } from '@/components/allergy-awareness-notice'
+import { CopyrightNotice } from '@/components/copyright-notice'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   // Authoritative forced-password-change gate. Deliberately NOT in
@@ -25,6 +27,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         {children}
         <footer className="border-t border-border px-4 py-5">
           <AllergyAwarenessNotice />
+          <div className="mt-4 flex flex-col items-center gap-1 text-center">
+            <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+              <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
+              <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+            </div>
+            <CopyrightNotice />
+          </div>
         </footer>
       </main>
     </div>

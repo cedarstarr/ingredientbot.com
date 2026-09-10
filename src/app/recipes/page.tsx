@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ChefHat, ArrowRight, ArrowLeft, Clock, UtensilsCrossed } from 'lucide-react'
 import { AllergyAwarenessNotice } from '@/components/allergy-awareness-notice'
+import { CopyrightNotice } from '@/components/copyright-notice'
 import { formatDuration } from '@/lib/recipe-format'
 
 export const revalidate = 3600
@@ -263,6 +264,7 @@ function BrowseShell({ children }: { children: React.ReactNode }) {
           <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
           <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
         </div>
+        <CopyrightNotice className="mt-3" />
       </footer>
     </div>
   )

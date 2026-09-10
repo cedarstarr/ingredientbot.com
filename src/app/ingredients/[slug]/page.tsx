@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { ChefHat, ArrowRight, ArrowLeft, Archive, CalendarDays, ShieldAlert, Replace } from 'lucide-react'
 import { AllergenDisclaimer } from '@/components/allergen-disclaimer'
 import { AllergyAwarenessNotice } from '@/components/allergy-awareness-notice'
+import { CopyrightNotice } from '@/components/copyright-notice'
 import { allergenLabel } from '@/lib/allergens'
 
 export const revalidate = 3600
@@ -244,6 +245,7 @@ export default async function IngredientDetailPage({ params }: Props) {
           <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
           <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
         </div>
+        <CopyrightNotice className="mt-3" />
       </footer>
     </div>
   )

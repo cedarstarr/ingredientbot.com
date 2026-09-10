@@ -4,6 +4,7 @@ import { ChefHat, Camera, Sparkles, Sliders, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { JsonLd } from '@/components/json-ld'
 import { AllergyAwarenessNotice } from '@/components/allergy-awareness-notice'
+import { CopyrightNotice } from '@/components/copyright-notice'
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ingredientbot.com'
 
@@ -185,6 +186,7 @@ export default function LandingPage() {
           <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
           <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
         </div>
+        <CopyrightNotice className="mt-3" />
       </footer>
     </div>
   )

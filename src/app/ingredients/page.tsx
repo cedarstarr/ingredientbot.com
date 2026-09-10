@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { ChefHat, ArrowRight } from 'lucide-react'
 import { IngredientIndexClient } from '@/components/ingredients/ingredient-index-client'
 import { AllergyAwarenessNotice } from '@/components/allergy-awareness-notice'
+import { CopyrightNotice } from '@/components/copyright-notice'
 
 export const revalidate = 3600
 
@@ -70,6 +71,7 @@ export default async function IngredientsIndexPage() {
           <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
           <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
         </div>
+        <CopyrightNotice className="mt-3" />
       </footer>
     </div>
   )

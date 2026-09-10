@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { ChefHat, ArrowRight, ShieldAlert } from 'lucide-react'
 import { AllergenDisclaimer } from '@/components/allergen-disclaimer'
 import { AllergyAwarenessNotice } from '@/components/allergy-awareness-notice'
+import { CopyrightNotice } from '@/components/copyright-notice'
 import { JsonLd } from '@/components/json-ld'
 
 export const revalidate = 3600
@@ -130,6 +131,7 @@ export default async function AllergensIndexPage() {
           <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
           <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
         </div>
+        <CopyrightNotice className="mt-3" />
       </footer>
     </div>
   )

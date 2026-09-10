@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ChefHat, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ReverseSearchClient } from './search-client'
+import { CopyrightNotice } from '@/components/copyright-notice'
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ingredientbot.com'
 
@@ -66,7 +67,9 @@ export default function WhatCanIMakePage() {
           <Link href="/recipes" className="transition-colors hover:text-foreground">Recipes</Link>
           <Link href="/ingredients" className="transition-colors hover:text-foreground">Ingredients</Link>
           <Link href="/privacy" className="transition-colors hover:text-foreground">Privacy</Link>
+          <Link href="/terms" className="transition-colors hover:text-foreground">Terms</Link>
         </div>
+        <CopyrightNotice className="mt-3" />
       </footer>
     </div>
   )
