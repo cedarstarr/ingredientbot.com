@@ -1,0 +1,26 @@
+Copyright (c) 2026 Foulweather Labs LLC
+All rights reserved.
+
+This software and its source code, documentation, data, design assets and
+generated content (the "Work") are proprietary and confidential.
+
+No permission is granted to any person to use, copy, modify, merge, publish,
+distribute, sublicense, sell, or create derivative works from the Work, in whole
+or in part, by any means, without the prior written permission of the copyright
+holder. No licence is granted by implication, estoppel, or otherwise.
+
+Access to this repository, whether granted deliberately or obtained
+inadvertently, does not transfer any ownership or licence.
+
+Automated access, scraping, text and data mining, and use of the Work as input
+to train, fine-tune, evaluate or ground any machine learning model are expressly
+prohibited absent prior written permission.
+
+THE WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDER
+BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE WORK OR ITS USE.
+
+Third-party components distributed with or depended upon by the Work remain
+subject to their own licences, which are unaffected by this notice.
