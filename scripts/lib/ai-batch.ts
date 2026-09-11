@@ -505,11 +505,18 @@ export interface BatchMapOptions<I> {
   /**
    * Preserve index alignment with `items` instead of compacting away skips.
    *
-   * Default false keeps every existing caller byte-identical in behaviour. With
-   * `keepHoles: true` a skipped item yields `null` at its original index, so
-   * `results[i]` always corresponds to `items[i]`. Prefer the tuple pattern in the
-   * mapper (see batchMap's doc comment) — this option exists for callers that
-   * genuinely need a positional array, e.g. writing back into a fixed-width table.
+   * **Defaults to true since FOU-537.** A skipped item yields `null` at its original
+   * index, so `results[i]` always corresponds to `items[i]`.
+   *
+   * It used to default to false, which compacted the output: from the first skip
+   * onward `results[i]` silently described `items[i-1]`. Nothing threw, the row
+   * counts looked right, and `tsc` was happy — six callers across three repos were
+   * fixed one at a time (FOU-443/445/446/447) before it became obvious that the
+   * default, not the callers, was the bug.
+   *
+   * `keepHoles: false` restores compaction. Only pass it when you genuinely do not
+   * care which input produced which output — and if you are about to write the
+   * results anywhere keyed by input, you do care.
    */
   keepHoles?: boolean;
   onProgress?: (done: number, total: number, lastItem: I) => void;
@@ -519,11 +526,13 @@ export interface BatchMapOptions<I> {
 /**
  * Map `items` through `fn`, one AI call per item, under the shared rate limiter.
  *
- * ⚠️ OUTPUT IS COMPACTED AFTER SKIPS — **never zip results against inputs by index.**
- * When `onError` returns 'skip' the failed item is REMOVED from the output array, not
- * left as a hole, so `results[i]` stops corresponding to `items[i]` from the first skip
- * onwards. Nothing throws and the counts look plausible; the pairing is just wrong.
- * On 2026-08-29 this shipped 12 padhr ComplianceDeadline rows each carrying the NEXT
+ * Output is index-aligned with `items`: a skipped item comes back as `null` in place,
+ * so `results[i]` always describes `items[i]`. The return type is `(O | null)[]`, which
+ * is deliberate — it makes an unguarded `results[i]` a type error instead of a silently
+ * mispaired row.
+ *
+ * It used to compact instead, and that cost real data: on 2026-08-29 it shipped 12 padhr
+ * ComplianceDeadline rows each carrying the NEXT
  * item's description (FOU-443) — caught only by a human reading every row.
  *
  * Return the pairing from the mapper so it travels with the result and compaction
@@ -537,19 +546,19 @@ export interface BatchMapOptions<I> {
  * for (const { seed, generated } of pairs) { ... }
  * ```
  *
- * Pass `keepHoles: true` if you genuinely need a positionally-aligned array; skipped
- * items then come back as `null` at their original index.
+ * Pass `keepHoles: false` for the old compacting behaviour — only when you genuinely
+ * do not care which input produced which output.
  */
 export async function batchMap<I, O>(
   items: I[],
   fn: (item: I, helpers: BatchMapHelpers) => Promise<O>,
-  opts: BatchMapOptions<I> & { keepHoles: true },
-): Promise<(O | null)[]>;
+  opts: BatchMapOptions<I> & { keepHoles: false },
+): Promise<O[]>;
 export async function batchMap<I, O>(
   items: I[],
   fn: (item: I, helpers: BatchMapHelpers) => Promise<O>,
   opts?: BatchMapOptions<I>,
-): Promise<O[]>;
+): Promise<(O | null)[]>;
 export async function batchMap<I, O>(
   items: I[],
   fn: (item: I, helpers: BatchMapHelpers) => Promise<O>,
@@ -587,6 +596,9 @@ export async function batchMap<I, O>(
     }
   };
   await Promise.all(Array.from({ length: Math.min(concurrency, items.length) || 1 }, worker));
-  if (opts.keepHoles) return results.map((r) => (r === SKIP ? null : (r as O)));
-  return results.filter((r): r is O => r !== SKIP);
+  // Holes by default (FOU-537): index alignment holds by construction, and the
+  // (O | null)[] return type turns every unguarded `results[i]` into a type error
+  // rather than a silently mispaired row.
+  if (opts.keepHoles === false) return results.filter((r): r is O => r !== SKIP);
+  return results.map((r) => (r === SKIP ? null : (r as O)));
 }

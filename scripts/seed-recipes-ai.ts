@@ -185,17 +185,23 @@ async function main() {
     },
   )
 
+  // batchMap now defaults to keepHoles (FOU-537): a skipped dish comes back as `null`
+  // at its original index instead of compacting away, so this filter is required —
+  // without it `r.title` below would throw on the first skip instead of silently
+  // mispairing like it used to.
+  const rows = generated.filter((r): r is GeneratedRecipe => r !== null)
+
   const elapsed = ((Date.now() - start) / 1000).toFixed(1)
   const s = getStats()
   console.log(
-    `\nGenerated ${generated.length}/${dishes.length} in ${elapsed}s ` +
+    `\nGenerated ${rows.length}/${dishes.length} in ${elapsed}s ` +
       `(cerebras ok=${s.cerebras.ok} fail=${s.cerebras.failed}, ` +
       `groq ok=${s.groq.ok} fail=${s.groq.failed})`,
   )
 
   let inserted = 0
   let skipped = 0
-  for (const r of generated) {
+  for (const r of rows) {
     const existing = await prisma.recipe.findFirst({
       where: { title: r.title, userId: admin!.id },
       select: { id: true },
