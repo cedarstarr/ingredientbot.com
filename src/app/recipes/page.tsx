@@ -5,14 +5,15 @@ import { ArrowRight } from 'lucide-react'
 import { BrowseShell, RecipeCard, EmptyState } from '@/components/recipes/browse-shell'
 import { OTHER_CUISINE_LABEL, slugifyCuisine } from '@/lib/recipe-format'
 
-// FOU-466: this page used to also render the filtered `?cuisine=` view inline,
-// which meant reading `searchParams` here — that forces the whole page dynamic
-// in Next.js, so `revalidate` below never took effect and every request ran
-// both queries below. The filtered view now lives at its own static segment,
-// /recipes/[cuisine], so this overview reads no searchParams and can actually
-// be revalidated on a schedule instead of per request.
-export const revalidate = 3600
-
+// FOU-466: `revalidate` used to live here, but it was dead — the filtered
+// `?cuisine=` view was rendered inline via `searchParams`, which forces the
+// whole page dynamic. That view now lives at its own segment, /recipes/[cuisine]
+// (see that commit), but this page is STILL dynamic: src/app/layout.tsx reads
+// headers()/cookies() unconditionally (EU consent gating + CSP nonce), which
+// forces dynamic rendering app-wide regardless of any page-level `revalidate`.
+// Removed rather than left in place implying a caching behavior that doesn't
+// exist — see FOU-466 for the follow-up (root layout would need a conditional
+// read, or Partial Prerendering, to let this page actually go static).
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ingredientbot.com'
 
 export const metadata: Metadata = {
