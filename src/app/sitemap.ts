@@ -110,12 +110,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 0.6,
     },
-    {
-      url: `${baseUrl}/allergens`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.6,
-    },
+    // /allergens (FOU-464): only advertise the index once at least one row is
+    // published — otherwise it's a live, sitemapped page backed by nothing.
+    // The page itself still renders (with an honest empty state) for anyone
+    // who navigates there directly; this only controls crawl discovery.
+    ...(allergens.length > 0
+      ? [
+          {
+            url: `${baseUrl}/allergens`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly' as const,
+            priority: 0.6,
+          },
+        ]
+      : []),
     {
       url: `${baseUrl}/signup`,
       lastModified: new Date(),

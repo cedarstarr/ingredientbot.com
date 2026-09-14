@@ -13,13 +13,23 @@ export const revalidate = 3600
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ingredientbot.com'
 
-export const metadata: Metadata = {
-  title: 'Allergen Reference — IngredientBot',
-  description:
-    'A reference guide to the major food allergens — regulatory status, alternate label names, hidden sources, cross-reactivity, and dining-out guidance.',
-  alternates: {
-    canonical: `${baseUrl}/allergens`,
-  },
+const description =
+  'A reference guide to the major food allergens — regulatory status, alternate label names, hidden sources, cross-reactivity, and dining-out guidance.'
+
+// FOU-464: dynamic so we can noindex while the table has zero published rows
+// — a linked, canonical page with no entries is thin content. Once at least
+// one allergen is published, this is identical to the old static export.
+export async function generateMetadata(): Promise<Metadata> {
+  const publishedCount = await prisma.allergen.count({ where: { published: true } })
+
+  return {
+    title: 'Allergen Reference — IngredientBot',
+    description,
+    alternates: {
+      canonical: `${baseUrl}/allergens`,
+    },
+    ...(publishedCount === 0 ? { robots: { index: false, follow: true } } : {}),
+  }
 }
 
 interface RegulatoryStatus {
@@ -41,7 +51,7 @@ export default async function AllergensIndexPage() {
     '@context': 'https://schema.org',
     '@type': 'DefinedTermSet',
     name: 'IngredientBot Allergen Reference',
-    description: metadata.description,
+    description,
     url: `${baseUrl}/allergens`,
     hasDefinedTerm: allergens.map((a) => ({
       '@type': 'DefinedTerm',
