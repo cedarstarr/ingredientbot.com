@@ -7,10 +7,8 @@ import { ArrowLeft } from 'lucide-react'
 import { BrowseShell, RecipeCard, EmptyState } from '@/components/recipes/browse-shell'
 import { OTHER_CUISINE_LABEL, slugifyCuisine } from '@/lib/recipe-format'
 
-// FOU-466: split out of /recipes so the overview there can drop searchParams
-// and actually revalidate. This segment owns the filtered, indexable view —
-// one clean URL per cuisine instead of /recipes?cuisine=X.
-export const revalidate = 3600
+// FOU-466: no `revalidate` — the root layout's headers()/cookies() reads force
+// every route dynamic (FOU-431), so it could never take effect here.
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ingredientbot.com'
 const publicWhere = { isPublic: true as const, publicSlug: { not: null } }
