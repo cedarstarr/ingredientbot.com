@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-09-10 (/qa-e2e run)
+**Last Updated**: 2026-09-16 (/qa-resilience run)
 
 ---
 
@@ -26,7 +26,7 @@
 | 11 | Button Audit | /qa-button-fix | DONE | 1 | 2026-07-18 | [view](reports/2026-07-19-qa-buttons.md) |
 | 12 | Re-verify Tests | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 13 | Security Hardening | /qa-security | DONE | 8 | 2026-08-29 | [view](reports/2026-08-29-site-security.md) |
-| 14 | Resilience Audit | /qa-resilience | STALE | 4 | 2026-08-01 | [view](reports/2026-08-02-site-resilience.md) |
+| 14 | Resilience Audit | /qa-resilience | DONE | 5 | 2026-09-16 | [view](reports/2026-08-02-site-resilience.md) |
 | 15 | AI Completion Audit | /qa-ai-completion | STALE | 1 | 2026-08-09 | — |
 | 16 | Design System Install | /design-implement | STALE | 2 | 2026-06-25 | [view](reports/2026-04-18-site-design.md) |
 | 17 | Token Hygiene | /qa-tokens | STALE | 6 | 2026-06-24 | [view](reports/2026-06-24-qa-tokens.md) |
@@ -44,7 +44,7 @@
 
 **Progress: 22/28 stages complete (1 skipped)**
 
-**Last Updated**: 2026-09-10 (/qa-e2e run)
+**Last Updated**: 2026-09-16 (/qa-resilience run)
 
 ---
 
@@ -155,3 +155,4 @@
 | 2026-09-08 | /qa-e2e | 6m | SUCCESS | 143/148 pass, 0 fail (was 1). Fixed a one-shot textContent race exposed by the FOU-321 disclaimer, and an SSR stream-doubling strict-mode violation on collections-heading. Gate for the 8-commit promotion. [view](reports/2026-09-09-qa-e2e.md) |
 | 2026-09-09 | /qa-e2e | 4m | SUCCESS | FOU-344 per-account login lockout. E2E gate 143/148 pass, 0 fail (chromium). Migration applied staging then production. [view](reports/2026-09-09-fou344-lockout.md) |
 | 2026-09-10 | /qa-e2e | 8m | SUCCESS | 145/153 pass, 0 fail; 1 stale-testid finding was a conditional-spread false positive [view](reports/2026-09-10-qa-e2e.md) |
+| 2026-09-16 | /qa-resilience | 1m | SUCCESS | Clean: err/health/mw/rl/sentry/prisma all present, 100% API try/catch, crons authed [view](reports/2026-08-02-site-resilience.md) |
