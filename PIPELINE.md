@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-09-16 (/qa-resilience run)
+**Last Updated**: 2026-09-17 (/qa-e2e run)
 
 ---
 
@@ -35,7 +35,7 @@
 | 20 | Performance Audit | /qa-perf | STALE | 3 | 2026-07-02 | [view](reports/2026-07-02-site-perf.md) |
 | 21 | SEO Audit | /qa-seo | STALE | 2 | 2026-07-13 | [view](reports/2026-04-19-site-seo.md) |
 | 22 | Accessibility Audit | /qa-a11y | STALE | 2 | 2026-07-15 | [view](reports/2026-07-15-qa-a11y.md) |
-| 23 | E2E Gate | /qa-e2e | DONE | 21 | 2026-09-10 | [view](reports/2026-09-10-qa-e2e.md) |
+| 23 | E2E Gate | /qa-e2e | DONE | 22 | 2026-09-17 | [view](reports/2026-09-17-qa-e2e.md) |
 | 24 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
 | 25 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
 | 26 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
@@ -44,7 +44,7 @@
 
 **Progress: 22/28 stages complete (1 skipped)**
 
-**Last Updated**: 2026-09-16 (/qa-resilience run)
+**Last Updated**: 2026-09-17 (/qa-e2e run)
 
 ---
 
@@ -156,3 +156,4 @@
 | 2026-09-09 | /qa-e2e | 4m | SUCCESS | FOU-344 per-account login lockout. E2E gate 143/148 pass, 0 fail (chromium). Migration applied staging then production. [view](reports/2026-09-09-fou344-lockout.md) |
 | 2026-09-10 | /qa-e2e | 8m | SUCCESS | 145/153 pass, 0 fail; 1 stale-testid finding was a conditional-spread false positive [view](reports/2026-09-10-qa-e2e.md) |
 | 2026-09-16 | /qa-resilience | 1m | SUCCESS | Clean: err/health/mw/rl/sentry/prisma all present, 100% API try/catch, crons authed [view](reports/2026-08-02-site-resilience.md) |
+| 2026-09-17 | /qa-e2e | 20m | SUCCESS | 0 fail (145/153); 1 stale-testid finding was a conditional spread testid, false positive [view](reports/2026-09-17-qa-e2e.md) |
