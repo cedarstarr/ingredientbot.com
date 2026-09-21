@@ -63,15 +63,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         )
 
         if (!isPasswordValid) {
-          const attempts = (user.failedLoginAttempts ?? 0) + 1
-          const lockMinutes = computeLockoutMinutes(attempts)
-          await prisma.user.update({
+          // Atomic increment: concurrent failed attempts each read the same stale count
+          // with read-then-write, so the increments collapse and the lockout never fires —
+          // under exactly the parallel requests credential stuffing uses.
+          const updated = await prisma.user.update({
             where: { id: user.id },
-            data: {
-              failedLoginAttempts: attempts,
-              lockedUntil: lockMinutes ? new Date(Date.now() + lockMinutes * 60_000) : null,
-            },
+            data: { failedLoginAttempts: { increment: 1 } },
           })
+          const lockMinutes = computeLockoutMinutes(updated.failedLoginAttempts)
+          if (lockMinutes) {
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { lockedUntil: new Date(Date.now() + lockMinutes * 60_000) },
+            })
+          }
           return null
         }
 
