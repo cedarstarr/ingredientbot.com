@@ -85,6 +85,13 @@ model User {
   notifyMarketing     Boolean   @default(true) @map("notify_marketing")
   notifyProduct       Boolean   @default(true) @map("notify_product")
 
+  // Durable welcome-drip state (FOU unfiled qa-db finding) — the record decides who
+  // still needs the email, not a lookback window on createdAt. sentAt null + attempts
+  // under the cap means still eligible; a failed send leaves sentAt null so the next
+  // run retries the same user instead of the window sliding past them.
+  welcomeEmailSentAt   DateTime? @map("welcome_email_sent_at")
+  welcomeEmailAttempts Int       @default(0) @map("welcome_email_attempts")
+
   pendingEmail      String?   @map("pending_email")
   emailChangeToken  String?   @unique @map("email_change_token")
   emailChangeExpiry DateTime? @map("email_change_expiry")

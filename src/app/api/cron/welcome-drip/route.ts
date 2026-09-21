@@ -5,6 +5,10 @@ import { childLogger } from '@/lib/logger'
 
 export const maxDuration = 60
 
+// A hard-bouncing or permanently-misconfigured address stops being retried after this
+// many attempts, rather than being retried forever by an unbounded record-based query.
+const MAX_WELCOME_ATTEMPTS = 3
+
 export async function GET(req: NextRequest) {
   // Fail closed: if CRON_SECRET is unset, reject all callers. Previously this fell open
   // and allowed unauthenticated callers to trigger bulk email sends.
@@ -22,13 +26,20 @@ export async function GET(req: NextRequest) {
   const start = Date.now()
 
   try {
-    // Day 1: users created in last 25 hours who haven't received a drip yet
-    const oneDayAgo = new Date(Date.now() - 25 * 3600 * 1000)
+    // The record decides who still needs the email, not the clock: welcomeEmailSentAt
+    // null + attempts under the cap is the whole eligibility condition, so a failed send
+    // (or an overlapping run) naturally retries the same user next time instead of a
+    // lookback window sliding past them or double-sending on the overlap. createdAt is
+    // only a sanity bound here — generous relative to the daily cadence — to keep this a
+    // "new signup" job and keep the query cheap; it is not what prevents re-sends.
+    const newUserWindow = new Date(Date.now() - 7 * 24 * 3600 * 1000)
     const newUsers = await prisma.user.findMany({
       where: {
-        createdAt: { gte: oneDayAgo },
+        createdAt: { gte: newUserWindow },
         notifyMarketing: true,
         emailVerified: { not: null },
+        welcomeEmailSentAt: null,
+        welcomeEmailAttempts: { lt: MAX_WELCOME_ATTEMPTS },
       },
       select: { id: true, email: true, name: true }
     })
@@ -40,17 +51,36 @@ export async function GET(req: NextRequest) {
     let sent = 0
     let failed = 0
     const errors: string[] = []
+    const sentIds: string[] = []
+    const failedIds: string[] = []
 
     results.forEach((result, i) => {
       if (result.status === 'fulfilled') {
         sent++
+        sentIds.push(newUsers[i].id)
       } else {
         failed++
+        failedIds.push(newUsers[i].id)
         const err = result.reason
         errors.push(`${newUsers[i].email}: ${err instanceof Error ? err.message : String(err)}`)
         log.error({ err, email: newUsers[i].email }, '[welcome-drip] Failed to send')
       }
     })
+
+    // Persist the outcome per user so the next run's selection query reflects reality —
+    // this is what actually stops the double-send/lost-send shape, not the try/catch above.
+    if (sentIds.length > 0) {
+      await prisma.user.updateMany({
+        where: { id: { in: sentIds } },
+        data: { welcomeEmailSentAt: new Date(), welcomeEmailAttempts: { increment: 1 } },
+      })
+    }
+    if (failedIds.length > 0) {
+      await prisma.user.updateMany({
+        where: { id: { in: failedIds } },
+        data: { welcomeEmailAttempts: { increment: 1 } },
+      })
+    }
 
     // Log job run
     await prisma.jobRun.create({

@@ -35,13 +35,24 @@ function escapeHtml(str: string): string {
 export async function sendEmail(opts: { to: string; subject: string; html: string }) {
   const client = getMailClient()
   if (!client) {
-    // Dev-only fallback — suppress in production to avoid leaking email addresses to logs
+    // NODE_ENV is 'production' for every built deploy (Vercel prod AND preview both run
+    // `next build && next start`) and only 'development' under `next dev` — so this split
+    // is "real deploy" vs "local dev server", not "prod env" vs "staging env".
     if (process.env.NODE_ENV !== 'production') {
+      // Dev-only fallback — the key is legitimately absent locally; log once and no-op
+      // rather than throwing, so local flows (signup, password reset, etc.) still work.
       console.log('[email] ZeptoMail not configured, logging email:')
       console.log(`  To: ${opts.to}`)
       console.log(`  Subject: ${opts.subject}`)
+      return { sent: false as const }
     }
-    return
+    // A built deploy with no API key is a real misconfiguration, not a legitimate no-op.
+    // Previously this returned normally, so a missing key made every caller — including
+    // Promise.allSettled batches in the cron jobs — see a "fulfilled" promise and report
+    // 100% success having sent nothing (sibling-site class of bug, three other sites
+    // fixed for the same shape). Throwing lets every existing try/catch and
+    // Promise.allSettled call site see this as the failure it is.
+    throw new Error('[email] ZEPTOMAIL_API_KEY is not configured')
   }
   const fromMatch = EMAIL_FROM.match(/^(.*?)\s*<(.+?)>$/)
   const fromAddr = fromMatch
@@ -53,6 +64,7 @@ export async function sendEmail(opts: { to: string; subject: string; html: strin
     subject: opts.subject,
     htmlbody: opts.html,
   })
+  return { sent: true as const }
 }
 
 export async function sendWelcomeEmail(to: string, name: string | null, verifyUrl?: string) {
