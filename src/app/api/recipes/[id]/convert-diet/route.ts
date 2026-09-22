@@ -49,10 +49,20 @@ export async function POST(
     return new Response('AI service not configured', { status: 503 })
   }
 
+  // FOU-631: this route only ever checked the requested target diet, so a user with a
+  // nut allergy on file who asked to convert to "vegan" got allergenFlag: false and no
+  // hard-constraint prompt — their stored allergy sat unused. Load it and OR it in,
+  // matching the substitute route (src/app/api/recipes/[id]/substitute/route.ts).
+  const dietaryProfile = await prisma.dietaryProfile.findUnique({
+    where: { userId: session.user.id },
+    select: { restrictions: true },
+  })
+  const storedRestrictions = dietaryProfile?.restrictions ?? []
+
   // FOU-321: "make this dairy-free" is an allergen claim when the target diet is
   // allergen-bearing. This no longer escalates to a paid model — it flags the response
   // (no frontend consumer today; grepped 2026-09-08) instead of certifying the result.
-  const isAllergenCall = hasAllergenRestriction([diet])
+  const isAllergenCall = hasAllergenRestriction([diet]) || hasAllergenRestriction(storedRestrictions)
 
   const recipeData = recipe.recipeData as {
     title?: string
@@ -60,10 +70,22 @@ export async function POST(
     instructions?: string[]
   }
 
+  // Same restriction-injection pattern as substitute/modify: a stored allergy has to
+  // survive into the prompt even when it's unrelated to the requested target diet.
+  const restrictionLines: string[] = []
+  if (storedRestrictions.length) {
+    restrictionLines.push(
+      hasAllergenRestriction(storedRestrictions)
+        ? `HARD CONSTRAINT — the user has allergen-bearing restrictions: ${storedRestrictions.join(', ')}. Every ingredient in the converted recipe must be safe under all of them, in addition to fitting "${diet}". If a common ${diet} substitute would violate one (e.g. almond flour for a nut allergy), do not use it — choose a different substitute. If no safe conversion exists, say so in "flavorNotes" and leave the ingredients unconverted.`
+        : `User dietary restrictions (always apply): ${storedRestrictions.join(', ')}.`
+    )
+  }
+  const restrictionContext = restrictionLines.length ? `\n\n${restrictionLines.join('\n')}` : ''
+
   let text: string
   try {
     const response = await generateText({
-      model: dietaryModel([diet], { feature: 'diet-conversion', userId: session.user.id }),
+      model: dietaryModel([diet, ...storedRestrictions], { feature: 'diet-conversion', userId: session.user.id }),
       maxOutputTokens: 800,
       system: `You are a professional chef specializing in dietary adaptations. Convert recipes to fit specific dietary restrictions while maintaining flavor and texture. Respond with JSON:
 {
@@ -74,7 +96,7 @@ export async function POST(
   ],
   "flavorNotes": "brief note on how the dish will taste differently",
   "difficulty": "easier|same|harder"
-}`,
+}${restrictionContext}`,
       messages: [{
         role: 'user',
         content: `Convert this recipe to ${diet}:
