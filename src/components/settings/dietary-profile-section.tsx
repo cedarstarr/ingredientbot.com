@@ -8,21 +8,9 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { useToast } from '@/components/ui/toaster'
 import { AllergenDisclaimer } from '@/components/allergen-disclaimer'
 import { X, Plus, Loader2, CheckCircle } from 'lucide-react'
-
-const RESTRICTION_OPTIONS = [
-  'vegan',
-  'vegetarian',
-  'gluten-free',
-  'dairy-free',
-  'nut-free',
-  'egg-free',
-  'soy-free',
-  'low-carb',
-  'keto',
-  'paleo',
-  'halal',
-  'kosher',
-]
+// Shared with the AI safety matcher (src/lib/ai.ts) so the toggle list and
+// hasAllergenRestriction() can't drift apart again — FOU-629.
+import { RESTRICTION_OPTIONS } from '@/lib/dietary-restrictions'
 
 const CUISINE_OPTIONS = [
   'Italian',

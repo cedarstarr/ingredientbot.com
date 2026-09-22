@@ -4,6 +4,7 @@ import { createOpenAICompatible } from '@ai-sdk/openai-compatible'
 import { wrapLanguageModel, type LanguageModelMiddleware } from 'ai'
 import type { LanguageModelV4StreamPart } from '@ai-sdk/provider'
 import { logAICall } from './ai-log'
+import { ALLERGEN_RESTRICTIONS } from './dietary-restrictions'
 
 // Vision side-path: gpt-oss-120b is text-only, so the photo-analysis route
 // keeps Gemini Flash Lite for image inputs. Don't use for text-only calls.
@@ -213,20 +214,9 @@ export function trackedStructuredModel(ctx: ModelCtx) {
 // certifying isn't.
 // ---------------------------------------------------------------------------
 
-// Restrictions where being wrong is a medical event rather than a preference.
-// 'keto'/'halal'/'paleo' etc. are deliberately absent — they carry no allergen risk.
-const ALLERGEN_RESTRICTIONS = new Set([
-  'nut-free',
-  'peanut-free',
-  'tree-nut-free',
-  'dairy-free',
-  'gluten-free',
-  'egg-free',
-  'soy-free',
-  'shellfish-free',
-  'fish-free',
-  'sesame-free',
-])
+// Vocabulary now lives in dietary-restrictions.ts, shared with the settings UI
+// so the two can't drift apart again (FOU-629).
+const ALLERGEN_RESTRICTIONS_SET = new Set<string>(ALLERGEN_RESTRICTIONS)
 
 /**
  * True when any restriction is allergen-bearing (or a custom entry mentioning
@@ -238,7 +228,7 @@ export function hasAllergenRestriction(restrictions: readonly string[] | null | 
   if (!restrictions?.length) return false
   return restrictions.some((r) => {
     const v = r.trim().toLowerCase()
-    return ALLERGEN_RESTRICTIONS.has(v) || v.includes('allerg') || v.includes('celiac')
+    return ALLERGEN_RESTRICTIONS_SET.has(v) || v.includes('allerg') || v.includes('celiac')
   })
 }
 
