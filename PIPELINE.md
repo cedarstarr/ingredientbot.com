@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-09-19 (/qa-bugs run)
+**Last Updated**: 2026-09-27 (/qa-resilience run)
 
 ---
 
@@ -26,7 +26,7 @@
 | 11 | Button Audit | /qa-button-fix | DONE | 1 | 2026-07-18 | [view](reports/2026-07-19-qa-buttons.md) |
 | 12 | Re-verify Tests | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 13 | Security Hardening | /qa-security | DONE | 8 | 2026-08-29 | [view](reports/2026-08-29-site-security.md) |
-| 14 | Resilience Audit | /qa-resilience | DONE | 5 | 2026-09-16 | [view](reports/2026-08-02-site-resilience.md) |
+| 14 | Resilience Audit | /qa-resilience | DONE | 6 | 2026-09-27 | [view](reports/2026-09-27-qa-resilience.md) |
 | 15 | AI Completion Audit | /qa-ai-completion | STALE | 1 | 2026-08-09 | — |
 | 16 | Design System Install | /design-implement | STALE | 2 | 2026-06-25 | [view](reports/2026-04-18-site-design.md) |
 | 17 | Token Hygiene | /qa-tokens | STALE | 6 | 2026-06-24 | [view](reports/2026-06-24-qa-tokens.md) |
@@ -44,7 +44,7 @@
 
 **Progress: 22/28 stages complete (1 skipped)**
 
-**Last Updated**: 2026-09-19 (/qa-bugs run)
+**Last Updated**: 2026-09-27 (/qa-resilience run)
 
 ---
 
@@ -158,3 +158,4 @@
 | 2026-09-16 | /qa-resilience | 1m | SUCCESS | Clean: err/health/mw/rl/sentry/prisma all present, 100% API try/catch, crons authed [view](reports/2026-08-02-site-resilience.md) |
 | 2026-09-17 | /qa-e2e | 20m | SUCCESS | 0 fail (145/153); 1 stale-testid finding was a conditional spread testid, false positive [view](reports/2026-09-17-qa-e2e.md) |
 | 2026-09-19 | /qa-bugs | 6m | PARTIAL | 8 findings, 0 fixed — all filed to the local tracker (FOU-601..620) [view](reports/2026-07-19-site-bugs.md) |
+| 2026-09-27 | /qa-resilience | 6m | SUCCESS | Clean — no resilience findings. [view](reports/2026-09-27-qa-resilience.md) |
