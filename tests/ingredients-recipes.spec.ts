@@ -11,7 +11,7 @@ import { test, expect } from '@playwright/test'
  */
 
 test.describe('Ingredient glossary', () => {
-  test('/ingredients renders heading and ingredient cards @smoke', async ({ page }) => {
+  test('/ingredients renders heading and ingredient cards', async ({ page }) => {
     const res = await page.goto('/ingredients')
     await page.waitForLoadState('domcontentloaded')
     expect(res?.status()).not.toBe(500)
@@ -44,7 +44,7 @@ test.describe('Ingredient glossary', () => {
 })
 
 test.describe('Recipe browse', () => {
-  test('/recipes renders heading and recipe cards or empty state @smoke', async ({ page }) => {
+  test('/recipes renders heading and recipe cards or empty state', async ({ page }) => {
     const res = await page.goto('/recipes')
     await page.waitForLoadState('domcontentloaded')
     expect(res?.status()).not.toBe(500)

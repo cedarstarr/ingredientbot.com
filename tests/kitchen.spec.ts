@@ -17,7 +17,7 @@ test.describe('Kitchen — ingredient input journey', () => {
     await page.waitForLoadState('domcontentloaded')
   })
 
-  test('ingredient textarea is visible and accepts input @smoke', async ({ page }) => {
+  test('ingredient textarea is visible and accepts input', async ({ page }) => {
     const input = page.getByRole('main').getByPlaceholder(KITCHEN_PLACEHOLDER)
     await expect(input).toBeVisible()
     await input.fill('chicken, rice')
@@ -46,7 +46,7 @@ test.describe('Kitchen — ingredient input journey', () => {
     ).toBeVisible()
   })
 
-  test('Find recipes click does not navigate away from /kitchen @smoke', async ({ page }) => {
+  test('Find recipes click does not navigate away from /kitchen', async ({ page }) => {
     // Mock the AI endpoint so we don't burn tokens on a real generation
     await page.route('/api/recipes/generate', async (route) => {
       const fakeNdjson =

@@ -15,7 +15,7 @@ test.describe('Recipe history search and filters (F37)', () => {
     await page.waitForLoadState('domcontentloaded')
   })
 
-  test('history page shows search input and Search button @smoke', async ({ page }) => {
+  test('history page shows search input and Search button', async ({ page }) => {
     // Scoped through the landmark: when a Next SSR stream closes early the page
     // content is left doubled — once in <main>, once in a hidden <div hidden>
     // under <body> — and an unscoped locator then matches 2+ nodes, picking the

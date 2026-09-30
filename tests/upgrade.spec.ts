@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test'
 test.describe('Upgrade page (authenticated)', () => {
   test.setTimeout(60000)
 
-  test('authenticated user sees pricing copy on /upgrade', async ({ page }) => {
+  test('authenticated user sees pricing copy on /upgrade @smoke', async ({ page }) => {
     await page.goto('/upgrade')
     await page.waitForLoadState('domcontentloaded')
 

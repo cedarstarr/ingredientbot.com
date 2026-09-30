@@ -19,7 +19,7 @@ test.describe('Saved Recipes (authenticated)', () => {
   // resolved content is left doubled — once in <main>, once orphaned in a hidden
   // <div id="S:0"> sibling under <body>. Unscoped testids then hit two nodes and
   // trip Playwright strict mode (FOU-388; same mechanism diagnosed in padjobs FOU-389).
-  test('authenticated user sees the Saved Recipes heading @smoke', async ({ page }) => {
+  test('authenticated user sees the Saved Recipes heading', async ({ page }) => {
     await page.goto('/saved')
     await expect(page.getByRole('main').getByTestId('saved-heading')).toBeVisible({ timeout: 10_000 })
   })

@@ -25,14 +25,14 @@ async function addIngredient(page: import('@playwright/test').Page, text: string
 }
 
 test.describe('Reverse ingredient search', () => {
-  test('page renders for a signed-out visitor @smoke @mobile', async ({ page }) => {
+  test('page renders for a signed-out visitor @mobile', async ({ page }) => {
     await page.goto(PAGE)
     await expect(page.getByTestId('what-can-i-make-heading')).toBeVisible()
     // Not redirected to /login.
     expect(new URL(page.url()).pathname).toBe(PAGE)
   })
 
-  test('composer accepts typed input @smoke @mobile', async ({ page }) => {
+  test('composer accepts typed input @mobile', async ({ page }) => {
     await page.goto(PAGE)
     const input = page.getByRole('main').getByTestId('ingredient-input')
     await input.fill('onion')
@@ -111,7 +111,7 @@ test.describe('Reverse ingredient search', () => {
     }).toPass({ timeout: 15_000 })
   })
 
-  test('the search API is reachable without a session @smoke', async ({ request }) => {
+  test('the search API is reachable without a session', async ({ request }) => {
     const res = await request.get('/api/search/ingredients?q=oli')
     expect(res.status()).toBe(200)
     const body = await res.json()

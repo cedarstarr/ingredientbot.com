@@ -30,7 +30,7 @@ test.describe('Authenticated app shell', () => {
     ).toBeVisible()
   })
 
-  test('/recipe/nonexistent-id returns 404 (not 500) @smoke', async ({ page }) => {
+  test('/recipe/nonexistent-id returns 404 (not 500)', async ({ page }) => {
     const res = await page.goto('/recipe/nonexistent-id-that-does-not-exist')
     await page.waitForLoadState('domcontentloaded')
     expect(res?.status()).not.toBe(500)
