@@ -14,7 +14,7 @@ test.describe('Auth — login & signup pages', () => {
     await expect(page.getByRole('button', { name: /sign in/i })).toBeVisible()
   })
 
-  test('signup page renders name, email, password, and confirm password fields @smoke', async ({ page }) => {
+  test('signup page renders name, email, password, and confirm password fields', async ({ page }) => {
     await page.goto('/signup')
     await page.waitForLoadState('domcontentloaded')
 

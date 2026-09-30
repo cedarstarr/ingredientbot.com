@@ -25,7 +25,7 @@ import { test, expect } from '@playwright/test'
 test.describe('Change password (unauthenticated)', () => {
   test.use({ storageState: { cookies: [], origins: [] } })
 
-  test('unauthenticated visitor is redirected to /login @smoke', async ({ page }) => {
+  test('unauthenticated visitor is redirected to /login', async ({ page }) => {
     await page.goto('/change-password')
     await expect(page).toHaveURL(/\/login/)
   })
