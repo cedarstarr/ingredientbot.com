@@ -98,7 +98,7 @@ export async function GET(req: NextRequest) {
 <head><meta charset="utf-8" /></head>
 <body style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#111;">
   <h2 style="color:#e57c2c;margin-bottom:4px;">Your Meal Plan for the Week of ${weekLabel}</h2>
-  <p style="color:#555;margin-top:0;">Hey ${displayName}, here&apos;s what&apos;s on the menu!</p>
+  <p style="color:#555;margin-top:0;">Hey ${displayName}, here&#39;s what&#39;s on the menu!</p>
   <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
   ${daysHtml}
   <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
@@ -106,7 +106,7 @@ export async function GET(req: NextRequest) {
     <a href="${SITE_URL}/meal-plan" style="background:#e57c2c;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;">View Meal Plan</a>
   </p>
   <p style="margin-top:32px;color:#999;font-size:12px;">
-    You&apos;re receiving this because you have meal plan notifications enabled.
+    You&#39;re receiving this because you have meal plan notifications enabled.
     <a href="${SITE_URL}/settings" style="color:#999;">Manage preferences</a>
   </p>
 </body>
