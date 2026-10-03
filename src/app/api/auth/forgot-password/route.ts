@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendPasswordResetEmail } from '@/lib/email'
-import { authLimiter } from '@/lib/rate-limit'
+import { authLimiter, clientIp } from '@/lib/rate-limit'
 import crypto from 'crypto'
 
 export async function POST(request: NextRequest) {
-  const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1'
+  const ip = clientIp(request)
   const { success } = await authLimiter.check(ip)
   if (!success) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })

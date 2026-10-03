@@ -3,12 +3,12 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { sendPasswordChangedEmail } from '@/lib/email'
 import { logAuditEvent } from '@/lib/audit'
-import { authLimiter, rateLimitResponse } from '@/lib/rate-limit'
+import { authLimiter, rateLimitResponse, clientIp } from '@/lib/rate-limit'
 import { passwordSchema, validatePassword } from '@/lib/password-policy'
 import bcrypt from 'bcryptjs'
 
 export async function PATCH(request: NextRequest) {
-  const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1'
+  const ip = clientIp(request)
   const { success } = await authLimiter.check(`password-change:${ip}`)
   if (!success) return rateLimitResponse()
 

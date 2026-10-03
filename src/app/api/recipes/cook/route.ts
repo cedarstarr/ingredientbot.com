@@ -3,12 +3,13 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateText } from 'ai'
 import { dietaryModel } from '@/lib/ai'
-import { aiLimiter } from '@/lib/rate-limit'
+import { aiLimiter, clientIp } from '@/lib/rate-limit'
 import { buildCookingMethodContext, buildSpiceContext } from '@/lib/recipe-prompt-utils'
 import { Difficulty } from '@/generated/prisma/client'
 import { startOfCurrentMonth } from '@/lib/date-utils'
 import { getPalateProfile } from '@/lib/palate'
 import { isOverFreeLimit, FREE_TIER_MONTHLY_RECIPES } from '@/lib/limits'
+import { withMonthlyQuota } from '@/lib/recipe-quota'
 
 export const maxDuration = 60
 
@@ -18,7 +19,7 @@ export async function POST(req: NextRequest) {
   const session = await auth()
   if (!session) return new Response('Unauthorized', { status: 401 })
 
-  const ip = req.headers.get('x-forwarded-for') ?? '127.0.0.1'
+  const ip = clientIp(req)
   const { success } = await aiLimiter.check(ip)
   if (!success) return new Response('Too many requests', { status: 429 })
 
@@ -224,11 +225,8 @@ Schema:
   // F30: Wrap recipe creation and usage counter update in a transaction — if either fails,
   // neither is committed, preventing a recipe from being saved without counting toward the limit
   // (or a counter incrementing for a recipe that failed to save).
-  const monthStart = startOfCurrentMonth()
-  const needsReset = !user.monthlyResetDate || user.monthlyResetDate < monthStart
-
-  const [recipe] = await prisma.$transaction([
-    prisma.recipe.create({
+  const recipe = await withMonthlyQuota(session.user.id, (tx) =>
+    tx.recipe.create({
       data: {
         userId: session.user.id,
         title: recipeData.title,
@@ -244,14 +242,8 @@ Schema:
         nutrition: recipeData.nutrition,
       },
     }),
-    prisma.user.update({
-      where: { id: session.user.id },
-      data: {
-        recipeCount: needsReset ? 1 : { increment: 1 },
-        monthlyResetDate: needsReset ? monthStart : undefined,
-      },
-    }),
-  ])
+  )
+  if (!recipe) return Response.json({ error: 'limit_reached', limit: FREE_TIER_MONTHLY_RECIPES }, { status: 402 })
 
   return Response.json({ id: recipe.id })
   } catch (err) {

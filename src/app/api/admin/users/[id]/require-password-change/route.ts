@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { logAuditEvent } from '@/lib/audit'
+import { clientIp } from '@/lib/rate-limit'
 
 export async function POST(
   request: NextRequest,
@@ -23,7 +24,7 @@ export async function POST(
     data: { mustChangePassword: true },
   })
 
-  const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1'
+  const ip = clientIp(request)
   void logAuditEvent(session.user.id, 'require_password_change', ip, { targetUserId: id })
 
   return NextResponse.json({ message: 'User will be required to change their password on next sign-in' })

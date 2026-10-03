@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateText } from 'ai'
 import { dietaryModel, hasAllergenRestriction } from '@/lib/ai'
-import { aiLimiter } from '@/lib/rate-limit'
+import { aiLimiter, clientIp } from '@/lib/rate-limit'
 import * as Sentry from '@sentry/nextjs'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
@@ -16,7 +16,7 @@ export async function POST(
   const session = await auth()
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const ip = req.headers.get('x-forwarded-for') ?? '127.0.0.1'
+  const ip = clientIp(req)
   const { success } = await aiLimiter.check(ip)
   if (!success) return new Response('Too many requests', { status: 429 })
 

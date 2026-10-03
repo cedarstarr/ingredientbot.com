@@ -4,10 +4,11 @@ import { prisma } from '@/lib/prisma'
 import { generateObject, NoObjectGeneratedError } from 'ai'
 import { z } from 'zod'
 import { trackedStructuredModel } from '@/lib/ai'
-import { aiLimiter } from '@/lib/rate-limit'
+import { aiLimiter, clientIp } from '@/lib/rate-limit'
 import { Difficulty } from '@/generated/prisma/client'
 import { startOfCurrentMonth } from '@/lib/date-utils'
 import { isOverFreeLimit, FREE_TIER_MONTHLY_RECIPES } from '@/lib/limits'
+import { withMonthlyQuota } from '@/lib/recipe-quota'
 
 export const maxDuration = 60
 
@@ -77,7 +78,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const session = await auth()
   if (!session) return new Response('Unauthorized', { status: 401 })
 
-  const ip = req.headers.get('x-forwarded-for') ?? '127.0.0.1'
+  const ip = clientIp(req)
   const { success } = await aiLimiter.check(ip)
   if (!success) return new Response('Too many requests', { status: 429 })
 
@@ -181,8 +182,8 @@ Preserve every ingredient and step from the modified recipe exactly. If a field 
 
   const rawText = buildRawText(structured)
 
-  const [recipe] = await prisma.$transaction([
-    prisma.recipe.create({
+  const recipe = await withMonthlyQuota(session.user.id, (tx) =>
+    tx.recipe.create({
       data: {
         userId: session.user.id,
         title: structured.title,
@@ -198,14 +199,8 @@ Preserve every ingredient and step from the modified recipe exactly. If a field 
         nutrition: (structured.nutrition as object) ?? (source.nutrition as object) ?? undefined,
       },
     }),
-    prisma.user.update({
-      where: { id: session.user.id },
-      data: {
-        recipeCount: needsReset ? 1 : { increment: 1 },
-        monthlyResetDate: needsReset ? monthStart : undefined,
-      },
-    }),
-  ])
+  )
+  if (!recipe) return Response.json({ error: 'limit_reached', limit: FREE_TIER_MONTHLY_RECIPES }, { status: 402 })
 
   return Response.json({ id: recipe.id })
   } catch (err) {

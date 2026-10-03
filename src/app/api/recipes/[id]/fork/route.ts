@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { formLimiter } from '@/lib/rate-limit'
+import { formLimiter, clientIp } from '@/lib/rate-limit'
 import { startOfCurrentMonth } from '@/lib/date-utils'
 import { isOverFreeLimit, FREE_TIER_MONTHLY_RECIPES } from '@/lib/limits'
+import { withMonthlyQuota } from '@/lib/recipe-quota'
 
 /**
  * Copy a PUBLIC library recipe into the signed-in user's own collection, so the
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // public recipe page, which sends the visitor to /login itself.
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const ip = req.headers.get('x-forwarded-for') ?? '127.0.0.1'
+    const ip = clientIp(req)
     const { success } = await formLimiter.check(ip)
     if (!success) return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 })
 
@@ -77,8 +78,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       }
     }
 
-    const [recipe] = await prisma.$transaction([
-      prisma.recipe.create({
+    const recipe = await withMonthlyQuota(session.user.id, (tx) =>
+      tx.recipe.create({
         data: {
           userId: session.user.id,
           title: source.title,
@@ -108,14 +109,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         },
         select: { id: true },
       }),
-      prisma.user.update({
-        where: { id: session.user.id },
-        data: {
-          recipeCount: needsReset ? 1 : { increment: 1 },
-          monthlyResetDate: needsReset ? monthStart : undefined,
-        },
-      }),
-    ])
+    )
+    if (!recipe) return NextResponse.json({ error: 'limit_reached', limit: FREE_TIER_MONTHLY_RECIPES }, { status: 402 })
 
     return NextResponse.json({ id: recipe.id, existing: false })
   } catch (err) {
