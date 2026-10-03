@@ -47,7 +47,7 @@ export default function PrivacyPage() {
             <ul className="space-y-2 text-muted-foreground list-disc list-inside">
               <li><strong className="text-foreground">Account information</strong> — your email address and a securely hashed password when you sign up.</li>
               <li><strong className="text-foreground">Recipes you generate and save</strong> — recipe content and the ingredients you used are stored in our database so you can access them later.</li>
-              <li><strong className="text-foreground">Ingredient inputs</strong> — the ingredients you enter in the kitchen are sent to Anthropic&apos;s Claude API to generate recipe suggestions. Anthropic may process and use this data per their own privacy policy.</li>
+              <li><strong className="text-foreground">Ingredient inputs</strong> — the ingredients you enter in the kitchen are sent to third-party AI providers (see &quot;AI disclosure&quot; below) to generate recipe suggestions, and photos you upload for ingredient recognition are sent to Google.</li>
             </ul>
           </section>
 
@@ -64,16 +64,28 @@ export default function PrivacyPage() {
             <h2 className="text-2xl font-semibold text-foreground mb-3">AI disclosure</h2>
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-6">
               <p className="text-foreground">
-                The ingredients you enter in the kitchen are sent to <strong>Anthropic&apos;s Claude API</strong> to generate recipe suggestions. This data leaves our servers and is processed by Anthropic. Please review{' '}
+                The ingredients you enter in the kitchen are sent to a shared AI service we operate, which passes them to a third-party AI model provider to generate recipe suggestions. If that service is unavailable, they are sent directly to <strong>Groq</strong>. This data leaves our servers and is processed by those providers. Please review{' '}
                 <a
-                  href="https://www.anthropic.com/privacy"
+                  href="https://groq.com/privacy-policy/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary underline underline-offset-4 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
-                  Anthropic&apos;s privacy policy
+                  Groq&apos;s privacy policy
                 </a>{' '}
                 to understand how they handle API inputs.
+              </p>
+              <p className="mt-3 text-foreground">
+                If you upload a photo of your fridge or pantry, the image is sent to <strong>Google&apos;s Gemini API</strong> to recognise the ingredients in it. See{' '}
+                <a
+                  href="https://policies.google.com/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary underline underline-offset-4 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  Google&apos;s privacy policy
+                </a>
+                .
               </p>
               <p className="mt-3 text-muted-foreground text-sm">
                 Do not enter sensitive personal information (health conditions, allergies requiring medical management, etc.) in the ingredient input field.
@@ -85,7 +97,8 @@ export default function PrivacyPage() {
             <h2 className="text-2xl font-semibold text-foreground mb-3">Third-party services</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               {[
-                { name: 'Anthropic / Claude', role: 'AI recipe generation from your ingredient inputs' },
+                { name: 'Shared AI service / Groq', role: 'AI recipe generation from your ingredient inputs' },
+                { name: 'Google (Gemini)', role: 'Recognising ingredients in photos you upload' },
                 { name: 'ZeptoMail', role: 'Transactional email delivery (welcome, password reset)' },
                 { name: 'Railway', role: 'Database hosting for your account and recipe data' },
                 { name: 'Vercel', role: 'Application hosting and edge infrastructure' },
