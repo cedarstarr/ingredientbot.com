@@ -1,6 +1,6 @@
 {
-  "name": "Robot Food — AI Recipe Assistant",
-  "short_name": "Robot Food",
+  "name": "IngredientBot — AI Recipe Assistant",
+  "short_name": "IngredientBot",
   "description": "Tell it what's in your fridge. Get instant AI recipe ideas.",
   "start_url": "/kitchen",
   "display": "standalone",

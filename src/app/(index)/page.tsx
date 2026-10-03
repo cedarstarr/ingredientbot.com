@@ -19,7 +19,7 @@ const webAppJsonLd = {
   '@type': 'WebApplication',
   name: 'IngredientBot',
   url: baseUrl,
-  description: 'AI-powered recipe suggestions based on ingredients you have. Type what\'s in your fridge, snap a photo, and get instant recipe ideas powered by Claude AI.',
+  description: 'AI-powered recipe suggestions based on ingredients you have. Type what\'s in your fridge, snap a photo, and get instant recipe ideas.',
   applicationCategory: 'FoodApplication',
   operatingSystem: 'Web',
   offers: {
@@ -68,7 +68,7 @@ export default function LandingPage() {
       <section className="mx-auto max-w-6xl px-4 pt-24 pb-20 text-center">
         <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm text-primary mb-8">
           <Sparkles className="h-3.5 w-3.5" />
-          Powered by Claude AI
+          AI recipe assistant
         </div>
         <h1 className="text-5xl font-bold tracking-tight text-balance text-foreground sm:text-6xl lg:text-7xl">
           Your kitchen,{' '}

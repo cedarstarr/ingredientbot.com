@@ -17,13 +17,13 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://ingredientbot.com'),
   openGraph: {
     title: 'IngredientBot — AI Recipe Assistant',
-    description: 'Tell it what\'s in your fridge. Get instant recipe ideas powered by Claude AI.',
+    description: 'Tell it what\'s in your fridge. Get instant recipe ideas.',
     images: [{ url: '/opengraph-image', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'IngredientBot — AI Recipe Assistant',
-    description: 'Tell it what\'s in your fridge. Get instant recipe ideas powered by Claude AI.',
+    description: 'Tell it what\'s in your fridge. Get instant recipe ideas.',
   },
   // F43: PWA manifest
   manifest: '/manifest.json',
