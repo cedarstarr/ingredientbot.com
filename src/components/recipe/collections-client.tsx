@@ -106,7 +106,7 @@ export function CollectionsClient({ collections: initial }: CollectionsClientPro
             <span>Collections</span>
           </h1>
           <p className="text-muted-foreground mt-1">
-            Organise your recipes into folders
+            Organize your recipes into folders
           </p>
         </div>
         <Button onClick={() => setCreating(true)} data-testid="collections-new-btn">
@@ -123,7 +123,7 @@ export function CollectionsClient({ collections: initial }: CollectionsClientPro
           </div>
           <h2 className="text-xl font-semibold text-foreground mb-2">No collections yet</h2>
           <p className="text-muted-foreground mb-6 max-w-sm">
-            Create your first collection to organise your saved recipes — by cuisine, occasion, or anything you like.
+            Create your first collection to organize your saved recipes — by cuisine, occasion, or anything you like.
           </p>
           <Button onClick={() => setCreating(true)}>
             <Plus className="h-4 w-4 mr-2" />
