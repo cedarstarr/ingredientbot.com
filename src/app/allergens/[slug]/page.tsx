@@ -226,21 +226,7 @@ export default async function AllergenDetailPage({ params }: Props) {
           </section>
         )}
 
-        {/* CTA */}
-        <div className="mt-4 rounded-2xl border border-primary/20 bg-primary/5 p-6 text-center">
-          <ChefHat className="h-8 w-8 text-primary mx-auto mb-3" />
-          <h2 className="text-xl font-bold text-foreground mb-2">Cooking around {allergen.name.toLowerCase()}?</h2>
-          <p className="text-muted-foreground text-sm mb-4 max-w-sm mx-auto">
-            Set your dietary profile once and every recipe IngredientBot generates respects it —
-            free to try.
-          </p>
-          <Button asChild size="lg">
-            <Link href="/kitchen">
-              Try IngredientBot Free
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Link>
-          </Button>
-        </div>
+        {/* No sign-up CTA here (FOU-730): on an allergen page any pitch for dietary filters reads as a safety promise. */}
       </main>
 
       <footer className="border-t border-border py-6 text-center text-sm text-muted-foreground">
