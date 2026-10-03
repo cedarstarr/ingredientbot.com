@@ -142,7 +142,7 @@ export default async function Image() {
               letterSpacing: '0.01em',
             }}
           >
-            Powered by Claude AI
+            AI recipe assistant
           </span>
         </div>
       </div>
