@@ -5,6 +5,7 @@ import { ChefHat, Loader2, Mic, MicOff, Send, Volume2, VolumeX } from 'lucide-re
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
+import { AllergenDisclaimer } from '@/components/allergen-disclaimer'
 
 // F89: Voice sous-chef — hands-free Q&A layered on top of cooking mode. Nothing here
 // persists (max 5 exchanges, client state only) — this is a scratch conversation about
@@ -41,6 +42,9 @@ export function SousChef({ recipeId, currentStepIndex, totalSteps }: Props) {
   // F89: speak-aloud toggle, default ON per spec — hands-free means the answer
   // should be heard, not just displayed, unless the user opts out.
   const [speakEnabled, setSpeakEnabled] = useState(true)
+  // FOU-603: set from the X-Allergen-Flag header. Answers are read aloud, so the
+  // written disclaimer stays pinned in the sheet rather than pairing with one answer.
+  const [allergenFlag, setAllergenFlag] = useState(false)
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null)
@@ -100,6 +104,7 @@ export function SousChef({ recipeId, currentStepIndex, totalSteps }: Props) {
         updateExchange(id, { status: 'error', answer: RATE_LIMIT_COPY })
         return
       }
+      if (res.headers.get('X-Allergen-Flag') === 'true') setAllergenFlag(true)
       if (!res.ok || !res.body) {
         updateExchange(id, { status: 'error', answer: GENERIC_FAILURE_COPY })
         return
@@ -271,6 +276,8 @@ export function SousChef({ recipeId, currentStepIndex, totalSteps }: Props) {
               })
             )}
           </div>
+
+          {allergenFlag && <AllergenDisclaimer compact />}
 
           <form
             onSubmit={(e) => { e.preventDefault(); ask(inputValue) }}
