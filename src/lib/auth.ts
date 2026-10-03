@@ -7,7 +7,7 @@ import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { logAuditEvent } from "@/lib/audit"
 import { authConfig } from "@/lib/auth.config"
-import { authLimiter } from "@/lib/rate-limit"
+import { authLimiter, clientIp } from "@/lib/rate-limit"
 import { computeLockoutMinutes, isLockedOut } from "@/lib/login-lockout"
 
 // NextAuth's credentials handler is owned by the auth library and is not covered
@@ -36,7 +36,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // Brute-force guard: 5 attempts/min per IP (shared key with other auth routes,
         // so a brute-forcer cannot move from /login to /forgot-password to evade).
         const hdrs = await headers()
-        const ip = hdrs.get('x-forwarded-for') ?? '127.0.0.1'
+        const ip = clientIp({ headers: hdrs })
         const { success } = await authLimiter.check(`login:${ip}`)
         if (!success) {
           throw new RateLimitedError('Too many sign-in attempts')
@@ -115,7 +115,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // no-throw by design, so keep the whole read best-effort.
       let ip: string | null = null
       try {
-        ip = (await headers()).get('x-forwarded-for') ?? '127.0.0.1'
+        ip = clientIp({ headers: await headers() })
       } catch { /* no request context — record the login without an IP */ }
       void logAuditEvent(user.id ?? null, 'login', ip)
     },

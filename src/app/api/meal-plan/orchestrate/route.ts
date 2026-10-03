@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { generateObject, NoObjectGeneratedError } from 'ai'
 import { z } from 'zod'
 import { trackedStructuredModel } from '@/lib/ai'
-import { aiLimiter } from '@/lib/rate-limit'
+import { aiLimiter, clientIp } from '@/lib/rate-limit'
 
 export const maxDuration = 60
 
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     const session = await auth()
     if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const ip = req.headers.get('x-forwarded-for') ?? '127.0.0.1'
+    const ip = clientIp(req)
     const { success } = await aiLimiter.check(ip)
     if (!success) return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
 

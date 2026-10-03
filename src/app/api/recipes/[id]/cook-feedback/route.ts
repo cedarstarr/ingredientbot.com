@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateText } from 'ai'
 import { brokerModel } from '@/lib/ai'
-import { aiLimiter } from '@/lib/rate-limit'
+import { aiLimiter, clientIp } from '@/lib/rate-limit'
 import * as Sentry from '@sentry/nextjs'
 
 export const maxDuration = 30
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     data: { outcome, note: note || null },
   })
 
-  const ip = req.headers.get('x-forwarded-for') ?? '127.0.0.1'
+  const ip = clientIp(req)
   const { success } = await aiLimiter.check(ip)
   if (!success) {
     // Rate-limited: the feedback is already saved, just skip the tip honestly.

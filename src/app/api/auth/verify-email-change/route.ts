@@ -2,10 +2,10 @@ import { NextRequest } from 'next/server'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { logAuditEvent } from '@/lib/audit'
-import { authLimiter } from '@/lib/rate-limit'
+import { authLimiter, clientIp } from '@/lib/rate-limit'
 
 export async function GET(req: NextRequest) {
-  const ip = req.headers.get('x-forwarded-for') ?? 'anonymous'
+  const ip = clientIp(req)
 
   // Symmetric rate-limit with signup / forgot / reset / password-change. Token entropy makes
   // brute-force infeasible in practice; this is defense-in-depth against accidental token-leak

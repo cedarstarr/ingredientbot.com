@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { streamText } from 'ai'
-import { brokerModel } from '@/lib/ai'
+import { dietaryModel, hasAllergenRestriction } from '@/lib/ai'
 import { aiLimiter, clientIp } from '@/lib/rate-limit'
 
 // F89: Voice sous-chef — hands-free Q&A while the user is mid-recipe in cooking mode.
@@ -67,6 +67,27 @@ export async function POST(
       return new Response('AI service not configured', { status: 503 })
     }
 
+    // FOU-603: same restriction handling as /substitute and /chat. The flag only
+    // tells the sheet to show AllergenDisclaimer — nothing here certifies a verdict.
+    const dietaryProfile = await prisma.dietaryProfile.findUnique({
+      where: { userId: session.user.id },
+      select: { restrictions: true, dislikedIngredients: true },
+    })
+    const restrictions = dietaryProfile?.restrictions ?? []
+    const isAllergenCall = hasAllergenRestriction(restrictions)
+    const restrictionLines: string[] = []
+    if (restrictions.length) {
+      restrictionLines.push(
+        isAllergenCall
+          ? `HARD CONSTRAINT — the user has allergen-bearing restrictions: ${restrictions.join(', ')}. Any substitution or ingredient suggestion you make must be safe under all of them. If they ask about an ingredient that would violate one, say so clearly rather than qualifying it.`
+          : `User dietary restrictions (always respect): ${restrictions.join(', ')}.`
+      )
+    }
+    if (dietaryProfile?.dislikedIngredients?.length) {
+      restrictionLines.push(`User dislikes these ingredients (avoid suggesting): ${dietaryProfile.dislikedIngredients.join(', ')}.`)
+    }
+    const restrictionContext = restrictionLines.length ? `\n\n${restrictionLines.join('\n')}` : ''
+
     const recipeData = recipe.recipeData as {
       title?: string
       ingredients?: unknown
@@ -88,10 +109,10 @@ Full steps: ${JSON.stringify(steps)}
 
 They are currently on step ${currentStepIndex + 1} of ${steps.length || '?'}: "${currentStepText ?? '(step text unavailable)'}"
 
-Answer only using the recipe above and ordinary, well-established food-safety practice. Never invent an ingredient, quantity, temperature, or instruction that isn't in the recipe or isn't standard safe kitchen knowledge — a wrong answer here (e.g. undercooked poultry) is a safety failure, not a quality miss. If you don't know or the recipe doesn't say, say so plainly instead of guessing. Reference their current step when relevant. Keep the answer to 2-3 short sentences — it will be read aloud.`
+Answer only using the recipe above and ordinary, well-established food-safety practice. Never invent an ingredient, quantity, temperature, or instruction that isn't in the recipe or isn't standard safe kitchen knowledge — a wrong answer here (e.g. undercooked poultry) is a safety failure, not a quality miss. If you don't know or the recipe doesn't say, say so plainly instead of guessing. Reference their current step when relevant. Keep the answer to 2-3 short sentences — it will be read aloud.${restrictionContext}`
 
     const result = streamText({
-      model: brokerModel({ feature: 'sous-chef', priority: 'interactive' }),
+      model: dietaryModel(restrictions, { feature: 'sous-chef', userId: session.user.id, priority: 'interactive' }),
       maxOutputTokens: 300,
       system: systemPrompt,
       messages: [{ role: 'user', content: question }],
@@ -125,6 +146,7 @@ Answer only using the recipe above and ordinary, well-established food-safety pr
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         Connection: 'keep-alive',
+        'X-Allergen-Flag': String(isAllergenCall),
       },
     })
   } catch (err) {

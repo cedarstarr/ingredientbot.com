@@ -3,11 +3,12 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateText } from 'ai'
 import { trackedModel } from '@/lib/ai'
-import { aiLimiter } from '@/lib/rate-limit'
+import { aiLimiter, clientIp } from '@/lib/rate-limit'
 import { Difficulty } from '@/generated/prisma/client'
 import { startOfCurrentMonth } from '@/lib/date-utils'
 import { isValidUrl } from '@/lib/ssrf'
 import { isOverFreeLimit, FREE_TIER_MONTHLY_RECIPES } from '@/lib/limits'
+import { withMonthlyQuota } from '@/lib/recipe-quota'
 
 export const maxDuration = 60
 
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest) {
   const session = await auth()
   if (!session?.user?.id) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const ip = req.headers.get('x-forwarded-for') ?? '127.0.0.1'
+  const ip = clientIp(req)
   const { success } = await aiLimiter.check(ip)
   if (!success) return Response.json({ error: 'Too many requests' }, { status: 429 })
 
@@ -97,11 +98,8 @@ export async function POST(req: NextRequest) {
       rd.notes ? `\n## Notes\n${rd.notes}` : '',
     ].join('\n')
 
-    const monthStart = startOfCurrentMonth()
-    const needsReset = !user.monthlyResetDate || user.monthlyResetDate < monthStart
-
-    const [recipe] = await prisma.$transaction([
-      prisma.recipe.create({
+    const recipe = await withMonthlyQuota(session.user.id, (tx) =>
+      tx.recipe.create({
         data: {
           userId: session.user.id,
           title: rd.title,
@@ -117,14 +115,8 @@ export async function POST(req: NextRequest) {
           nutrition: rd.nutrition ?? undefined,
         },
       }),
-      prisma.user.update({
-        where: { id: session.user.id },
-        data: {
-          recipeCount: needsReset ? 1 : { increment: 1 },
-          monthlyResetDate: needsReset ? monthStart : undefined,
-        },
-      }),
-    ])
+    )
+    if (!recipe) return Response.json({ error: 'limit_reached', limit: FREE_TIER_MONTHLY_RECIPES }, { status: 402 })
 
     return Response.json({ id: recipe.id })
   }

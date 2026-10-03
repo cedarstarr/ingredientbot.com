@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { streamText } from 'ai'
 import { dietaryModel, hasAllergenRestriction } from '@/lib/ai'
-import { aiLimiter } from '@/lib/rate-limit'
+import { aiLimiter, clientIp } from '@/lib/rate-limit'
 
 export const maxDuration = 60
 
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const session = await auth()
   if (!session) return new Response('Unauthorized', { status: 401 })
 
-  const ip = req.headers.get('x-forwarded-for') ?? '127.0.0.1'
+  const ip = clientIp(req)
   const { success } = await aiLimiter.check(ip)
   if (!success) return new Response('Too many requests', { status: 429 })
 

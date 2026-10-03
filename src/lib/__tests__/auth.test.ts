@@ -31,6 +31,9 @@ vi.mock('@/lib/audit', () => ({ logAuditEvent: logAuditEventMock }))
 const authLimiterCheckMock = vi.fn()
 vi.mock('@/lib/rate-limit', () => ({
   authLimiter: { check: authLimiterCheckMock },
+  // Mirrors the real clientIp(): leftmost x-forwarded-for entry only (FOU-656).
+  clientIp: (req: { headers: { get: (k: string) => string | null } }) =>
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'anonymous',
 }))
 
 vi.mock('@auth/prisma-adapter', () => ({ PrismaAdapter: vi.fn(() => ({})) }))
@@ -108,6 +111,15 @@ describe('authorize() — brute-force rate limit', () => {
       authorize({ email: 'cook@example.com', password: 'x' })
     ).rejects.toMatchObject({ code: 'RateLimit' })
     expect(findUniqueMock).not.toHaveBeenCalled()
+  })
+})
+
+describe('authorize() — rate-limit key (FOU-656)', () => {
+  it('keys the limiter on the leftmost x-forwarded-for entry, not the whole header', async () => {
+    headersImpl = () => ({ get: () => 'spoofed-1, 203.0.113.5' })
+    findUniqueMock.mockResolvedValue(null)
+    await authorize({ email: 'nobody@example.com', password: 'x' })
+    expect(authLimiterCheckMock).toHaveBeenCalledWith('login:spoofed-1')
   })
 })
 

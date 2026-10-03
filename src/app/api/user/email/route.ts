@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { authLimiter, rateLimitResponse } from '@/lib/rate-limit'
+import { authLimiter, rateLimitResponse, clientIp } from '@/lib/rate-limit'
 import { sendEmailChangeVerificationEmail } from '@/lib/email'
 import { logAuditEvent } from '@/lib/audit'
 import { randomBytes } from 'crypto'
@@ -15,7 +15,7 @@ const emailChangeSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1'
+    const ip = clientIp(request)
     const { success } = await authLimiter.check(`email-change:${ip}`)
     if (!success) return rateLimitResponse()
 
