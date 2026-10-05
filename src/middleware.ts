@@ -18,14 +18,14 @@ const { auth } = NextAuth(authConfig)
 // surfaces whatever the Next.js runtime, next-themes-less Tailwind build, and
 // next-plausible actually emit. To enforce: rename the header key below (and in
 // withSecurityHeaders) from 'Content-Security-Policy-Report-Only' to
-// 'Content-Security-Policy'. The nonce plumbing is already real, not a placeholder.
+// 'Content-Security-Policy'. (Nonce plumbing removed 2026-10-04 in favour of a static policy.)
 //
 // Violations go to Sentry (tunnelRoute '/monitoring', same-origin) rather than the
 // browser console, so report-uri needs no matching connect-src entry.
 const CSP_REPORT_URI =
   'https://o4510954719543296.ingest.us.sentry.io/api/4511262844190720/security/?sentry_key=5071dc7cb86dd50b8907fdb7c877f95b'
 
-function buildCsp(nonce: string): string {
+function buildCsp(): string {
   // React uses eval() in development to rebuild server error stacks in the browser.
   const devEval = process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''
 
@@ -39,10 +39,11 @@ function buildCsp(nonce: string): string {
     // so this costs nothing there; gurumind.ai and foulweatherlabs.com allow the same host.
     "frame-src https://vercel.live",
     "object-src 'none'",
-    // Under 'strict-dynamic' the browser ignores host allowlists and 'unsafe-inline'
-    // entirely and trusts only the nonce — an injected <script> cannot know a
-    // per-request random value, so it does not execute.
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${devEval}`,
+    // Static, nonce-free (Cedar's approval 2026-10-04): a per-request nonce forced the root
+    // layout to read headers() and made every route dynamic. Next's inline flight/theme
+    // scripts vary per page so hashing is impractical; 'unsafe-inline' is the accepted cost.
+    // plausible.io must be listed explicitly now that 'strict-dynamic' no longer trusts it.
+    `script-src 'self' 'unsafe-inline' https://plausible.io${devEval}`,
     // Styles keep 'unsafe-inline': Tailwind's runtime rules and next/font's injected
     // <style> have no nonce seam, and style injection is not the threat being addressed.
     "style-src 'self' 'unsafe-inline'",
@@ -62,13 +63,7 @@ function buildCsp(nonce: string): string {
   ].join('; ')
 }
 
-// Edge-runtime nonce. Buffer is not reliably available here, so this uses
-// getRandomValues + btoa rather than the Buffer.from() form in the Next.js docs.
-function createNonce(): string {
-  const bytes = new Uint8Array(16)
-  crypto.getRandomValues(bytes)
-  return btoa(String.fromCharCode(...bytes))
-}
+const CSP = buildCsp()
 
 const securityHeaders = {
   'X-Content-Type-Options': 'nosniff',
@@ -81,7 +76,7 @@ function addSecurityHeaders(response: NextResponse, requestId?: string, csp?: st
   for (const [key, value] of Object.entries(securityHeaders)) {
     response.headers.set(key, value)
   }
-  if (csp) response.headers.set('Content-Security-Policy-Report-Only', csp)
+  if (csp) response.headers.set('Content-Security-Policy-Report-Only', CSP)
   if (requestId) response.headers.set('x-request-id', requestId)
   return response
 }
@@ -92,6 +87,7 @@ const PUBLIC_PATHS = [
   '/privacy', '/terms',
   '/api/auth',
   '/api/health',
+  '/api/geo',
   '/_next', '/favicon.ico', '/robots.txt', '/sitemap.xml',
   '/api/cron/',
   // PWA assets — must be publicly accessible for install/offline flow
@@ -132,20 +128,6 @@ export default auth(async function middleware(request: NextAuthRequest) {
     }
   }
 
-  // One nonce per request, forwarded on the REQUEST so Next.js stamps its own inlined
-  // bootstrap and flight-data scripts: parseRequestHeaders() in app-render.js reads
-  // `content-security-policy` OR `content-security-policy-report-only` off the incoming
-  // request and extracts 'nonce-{value}'. Both spellings are set below — either alone
-  // would do, and the pair costs nothing. This is the ONLY place a CSP is defined for
-  // this site (FOU-347/FOU-288) — next.config.ts's headers() array must never add one.
-  const nonce = createNonce()
-  const csp = buildCsp(nonce)
-  const requestHeaders = new Headers(request.headers)
-  requestHeaders.set('x-nonce', nonce)
-  requestHeaders.set('Content-Security-Policy', csp)
-  requestHeaders.set('Content-Security-Policy-Report-Only', csp)
-  const withNonce = { request: { headers: requestHeaders } }
-
   // Brute-force protection on the credentials login. This must run BEFORE the
   // PUBLIC_PATHS short-circuit below, which treats all of /api/auth as public,
   // and it stays separate from the general /api limiter that follows — that one
@@ -182,10 +164,10 @@ export default auth(async function middleware(request: NextAuthRequest) {
 
   const host = request.headers.get('host') ?? ''
   if (host.startsWith('staging.')) {
-    const response = NextResponse.next(withNonce)
+    const response = NextResponse.next()
     response.headers.set('X-Robots-Tag', 'noindex, nofollow')
     response.headers.set('x-request-id', requestId)
-    response.headers.set('Content-Security-Policy-Report-Only', csp)
+    response.headers.set('Content-Security-Policy-Report-Only', CSP)
     return response
   }
 
@@ -204,7 +186,7 @@ export default auth(async function middleware(request: NextAuthRequest) {
     // was fine, and a direct request for /coming-soon is single-pass on both hosts.
     // A redirect lands the browser on that single-pass path; nothing is rendered on
     // this hop, so no nonce needs forwarding. Same shape as gurumind.ai's launch gate.
-    return addSecurityHeaders(NextResponse.redirect(url), requestId, csp)
+    return addSecurityHeaders(NextResponse.redirect(url), requestId, CSP)
   }
 
   // Allow public paths without auth. The landing page is exact-matched:
@@ -242,26 +224,26 @@ export default auth(async function middleware(request: NextAuthRequest) {
       path.startsWith('/change-password') ||
       path.startsWith('/api/user/password')
     if (!isVerifyEmailPath) {
-      return addSecurityHeaders(NextResponse.redirect(new URL('/verify-email', request.url)), requestId, csp)
+      return addSecurityHeaders(NextResponse.redirect(new URL('/verify-email', request.url)), requestId, CSP)
     }
   }
 
   // Admin protection
   if (pathname.startsWith('/admin')) {
     if (!user) {
-      return addSecurityHeaders(NextResponse.redirect(new URL('/login', request.url)), requestId, csp)
+      return addSecurityHeaders(NextResponse.redirect(new URL('/login', request.url)), requestId, CSP)
     }
     if (!user.isAdmin) {
-      return addSecurityHeaders(NextResponse.redirect(new URL('/kitchen', request.url)), requestId, csp)
+      return addSecurityHeaders(NextResponse.redirect(new URL('/kitchen', request.url)), requestId, CSP)
     }
   }
 
   // Redirect logged-in users away from login/signup pages
   if ((pathname.startsWith('/login') || pathname.startsWith('/signup')) && user && emailVerified) {
-    return addSecurityHeaders(NextResponse.redirect(new URL('/kitchen', request.url)), requestId, csp)
+    return addSecurityHeaders(NextResponse.redirect(new URL('/kitchen', request.url)), requestId, CSP)
   }
 
-  return addSecurityHeaders(NextResponse.next(withNonce), requestId, csp)
+  return addSecurityHeaders(NextResponse.next(), requestId, CSP)
 })
 
 export const config = {

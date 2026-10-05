@@ -16,6 +16,13 @@ import { formatDuration, isIngredientHeading } from '@/lib/recipe-format'
 
 export const revalidate = 3600
 
+// No slugs prerendered at build (public recipes change constantly and the build would need
+// the DB for every one); an empty list opts the route into on-demand ISR — first hit renders
+// and caches for `revalidate`, instead of every hit rendering dynamically.
+export function generateStaticParams() {
+  return []
+}
+
 interface Props {
   params: Promise<{ slug: string }>
 }
