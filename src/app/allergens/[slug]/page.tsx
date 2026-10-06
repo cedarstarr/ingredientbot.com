@@ -13,6 +13,19 @@ import { JsonLd } from '@/components/json-ld'
 
 export const revalidate = 3600
 
+// Same `published: true` gate as sitemap.ts (FOU-591: none are published on production yet,
+// so this returns [] there). At most 15 rows. DB unreachable at build -> [] -> on-demand ISR.
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
+  try {
+    return await prisma.allergen.findMany({
+      where: { published: true },
+      select: { slug: true },
+    })
+  } catch {
+    return []
+  }
+}
+
 interface Props {
   params: Promise<{ slug: string }>
 }
