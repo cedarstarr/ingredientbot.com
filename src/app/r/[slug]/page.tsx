@@ -16,11 +16,21 @@ import { formatDuration, isIngredientHeading } from '@/lib/recipe-format'
 
 export const revalidate = 3600
 
-// No slugs prerendered at build (public recipes change constantly and the build would need
-// the DB for every one); an empty list opts the route into on-demand ISR — first hit renders
-// and caches for `revalidate`, instead of every hit rendering dynamically.
-export function generateStaticParams() {
-  return []
+// chose 100 newest over all ~1000: each prerendered page is a build-time DB read, and the
+// long tail renders on first hit and caches via ISR anyway (dynamicParams stays true).
+// Same isPublic/publicSlug gate as sitemap.ts. DB unreachable at build -> [] -> on-demand ISR.
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
+  try {
+    const recipes = await prisma.recipe.findMany({
+      where: { isPublic: true, publicSlug: { not: null } },
+      select: { publicSlug: true },
+      orderBy: { updatedAt: 'desc' },
+      take: 100,
+    })
+    return recipes.flatMap((r) => (r.publicSlug ? [{ slug: r.publicSlug }] : []))
+  } catch {
+    return []
+  }
 }
 
 interface Props {

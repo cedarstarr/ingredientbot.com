@@ -13,6 +13,21 @@ import { allergenLabel } from '@/lib/allergens'
 
 export const revalidate = 3600
 
+// Same `description: { not: null }` published gate as sitemap.ts; capped because the glossary
+// grows with the reverse-search backfill. DB unreachable at build -> [] -> on-demand ISR.
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
+  try {
+    return await prisma.ingredient.findMany({
+      where: { description: { not: null } },
+      select: { slug: true },
+      orderBy: { updatedAt: 'desc' },
+      take: 100,
+    })
+  } catch {
+    return []
+  }
+}
+
 interface Props {
   params: Promise<{ slug: string }>
 }
