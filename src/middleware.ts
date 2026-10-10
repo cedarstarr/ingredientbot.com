@@ -82,7 +82,7 @@ function addSecurityHeaders(response: NextResponse, requestId?: string, csp?: st
   for (const [key, value] of Object.entries(securityHeaders)) {
     response.headers.set(key, value)
   }
-  if (csp) response.headers.set('Content-Security-Policy-Report-Only', csp)
+  if (csp) response.headers.set('Content-Security-Policy', csp)
   if (requestId) response.headers.set('x-request-id', requestId)
   return response
 }
@@ -150,7 +150,7 @@ export default auth(async function middleware(request: NextAuthRequest) {
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set('x-nonce', nonce)
   requestHeaders.set('Content-Security-Policy', csp)
-  requestHeaders.set('Content-Security-Policy-Report-Only', csp)
+  requestHeaders.set('Content-Security-Policy', csp)
   const withNonce = { request: { headers: requestHeaders } }
 
   // Brute-force protection on the credentials login. This must run BEFORE the
@@ -192,7 +192,7 @@ export default auth(async function middleware(request: NextAuthRequest) {
     const response = NextResponse.next(withNonce)
     response.headers.set('X-Robots-Tag', 'noindex, nofollow')
     response.headers.set('x-request-id', requestId)
-    response.headers.set('Content-Security-Policy-Report-Only', csp)
+    response.headers.set('Content-Security-Policy', csp)
     return response
   }
 
