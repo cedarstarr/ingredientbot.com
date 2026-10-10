@@ -4,6 +4,7 @@ import { authConfig } from '@/lib/auth.config'
 import type { NextAuthRequest } from 'next-auth'
 import { apiRatelimit, authRatelimit, clientIp } from '@/lib/rate-limit'
 import { slugifyCuisine } from '@/lib/recipe-format'
+import { BOTID_PROXY_PREFIX } from './lib/botid-routes'
 
 const { auth } = NextAuth(authConfig)
 
@@ -111,6 +112,12 @@ const PUBLIC_PATHS = [
 export default auth(async function middleware(request: NextAuthRequest) {
   const requestId = request.headers.get('x-request-id') ?? crypto.randomUUID()
   const pathname = request.nextUrl.pathname
+
+  // BotID's challenge script and its verification calls load through this prefix
+  // (FOU-345). It has to pass before the rate limiter, the coming-soon gate and
+  // the auth wall — an anonymous visitor redirected to /login here would never
+  // get a verdict, and every protected form would then be refused as a bot.
+  if (pathname.startsWith(BOTID_PROXY_PREFIX)) return NextResponse.next()
 
   // FOU-466: /recipes?cuisine=X moved to /recipes/[cuisine] so the overview
   // page can drop searchParams and actually revalidate. Permanently redirect

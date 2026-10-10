@@ -3,8 +3,12 @@ import { prisma } from '@/lib/prisma'
 import { sendPasswordResetEmail } from '@/lib/email'
 import { authLimiter, clientIp } from '@/lib/rate-limit'
 import crypto from 'crypto'
+import { rejectBots } from '@/lib/botid'
 
 export async function POST(request: NextRequest) {
+  const botResponse = await rejectBots()
+  if (botResponse) return botResponse
+
   const ip = clientIp(request)
   const { success } = await authLimiter.check(ip)
   if (!success) {

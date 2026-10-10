@@ -5,8 +5,12 @@ import { logAuditEvent } from '@/lib/audit'
 import { authLimiter, clientIp } from '@/lib/rate-limit'
 import { passwordSchema, validatePassword } from '@/lib/password-policy'
 import bcrypt from 'bcryptjs'
+import { rejectBots } from '@/lib/botid'
 
 export async function POST(request: NextRequest) {
+  const botResponse = await rejectBots()
+  if (botResponse) return botResponse
+
   const ip = clientIp(request)
   const { success } = await authLimiter.check(ip)
   if (!success) {
