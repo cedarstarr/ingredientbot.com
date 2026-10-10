@@ -1,9 +1,11 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import Link from 'next/link'
 
-export function CookieBanner({ showBanner, onChoice }: { showBanner: boolean; onChoice?: (value: string) => void }) {
+export function CookieBanner({ showBanner }: { showBanner: boolean }) {
+  const router = useRouter()
   const [visible, setVisible] = useState(showBanner)
 
   if (!visible) return null
@@ -25,7 +27,6 @@ export function CookieBanner({ showBanner, onChoice }: { showBanner: boolean; on
           <button
             onClick={() => {
               setCookie('rejected')
-              onChoice?.('rejected')
               setVisible(false)
             }}
             aria-label="Reject non-essential cookies"
@@ -36,8 +37,8 @@ export function CookieBanner({ showBanner, onChoice }: { showBanner: boolean; on
           <button
             onClick={() => {
               setCookie('accepted')
-              onChoice?.('accepted')
               setVisible(false)
+              router.refresh()
             }}
             aria-label="Accept all cookies"
             className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
