@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
+import { withBotId } from "botid/next/config";
 
 const nextConfig: NextConfig = {
   images: {
@@ -33,7 +34,8 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
+// withBotId adds the same-origin rewrites BotID's challenge script loads through (FOU-345).
+export default withBotId(withSentryConfig(nextConfig, {
   org: "foulweatherlabscom",
   project: "ingredientbotcom",
   authToken: process.env.SENTRY_AUTH_TOKEN,
@@ -41,4 +43,4 @@ export default withSentryConfig(nextConfig, {
   widenClientFileUpload: true,
   tunnelRoute: "/monitoring",
   sourcemaps: { deleteSourcemapsAfterUpload: true },
-});
+}));
