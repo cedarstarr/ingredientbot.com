@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-10-01 (/qa-copy run)
+**Last Updated**: 2026-10-17 (/qa-security run)
 
 ---
 
@@ -25,14 +25,14 @@
 | 10 | QA / Bug Check | /qa-bugs | DONE | 7 | 2026-09-19 | [view](reports/2026-07-19-site-bugs.md) |
 | 11 | Button Audit | /qa-button-fix | DONE | 1 | 2026-07-18 | [view](reports/2026-07-19-qa-buttons.md) |
 | 12 | Re-verify Tests | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
-| 13 | Security Hardening | /qa-security | DONE | 8 | 2026-08-29 | [view](reports/2026-08-29-site-security.md) |
-| 14 | Resilience Audit | /qa-resilience | DONE | 6 | 2026-09-27 | [view](reports/2026-09-27-qa-resilience.md) |
+| 13 | Security Hardening | /qa-security | DONE | 9 | 2026-10-17 | [view](reports/2026-10-17-site-security.md) |
+| 14 | Resilience Audit | /qa-resilience | STALE | 6 | 2026-09-27 | [view](reports/2026-09-27-qa-resilience.md) |
 | 15 | AI Completion Audit | /qa-ai-completion | STALE | 1 | 2026-08-09 | — |
 | 16 | Design System Install | /design-implement | STALE | 2 | 2026-06-25 | [view](reports/2026-04-18-site-design.md) |
 | 17 | Token Hygiene | /qa-tokens | STALE | 6 | 2026-06-24 | [view](reports/2026-06-24-qa-tokens.md) |
-| 18 | Copy Audit | /qa-copy | DONE | 4 | 2026-10-01 | [view](reports/2026-10-01-site-copy.md) |
+| 18 | Copy Audit | /qa-copy | STALE | 4 | 2026-10-01 | [view](reports/2026-10-01-site-copy.md) |
 | 19 | Navigation Audit | /qa-nav | STALE | 12 | 2026-07-20 | [view](reports/2026-07-13-qa-nav.md) |
-| 20 | Performance Audit | /qa-perf | DONE | 4 | 2026-10-01 | [view](reports/2026-10-01-site-perf.md) |
+| 20 | Performance Audit | /qa-perf | STALE | 4 | 2026-10-01 | [view](reports/2026-10-01-site-perf.md) |
 | 21 | SEO Audit | /qa-seo | STALE | 2 | 2026-07-13 | [view](reports/2026-04-19-site-seo.md) |
 | 22 | Accessibility Audit | /qa-a11y | STALE | 2 | 2026-07-15 | [view](reports/2026-07-15-qa-a11y.md) |
 | 23 | E2E Gate | /qa-e2e | DONE | 22 | 2026-09-17 | [view](reports/2026-09-17-qa-e2e.md) |
@@ -44,7 +44,7 @@
 
 **Progress: 22/28 stages complete (1 skipped)**
 
-**Last Updated**: 2026-10-01 (/qa-copy run)
+**Last Updated**: 2026-10-17 (/qa-security run)
 
 ---
 
@@ -161,3 +161,4 @@
 | 2026-09-27 | /qa-resilience | 6m | SUCCESS | Clean — no resilience findings. [view](reports/2026-09-27-qa-resilience.md) |
 | 2026-10-01 | /qa-perf | 3m | SUCCESS | 5 perf issues found, 0 fixed; filed FOU-706, FOU-707 [view](reports/2026-10-01-site-perf.md) |
 | 2026-10-01 | /qa-copy | 3m | SUCCESS | Audit only, no fixes applied: 8 blockers, 5 typos, 11 voice, 6 CTAs [view](reports/2026-10-01-site-copy.md) |
+| 2026-10-17 | /qa-security | 12m | PARTIAL | 2 findings (1 CRITICAL dep deferred FOU-758, 1 MEDIUM SSRF fixed) [view](reports/2026-10-17-site-security.md) |

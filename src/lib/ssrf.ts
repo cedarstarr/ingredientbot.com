@@ -41,11 +41,32 @@ export function decodeIPv4Variants(host: string): number[] | null {
   return null
 }
 
+// The WHATWG parser normalises every IPv6 form to compressed lowercase hex, and rewrites
+// ::ffff:127.0.0.1 to ::ffff:7f00:1 — so a prefix/hex match on the normalised text is enough.
+// chose this over the old startsWith('fc'|'fd') on the raw host because that also blocked
+// public names like fcbarcelona.com while missing every bracketed literal.
+export function isPrivateIPv6(addr: string): boolean {
+  if (addr === '::' || addr === '::1') return true
+  if (/^f[cd][0-9a-f]{2}:/.test(addr)) return true     // fc00::/7 unique-local
+  if (/^fe[89ab][0-9a-f]:/.test(addr)) return true     // fe80::/10 link-local
+  if (/^ff[0-9a-f]{2}:/.test(addr)) return true        // ff00::/8 multicast
+  const mapped = addr.match(/^(?:::ffff:|64:ff9b::)([0-9a-f]{1,4}):([0-9a-f]{1,4})$/) // IPv4-mapped / NAT64
+  if (mapped) {
+    const hi = parseInt(mapped[1], 16)
+    const lo = parseInt(mapped[2], 16)
+    return isPrivateIPv4([hi >> 8, hi & 0xff, lo >> 8, lo & 0xff])
+  }
+  return false
+}
+
 export function isValidUrl(str: string): boolean {
   try {
     const url = new URL(str)
     if (url.protocol !== 'http:' && url.protocol !== 'https:') return false
     const host = url.hostname.toLowerCase()
+    // url.hostname keeps the brackets on IPv6 literals ("[fd00::1]"), so the bare-prefix
+    // checks below never matched them. Judge the literal on its own terms first.
+    if (host.startsWith('[') && isPrivateIPv6(host.slice(1, -1))) return false
     if (
       host === 'localhost' ||
       host === '0.0.0.0' ||
@@ -53,9 +74,7 @@ export function isValidUrl(str: string): boolean {
       host.endsWith('.local') ||
       host === 'metadata.google.internal' ||
       host === '[::1]' || host === '::1' ||
-      host.startsWith('::1') ||
-      host.startsWith('fc') || host.startsWith('fd') || // fc00::/7 unique-local IPv6
-      host.startsWith('fe80:')                          // link-local IPv6
+      host.startsWith('::1')
     ) {
       return false
     }

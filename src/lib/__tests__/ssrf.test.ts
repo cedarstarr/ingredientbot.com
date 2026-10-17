@@ -169,3 +169,15 @@ describe('isValidUrl', () => {
     expect(isValidUrl('http://2130706433/')).toBe(false)
   })
 })
+
+describe('isValidUrl — bracketed IPv6 literals', () => {
+  it.each([
+    'http://[::1]/', 'http://[::]/', 'http://[fd00::1]/', 'http://[fc00::1]/',
+    'http://[fe80::1]/', 'http://[::ffff:127.0.0.1]/', 'http://[::ffff:169.254.169.254]/',
+  ])('blocks %s', (u) => expect(isValidUrl(u)).toBe(false))
+
+  it('allows public IPv6 and hostnames that merely start with fc/fd', () => {
+    expect(isValidUrl('http://[2606:4700::1111]/')).toBe(true)
+    expect(isValidUrl('https://fcbarcelona.com/recipe')).toBe(true)
+  })
+})
