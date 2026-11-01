@@ -113,7 +113,7 @@ const PUBLIC_PATHS = [
   '/api/search',
 ]
 
-export default auth(async function middleware(request: NextAuthRequest) {
+async function handle(request: NextAuthRequest) {
   const requestId = request.headers.get('x-request-id') ?? crypto.randomUUID()
   const pathname = request.nextUrl.pathname
 
@@ -185,15 +185,6 @@ export default auth(async function middleware(request: NextAuthRequest) {
       res.headers.set('x-request-id', requestId)
       return res
     }
-  }
-
-  const host = request.headers.get('host') ?? ''
-  if (host.startsWith('staging.')) {
-    const response = NextResponse.next(withNonce)
-    response.headers.set('X-Robots-Tag', 'noindex, nofollow')
-    response.headers.set('x-request-id', requestId)
-    response.headers.set('Content-Security-Policy', csp)
-    return response
   }
 
   if (process.env.COMING_SOON === 'true' && !pathname.startsWith('/api/') && pathname !== '/coming-soon' && pathname !== '/robots.txt' && pathname !== '/sitemap.xml' && pathname !== '/login' && !request.auth?.user?.isAdmin) {
@@ -269,6 +260,17 @@ export default auth(async function middleware(request: NextAuthRequest) {
   }
 
   return addSecurityHeaders(NextResponse.next(withNonce), requestId, csp)
+}
+
+// chose a wrapper over an early return for staging.*: the old early return skipped the auth
+// wall, email-verify and admin gates and COMING_SOON. Staging now runs every gate (and the
+// unchanged nonce/CSP path) and only gains noindex on whatever response comes out.
+export default auth(async function middleware(request: NextAuthRequest) {
+  const response = await handle(request)
+  if (response && (request.headers.get('host') ?? '').startsWith('staging.')) {
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+  }
+  return response
 })
 
 export const config = {
