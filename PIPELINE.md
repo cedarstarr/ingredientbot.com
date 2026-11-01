@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-10-17 (/qa-e2e run)
+**Last Updated**: 2026-10-31 (/qa-bugs run)
 
 ---
 
@@ -22,7 +22,7 @@
 | 7 | Write Tests | /qa-spec-reconcile | DONE | 11 | 2026-06-30 | [view](reports/2026-07-01-qa-spec-reconcile.md) |
 | 8 | Verify Build | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 9 | Database Review | /qa-db | DONE | 4 | 2026-06-03 | [view](reports/2026-06-04-site-db.md) |
-| 10 | QA / Bug Check | /qa-bugs | DONE | 7 | 2026-09-19 | [view](reports/2026-07-19-site-bugs.md) |
+| 10 | QA / Bug Check | /qa-bugs | DONE | 8 | 2026-10-31 | [view](reports/2026-10-31-site-bugs.md) |
 | 11 | Button Audit | /qa-button-fix | DONE | 1 | 2026-07-18 | [view](reports/2026-07-19-qa-buttons.md) |
 | 12 | Re-verify Tests | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 13 | Security Hardening | /qa-security | DONE | 9 | 2026-10-17 | [view](reports/2026-10-17-site-security.md) |
@@ -44,7 +44,7 @@
 
 **Progress: 22/28 stages complete (1 skipped)**
 
-**Last Updated**: 2026-10-17 (/qa-e2e run)
+**Last Updated**: 2026-10-31 (/qa-bugs run)
 
 ---
 
@@ -163,3 +163,4 @@
 | 2026-10-01 | /qa-copy | 3m | SUCCESS | Audit only, no fixes applied: 8 blockers, 5 typos, 11 voice, 6 CTAs [view](reports/2026-10-01-site-copy.md) |
 | 2026-10-17 | /qa-security | 12m | PARTIAL | 2 findings (1 CRITICAL dep deferred FOU-758, 1 MEDIUM SSRF fixed) [view](reports/2026-10-17-site-security.md) |
 | 2026-10-17 | /qa-e2e | 10m | SUCCESS | chromium 0 fail [view](reports/2026-10-18-qa-e2e.md) |
+| 2026-10-31 | /qa-bugs | 30m | PARTIAL | 5 bugs found, 3 fixed; FOU-781/782/783 deferred [view](reports/2026-10-31-site-bugs.md) |
