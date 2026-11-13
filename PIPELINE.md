@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-10-31 (/qa-bugs run)
+**Last Updated**: 2026-11-12 (/qa-e2e run)
 
 ---
 
@@ -35,7 +35,7 @@
 | 20 | Performance Audit | /qa-perf | STALE | 4 | 2026-10-01 | [view](reports/2026-10-01-site-perf.md) |
 | 21 | SEO Audit | /qa-seo | STALE | 2 | 2026-07-13 | [view](reports/2026-04-19-site-seo.md) |
 | 22 | Accessibility Audit | /qa-a11y | STALE | 2 | 2026-07-15 | [view](reports/2026-07-15-qa-a11y.md) |
-| 23 | E2E Gate | /qa-e2e | DONE | 23 | 2026-10-17 | [view](reports/2026-10-18-qa-e2e.md) |
+| 23 | E2E Gate | /qa-e2e | DONE | 24 | 2026-11-12 | [view](reports/2026-10-18-qa-e2e.md) |
 | 24 | Env Sync | /ops-env-sync | PENDING | 0 | — | — |
 | 25 | Domain Health | /ops-domain-health | PENDING | 0 | — | — |
 | 26 | Lighthouse | /ops-lighthouse | PENDING | 0 | — | — |
@@ -44,7 +44,7 @@
 
 **Progress: 22/28 stages complete (1 skipped)**
 
-**Last Updated**: 2026-10-31 (/qa-bugs run)
+**Last Updated**: 2026-11-12 (/qa-e2e run)
 
 ---
 
@@ -164,3 +164,4 @@
 | 2026-10-17 | /qa-security | 12m | PARTIAL | 2 findings (1 CRITICAL dep deferred FOU-758, 1 MEDIUM SSRF fixed) [view](reports/2026-10-17-site-security.md) |
 | 2026-10-17 | /qa-e2e | 10m | SUCCESS | chromium 0 fail [view](reports/2026-10-18-qa-e2e.md) |
 | 2026-10-31 | /qa-bugs | 30m | PARTIAL | 5 bugs found, 3 fixed; FOU-781/782/783 deferred [view](reports/2026-10-31-site-bugs.md) |
+| 2026-11-12 | /qa-e2e | 25m | SUCCESS | chromium full suite green; reconcile in sync [view](reports/2026-10-18-qa-e2e.md) |
