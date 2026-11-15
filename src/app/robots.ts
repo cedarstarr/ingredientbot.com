@@ -1,9 +1,11 @@
 import type { MetadataRoute } from 'next'
 
 const AI_CRAWLERS = [
-  'GPTBot', 'ChatGPT-User', 'Claude-Web', 'anthropic-ai',
-  'Google-Extended', 'CCBot', 'PerplexityBot', 'Bytespider',
-  'YouBot', 'Diffbot', 'Amazonbot', 'cohere-ai', 'meta-externalagent',
+  'GPTBot', 'OAI-SearchBot', 'ChatGPT-User',
+  'ClaudeBot', 'Claude-User', 'Claude-SearchBot', 'Claude-Web', 'anthropic-ai',
+  'Google-Extended', 'Applebot-Extended', 'CCBot', 'PerplexityBot', 'Perplexity-User',
+  'Bytespider', 'YouBot', 'Diffbot', 'Amazonbot', 'cohere-ai',
+  'meta-externalagent', 'meta-externalfetcher',
 ]
 
 export default function robots(): MetadataRoute.Robots {
