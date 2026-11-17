@@ -2,7 +2,11 @@
  * SSRF guard utilities — block private/loopback/link-local/cloud-metadata destinations.
  * Hostname blocklist over DNS resolution: covers the 99% attack surface
  * (cloud metadata IP, literal localhost, RFC1918 addresses) without an extra dep.
+ * isValidUrl is the cheap synchronous literal check; isPublicUrl adds DNS resolution (FOU-777).
  */
+
+import { lookup } from 'node:dns/promises'
+import { isIP } from 'node:net'
 
 export function isPrivateIPv4(parts: number[]): boolean {
   if (parts.length !== 4 || parts.some((p) => Number.isNaN(p) || p < 0 || p > 255)) return false
@@ -85,4 +89,49 @@ export function isValidUrl(str: string): boolean {
   } catch {
     return false
   }
+}
+
+// chose resolve-then-fetch over pinning the connection to the resolved IP: pinning needs an
+// undici dispatcher dependency, and the residual DNS-rebinding window is a single 15s fetch whose
+// body only reaches an LLM extractor. Every address is checked, so a mixed A/AAAA answer fails.
+function addressIsPrivate(address: string): boolean {
+  const family = isIP(address)
+  if (family === 4) return isPrivateIPv4(address.split('.').map(Number))
+  if (family === 6) {
+    const a = address.toLowerCase()
+    if (isPrivateIPv6(a)) return true
+    // dns.lookup returns ::ffff:127.0.0.1 in dotted form, which the hex-pair matcher above misses
+    const dotted = a.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/)
+    return dotted ? isPrivateIPv4(dotted[1].split('.').map(Number)) : false
+  }
+  return true // unparseable address: fail closed
+}
+
+export async function isPublicUrl(str: string): Promise<boolean> {
+  if (!isValidUrl(str)) return false
+  try {
+    const host = new URL(str).hostname.replace(/^\[|\]$/g, '')
+    if (isIP(host)) return !addressIsPrivate(host)
+    const addrs = await lookup(host, { all: true })
+    return addrs.length > 0 && addrs.every((a) => !addressIsPrivate(a.address))
+  } catch {
+    return false // NXDOMAIN / lookup failure: nothing to fetch
+  }
+}
+
+// Stream the body and stop at maxBytes so a multi-GB response cannot be buffered whole.
+export async function readTextCapped(res: Response, maxBytes: number): Promise<string> {
+  if (!res.body) return ''
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let received = 0
+  let out = ''
+  while (received < maxBytes) {
+    const { done, value } = await reader.read()
+    if (done) break
+    received += value.byteLength
+    out += decoder.decode(value, { stream: true })
+  }
+  await reader.cancel().catch(() => {})
+  return out
 }

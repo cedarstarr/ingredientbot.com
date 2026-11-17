@@ -6,7 +6,7 @@ import { trackedModel } from '@/lib/ai'
 import { aiLimiter, clientIp } from '@/lib/rate-limit'
 import { Difficulty } from '@/generated/prisma/client'
 import { startOfCurrentMonth } from '@/lib/date-utils'
-import { isValidUrl } from '@/lib/ssrf'
+import { isPublicUrl, readTextCapped } from '@/lib/ssrf'
 import { isOverFreeLimit, FREE_TIER_MONTHLY_RECIPES } from '@/lib/limits'
 import { withMonthlyQuota } from '@/lib/recipe-quota'
 
@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Extract mode: fetch URL and extract recipe via Claude
-  if (!url || !isValidUrl(url)) {
+  if (!url || !(await isPublicUrl(url))) {
     return Response.json({ error: 'Please provide a valid URL' }, { status: 400 })
   }
 
@@ -157,7 +157,7 @@ export async function POST(req: NextRequest) {
         return Response.json({ error: 'Redirect without location header' }, { status: 422 })
       }
       const next = new URL(location, url).toString()
-      if (!isValidUrl(next)) {
+      if (!(await isPublicUrl(next))) {
         clearTimeout(timeout)
         return Response.json({ error: 'Redirect target blocked' }, { status: 422 })
       }
@@ -180,7 +180,7 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: `Could not fetch page (HTTP ${status})` }, { status: 422 })
     }
 
-    html = await res.text()
+    html = await readTextCapped(res, 1_000_000)
   } catch (err) {
     const message = err instanceof Error && err.name === 'AbortError'
       ? 'The page took too long to load. Try a different URL.'
