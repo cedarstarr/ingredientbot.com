@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { streamText } from 'ai'
 import { dietaryModel, hasAllergenRestriction } from '@/lib/ai'
 import { aiLimiter, clientIp } from '@/lib/rate-limit'
+import { chatInputSchema, exceedsLimits } from '@/lib/input-limits'
 
 export const maxDuration = 60
 
@@ -29,7 +30,9 @@ export async function POST(
     })
     if (!recipe) return new Response('Not found', { status: 404 })
 
-    const { message, history } = await req.json()
+    const body = await req.json()
+    if (exceedsLimits(chatInputSchema, body)) return new Response('Input too large or malformed', { status: 400 })
+    const { message, history } = body
     if (!message?.trim()) return new Response('Message is required', { status: 400 })
 
     if (process.env.PLAYWRIGHT_TEST === 'true') {
