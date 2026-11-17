@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendWelcomeEmail } from '@/lib/email'
 import { childLogger } from '@/lib/logger'
+import { getUnsubscribeUrl } from '@/lib/unsubscribe'
 
 export const maxDuration = 60
 
@@ -45,7 +46,7 @@ export async function GET(req: NextRequest) {
     })
 
     const results = await Promise.allSettled(
-      newUsers.map(user => sendWelcomeEmail(user.email, user.name))
+      newUsers.map(async user => sendWelcomeEmail(user.email, user.name, undefined, await getUnsubscribeUrl(user.id)))
     )
 
     let sent = 0

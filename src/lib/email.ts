@@ -67,11 +67,12 @@ export async function sendEmail(opts: { to: string; subject: string; html: strin
   return { sent: true as const }
 }
 
-export async function sendWelcomeEmail(to: string, name: string | null, verifyUrl?: string) {
+export async function sendWelcomeEmail(to: string, name: string | null, verifyUrl?: string, unsubscribeUrl?: string) {
   const html = await renderWelcomeEmail({
     name: name || 'there',
     siteUrl: SITE_URL,
     verifyUrl,
+    unsubscribeUrl,
   })
   await sendEmail({
     to,

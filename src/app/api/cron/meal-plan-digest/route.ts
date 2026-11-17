@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendEmail } from '@/lib/email'
 import { childLogger } from '@/lib/logger'
+import { getUnsubscribeUrl } from '@/lib/unsubscribe'
 
 export const maxDuration = 60
 
@@ -67,7 +68,7 @@ export async function GET(req: NextRequest) {
   const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ingredientbot.com'
 
   // Build and send email for a single plan — extracted so Promise.allSettled can dispatch in parallel
-  const sendPlanEmail = (plan: typeof mealPlans[number]) => {
+  const sendPlanEmail = async (plan: typeof mealPlans[number]) => {
     if (plan.slots.length === 0) return Promise.resolve(null)
 
     const byDay = new Map<number, typeof plan.slots>()
@@ -93,6 +94,7 @@ export async function GET(req: NextRequest) {
     const displayName = escapeHtml(plan.user.name || 'there')
     const weekLabel = plan.weekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' })
 
+    const unsubscribeUrl = await getUnsubscribeUrl(plan.user.id)
     const html = `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" /></head>
@@ -107,7 +109,8 @@ export async function GET(req: NextRequest) {
   </p>
   <p style="margin-top:32px;color:#999;font-size:12px;">
     You&#39;re receiving this because you have meal plan notifications enabled.
-    <a href="${SITE_URL}/settings" style="color:#999;">Manage preferences</a>
+    <a href="${SITE_URL}/settings" style="color:#999;">Manage preferences</a> ·
+    <a href="${unsubscribeUrl}" style="color:#999;">Unsubscribe</a>
   </p>
 </body>
 </html>`
