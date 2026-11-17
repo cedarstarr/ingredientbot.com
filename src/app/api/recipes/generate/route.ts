@@ -7,6 +7,7 @@ import { aiLimiter, clientIp } from '@/lib/rate-limit'
 import { canonicalize, getCached, setCached, sha256 } from '@/lib/recipe-cache'
 import { buildCookingMethodContext, buildSpiceContext } from '@/lib/recipe-prompt-utils'
 import { getPalateProfile } from '@/lib/palate'
+import { exceedsLimits, generateInputSchema } from '@/lib/input-limits'
 
 export const maxDuration = 60
 
@@ -19,6 +20,10 @@ export async function POST(req: NextRequest) {
   const { success } = await aiLimiter.check(ip)
   if (!success) return new Response('Too many requests', { status: 429 })
 
+  const body = await req.json()
+  if (exceedsLimits(generateInputSchema, body)) {
+    return new Response('Input too large or malformed', { status: 400 })
+  }
   const {
     ingredients, cuisine, dietary, expiringIngredients, leftovers,
     strictMode, teachMode,
@@ -26,7 +31,7 @@ export async function POST(req: NextRequest) {
     // F74: cooking method (string). F75: exhausted toggle. F76: protein-max toggle.
     // F77: restaurant recreation free-text. F78: spice level 0..3.
     cookingMethod, exhaustedMode, proteinMax, restaurantStyle, spiceLevel,
-  } = await req.json()
+  } = body
 
   // F54: "Impress Me" bypasses the ingredient count guard
   if (!impressMe && (!ingredients || ingredients.length < 2)) {

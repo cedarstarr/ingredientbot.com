@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { generateText } from 'ai'
 import { dietaryModel } from '@/lib/ai'
 import { aiLimiter, clientIp } from '@/lib/rate-limit'
+import { exceedsLimits, generateInputSchema } from '@/lib/input-limits'
 import { buildCookingMethodContext, buildSpiceContext } from '@/lib/recipe-prompt-utils'
 import { Difficulty } from '@/generated/prisma/client'
 import { startOfCurrentMonth } from '@/lib/date-utils'
@@ -36,11 +37,15 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'AI service not configured' }, { status: 503 })
   }
 
+  const body = await req.json()
+  if (exceedsLimits(generateInputSchema, body)) {
+    return Response.json({ error: 'Input too large or malformed' }, { status: 400 })
+  }
   const {
     suggestion, ingredients, strictMode, teachMode, leftovers, budgetMode, chefPersonality, dateNightMode,
     // F74–F78: modifiers mirrored from the generate route
     cookingMethod, exhaustedMode, proteinMax, restaurantStyle, spiceLevel,
-  } = await req.json()
+  } = body
   if (!suggestion?.title) {
     return Response.json({ error: 'Invalid suggestion' }, { status: 400 })
   }

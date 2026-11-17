@@ -1,9 +1,9 @@
 import { Html, Head, Body, Container, Heading, Text, Link, Hr } from '@react-email/components'
 import { render } from '@react-email/render'
 
-interface Props { name: string; siteUrl: string; verifyUrl?: string }
+interface Props { name: string; siteUrl: string; verifyUrl?: string; unsubscribeUrl?: string }
 
-function WelcomeEmail({ name, siteUrl, verifyUrl }: Props) {
+function WelcomeEmail({ name, siteUrl, verifyUrl, unsubscribeUrl }: Props) {
   return (
     <Html>
       <Head />
@@ -26,6 +26,12 @@ function WelcomeEmail({ name, siteUrl, verifyUrl }: Props) {
         <Hr style={{ marginTop: '32px' }} />
         <Text style={{ color: '#999', fontSize: '13px' }}>
           <Link href={siteUrl} style={{ color: '#999' }}>ingredientbot.com</Link>
+          {unsubscribeUrl && (
+            <>
+              {' · '}
+              <Link href={unsubscribeUrl} style={{ color: '#999' }}>Unsubscribe</Link>
+            </>
+          )}
         </Text>
       </Body>
     </Html>

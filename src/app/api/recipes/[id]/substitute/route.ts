@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { generateText } from 'ai'
 import { dietaryModel, hasAllergenRestriction } from '@/lib/ai'
 import { aiLimiter, clientIp } from '@/lib/rate-limit'
+import { exceedsLimits, substituteInputSchema } from '@/lib/input-limits'
 import * as Sentry from '@sentry/nextjs'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
@@ -27,7 +28,11 @@ export async function POST(
   if (!recipe) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   try {
-    const { missingIngredient } = await req.json()
+    const body = await req.json()
+    if (exceedsLimits(substituteInputSchema, body)) {
+      return NextResponse.json({ error: 'Input too large or malformed' }, { status: 400 })
+    }
+    const { missingIngredient } = body
     if (!missingIngredient) {
       return NextResponse.json({ error: 'missingIngredient is required' }, { status: 400 })
     }

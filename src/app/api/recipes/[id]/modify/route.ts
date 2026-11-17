@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { streamText } from 'ai'
 import { dietaryModel, hasAllergenRestriction } from '@/lib/ai'
 import { aiLimiter, clientIp } from '@/lib/rate-limit'
+import { exceedsLimits, modifyInputSchema } from '@/lib/input-limits'
 
 export const maxDuration = 60
 
@@ -49,6 +50,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   }
 
   const body = await req.json()
+  if (exceedsLimits(modifyInputSchema, body)) return new Response('Input too large or malformed', { status: 400 })
   const { action, targetServings, targetMethod } = body
 
   const actionPrompt = actionPrompts[action]

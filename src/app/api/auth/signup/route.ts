@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendWelcomeEmail } from '@/lib/email'
+import { getUnsubscribeUrl } from '@/lib/unsubscribe'
 import { authLimiter, clientIp } from '@/lib/rate-limit'
 import { passwordSchema, validatePassword } from '@/lib/password-policy'
 import bcrypt from 'bcryptjs'
@@ -71,7 +72,7 @@ export async function POST(request: NextRequest) {
 
   // Send welcome/verify email
   try {
-    await sendWelcomeEmail(email, name || null, verifyUrl)
+    await sendWelcomeEmail(email, name || null, verifyUrl, await getUnsubscribeUrl(user.id))
   } catch (err) { console.error('Transactional email send failed', err) }
 
   return NextResponse.json({ message: 'Account created. Please check your email to verify.' })

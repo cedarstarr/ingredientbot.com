@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { dietaryProfileInputSchema, exceedsLimits } from '@/lib/input-limits'
 
 // F79: medical dietary flags (low-sodium / low-FODMAP / diabetes-friendly) — persisted on DietaryProfile
 const DIETARY_SELECT = {
@@ -41,6 +42,9 @@ export async function PATCH(req: NextRequest) {
   if (!session?.user) return new Response('Unauthorized', { status: 401 })
 
   const body = await req.json()
+  if (exceedsLimits(dietaryProfileInputSchema, body)) {
+    return Response.json({ error: 'Profile fields too large' }, { status: 400 })
+  }
 
   try {
     // FOU-630: PATCH is the verb that invites partial payloads, but the old
