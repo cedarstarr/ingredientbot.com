@@ -415,9 +415,16 @@ async function main() {
   }
 }
 
-main()
-  .catch((e) => {
-    console.error(e)
-    process.exit(1)
-  })
-  .finally(() => prismaRef?.$disconnect().catch(() => undefined))
+// Run only when invoked directly. ingredient-normalize.test.ts imports
+// DEFAULT_INPUTS from here, and an unguarded main() made the import start a
+// model-driven run that ended in process.exit(1) inside the test worker.
+// `typeof require` keeps this safe under Vitest's ESM loader, where require is
+// not defined; same guard as the repo's other seeders.
+if (typeof require !== 'undefined' && require.main === module) {
+  main()
+    .catch((e) => {
+      console.error(e)
+      process.exit(1)
+    })
+    .finally(() => prismaRef?.$disconnect().catch(() => undefined))
+}
