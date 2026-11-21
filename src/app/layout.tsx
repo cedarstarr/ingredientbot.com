@@ -62,7 +62,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head>
         {/* F43: PWA theme color */}
         <meta name="theme-color" content="#c2613c" />
-        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       <body className={`${inter.variable} font-sans antialiased`}>
         {/* Skip-to-content: first focusable element, visible on focus for keyboard users */}
