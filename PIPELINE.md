@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-11-21 (/qa-nav run)
+**Last Updated**: 2026-11-22 (/qa-nav run)
 
 ---
 
@@ -31,7 +31,7 @@
 | 16 | Design System Install | /design-implement | STALE | 2 | 2026-06-25 | [view](reports/2026-04-18-site-design.md) |
 | 17 | Token Hygiene | /qa-tokens | STALE | 6 | 2026-06-24 | [view](reports/2026-06-24-qa-tokens.md) |
 | 18 | Copy Audit | /qa-copy | STALE | 4 | 2026-10-01 | [view](reports/2026-10-01-site-copy.md) |
-| 19 | Navigation Audit | /qa-nav | DONE | 13 | 2026-11-21 | [view](reports/2026-07-13-qa-nav.md) |
+| 19 | Navigation Audit | /qa-nav | DONE | 14 | 2026-11-22 | [view](reports/2026-07-13-qa-nav.md) |
 | 20 | Performance Audit | /qa-perf | STALE | 4 | 2026-10-01 | [view](reports/2026-10-01-site-perf.md) |
 | 21 | SEO Audit | /qa-seo | STALE | 2 | 2026-07-13 | [view](reports/2026-04-19-site-seo.md) |
 | 22 | Accessibility Audit | /qa-a11y | STALE | 2 | 2026-07-15 | [view](reports/2026-07-15-qa-a11y.md) |
@@ -44,7 +44,7 @@
 
 **Progress: 22/28 stages complete (1 skipped)**
 
-**Last Updated**: 2026-11-21 (/qa-nav run)
+**Last Updated**: 2026-11-22 (/qa-nav run)
 
 ---
 
@@ -167,3 +167,4 @@
 | 2026-11-12 | /qa-e2e | 25m | SUCCESS | chromium full suite green; reconcile in sync [view](reports/2026-10-18-qa-e2e.md) |
 | 2026-11-21 | /qa-bugs | 40m | SUCCESS | 0 C/H/M, 8 low; allergen disclaimer verified everywhere [view](reports/2026-10-31-site-bugs.md) |
 | 2026-11-21 | /qa-nav | 1m | SUCCESS | 1 orphan(s), 0 dead link(s); no edits [view](reports/2026-07-13-qa-nav.md) |
+| 2026-11-22 | /qa-nav | 1m | SUCCESS | 0 orphan(s), 0 dead link(s); no edits [view](reports/2026-07-13-qa-nav.md) |
