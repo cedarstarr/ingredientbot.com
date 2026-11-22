@@ -17,8 +17,8 @@
 | 2 | Code Scaffold | /build-scaffold | SKIPPED | 0 | — | — |
 | 3 | Feature Research | /plan-research | DONE | 2 | 2026-04-09 | [view](reports/2026-04-09-site-research.md) |
 | 4 | Feature Audit | /plan-feature-audit | DONE | 1 | 2026-04-11 | [view](reports/2026-04-11-site-audit.md) |
-| 5 | Feature Triage | /site-features | DONE | 1 | 2026-04-09 | [view](reports/2026-04-09-site-features.md) |
-| 6 | Feature Install | /site-install | DONE | 1 | 2026-04-10 00:00 | [view](reports/2026-04-10-site-install.md) |
+| 5 | Feature Triage | /plan-feature-triage | DONE | 1 | 2026-04-09 | [view](reports/2026-04-09-site-features.md) |
+| 6 | Feature Install | /build-features | DONE | 1 | 2026-04-10 00:00 | [view](reports/2026-04-10-site-install.md) |
 | 7 | Write Tests | /qa-spec-reconcile | DONE | 11 | 2026-06-30 | [view](reports/2026-07-01-qa-spec-reconcile.md) |
 | 8 | Verify Build | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 9 | Database Review | /qa-db | DONE | 4 | 2026-06-03 | [view](reports/2026-06-04-site-db.md) |
