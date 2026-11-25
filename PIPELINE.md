@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-11-22 (/qa-nav run)
+**Last Updated**: 2026-11-23 (/qa-resilience run)
 
 ---
 
@@ -26,12 +26,12 @@
 | 11 | Button Audit | /qa-button-fix | DONE | 1 | 2026-07-18 | [view](reports/2026-07-19-qa-buttons.md) |
 | 12 | Re-verify Tests | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 13 | Security Hardening | /qa-security | DONE | 9 | 2026-10-17 | [view](reports/2026-10-17-site-security.md) |
-| 14 | Resilience Audit | /qa-resilience | STALE | 6 | 2026-09-27 | [view](reports/2026-09-27-qa-resilience.md) |
+| 14 | Resilience Audit | /qa-resilience | DONE | 7 | 2026-11-23 | [view](reports/2026-09-27-qa-resilience.md) |
 | 15 | AI Completion Audit | /qa-ai-completion | STALE | 1 | 2026-08-09 | — |
 | 16 | Design System Install | /design-implement | STALE | 2 | 2026-06-25 | [view](reports/2026-04-18-site-design.md) |
 | 17 | Token Hygiene | /qa-tokens | STALE | 6 | 2026-06-24 | [view](reports/2026-06-24-qa-tokens.md) |
 | 18 | Copy Audit | /qa-copy | STALE | 4 | 2026-10-01 | [view](reports/2026-10-01-site-copy.md) |
-| 19 | Navigation Audit | /qa-nav | DONE | 14 | 2026-11-22 | [view](reports/2026-07-13-qa-nav.md) |
+| 19 | Navigation Audit | /qa-nav | STALE | 14 | 2026-11-22 | [view](reports/2026-07-13-qa-nav.md) |
 | 20 | Performance Audit | /qa-perf | STALE | 4 | 2026-10-01 | [view](reports/2026-10-01-site-perf.md) |
 | 21 | SEO Audit | /qa-seo | STALE | 2 | 2026-07-13 | [view](reports/2026-04-19-site-seo.md) |
 | 22 | Accessibility Audit | /qa-a11y | STALE | 2 | 2026-07-15 | [view](reports/2026-07-15-qa-a11y.md) |
@@ -44,7 +44,7 @@
 
 **Progress: 22/28 stages complete (1 skipped)**
 
-**Last Updated**: 2026-11-22 (/qa-nav run)
+**Last Updated**: 2026-11-23 (/qa-resilience run)
 
 ---
 
@@ -168,3 +168,4 @@
 | 2026-11-21 | /qa-bugs | 40m | SUCCESS | 0 C/H/M, 8 low; allergen disclaimer verified everywhere [view](reports/2026-10-31-site-bugs.md) |
 | 2026-11-21 | /qa-nav | 1m | SUCCESS | 1 orphan(s), 0 dead link(s); no edits [view](reports/2026-07-13-qa-nav.md) |
 | 2026-11-22 | /qa-nav | 1m | SUCCESS | 0 orphan(s), 0 dead link(s); no edits [view](reports/2026-07-13-qa-nav.md) |
+| 2026-11-23 | /qa-resilience | 3m | SUCCESS | Clean, no findings [view](reports/2026-09-27-qa-resilience.md) |
