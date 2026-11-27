@@ -5,7 +5,7 @@
 **Monetization**: Freemium — free recipe limit, Pro for unlimited
 **Created**: 2026-04-06
 **Design System**: Claude design system installed (2026-05-03)
-**Last Updated**: 2026-11-23 (/qa-resilience run)
+**Last Updated**: 2026-11-27 (/qa-button-fix run)
 
 ---
 
@@ -22,8 +22,8 @@
 | 7 | Write Tests | /qa-spec-reconcile | DONE | 11 | 2026-06-30 | [view](reports/2026-07-01-qa-spec-reconcile.md) |
 | 8 | Verify Build | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 9 | Database Review | /qa-db | DONE | 4 | 2026-06-03 | [view](reports/2026-06-04-site-db.md) |
-| 10 | QA / Bug Check | /qa-bugs | DONE | 9 | 2026-11-21 | [view](reports/2026-10-31-site-bugs.md) |
-| 11 | Button Audit | /qa-button-fix | DONE | 1 | 2026-07-18 | [view](reports/2026-07-19-qa-buttons.md) |
+| 10 | QA / Bug Check | /qa-bugs | STALE | 9 | 2026-11-21 | [view](reports/2026-10-31-site-bugs.md) |
+| 11 | Button Audit | /qa-button-fix | DONE | 2 | 2026-11-27 | [view](reports/2026-07-19-qa-buttons.md) |
 | 12 | Re-verify Tests | /qa-spec-fix | DONE | 2 | 2026-05-03 | [view](reports/2026-05-03-tests-fix.md) |
 | 13 | Security Hardening | /qa-security | DONE | 9 | 2026-10-17 | [view](reports/2026-10-17-site-security.md) |
 | 14 | Resilience Audit | /qa-resilience | DONE | 7 | 2026-11-23 | [view](reports/2026-09-27-qa-resilience.md) |
@@ -44,7 +44,7 @@
 
 **Progress: 22/28 stages complete (1 skipped)**
 
-**Last Updated**: 2026-11-23 (/qa-resilience run)
+**Last Updated**: 2026-11-27 (/qa-button-fix run)
 
 ---
 
@@ -169,3 +169,4 @@
 | 2026-11-21 | /qa-nav | 1m | SUCCESS | 1 orphan(s), 0 dead link(s); no edits [view](reports/2026-07-13-qa-nav.md) |
 | 2026-11-22 | /qa-nav | 1m | SUCCESS | 0 orphan(s), 0 dead link(s); no edits [view](reports/2026-07-13-qa-nav.md) |
 | 2026-11-23 | /qa-resilience | 3m | SUCCESS | Clean, no findings [view](reports/2026-09-27-qa-resilience.md) |
+| 2026-11-27 | /qa-button-fix | 6m | SUCCESS | all rows pass on staging (gurumind/jetsetfx AI rows passed after AI broker redeploy) [view](reports/2026-07-19-qa-buttons.md) |
